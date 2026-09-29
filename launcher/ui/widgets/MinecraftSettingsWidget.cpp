@@ -48,6 +48,8 @@
 #include "minecraft/auth/AccountList.h"
 #include "settings/Setting.h"
 
+#include "BuildConfig.h"
+
 MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent), m_instance(instance), m_ui(new Ui::MinecraftSettingsWidget)
 {

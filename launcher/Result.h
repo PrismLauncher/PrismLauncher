@@ -59,3 +59,9 @@ using Result = std::expected<T, E>;
     auto&& TRY_INTO_VAR_ = (expr); \
     TRY(TRY_INTO_VAR_)             \
     decl = TRY_INTO_VAR_.value();
+
+#define TRY_INTO_CHECK_UNEXPECTED(decl, expr, check, err) \
+    decl = (expr);                                        \
+    if (check) {                                          \
+        return std::unexpected{ err };                    \
+    }

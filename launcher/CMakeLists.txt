@@ -788,6 +788,17 @@ SET(LAUNCHER_SOURCES
     # console utils
     console/Console.h
 
+    # application start utilities
+    startup/Startup.h
+    startup/Startup.cpp
+    logging/Debug.cpp
+    logging/Debug.h
+
+    # CLI commands and parsing
+    cli/Commands.h
+    cli/Parser.h
+    cli/Parser.cpp
+
     # GUI - general utilities
     DesktopServices.h
     DesktopServices.cpp
@@ -1321,7 +1332,10 @@ if(${Launcher_USE_PCH})
     target_precompile_headers(${Launcher_Name} REUSE_FROM Launcher_logic)
 endif()
 
-target_link_libraries(${Launcher_Name} Launcher_logic)
+target_link_libraries(${Launcher_Name}
+  Launcher_logic
+  CLI11::CLI11
+)
 
 if(DEFINED Launcher_APP_BINARY_NAME)
     set_target_properties(${Launcher_Name} PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}")

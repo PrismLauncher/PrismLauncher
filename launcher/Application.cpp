@@ -84,9 +84,11 @@
 #include "ApplicationMessage.h"
 
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <memory>
-#include <mutex>
+#include <ranges>
+#include <utility>
 
 #include <QAccessible>
 #include <QCommandLineParser>
@@ -103,7 +105,6 @@
 #include <QStyleFactory>
 #include <QTranslator>
 #include <QWindow>
-#include <utility>
 
 #include "InstanceList.h"
 #include "MTPixmapCache.h"
@@ -123,11 +124,13 @@
 #include "meta/Index.h"
 #include "translations/TranslationsModel.h"
 
+#include "FileSystem.h"
+
 #include <DesktopServices.h>
-#include <FileSystem.h>
 #include <LocalPeer.h>
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <variant>
 #include "SysInfo.h"
 
 #ifdef Q_OS_LINUX
@@ -167,104 +170,16 @@
 #include <QStyleHints>
 #endif
 
-#include "console/Console.h"
+#include "logging/Debug.h"
+
+#include "cli/Commands.h"
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-static const QLatin1String g_liveCheckFile("live.check");
-
 PixmapCache* PixmapCache::s_instance = nullptr;
 
-static bool isANSIColorConsole;
-
-static const QString g_defaultLogFormat = QStringLiteral(
-    "%{time process}"
-    " "
-    "%{if-debug}Debug:%{endif}"
-    "%{if-info}Info:%{endif}"
-    "%{if-warning}Warning:%{endif}"
-    "%{if-critical}Critical:%{endif}"
-    "%{if-fatal}Fatal:%{endif}"
-    " "
-    "%{if-category}[%{category}] %{endif}"
-    "%{message}"
-    " "
-    "(%{function}:%{line})");
-
-#define ansi_reset "\x1b[0m"
-#define ansi_bold "\x1b[1m"
-#define ansi_reset_bold "\x1b[22m"
-#define ansi_faint "\x1b[2m"
-#define ansi_italic "\x1b[3m"
-#define ansi_red_fg "\x1b[31m"
-#define ansi_green_fg "\x1b[32m"
-#define ansi_yellow_fg "\x1b[33m"
-#define ansi_blue_fg "\x1b[34m"
-#define ansi_purple_fg "\x1b[35m"
-#define ansi_inverse "\x1b[7m"
-
-// clang-format off
-static const QString g_ansiLogFormat = QStringLiteral(
-    ansi_faint "%{time process}" ansi_reset
-    " "
-    "%{if-debug}" ansi_bold ansi_green_fg "D:" ansi_reset "%{endif}"
-    "%{if-info}" ansi_bold ansi_blue_fg "I:" ansi_reset "%{endif}"
-    "%{if-warning}" ansi_bold ansi_yellow_fg "W:" ansi_reset_bold "%{endif}"
-    "%{if-critical}" ansi_bold ansi_red_fg "C:" ansi_reset_bold "%{endif}"
-    "%{if-fatal}" ansi_bold ansi_inverse ansi_red_fg "F:" ansi_reset_bold "%{endif}"
-    " "
-    "%{if-category}" ansi_bold "[%{category}]" ansi_reset_bold " %{endif}"
-    "%{message}"
-    " "
-    ansi_reset ansi_faint "(%{function}:%{line})" ansi_reset
-);
-// clang-format on
-
-#undef ansi_inverse
-#undef ansi_purple_fg
-#undef ansi_blue_fg
-#undef ansi_yellow_fg
-#undef ansi_green_fg
-#undef ansi_red_fg
-#undef ansi_italic
-#undef ansi_faint
-#undef ansi_bold
-#undef ansi_reset_bold
-#undef ansi_reset
-
 namespace {
-
-/** This is used so that we can output to the log file in addition to the CLI. */
-void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
-{
-    static std::mutex s_loggerMutex;
-    const std::lock_guard<std::mutex> lock(s_loggerMutex);  // synchronized, QFile logFile is not thread-safe
-
-    if (isANSIColorConsole) {
-        // ensure default is set for log file
-        qSetMessagePattern(g_defaultLogFormat);
-    }
-
-    QString out = qFormatLogMessage(type, context, msg);
-    if (APPLICATION->logModel) {
-        APPLICATION->logModel->append(MessageLevel::fromQtMsgType(type), out);
-    }
-
-    out += QChar::LineFeed;
-    APPLICATION->logFile->write(out.toUtf8());
-    APPLICATION->logFile->flush();
-
-    if (isANSIColorConsole) {
-        // format ansi for console;
-        qSetMessagePattern(g_ansiLogFormat);
-        out = qFormatLogMessage(type, context, msg);
-        out += QChar::LineFeed;
-    }
-
-    QTextStream(stderr) << out.toLocal8Bit();
-    fflush(stderr);
-}
 
 std::tuple<QDateTime, QString, QString, QString, QString> readLockFile(const QString& path)
 {
@@ -301,14 +216,11 @@ std::tuple<QDateTime, QString, QString, QString, QString> readLockFile(const QSt
     }
     return std::make_tuple(timestamp, from, to, target, dataPath);
 }
+
 }  // namespace
 
-Application::Application(int& argc, char** argv) : QApplication(argc, argv)
+Application::Application(int& argc, char** argv, const Cli::Args& args) : QApplication(argc, argv)
 {
-    if (console::isConsole()) {
-        isANSIColorConsole = true;
-    }
-
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME);
@@ -320,59 +232,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // Don't quit on hiding the last window
     Application::setQuitOnLastWindowClosed(false);
     Application::setQuitLockEnabled(false);
-
-    // Commandline parsing
-    QCommandLineParser parser;
-    parser.setApplicationDescription(BuildConfig.LAUNCHER_DISPLAYNAME);
-
-    parser.addOptions(
-        { { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
-          { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
-          { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
-          { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
-          { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
-          { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
-          { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
-          { "show-window", "Show the main launcher window (useful in combination with --launch)" },
-          { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-          { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
-    // Has to be positional for some OS to handle that properly
-    parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
-
-    parser.addHelpOption();
-    parser.addVersionOption();
-
-    parser.process(arguments());
-
-    m_instanceIdToLaunch = parser.value("launch");
-    m_serverToJoin = parser.value("server");
-    m_worldToJoin = parser.value("world");
-    m_profileToUse = parser.value("profile");
-    if (parser.isSet("offline")) {
-        m_launchOffline = true;
-        m_offlineName = parser.value("offline");
-    }
-    m_liveCheck = parser.isSet("alive");
-
-    m_instanceIdToShowWindowOf = parser.value("show");
-    m_showMainWindow = parser.isSet("show-window");
-
-    for (const auto& url : parser.values("import")) {
-        m_urlsToImport.append(normalizeImportUrl(url));
-    }
-
-    // treat unspecified positional arguments as import urls
-    for (const auto& url : parser.positionalArguments()) {
-        m_urlsToImport.append(normalizeImportUrl(url));
-    }
-
-    // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
-        m_instanceIdToLaunch.isEmpty()) {
-        std::cerr << "--server, --profile and --offline can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
-        return;
-    }
 
     QString origcwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
@@ -392,43 +251,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 #endif
     }
 
-    QString adjustedBy;
-    QString dataPath;
-    // change folder
-    QString dataDirEnv;
-    QString dirParam = parser.value("dir");
-    if (!dirParam.isEmpty()) {
-        // the dir param. it makes multimc data path point to whatever the user specified
-        // on command line
-        adjustedBy = "Command line";
-        dataPath = dirParam;
-    } else if (dataDirEnv = QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
-               !dataDirEnv.isEmpty()) {
-        adjustedBy = "System environment";
-        dataPath = dataDirEnv;
-    } else {
-        QDir foo;
-        if (DesktopServices::isSnap()) {
-            foo = QDir(qEnvironmentVariable("SNAP_USER_COMMON"));
-        } else {
-            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
-        }
-
-        dataPath = foo.absolutePath();
-        adjustedBy = "Persistent data path";
-
-#ifndef Q_OS_MACOS
-        if (auto portableUserData = FS::PathCombine(m_rootPath, "UserData"); QDir(portableUserData).exists()) {
-            dataPath = portableUserData;
-            adjustedBy = "Portable user data path";
-            m_portable = true;
-        } else if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
-            dataPath = m_rootPath;
-            adjustedBy = "Portable data path";
-            m_portable = true;
-        }
-#endif
-    }
+    auto dataPath = QDir::cleanPath(QString::fromStdU16String(args.dataPath.dataPath.u16string()));
 
     if (!FS::ensureFolderPathExists(dataPath)) {
         showFatalErrorMessage(
@@ -453,6 +276,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                                   .arg(dataPath));
         return;
     }
+
     m_dataPath = dataPath;
 
     /*
@@ -461,58 +285,36 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
      * We want to initialize this before logging to avoid messing with the log of a potential already running copy.
      */
     auto appID = ApplicationId::fromPathAndVersion(QDir::currentPath(), BuildConfig.printableVersionString());
+    m_appID = appID.toString();
     {
         // FIXME: you can run the same binaries with multiple data dirs and they won't clash. This could cause issues for updates.
         m_peerInstance = new LocalPeer(this, appID);
         connect(m_peerInstance, &LocalPeer::messageReceived, this, &Application::messageReceived);
         if (m_peerInstance->isClient()) {
-            bool sentMessage = false;
             int timeout = 2000;
 
-            if (m_instanceIdToLaunch.isEmpty()) {
-                ApplicationMessage activate;
-                activate.command = "activate";
-                sentMessage = m_peerInstance->sendMessage(activate.serialize(), timeout);
-
-                if (!m_urlsToImport.isEmpty()) {
-                    for (const auto& url : m_urlsToImport) {
-                        ApplicationMessage import;
-                        import.command = "import";
-                        import.args.insert("url", url.toString());
-                        sentMessage = m_peerInstance->sendMessage(import.serialize(), timeout);
-                    }
+            for (const auto& cmd : args.commands) {
+                auto msg = ApplicationMessage::fromCliCommand(cmd);
+                if (!m_peerInstance->sendMessage(msg.serialize(), timeout)) {
+                    std::cerr << "Unable to redirect command `" << msg.command.toStdString().c_str() << "` to already running instance\n";
+                    // C function not Qt function - event loop not started yet
+                    ::std::exit(1);
                 }
-            } else {
-                ApplicationMessage launch;
-                launch.command = "launch";
-                launch.args["id"] = m_instanceIdToLaunch;
-
-                if (!m_serverToJoin.isEmpty()) {
-                    launch.args["server"] = m_serverToJoin;
-                } else if (!m_worldToJoin.isEmpty()) {
-                    launch.args["world"] = m_worldToJoin;
-                }
-                if (!m_profileToUse.isEmpty()) {
-                    launch.args["profile"] = m_profileToUse;
-                }
-                if (m_launchOffline) {
-                    launch.args["offline_enabled"] = "true";
-                    launch.args["offline_name"] = m_offlineName;
-                }
-                sentMessage = m_peerInstance->sendMessage(launch.serialize(), timeout);
             }
-            if (sentMessage) {
-                m_status = Application::Succeeded;
-                return;
-            }
-            std::cerr << "Unable to redirect command to already running instance\n";
-            // C function not Qt function - event loop not started yet
-            ::exit(1);
+
+            // exit this instance
+            m_status = Application::Succeeded;
+            return;
         }
     }
 
+    // store commands to process later
+    m_commands = args.commands;
+
     // init the logger
     {
+        logModel = std::make_unique<LogModel>(this);
+
         static const QString s_baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
         static const QString s_logBase = FS::PathCombine("logs", s_baseLogFile);
         if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
@@ -541,10 +343,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                                       .arg(dataPath));
             return;
         }
-        qInstallMessageHandler(appDebugOutput);
-        qSetMessagePattern(g_defaultLogFormat);
 
-        logModel = std::make_unique<LogModel>(this);
+        Logging::setupQtLogFunction();
 
         bool foundLoggingRules = false;
 
@@ -556,7 +356,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // search the dataPath()
         // seach app data standard path
-        if (!foundLoggingRules && !isPortable() && dirParam.isEmpty() && dataDirEnv.isEmpty()) {
+        if (!foundLoggingRules && !isPortable() && args.dataPath.source != Startup::DataPathSource::Commandline &&
+            args.dataPath.source != Startup::DataPathSource::SystemEnvironment) {
             logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, FS::PathCombine("..", logRulesFile));
             if (!logRulesPath.isEmpty()) {
                 qInfo() << "Found" << logRulesPath << "...";
@@ -606,6 +407,32 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     {
+        QString adjustedBy = "";
+        switch (args.dataPath.source) {
+            case Startup::DataPathSource::SystemEnvironment: {
+                adjustedBy = "System environment";
+                break;
+            }
+            case Startup::DataPathSource::PortableData: {
+                adjustedBy = "Portable data path";
+                break;
+            }
+            case Startup::DataPathSource::PortableUserData: {
+                adjustedBy = "Portable user data path";
+                break;
+            }
+            case Startup::DataPathSource::Commandline: {
+                adjustedBy = "Command line";
+                break;
+            }
+            case Startup::DataPathSource::PersistentDataPath: {
+                adjustedBy = "Persistent data path";
+                break;
+            }
+            default: {
+                break;
+            }
+        }
         qInfo() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + ", " + QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
         qInfo() << "Version                    :" << BuildConfig.printableVersionString();
         qInfo() << "Platform                   :" << BuildConfig.BUILD_PLATFORM;
@@ -624,30 +451,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         qInfo() << "Binary path                :" << binPath;
         qInfo() << "Application root path      :" << m_rootPath;
-        if (!m_instanceIdToLaunch.isEmpty()) {
-            qInfo() << "ID of instance to launch   :" << m_instanceIdToLaunch;
-        }
-        if (!m_serverToJoin.isEmpty()) {
-            qInfo() << "Address of server to join  :" << m_serverToJoin;
-        } else if (!m_worldToJoin.isEmpty()) {
-            qInfo() << "Name of the world to join  :" << m_worldToJoin;
-        }
         qInfo() << "<> Paths set.";
-    }
-
-    if (m_liveCheck) {
-        QFile check(g_liveCheckFile);
-        if (check.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            auto payload = appID.toString().toUtf8();
-            if (check.write(payload) == payload.size()) {
-                check.close();
-            } else {
-                qWarning() << "Could not write into" << g_liveCheckFile << "error:" << check.errorString();
-                check.remove();  // also closes file!
-            }
-        } else {
-            qWarning() << "Could not open" << g_liveCheckFile << "for writing:" << check.errorString();
-        }
     }
 
     // Initialize application settings
@@ -1370,46 +1174,14 @@ bool Application::event(QEvent* event)
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
-    if (!m_instanceIdToLaunch.isEmpty()) {
-        auto* inst = instances()->getInstanceById(m_instanceIdToLaunch);
-        if (inst) {
-            MinecraftTarget::Ptr targetToJoin = nullptr;
-            MinecraftAccountPtr accountToUse = nullptr;
 
-            qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
-            if (!m_serverToJoin.isEmpty()) {
-                // FIXME: validate the server string
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_serverToJoin, false)));
-                qDebug() << "   Launching with server" << m_serverToJoin;
-            } else if (!m_worldToJoin.isEmpty()) {
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_worldToJoin, true)));
-                qDebug() << "   Launching with world" << m_worldToJoin;
-            }
-
-            if (!m_profileToUse.isEmpty()) {
-                accountToUse = accounts()->getAccountByProfileName(m_profileToUse);
-                if (!accountToUse) {
-                    return;
-                }
-                qDebug() << "   Launching with account" << m_profileToUse;
-            }
-
-            launch(inst, m_launchOffline ? LaunchMode::Offline : LaunchMode::Normal, targetToJoin, accountToUse, m_offlineName);
-
-            if (!m_showMainWindow) {
-                return;
-            }
-        }
+    for (const auto& cmd : m_commands) {
+        processCommand(cmd);
     }
-    if (!m_instanceIdToShowWindowOf.isEmpty()) {
-        auto* inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
-        if (inst) {
-            qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
-            showInstanceWindow(inst);
-            return;
-        }
-    }
-    if (!m_mainWindow) {
+
+    auto isNotHideMainWindowCmd = [](const Cli::Command& cmd) -> bool { return !std::holds_alternative<Cli::Cmd::Launch>(cmd); };
+
+    if (m_commands.empty() || std::ranges::all_of(m_commands, isNotHideMainWindowCmd)) {
         // normal main window
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
@@ -1428,16 +1200,123 @@ void Application::performMainStartupAction()
         qDebug() << "<> Updater started.";
     }
 
-    {  // delete instances tmp dirctory
+    {  // delete instances tmp directory
         auto instDir = m_settings->get("InstanceDir").toString();
         const QString tempRoot = FS::PathCombine(instDir, ".tmp");
         FS::deletePath(tempRoot);
     }
 
-    if (!m_urlsToImport.isEmpty()) {
-        qDebug() << "<> Importing from url:" << m_urlsToImport;
-        m_mainWindow->processURLs(m_urlsToImport);
+    QList<QUrl> toProcess{};
+    for (const auto& uri :
+         std::views::all(m_commands) |
+             std::views::filter([](const Cli::Command& cmd) -> bool { return std::holds_alternative<Cli::Cmd::ProcessURI>(cmd); }) |
+             std::views::transform([](const Cli::Command& cmd) -> const std::string& { return std::get<Cli::Cmd::ProcessURI>(cmd).uri; })) {
+        toProcess.append(QUrl::fromUserInput(QString::fromStdString(uri)));
     }
+
+    if (!toProcess.isEmpty()) {
+        qDebug() << "<> Processing urls:" << toProcess;
+        m_mainWindow->processURLs(toProcess);
+    }
+}
+
+void Application::processCommand(const Cli::Command& cmd)
+{
+    struct {
+        Application* app;
+        void operator()(const Cli::Cmd::Launch& launch)
+        {
+            auto instanceIdToLaunch = QString::fromStdString(launch.id);
+            auto* inst = app->instances()->getInstanceById(instanceIdToLaunch);
+            if (inst) {
+                qDebug() << "<> Instance" << instanceIdToLaunch << "launching";
+
+                MinecraftTarget::Ptr targetToJoin = nullptr;
+                MinecraftAccountPtr accountToUse = nullptr;
+
+                struct {
+                    MinecraftTarget::Ptr operator()(const Cli::Cmd::Launch::ServerTarget& server)
+                    {
+                        // FIXME: validate the server string
+                        auto serverAddress = QString::fromStdString(server.target);
+                        qDebug() << "   Launching with server" << serverAddress;
+                        return std::make_shared<MinecraftTarget>(MinecraftTarget::fromServerAddress(serverAddress));
+                    }
+                    MinecraftTarget::Ptr operator()(const Cli::Cmd::Launch::WorldTarget& world)
+                    {
+                        auto worldName = QString::fromStdString(world.target);
+                        qDebug() << "   Launching with world" << worldName;
+                        return std::make_shared<MinecraftTarget>(MinecraftTarget{ .world = worldName });
+                    }
+                    MinecraftTarget::Ptr operator()(const Cli::Cmd::Launch::NoTarget& /*unused*/) { return nullptr; }
+                } targetVisitor{};
+
+                auto target = std::visit(targetVisitor, launch.target);
+
+                struct {
+                    Application* app;
+                    std::tuple<LaunchMode, MinecraftAccountPtr, QString> operator()(
+                        const Cli::Cmd::Launch::AccountDefault& /*unused*/) const
+                    {
+                        return { LaunchMode::Normal, nullptr, {} };
+                    }
+                    std::tuple<LaunchMode, MinecraftAccountPtr, QString> operator()(const Cli::Cmd::Launch::AccountProfile& profile) const
+                    {
+                        auto name = QString::fromStdString(profile.name);
+                        auto account = app->accounts()->getAccountByProfileName(name);
+                        if (!account) {
+                            qDebug() << "   Can't find account " << name << ", using default account";
+                        }
+                        qDebug() << "   Launching with account " << name;
+                        return { LaunchMode::Normal, account, {} };
+                    }
+                    std::tuple<LaunchMode, MinecraftAccountPtr, QString> operator()(const Cli::Cmd::Launch::AccountOffline& offline) const
+                    {
+                        return { LaunchMode::Offline, nullptr, QString::fromStdString(offline.name) };
+                    }
+
+                } accountVisitor{ .app = app };
+
+                auto [mode, account, offlineName] = std::visit(accountVisitor, launch.account);
+
+                app->launch(inst, mode, target, account, offlineName);
+            }
+        }
+        void operator()(const Cli::Cmd::ShowMainWindow& /*unused*/) const { app->showMainWindow(true); }
+        void operator()(const Cli::Cmd::ShowInstanceWindow& instance) const
+        {
+            auto instanceId = QString::fromStdString(instance.id);
+            auto* inst = app->instances()->getInstanceById(instanceId);
+
+            if (inst) {
+                qDebug() << "<> Showing window of instance " << instanceId;
+                app->showInstanceWindow(inst);
+                return;
+            }
+        }
+        void operator()(const Cli::Cmd::ProcessURI& uri)
+        {
+            // handled separately
+        }
+        void operator()(const Cli::Cmd::Alive& alive) const
+        {
+            auto path = alive.path / Cli::g_liveCheckFile;
+            QFile check(path);
+            if (check.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                auto payload = app->m_appID.toUtf8();
+                if (check.write(payload) == payload.size()) {
+                    check.close();
+                } else {
+                    qWarning() << "Could not write into" << path << "error:" << check.errorString();
+                    check.remove();  // also closes file!
+                }
+            } else {
+                qWarning() << "Could not open" << path << "for writing:" << check.errorString();
+            }
+        }
+    } visitor{ .app = this };
+
+    std::visit(visitor, cmd);
 }
 
 void Application::showFatalErrorMessage(const QString& title, const QString& content)
@@ -1462,72 +1341,26 @@ void Application::messageReceived(const QByteArray& message)
         return;
     }
 
-    auto& command = received.command;
+    auto commandResult = received.toCliCommand();
+    if (!commandResult) {
+        qWarning() << "Received invalid command:" << res.error();
+        return;
+    }
+    auto command = commandResult.value();
 
     if (status() != Initialized) {
-        bool isLoginAtempt = false;
-        if (command == "import") {
-            QString url = received.args["url"];
-            isLoginAtempt = !url.isEmpty() && normalizeImportUrl(url).scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME;
+        bool isLoginAttempt = false;
+        if (const auto* uriCmd = std::get_if<Cli::Cmd::ProcessURI>(&command)) {
+            QString url = QString::fromStdString(uriCmd->uri);
+            isLoginAttempt = !url.isEmpty() && normalizeImportUrl(url).scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME;
         }
-        if (!isLoginAtempt) {
+        if (!isLoginAttempt) {
             qDebug() << "Received message" << message << "while still initializing. It will be ignored.";
             return;
         }
     }
 
-    if (command == "activate") {
-        showMainWindow();
-    } else if (command == "import") {
-        QString url = received.args["url"];
-        if (url.isEmpty()) {
-            qWarning() << "Received" << command << "message without a zip path/URL.";
-            return;
-        }
-        if (!m_mainWindow) {
-            showMainWindow(false);
-        }
-        m_mainWindow->processURLs({ normalizeImportUrl(url) });
-    } else if (command == "launch") {
-        QString id = received.args["id"];
-        QString server = received.args["server"];
-        QString world = received.args["world"];
-        QString profile = received.args["profile"];
-        bool offline = received.args["offline_enabled"] == "true";
-        QString offlineName = received.args["offline_name"];
-
-        MinecraftInstance* instance = nullptr;
-        if (!id.isEmpty()) {
-            instance = instances()->getInstanceById(id);
-            if (!instance) {
-                qWarning() << "Launch command requires an valid instance ID. " << id << "resolves to nothing.";
-                return;
-            }
-        } else {
-            qWarning() << "Launch command called without an instance ID...";
-            return;
-        }
-
-        MinecraftTarget::Ptr serverObject = nullptr;
-        if (!server.isEmpty()) {
-            serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(server, false));
-        } else if (!world.isEmpty()) {
-            serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world, true));
-        }
-        MinecraftAccountPtr accountObject;
-        if (!profile.isEmpty()) {
-            accountObject = accounts()->getAccountByProfileName(profile);
-            if (!accountObject) {
-                qWarning() << "Launch command requires the specified profile to be valid. " << profile
-                           << "does not resolve to any account.";
-                return;
-            }
-        }
-
-        launch(instance, offline ? LaunchMode::Offline : LaunchMode::Normal, serverObject, accountObject, offlineName);
-    } else {
-        qWarning() << "Received invalid message" << message;
-    }
+    processCommand(command);
 }
 
 TranslationsModel* Application::translations()

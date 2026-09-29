@@ -37,7 +37,9 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <variant>
 #include "Json.h"
+#include "Result.h"
 
 Result<> ApplicationMessage::parse(const QByteArray& input)
 {
@@ -64,4 +66,143 @@ QByteArray ApplicationMessage::serialize() const
     root.insert("args", outArgs);
 
     return Json::toText(root);
+}
+
+Result<Cli::Command> ApplicationMessage::toCliCommand() const
+{
+    // Launch
+    if (command == "launch") {
+        TRY_INTO_CHECK_UNEXPECTED(auto targetType, args.value("targetType"), !targetType.isEmpty(),
+                                  "missing `targetType` for  Launch command");
+        TRY_INTO_CHECK_UNEXPECTED(auto target, args.value("target"), !target.isEmpty(), "missing `target` for  Launch command");
+        TRY_INTO_CHECK_UNEXPECTED(auto accountType, args.value("accountType"), !accountType.isEmpty(),
+                                  "missing `accountType` for  Launch command");
+        TRY_INTO_CHECK_UNEXPECTED(auto account, args.value("account"), !account.isEmpty(), "missing `account` for  Launch command");
+        TRY_INTO_CHECK_UNEXPECTED(auto id, args.value("id"), !id.isEmpty(), "missing `id` for  Launch command");
+
+        Cli::Cmd::Launch launch{
+            .id = id.toStdString(),
+        };
+
+        if (targetType == "no_target") {
+            launch.target = Cli::Cmd::Launch::NoTarget{};
+        } else if (targetType == "server") {
+            launch.target = Cli::Cmd::Launch::ServerTarget{
+                .target = target.toStdString(),
+            };
+        } else if (targetType == "world") {
+            launch.target = Cli::Cmd::Launch::WorldTarget{
+                .target = target.toStdString(),
+            };
+        } else {
+            return std::unexpected{ QString("unknown launch target type `%1`").arg(targetType) };
+        }
+
+        if (accountType == "default") {
+            launch.account = Cli::Cmd::Launch::AccountDefault{};
+        } else if (accountType == "profile") {
+            launch.account = Cli::Cmd::Launch::AccountProfile{
+                .name = account.toStdString(),
+            };
+
+        } else if (accountType == "offline") {
+            launch.account = Cli::Cmd::Launch::AccountOffline{
+                .name = account.toStdString(),
+            };
+        } else {
+            return std::unexpected{ QString("unknown account type `%1`").arg(accountType) };
+        }
+
+        return launch;
+    }
+
+    // ProcessUri
+    if (command == "processUri") {
+        TRY_INTO_CHECK_UNEXPECTED(auto uri, args.value("uri"), !uri.isEmpty(), "missing `uri` for  ProcessURI command");
+
+        return Cli::Cmd::ProcessURI{ .uri = uri.toStdString() };
+    }
+
+    // ShowMainWindow
+    if (command == "showMainWindow") {
+        return Cli::Cmd::ShowMainWindow{};
+    }
+
+    // ShowInstanceWindow
+    if (command == "showInstanceWindow") {
+        TRY_INTO_CHECK_UNEXPECTED(auto id, args.value("id"), !id.isEmpty(), "missing `id` for  ShowInstanceWindow command");
+
+        return Cli::Cmd::ShowInstanceWindow{ .id = id.toStdString() };
+    }
+
+    // Alive
+    if (command == "alive") {
+        TRY_INTO_CHECK_UNEXPECTED(auto path, args.value("path"), !path.isEmpty(), "missing `path` for  Alive command");
+        return Cli::Cmd::Alive{ .path = path.toStdU16String() };
+    }
+
+    return std::unexpected{ QString("unknown cli command `%1`").arg(command) };
+}
+
+ApplicationMessage ApplicationMessage::fromCliCommand(const Cli::Command& cmd)
+{
+    struct CmdVisitorSerializer {
+        ApplicationMessage message;
+
+        void operator()(const Cli::Cmd::Launch& launch)
+        {
+            message.command = "launch";
+            struct LaunchTargetSerializer {
+                std::pair<QString, QString> operator()(const Cli::Cmd::Launch::NoTarget& /*unused*/) { return { "no_target", "" }; }
+                std::pair<QString, QString> operator()(const Cli::Cmd::Launch::ServerTarget& server)
+                {
+                    return { "server", QString::fromStdString(server.target) };
+                }
+                std::pair<QString, QString> operator()(const Cli::Cmd::Launch::WorldTarget& world)
+                {
+                    return { "world", QString::fromStdString(world.target) };
+                }
+            } targetSerializer{};
+
+            struct LaunchAccountSerializer {
+                std::pair<QString, QString> operator()(const Cli::Cmd::Launch::AccountDefault& /*unused*/) { return { "default", "" }; }
+                std::pair<QString, QString> operator()(const Cli::Cmd::Launch::AccountProfile& profile)
+                {
+                    return { "profile", QString::fromStdString(profile.name) };
+                }
+                std::pair<QString, QString> operator()(const Cli::Cmd::Launch::AccountOffline& offline)
+                {
+                    return { "offline", QString::fromStdString(offline.name) };
+                }
+            } accountSerializer{};
+
+            auto [targetType, target] = std::visit(targetSerializer, launch.target);
+            auto [accountType, account] = std::visit(accountSerializer, launch.account);
+
+            message.args.insert("targetType", targetType);
+            message.args.insert("target", target);
+            message.args.insert("accountType", accountType);
+            message.args.insert("account", account);
+            message.args.insert("id", QString::fromStdString(launch.id));
+        }
+        void operator()(const Cli::Cmd::ProcessURI& processUri)
+        {
+            message.command = "processUri";
+            message.args.insert("uri", QString::fromStdString(processUri.uri));
+        }
+        void operator()(const Cli::Cmd::ShowMainWindow& /*unused*/) { message.command = "showMainWindow"; }
+        void operator()(const Cli::Cmd::ShowInstanceWindow& showInstanceWindow)
+        {
+            message.command = "showInstanceWindow";
+            message.args.insert("id", QString::fromStdString(showInstanceWindow.id));
+        }
+        void operator()(const Cli::Cmd::Alive& alive)
+        {
+            message.command = "alive";
+            message.args.insert("path", QString::fromStdU16String(alive.path.u16string()));
+        }
+    } serializer{};
+
+    std::visit(serializer, cmd);
+    return serializer.message;
 }

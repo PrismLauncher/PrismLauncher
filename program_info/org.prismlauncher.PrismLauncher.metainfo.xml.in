@@ -2,7 +2,7 @@
 <component type="desktop">
   <id>@Launcher_AppID@</id>
   <name>Prism Launcher</name>
-  <summary>Custom Minecraft Launcher to easily manage multiple Minecraft installations at once</summary>
+  <summary>@Launcher_AppSummary@</summary>
   <developer id="org.prismlauncher">
     <name>Prism Launcher Contributors</name>
   </developer>
