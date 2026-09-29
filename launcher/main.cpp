@@ -41,6 +41,8 @@
 #include <QString>
 
 #include "Application.h"
+#include "CLI/CLI.hpp"
+#include "cli/Commands.h"
 
 #if defined Q_OS_WIN32
 #include "console/WindowsConsole.h"
