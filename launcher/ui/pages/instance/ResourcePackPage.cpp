@@ -114,7 +114,7 @@ void ResourcePackPage::downloadDialogFinished(int result)
         }
 
         ProgressDialog loadDialog(this);
-        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.showSkipButton();
         loadDialog.execWithTask(&tasks);
 
         m_model->update();
@@ -187,7 +187,7 @@ void ResourcePackPage::updateResourcePacks()
         }
 
         ProgressDialog loadDialog(this);
-        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.showSkipButton();
         loadDialog.execWithTask(&tasks);
 
         m_model->update();
