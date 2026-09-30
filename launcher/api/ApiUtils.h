@@ -24,6 +24,7 @@
 #include "Application.h"
 #include "InstanceList.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 
 #include "ApiParams.h"
 
@@ -38,6 +39,21 @@ inline MinecraftInstance* requireInstance(const QJsonObject& params, const QStri
         throw ApiError::instanceNotFound(id);
     }
     return instance;
+}
+
+/**
+ * Component lists are loaded lazily; load them from disk (never from the network) before reading versions.
+ * Same approach as MinecraftInstance::getStatusbarDescription(). Returns the profile, or nullptr.
+ */
+inline PackProfile* loadedPackProfile(MinecraftInstance* instance)
+{
+    auto* profile = instance->getPackProfile();
+    if (profile && profile->getComponentVersion("net.minecraft").isEmpty()) {
+        if (auto res = profile->reload(Net::Mode::Offline); !res) {
+            qWarning() << "Failed to load the components of" << instance->id() << ":" << res.error();
+        }
+    }
+    return profile;
 }
 
 /** Milliseconds since epoch, or null for "unknown". */

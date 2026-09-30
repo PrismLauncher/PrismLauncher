@@ -162,7 +162,7 @@ QString InstanceApi::stateOf(MinecraftInstance* instance) const
 
 QJsonObject InstanceApi::serializeInstance(MinecraftInstance* instance, const QString& state)
 {
-    auto* profile = instance->getPackProfile();
+    auto* profile = loadedPackProfile(instance);
     QJsonValue loader;
     QString mcVersion;
     if (profile) {
@@ -349,7 +349,7 @@ QJsonValue InstanceApi::get(const QJsonObject& params) const
     obj.insert("instanceRoot", instance->instanceRoot());
     obj.insert("gameRoot", instance->gameRoot());
     QJsonArray components;
-    if (auto* profile = instance->getPackProfile()) {
+    if (auto* profile = loadedPackProfile(instance)) {
         for (int i = 0; i < profile->rowCount(); i++) {
             auto component = profile->getComponent(static_cast<size_t>(i));
             if (!component) {
@@ -428,7 +428,9 @@ QJsonValue InstanceApi::kill(const QJsonObject& params)
     if (!instance->isRunning() && !m_states.contains(instance->id())) {
         throw ApiError("INSTANCE_NOT_RUNNING", tr("%1 is not running").arg(instance->name()));
     }
+    m_killRequested.insert(instance->id());
     if (!APPLICATION->kill(instance)) {
+        m_killRequested.remove(instance->id());
         throw ApiError("LAUNCH_FAILED", tr("%1 cannot be stopped right now").arg(instance->name()));
     }
     return ok();
@@ -647,8 +649,10 @@ void InstanceApi::launchFinished(MinecraftInstance* instance, bool success, bool
     const auto id = instance->id();
     const auto previous = m_states.take(id);
     const auto error = m_launchErrors.take(id);
+    const bool killed = m_killRequested.remove(id);
+    aborted = aborted || killed;
     if (previous == QLatin1String("running")) {
-        const QJsonObject payload{ { "instanceId", id }, { "success", success }, { "reason", reason } };
+        const QJsonObject payload{ { "instanceId", id }, { "success", success }, { "reason", killed ? tr("Stopped by the user") : reason } };
         m_router->emitEvent("instance.stopped", payload);
         if (!success && !aborted) {
             m_router->emitEvent("minecraft.crashed", payload);

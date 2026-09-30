@@ -96,6 +96,8 @@ class InstanceApi : public QObject, public LaunchInteraction {
     QHash<QString, QString> m_states;
     /** Most specific reason a launch was refused, reported when the controller finishes. */
     QHash<QString, ApiError> m_launchErrors;
+    /** Instances the user stopped: their "Game crashed." failure is not a crash. */
+    QSet<QString> m_killRequested;
 };
 
 }  // namespace api

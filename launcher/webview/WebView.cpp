@@ -119,10 +119,10 @@ QByteArray WebView::mimeTypeFor(const QString& path)
         const char* mime;
     };
     static constexpr Entry s_types[] = {
-        { ".html", "text/html; charset=utf-8" },
-        { ".js", "text/javascript; charset=utf-8" },
-        { ".mjs", "text/javascript; charset=utf-8" },
-        { ".css", "text/css; charset=utf-8" },
+        { ".html", "text/html" },
+        { ".js", "text/javascript" },
+        { ".mjs", "text/javascript" },
+        { ".css", "text/css" },
         { ".json", "application/json" },
         { ".svg", "image/svg+xml" },
         { ".png", "image/png" },
@@ -134,7 +134,7 @@ QByteArray WebView::mimeTypeFor(const QString& path)
         { ".woff2", "font/woff2" },
         { ".woff", "font/woff" },
         { ".ttf", "font/ttf" },
-        { ".txt", "text/plain; charset=utf-8" },
+        { ".txt", "text/plain" },
     };
     for (const auto& entry : s_types) {
         if (lower.endsWith(QLatin1String(entry.suffix))) {

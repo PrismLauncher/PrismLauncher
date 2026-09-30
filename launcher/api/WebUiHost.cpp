@@ -192,7 +192,13 @@ bool WebUiHost::init(QString* error)
         return true;
     });
 
-    const QUrl url = m_devUrl.isEmpty() ? webview::WebView::appUrl() : QUrl(m_devUrl);
+    QUrl url = m_devUrl.isEmpty() ? webview::WebView::appUrl() : QUrl(m_devUrl);
+#ifdef MATERIALMC_WEBUI_ALLOW_DEV_URL
+    // Development aid: open a given route directly, e.g. MATERIALMC_WEBUI_ROUTE=/settings
+    if (const auto route = qEnvironmentVariable("MATERIALMC_WEBUI_ROUTE"); route.startsWith('/')) {
+        url.setFragment(route);
+    }
+#endif
     qDebug() << "Web UI: loading" << url << (m_root.isEmpty() ? QString() : QStringLiteral("from %1").arg(m_root)) << "with"
              << m_view->engineName();
     m_view->load(url);

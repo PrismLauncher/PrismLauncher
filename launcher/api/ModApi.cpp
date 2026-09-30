@@ -92,7 +92,7 @@ struct InstanceFilter {
 InstanceFilter filterFor(MinecraftInstance* instance, ModPlatform::ResourceType type)
 {
     InstanceFilter filter;
-    auto* profile = instance->getPackProfile();
+    auto* profile = loadedPackProfile(instance);
     if (profile) {
         filter.mcVersion = profile->getComponentVersion("net.minecraft");
         if (type == ModPlatform::ResourceType::Mod) {

@@ -18,6 +18,7 @@
 #include "VersionApi.h"
 
 #include <QDir>
+#include <QFileInfo>
 #include <QJsonArray>
 
 #include "Application.h"
@@ -161,7 +162,7 @@ void registerVersionApi(ApiRouter* router, TaskTracker* tasks, QObject* context)
                                    { "version", java->id.toString() },
                                    { "architecture", java->arch },
                                    { "recommended", list->data(list->index(i), BaseVersionList::RecommendedRole).toBool() },
-                                   { "isManaged", QDir(java->path).absolutePath().startsWith(managedRoot) },
+                                   { "isManaged", QFileInfo(java->path).isAbsolute() && QDir(java->path).absolutePath().startsWith(managedRoot) },
                                });
                            }
                            return out;

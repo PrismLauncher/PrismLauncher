@@ -234,7 +234,9 @@ class LinuxWebView final : public WebView {
         webkit_uri_scheme_response_set_status(schemeResponse, static_cast<guint>(response.status), nullptr);
         webkit_uri_scheme_response_set_content_type(schemeResponse, response.mimeType.constData());
 
+        // With explicit headers WebKit takes the MIME type from them, not from set_content_type().
         SoupMessageHeaders* headers = soup_message_headers_new(SOUP_MESSAGE_HEADERS_RESPONSE);
+        soup_message_headers_append(headers, "Content-Type", response.mimeType.constData());
         soup_message_headers_append(headers, "Content-Security-Policy", contentSecurityPolicy().constData());
         soup_message_headers_append(headers, "X-Content-Type-Options", "nosniff");
         soup_message_headers_append(headers, "Cache-Control", "no-store");

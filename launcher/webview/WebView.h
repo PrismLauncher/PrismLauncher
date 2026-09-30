@@ -120,7 +120,7 @@ class WebView {
     /** Script that delivers `json` to the page. The payload is embedded as an escaped string literal. */
     static QByteArray deliverScript(const QByteArray& json);
     static QByteArray contentSecurityPolicy();
-    /** Guesses a MIME type from a file name for the resources we serve. */
+    /** Guesses a MIME type (without parameters: WebKitGTK does not parse them) from a file name. */
     static QByteArray mimeTypeFor(const QString& path);
 
     MessageHandler m_messageHandler;
