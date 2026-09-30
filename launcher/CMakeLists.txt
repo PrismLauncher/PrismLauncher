@@ -871,6 +871,7 @@ SET(LAUNCHER_SOURCES
     # Processes
     LaunchMode.h
     LaunchController.h
+    LaunchInteraction.h
     LaunchController.cpp
 
     # page provider for instances

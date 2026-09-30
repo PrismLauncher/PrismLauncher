@@ -40,6 +40,8 @@
 #include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
+class LaunchInteraction;
+
 class InstanceWindow;
 
 enum class LaunchDecision { Undecided, Continue, Abort };
@@ -63,6 +65,9 @@ class LaunchController : public Task {
     void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
 
     void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
+
+    /** Answers the pipeline's questions instead of Qt dialogs (used by the web UI). Not owned. */
+    void setInteraction(LaunchInteraction* interaction) { m_interaction = interaction; }
 
     void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_targetToJoin = std::move(targetToJoin); }
 
@@ -95,6 +100,7 @@ class LaunchController : public Task {
     QString m_offlineName;
     MinecraftInstance* m_instance = nullptr;
     QWidget* m_parentWidget = nullptr;
+    LaunchInteraction* m_interaction = nullptr;
     InstanceWindow* m_console = nullptr;
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session = nullptr;

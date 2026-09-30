@@ -39,27 +39,33 @@
 
 #include <QRegularExpression>
 
-bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
+QString JavaCommon::jvmArgsProblem(const QString& jvmargs)
 {
     static const QRegularExpression s_memRegex("-Xm[sx]");
     static const QRegularExpression s_versionRegex("-version:.*");
     if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(s_memRegex) || jvmargs.contains("-XX-MaxHeapSize") ||
         jvmargs.contains("-XX:InitialHeapSize")) {
-        auto warnStr = QObject::tr(
+        return QObject::tr(
             "You tried to manually set a JVM memory option (using \"-XX:PermSize\", \"-XX-MaxHeapSize\", \"-XX:InitialHeapSize\", \"-Xmx\" "
             "or \"-Xms\").\n"
             "There are dedicated boxes for these in the settings (Java tab, in the Memory group at the top).\n"
             "This message will be displayed until you remove them from the JVM arguments.");
-        CustomMessageBox::selectable(parent, QObject::tr("JVM arguments warning"), warnStr, QMessageBox::Warning)->exec();
-        return false;
     }
     // block lunacy with passing required version to the JVM
     if (jvmargs.contains(s_versionRegex)) {
-        auto warnStr = QObject::tr(
+        return QObject::tr(
             "You tried to pass required Java version argument to the JVM (using \"-version:xxx\"). This is not safe and will not be "
             "allowed.\n"
             "This message will be displayed until you remove this from the JVM arguments.");
-        CustomMessageBox::selectable(parent, QObject::tr("JVM arguments warning"), warnStr, QMessageBox::Warning)->exec();
+    }
+    return {};
+}
+
+bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
+{
+    const auto problem = jvmArgsProblem(jvmargs);
+    if (!problem.isEmpty()) {
+        CustomMessageBox::selectable(parent, QObject::tr("JVM arguments warning"), problem, QMessageBox::Warning)->exec();
         return false;
     }
     return true;

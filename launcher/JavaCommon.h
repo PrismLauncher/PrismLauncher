@@ -8,6 +8,8 @@ class QWidget;
  */
 namespace JavaCommon {
 bool checkJVMArgs(QString args, QWidget* parent);
+// Returns a user-facing explanation if the JVM arguments are rejected, or an empty string if they are fine.
+QString jvmArgsProblem(const QString& args);
 
 // Show a dialog saying that the Java binary was usable
 void javaWasOk(QWidget* parent, const JavaChecker::Result& result);
