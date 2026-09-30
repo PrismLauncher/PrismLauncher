@@ -13,7 +13,7 @@ export type LogLevel =
   | "fatal";
 
 export interface LogLine {
-  /** Monotonic line number within the current launch (survives LogModel ring-buffer wrap). */
+  /** Monotonic line number per instance (survives LogModel ring-buffer wrap-around and relaunches). */
   n: number;
   level: LogLevel;
   text: string;

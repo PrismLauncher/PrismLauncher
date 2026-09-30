@@ -82,6 +82,17 @@
 #include "ui/themes/ThemeManager.h"
 
 #include "ApplicationMessage.h"
+#include "LaunchInteraction.h"
+
+#ifdef LAUNCHER_WEBUI
+#include "api/WebUiHost.h"
+#else
+class WebUiHost {
+   public:
+    void present() {}
+    void hide() {}
+};
+#endif
 
 #include <algorithm>
 #include <iostream>
@@ -335,7 +346,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
           { "show-window", "Show the main launcher window (useful in combination with --launch)" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-          { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
+          { "show", "Opens the window for the specified instance (by instance ID)", "show" },
+          { "qt-gui", "Use the legacy Qt Widgets interface instead of the web UI" } });
     // Has to be positional for some OS to handle that properly
     parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
 
@@ -356,6 +368,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     m_instanceIdToShowWindowOf = parser.value("show");
     m_showMainWindow = parser.isSet("show-window");
+    m_forceQtGui = parser.isSet("qt-gui") || qEnvironmentVariableIntValue("MATERIALMC_QT_GUI") != 0;
 
     for (const auto& url : parser.values("import")) {
         m_urlsToImport.append(normalizeImportUrl(url));
@@ -1272,7 +1285,13 @@ bool Application::createSetupWizard()
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = !m_accounts->anyAccountIsValid() && (capabilities().testAnyFlags(Application::SupportsMSA));
+    // The web UI has its own account flow (and prompts from the home screen), so only the Qt GUI needs the login page.
+#ifdef LAUNCHER_WEBUI
+    const bool qtGui = m_forceQtGui;
+#else
+    const bool qtGui = true;
+#endif
+    bool login = qtGui && !m_accounts->anyAccountIsValid() && (capabilities().testAnyFlags(Application::SupportsMSA));
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
@@ -1357,8 +1376,9 @@ bool Application::event(QEvent* event)
 #endif
 
     if (event->type() == QEvent::FileOpen) {
+        // TODO(webui): modpack/resource import still uses the Qt dialogs.
         if (!m_mainWindow) {
-            showMainWindow(false);
+            showQtMainWindow(false);
         }
         auto* ev = static_cast<QFileOpenEvent*>(event);
         m_mainWindow->processURLs({ ev->url() });
@@ -1409,8 +1429,8 @@ void Application::performMainStartupAction()
             return;
         }
     }
-    if (!m_mainWindow) {
-        // normal main window
+    if (!m_mainWindow && !isWebUiActive()) {
+        // normal main window: the web UI, or the Qt one if it is unavailable / --qt-gui was passed
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
@@ -1436,6 +1456,8 @@ void Application::performMainStartupAction()
 
     if (!m_urlsToImport.isEmpty()) {
         qDebug() << "<> Importing from url:" << m_urlsToImport;
+        // TODO(webui): modpack/resource import still uses the Qt dialogs.
+        showQtMainWindow(false);
         m_mainWindow->processURLs(m_urlsToImport);
     }
 }
@@ -1484,8 +1506,9 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
+        // TODO(webui): modpack/resource import still uses the Qt dialogs.
         if (!m_mainWindow) {
-            showMainWindow(false);
+            showQtMainWindow(false);
         }
         m_mainWindow->processURLs({ normalizeImportUrl(url) });
     } else if (command == "launch") {
@@ -1588,13 +1611,26 @@ bool Application::launch(MinecraftInstance* instance,
         } else if (m_mainWindow) {
             controller->setParentWidget(m_mainWindow);
         }
+        if (auto* interaction = m_launchInteraction) {
+            controller->setInteraction(interaction);
+            // Must run before controllerFinished(), which destroys the controller.
+            connect(controller.get(), &LaunchController::finished, this, [interaction, instance, c = controller.get()] {
+                interaction->launchFinished(instance, c->wasSuccessful(), c->getState() == Task::State::AbortedByUser, c->failReason());
+            });
+        }
         connect(controller.get(), &LaunchController::finished, this, &Application::controllerFinished);
         addRunningInstance();
         QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
         return true;
     } else if (instance->isRunning()) {
-        showInstanceWindow(instance, "console");
+        if (m_launchInteraction) {
+            m_launchInteraction->showConsole(instance);
+        } else {
+            showInstanceWindow(instance, "console");
+        }
         return true;
+    } else if (m_launchInteraction) {
+        return false;
     } else if (instance->canEdit()) {
         showInstanceWindow(instance);
         return true;
@@ -1703,7 +1739,72 @@ void Application::ShowGlobalSettings(class QWidget* parent, QString openPage)
     }
 }
 
+bool Application::isWebUiActive() const
+{
+    return m_webUi != nullptr;
+}
+
+bool Application::startWebUi()
+{
+#ifdef LAUNCHER_WEBUI
+    if (m_webUi) {
+        return true;
+    }
+    if (m_forceQtGui) {
+        return false;
+    }
+    QString error;
+    m_webUi = WebUiHost::create(&error);
+    if (!m_webUi) {
+        qWarning() << "Web UI unavailable, falling back to the Qt GUI:" << error;
+        return false;
+    }
+    m_openWindows++;
+    m_webUiCounted = true;
+    qDebug() << "<> Web UI started.";
+    return true;
+#else
+    return false;
+#endif
+}
+
+void Application::webUiClosed()
+{
+    // Mirrors on_windowClose() for the main window: the launcher keeps running while games do.
+    if (m_webUiCounted && m_openWindows > 0) {
+        m_openWindows--;
+    }
+    m_webUiCounted = false;
+    if (shouldExitNow()) {
+        exit(0);
+    }
+}
+
+void Application::hideLauncherWindows()
+{
+    closeAllWindows();
+    if (m_webUi) {
+        m_webUi->hide();
+    }
+}
+
 MainWindow* Application::showMainWindow(bool minimized)
+{
+    if (m_webUi) {
+        if (!m_webUiCounted) {
+            m_openWindows++;
+            m_webUiCounted = true;
+        }
+        m_webUi->present();
+        return nullptr;
+    }
+    if (!m_mainWindow && startWebUi()) {
+        return nullptr;
+    }
+    return showQtMainWindow(minimized);
+}
+
+MainWindow* Application::showQtMainWindow(bool minimized)
 {
     if (m_mainWindow) {
         m_mainWindow->setWindowState(m_mainWindow->windowState() & ~Qt::WindowMinimized);

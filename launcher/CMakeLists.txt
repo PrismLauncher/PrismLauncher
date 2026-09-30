@@ -1208,6 +1208,24 @@ if(Launcher_ENABLE_WEBUI)
         api/SensitiveChange.h
         api/TaskTracker.h
         api/TaskTracker.cpp
+        api/InstanceApi.h
+        api/InstanceApi.cpp
+        api/ConsoleApi.h
+        api/ConsoleApi.cpp
+        api/ResourceApi.h
+        api/ResourceApi.cpp
+        api/AccountApi.h
+        api/AccountApi.cpp
+        api/VersionApi.h
+        api/VersionApi.cpp
+        api/ModApi.h
+        api/ModApi.cpp
+        api/SettingsApi.h
+        api/SettingsApi.cpp
+        api/SystemApi.h
+        api/SystemApi.cpp
+        api/WebUiHost.h
+        api/WebUiHost.cpp
     )
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
         list(APPEND WEBUI_SOURCES webview/LinuxWebView.cpp)

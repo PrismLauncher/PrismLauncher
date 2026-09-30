@@ -565,7 +565,8 @@ add_subdirectory(libraries/qdcss) # css parser
 add_subdirectory(buildconfig)
 
 if(Launcher_ENABLE_WEBUI)
-    add_subdirectory(frontend)
+    # Separate binary dir: build/frontend is the staged bundle next to the executable.
+    add_subdirectory(frontend "${CMAKE_BINARY_DIR}/frontend-build")
 endif()
 
 if(BUILD_TESTING)

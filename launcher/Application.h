@@ -52,6 +52,8 @@
 #include "minecraft/auth/MinecraftAccount.h"
 
 class LaunchController;
+class LaunchInteraction;
+class WebUiHost;
 class LocalPeer;
 class InstanceWindow;
 class MainWindow;
@@ -186,7 +188,18 @@ class Application : public QApplication {
     bool openJsonEditor(const QString& filename);
 
     InstanceWindow* showInstanceWindow(MinecraftInstance* instance, const QString& page = QString());
+    /** Shows the launcher's main UI: the web UI when it is active, otherwise the Qt main window (returned). */
     MainWindow* showMainWindow(bool minimized = false);
+    /** Always shows the Qt main window, e.g. for flows the web UI does not cover yet (modpack import). */
+    MainWindow* showQtMainWindow(bool minimized = false);
+    /** Hides every launcher window while the game runs ("CloseAfterLaunch"). */
+    void hideLauncherWindows();
+
+    /** Installs the object that answers launch-time questions instead of Qt dialogs (nullptr restores dialogs). */
+    void setLaunchInteraction(LaunchInteraction* interaction) { m_launchInteraction = interaction; }
+    bool isWebUiActive() const;
+    /** Called by the web UI host when its window was closed by the user. */
+    void webUiClosed();
     ViewLogWindow* showLogWindow();
 
     void updateIsRunning(bool running);
@@ -290,6 +303,14 @@ class Application : public QApplication {
 
     // main window, if any
     MainWindow* m_mainWindow = nullptr;
+
+    // React/WebView UI, if active (see docs/react-webview.md)
+    std::unique_ptr<WebUiHost> m_webUi;
+    LaunchInteraction* m_launchInteraction = nullptr;
+    bool m_forceQtGui = false;
+    // whether the web UI window currently counts towards m_openWindows
+    bool m_webUiCounted = false;
+    bool startWebUi();
 
     // log window, if any
     ViewLogWindow* m_viewLogWindow = nullptr;
