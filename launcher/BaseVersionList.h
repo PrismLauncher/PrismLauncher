@@ -67,7 +67,7 @@ class BaseVersionList : public QAbstractListModel {
 
     //! Checks whether or not the list is loaded. If this returns false, the list should be
     // loaded.
-    virtual bool isLoaded() = 0;
+    virtual bool isLoaded() const = 0;
 
     //! Gets the version at the given index.
     virtual const BaseVersion::Ptr at(int i) const = 0;
