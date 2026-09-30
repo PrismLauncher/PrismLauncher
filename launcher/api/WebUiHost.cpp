@@ -77,6 +77,7 @@ webview::Response fileResponse(const QString& path)
     return { 200, {}, file.readAll() };
 }
 
+#ifdef MATERIALMC_WEBUI_ALLOW_DEV_URL
 /** Accepts only http(s) URLs on the loopback interface: the dev server must never be a remote host. */
 QString validatedDevUrl(const QString& raw)
 {
@@ -89,6 +90,7 @@ QString validatedDevUrl(const QString& raw)
     }
     return url.toString();
 }
+#endif
 
 }  // namespace
 
