@@ -1199,6 +1199,15 @@ if(Launcher_ENABLE_WEBUI)
     set(WEBUI_SOURCES
         webview/WebView.h
         webview/WebView.cpp
+
+        api/ApiError.h
+        api/ApiParams.h
+        api/ApiUtils.h
+        api/ApiRouter.h
+        api/ApiRouter.cpp
+        api/SensitiveChange.h
+        api/TaskTracker.h
+        api/TaskTracker.cpp
     )
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
         list(APPEND WEBUI_SOURCES webview/LinuxWebView.cpp)
