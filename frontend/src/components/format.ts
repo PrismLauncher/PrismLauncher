@@ -21,7 +21,9 @@ export function formatDuration(seconds: number): string {
   return `${Math.floor(seconds)} s`;
 }
 
-const relative = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+// The UI is English-only for now (TODO: i18n from the launcher's Language setting), so format dates in English too.
+const LOCALE = "en";
+const relative = new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto" });
 
 export function formatRelative(timestamp: number | null | undefined): string {
   if (!timestamp) return "never";
@@ -31,12 +33,12 @@ export function formatRelative(timestamp: number | null | undefined): string {
   if (abs < 3600) return relative.format(Math.round(diff / 60), "minute");
   if (abs < 86400) return relative.format(Math.round(diff / 3600), "hour");
   if (abs < 86400 * 30) return relative.format(Math.round(diff / 86400), "day");
-  return new Date(timestamp).toLocaleDateString();
+  return new Date(timestamp).toLocaleDateString(LOCALE);
 }
 
 export function formatDate(timestamp: number | null | undefined): string {
   if (!timestamp) return "—";
-  return new Date(timestamp).toLocaleString();
+  return new Date(timestamp).toLocaleString(LOCALE);
 }
 
 export const LOADER_NAMES: Record<LoaderKind, string> = {
@@ -46,3 +48,7 @@ export const LOADER_NAMES: Record<LoaderKind, string> = {
   neoforge: "NeoForge",
   liteloader: "LiteLoader",
 };
+
+export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`;
+}

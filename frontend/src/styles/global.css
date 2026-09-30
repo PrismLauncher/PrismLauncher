@@ -249,6 +249,8 @@ textarea {
   cursor: pointer;
   font-weight: 500;
   white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
   transition: background 0.1s ease;
 }
 .btn:hover:not(:disabled) {
@@ -318,7 +320,7 @@ textarea {
   flex-direction: column;
   gap: 6px;
 }
-.field > span {
+.field > span:first-child {
   color: var(--text-dim);
   font-size: 12px;
   font-weight: 500;
@@ -435,8 +437,9 @@ textarea {
 
 .segmented {
   display: inline-flex;
+  flex-wrap: wrap;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 18px;
   overflow: hidden;
 }
 .segmented button {
