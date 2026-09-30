@@ -349,6 +349,28 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif()
 endif()
 
+######## Web UI (React + system WebView) ########
+# The web UI replaces the Qt Widgets GUI. The Qt GUI is still built and stays available as a fallback
+# (`--qt-gui`) until the web UI reaches feature parity; see docs/react-webview.md.
+set(Launcher_ENABLE_WEBUI_DEFAULT OFF)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(webkit2gtk IMPORTED_TARGET webkit2gtk-4.1 gtk+-3.0)
+    set(Launcher_ENABLE_WEBUI_DEFAULT ${webkit2gtk_FOUND})
+endif()
+# TODO(webui): enable by default on Windows (WebView2) and macOS (WKWebView) once those backends exist.
+option(Launcher_ENABLE_WEBUI "Build the React web UI and the system WebView host" ${Launcher_ENABLE_WEBUI_DEFAULT})
+option(Launcher_WEBUI_ALLOW_DEV_URL "Allow MATERIALMC_DEV_URL to load the UI from a dev server in non-Debug builds" OFF)
+
+if(Launcher_ENABLE_WEBUI)
+    if((CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD") AND NOT webkit2gtk_FOUND)
+        message(FATAL_ERROR "Launcher_ENABLE_WEBUI is enabled, but webkit2gtk-4.1 / gtk+-3.0 were not found")
+    endif()
+    message(STATUS "Web UI enabled")
+else()
+    message(STATUS "Web UI disabled, only the Qt Widgets GUI will be built")
+endif()
+
 # Find libqrencode
 ## NOTE(@getchoo): Never use pkg-config with MSVC since the vcpkg port makes our install bundle fail to find the dll
 if(MSVC)
@@ -405,6 +427,7 @@ if(UNIX AND APPLE)
     set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
     set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
     set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
+    set(FRONTEND_DEST_DIR "${Launcher_Name}.app/Contents/Resources/frontend")
 
     # Mac bundle settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
@@ -481,6 +504,7 @@ elseif(UNIX)
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
     set(JARS_DEST_DIR "share/${Launcher_Name}")
+    set(FRONTEND_DEST_DIR "share/${Launcher_Name}/frontend")
 
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
@@ -511,6 +535,7 @@ elseif(WIN32)
     set(PLUGIN_DEST_DIR ".")
     set(RESOURCES_DEST_DIR ".")
     set(JARS_DEST_DIR "jars")
+    set(FRONTEND_DEST_DIR "frontend")
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
@@ -538,6 +563,10 @@ add_subdirectory(libraries/qdcss) # css parser
 ############################### Built Artifacts ###############################
 
 add_subdirectory(buildconfig)
+
+if(Launcher_ENABLE_WEBUI)
+    add_subdirectory(frontend)
+endif()
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
