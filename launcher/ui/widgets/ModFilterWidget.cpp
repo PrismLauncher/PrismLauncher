@@ -214,30 +214,19 @@ void ModFilterWidget::loadVersionList()
 {
     m_versionList = APPLICATION->metadataIndex()->get("net.minecraft");
     if (!m_versionList->isLoaded()) {
-        QEventLoop loadVersionListLoop;
-
-        QTimer timeLimitForListLoad;
-        timeLimitForListLoad.setTimerType(Qt::TimerType::CoarseTimer);
-        timeLimitForListLoad.setSingleShot(true);
-        timeLimitForListLoad.callOnTimeout(&loadVersionListLoop, &QEventLoop::quit);
-        timeLimitForListLoad.start(4000);
-
         auto task = m_versionList->getLoadTask();
 
         connect(task.get(), &Task::failed, this, [this] {
             m_ui->versions->setEnabled(false);
             m_ui->showAllVersions->setEnabled(false);
         });
-        connect(task.get(), &Task::finished, &loadVersionListLoop, &QEventLoop::quit);
+        connect(task.get(), &Task::finished, this, [this] { m_versionsProxy->setSourceModel(m_versionList.get()); });
 
         if (!task->isRunning()) {
             task->start();
         }
 
-        loadVersionListLoop.exec();
-        if (timeLimitForListLoad.isActive()) {
-            timeLimitForListLoad.stop();
-        }
+        return;
     }
     m_versionsProxy->setSourceModel(m_versionList.get());
 }
