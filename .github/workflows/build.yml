@@ -118,8 +118,11 @@ jobs:
       ##
 
       - name: Configure project
+        env:
+          # Fail instead of silently falling back to the Qt-only GUI when the web UI dependencies are missing
+          WEBUI_FLAGS: ${{ runner.os == 'Linux' && '-D Launcher_ENABLE_WEBUI=ON' || '' }}
         run: |
-          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET"
+          cmake --preset "$CMAKE_PRESET" -D VCPKG_HOST_TRIPLET="$VCPKG_TRIPLET" -D VCPKG_TARGET_TRIPLET="$VCPKG_TRIPLET" $WEBUI_FLAGS
 
       - name: Run build
         run: |

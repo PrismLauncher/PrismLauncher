@@ -26,7 +26,13 @@
 #include <QAbstractEventDispatcher>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFileInfo>
 #include <QTimer>
+
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cerrno>
+#include <cstring>
 
 // Qt defines `signals`, `slots` and `emit` as macros; GLib/GIO headers use `signals` as an identifier.
 #pragma push_macro("signals")
@@ -46,6 +52,66 @@ namespace webview {
 namespace {
 
 constexpr auto MessageHandlerName = "materialmc";
+
+/**
+ * Relocatable WebKitGTK for AppImage / portable bundles.
+ *
+ * libwebkit2gtk has its helper-process directory (WebKitWebProcess, WebKitNetworkProcess, injected bundle)
+ * compiled in. The packaging script (.github/actions/package/linux/bundle-webkit.sh) rewrites that path in the
+ * bundled library to a same-length path in /tmp and sets:
+ *   MATERIALMC_WEBKIT_LINK         the rewritten path, e.g. /tmp/.materialmc-webkit-XXXXXXXXXXXXX
+ *   MATERIALMC_WEBKIT_LINK_TARGET  the helper directory, relative to the bundle root (SHARUN_DIR)
+ * Here we point that path at the bundle before WebKit starts. We only ever replace a symlink we own, so another
+ * user cannot redirect us to their binaries; if the link cannot be made the web UI is not started.
+ */
+bool prepareRelocatedWebKit(QString* error)
+{
+    const QByteArray link = qgetenv("MATERIALMC_WEBKIT_LINK");
+    const QByteArray bundleRoot = qgetenv("SHARUN_DIR");
+    if (link.isEmpty()) {
+        // A sharun bundle with WebKit helpers but without the relocation settings (e.g. a lost .env) would make
+        // WebKit abort the whole process when it spawns them; refuse instead so the Qt GUI is used.
+        if (!bundleRoot.isEmpty() && QFileInfo::exists(QString::fromLocal8Bit(bundleRoot + "/shared/lib/webkit2gtk-4.1"))) {
+            if (error) {
+                *error = QStringLiteral("the bundled WebKitGTK is not configured (MATERIALMC_WEBKIT_LINK is missing from .env)");
+            }
+            return false;
+        }
+        return true;  // system WebKitGTK
+    }
+    const QByteArray relative = qgetenv("MATERIALMC_WEBKIT_LINK_TARGET");
+    const QByteArray target = bundleRoot + '/' + relative;
+    auto fail = [error, &link](const QString& why) {
+        if (error) {
+            *error = QStringLiteral("Cannot prepare the bundled WebKitGTK (%1): %2").arg(QString::fromLocal8Bit(link), why);
+        }
+        return false;
+    };
+    if (bundleRoot.isEmpty() || relative.isEmpty() || !link.startsWith("/tmp/") || link.contains("/../")) {
+        return fail(QStringLiteral("incomplete bundle environment"));
+    }
+    struct stat st{};
+    if (stat(target.constData(), &st) != 0 || !S_ISDIR(st.st_mode)) {
+        return fail(QStringLiteral("%1 is missing").arg(QString::fromLocal8Bit(target)));
+    }
+    if (lstat(link.constData(), &st) == 0) {
+        if (!S_ISLNK(st.st_mode) || st.st_uid != getuid()) {
+            return fail(QStringLiteral("the path exists and is not our symlink"));
+        }
+        if (unlink(link.constData()) != 0) {
+            return fail(QString::fromLocal8Bit(strerror(errno)));
+        }
+    }
+    if (symlink(target.constData(), link.constData()) != 0) {
+        return fail(QString::fromLocal8Bit(strerror(errno)));
+    }
+    // Re-check: nobody else may have won a race for the name.
+    if (lstat(link.constData(), &st) != 0 || !S_ISLNK(st.st_mode) || st.st_uid != getuid()) {
+        return fail(QStringLiteral("the symlink was replaced"));
+    }
+    qDebug() << "WebView: using bundled WebKitGTK helpers from" << target;
+    return true;
+}
 
 bool ensureGtk(QString* error)
 {
@@ -314,7 +380,7 @@ class LinuxWebView final : public WebView {
 
 std::unique_ptr<WebView> createLinuxWebView(const Options& options, QString* error)
 {
-    if (!ensureGtk(error)) {
+    if (!prepareRelocatedWebKit(error) || !ensureGtk(error)) {
         return nullptr;
     }
     auto view = std::make_unique<LinuxWebView>(options);

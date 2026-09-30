@@ -302,7 +302,8 @@ give it more power than the fixed API.
    The page cannot make network requests itself; remote images (mod icons) are the only external loads.
 7. **Static files** are served only from the resolved bundle directory; `..` and symlinks leaving it
    are rejected (canonical path check).
-8. **WebView hardening:** ephemeral web context (no persistent storage), no popups / new windows,
+8. **WebView hardening:** (in AppImage/portable bundles the WebKit sandbox is off, see
+   [CI and Linux packages](#ci-and-linux-packages)) ephemeral web context (no persistent storage), no popups / new windows,
    permission requests (camera, geolocation, notifications, ...) denied, JavaScript clipboard access
    disabled (`system.copyText` instead), inspector and context menu only in development.
 9. **Dev URL only in Debug builds**, and only for loopback hosts (see below). Release builds never load
@@ -327,6 +328,28 @@ cmake --install build --prefix /usr
   * macOS: `<App>.app/Contents/Resources/frontend`
 * At runtime `WebUiHost::findFrontendRoot()` looks in those places (and `<exe dir>/frontend` for the
   build tree). No Node.js or server is needed at runtime.
+
+### CI and Linux packages
+
+* `.github/actions/setup-dependencies/linux` installs `libwebkit2gtk-4.1-dev`, `glib-networking` and Node.js 22;
+  `build.yml` configures Linux builds with `-D Launcher_ENABLE_WEBUI=ON`, so missing dependencies fail the
+  build instead of silently producing a Qt-only launcher. Windows and macOS builds are unchanged (web UI off).
+* The AppImage and the portable tarball bundle WebKitGTK with `sharun lib4bin --with-hooks`. Besides the
+  launcher, lib4bin gets the WebKit helper processes, the GIO TLS module (https images) and Mesa's EGL vendor
+  plus DRI drivers (WebKitGTK aborts without an EGL display) — see `WEBKIT_BUNDLE_FILES` in
+  `.github/actions/package/linux/action.yml`.
+* libwebkit2gtk has its helper directory compiled in. sharun's hooks rewrite it to a path relative to the
+  working directory, which breaks because the launcher changes its working directory to the data folder.
+  `.github/actions/package/linux/bundle-webkit.sh` therefore rewrites it once more to a same-length path in
+  `/tmp` and records it in the bundle's `.env` (`MATERIALMC_WEBKIT_LINK`, `MATERIALMC_WEBKIT_LINK_TARGET`).
+  At start-up `prepareRelocatedWebKit()` (LinuxWebView.cpp) points that path at the bundled helpers; it only
+  ever replaces a symlink owned by the current user, and refuses to start the web UI (Qt fallback) otherwise.
+* The AppImage keeps `sharun` next to `AppRun` (hard link): child processes find the bundle root through
+  `$SHARUN_DIR/sharun`. The portable tarball includes `.env` explicitly (`*` skips dotfiles).
+* In these bundles WebKit's bubblewrap sandbox is disabled (`WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1`):
+  bubblewrap cannot see the AppImage mount. The web process only renders the bundled UI (CSP, no page network
+  access) plus remote images; distribution packages that use the system WebKitGTK keep the sandbox.
+* The bundled Mesa (with LLVM for llvmpipe/radeonsi) adds roughly 50 MB to the AppImage.
 
 CMake options:
 
