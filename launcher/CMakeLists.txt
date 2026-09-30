@@ -1193,6 +1193,24 @@ if(WIN32)
     )
 endif()
 
+######## Web UI host (system WebView + typed API for the React frontend) ########
+if(Launcher_ENABLE_WEBUI)
+    set(WEBUI_SOURCES
+        webview/WebView.h
+        webview/WebView.cpp
+    )
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
+        list(APPEND WEBUI_SOURCES webview/LinuxWebView.cpp)
+        # GTK headers clash with Qt's keyword macros; this file manages them itself and must not get the Qt PCH.
+        set_source_files_properties(webview/LinuxWebView.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+    elseif(WIN32)
+        list(APPEND WEBUI_SOURCES webview/WindowsWebView.cpp)
+    elseif(APPLE)
+        list(APPEND WEBUI_SOURCES webview/MacOSWebView.mm)
+    endif()
+    set(LAUNCHER_SOURCES ${LAUNCHER_SOURCES} ${WEBUI_SOURCES})
+endif()
+
 qt_add_resources(LAUNCHER_RESOURCES
     resources/backgrounds/backgrounds.qrc
     resources/multimc/multimc.qrc
@@ -1315,6 +1333,35 @@ if(APPLE)
     endif()
 endif()
 
+if(Launcher_ENABLE_WEBUI)
+    target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_WEBUI)
+    # Backend selection and the dev-URL switch only matter to a few files. They are set per file (and those files skip
+    # the PCH) so the target-wide definitions stay identical to the PCH the executable reuses.
+    set(WEBUI_BACKEND_DEFINITION "")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
+        set(WEBUI_BACKEND_DEFINITION MATERIALMC_WEBVIEW_WEBKITGTK)
+        target_link_libraries(Launcher_logic PkgConfig::webkit2gtk)
+    elseif(WIN32)
+        set(WEBUI_BACKEND_DEFINITION MATERIALMC_WEBVIEW_WEBVIEW2)
+    elseif(APPLE)
+        set(WEBUI_BACKEND_DEFINITION MATERIALMC_WEBVIEW_WKWEBVIEW)
+    endif()
+    set_source_files_properties(webview/WebView.cpp PROPERTIES
+        COMPILE_DEFINITIONS "${WEBUI_BACKEND_DEFINITION}"
+        SKIP_PRECOMPILE_HEADERS ON
+    )
+    # Loading the UI from a dev server (MATERIALMC_DEV_URL) is a development feature only.
+    if(Launcher_WEBUI_ALLOW_DEV_URL)
+        set(WEBUI_DEV_URL_DEFINITION MATERIALMC_WEBUI_ALLOW_DEV_URL)
+    else()
+        set(WEBUI_DEV_URL_DEFINITION $<$<CONFIG:Debug>:MATERIALMC_WEBUI_ALLOW_DEV_URL>)
+    endif()
+    set_source_files_properties(api/WebUiHost.cpp PROPERTIES
+        COMPILE_DEFINITIONS "${WEBUI_DEV_URL_DEFINITION}"
+        SKIP_PRECOMPILE_HEADERS ON
+    )
+endif()
+
 add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
 
 if(${Launcher_USE_PCH})
@@ -1322,6 +1369,9 @@ if(${Launcher_USE_PCH})
 endif()
 
 target_link_libraries(${Launcher_Name} Launcher_logic)
+if(Launcher_ENABLE_WEBUI)
+    add_dependencies(${Launcher_Name} Launcher_frontend)
+endif()
 
 if(DEFINED Launcher_APP_BINARY_NAME)
     set_target_properties(${Launcher_Name} PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}")
