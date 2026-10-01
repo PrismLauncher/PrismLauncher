@@ -36,12 +36,16 @@ namespace Cmd {
 
 struct Launch {
     // targets
-    struct NoTarget {};
+    struct NoTarget {
+        auto operator<=>(const NoTarget&) const = default;
+    };
     struct ServerTarget {
         std::string target;
+        auto operator<=>(const ServerTarget&) const = default;
     };
     struct WorldTarget {
         std::string target;
+        auto operator<=>(const WorldTarget&) const = default;
     };
     using TargetBase = std::variant<NoTarget, ServerTarget, WorldTarget>;
     struct Target : TargetBase {
@@ -49,12 +53,16 @@ struct Launch {
     };
 
     // accounts
-    struct AccountDefault {};
+    struct AccountDefault {
+        auto operator<=>(const AccountDefault&) const = default;
+    };
     struct AccountProfile {
         std::string name;
+        auto operator<=>(const AccountProfile&) const = default;
     };
     struct AccountOffline {
         std::string name;
+        auto operator<=>(const AccountOffline&) const = default;
     };
     using AccountBase = std::variant<AccountDefault, AccountProfile, AccountOffline>;
     struct Account : AccountBase {
@@ -64,16 +72,22 @@ struct Launch {
     std::string id;
     Target target = NoTarget{};
     Account account = AccountDefault{};
+    auto operator<=>(const Launch&) const = default;
 };
 struct ProcessURI {
     std::string uri;
+    auto operator<=>(const ProcessURI&) const = default;
 };
-struct ShowMainWindow {};
+struct ShowMainWindow {
+    auto operator<=>(const ShowMainWindow&) const = default;
+};
 struct ShowInstanceWindow {
     std::string id;
+    auto operator<=>(const ShowInstanceWindow&) const = default;
 };
 struct Alive {
     std::filesystem::path path;
+    auto operator<=>(const Alive&) const = default;
 };
 
 };  // namespace Cmd
@@ -86,6 +100,7 @@ struct Command : CommandBase {
 struct Args {
     Startup::DataPathResult dataPath;
     std::vector<Command> commands;
+    auto operator<=>(const Args&) const = default;
 };
 
 }  // namespace Cli

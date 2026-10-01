@@ -1256,6 +1256,7 @@ target_link_libraries(Launcher_logic
     qdcss
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
+    CLI11::CLI11
 )
 
 if(TARGET PkgConfig::libqrencode)
@@ -1334,7 +1335,6 @@ endif()
 
 target_link_libraries(${Launcher_Name}
   Launcher_logic
-  CLI11::CLI11
 )
 
 if(DEFINED Launcher_APP_BINARY_NAME)
