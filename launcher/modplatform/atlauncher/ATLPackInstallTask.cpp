@@ -54,6 +54,7 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/ChecksumValidator.h"
+#include "net/RPCSink.h"
 #include "settings/INISettingsObject.h"
 
 #include "net/ApiRequest.h"
@@ -102,7 +103,10 @@ void PackInstallTask::executeTask()
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_packSafeName).arg(m_versionName);
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
+    auto [action, response] = Net::RPC::make<ATLauncher::PackVersion>(
+        { { .url = searchUrl }, [](const auto& v) -> Result<ATLauncher::PackVersion> {
+             return Json::requireObject(v, "ATLauncher pack manifest").and_then([](const auto& v) { return ATLauncher::loadVersion(v); });
+         } });
     netJob->addNetAction(action);
 
     connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onDownloadSucceeded(response); });
@@ -113,27 +117,13 @@ void PackInstallTask::executeTask()
     m_jobPtr->start();
 }
 
-void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
+void PackInstallTask::onDownloadSucceeded(ATLauncher::PackVersion* responsePtr)
 {
     qDebug() << "PackInstallTask::onDownloadSucceeded:" << QThread::currentThreadId();
 
     // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
-    QByteArray response = std::move(*responsePtr);
+    m_version = std::move(*responsePtr);
     m_jobPtr.reset();
-
-    ATLauncher::PackVersion version;
-    auto doc = Json::requireDocument(response, "ATLauncher pack manifest").and_then([&version](const auto& v) {
-        auto obj = v.object();
-        return ATLauncher::loadVersion(version, obj);
-    });
-    if (!doc) {
-        qWarning() << "Error while parsing JSON response from ATLauncher:" << doc.error();
-        qWarning() << response;
-        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
-        return;
-    }
-
-    m_version = version;
 
     // Derived from the installation mode
     QString message;
@@ -379,27 +369,27 @@ Result<QString> PackInstallTask::pickLoaderVersion(const Meta::VersionList::Ptr&
             return version->descriptor();
         }
 
-        return std::unexpected("No recommended version.");
+        return std::unexpected(tr("No matching version was found."));
     }
     if (m_version.loader.choose) {
         // Fabric Loader doesn't depend on a given Minecraft version.
         if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
-            auto choosenVersion = m_support->chooseVersion(vlist, nullptr);
-            if (choosenVersion.isEmpty()) {
-                return std::unexpected("No choosen version");
+            auto chosenVersion = m_support->chooseVersion(vlist, nullptr);
+            if (chosenVersion.isEmpty()) {
+                return std::unexpected(tr("No version was chosen."));
             }
-            return choosenVersion;
+            return chosenVersion;
         }
 
-        auto choosenVersion = m_support->chooseVersion(vlist, m_version.minecraft);
-        if (choosenVersion.isEmpty()) {
-            return std::unexpected("No choosen version");
+        auto chosenVersion = m_support->chooseVersion(vlist, m_version.minecraft);
+        if (chosenVersion.isEmpty()) {
+            return std::unexpected(tr("No version was chosen."));
         }
-        return choosenVersion;
+        return chosenVersion;
     }
 
     if (m_version.loader.version.isEmpty()) {
-        return std::unexpected("Missing version");
+        return std::unexpected(tr("No loader version set for modpack!"));
     }
 
     return m_version.loader.version;
@@ -491,7 +481,7 @@ bool PackInstallTask::createLibrariesComponent(const QString& instanceRoot, Pack
         { "e1d76a05a3723920e2f80a5e66c45f16", "1.7.2_02" },        { "00318cb0c787934d523f63cdfe8ddde4", "1.9-SNAPSHOT" },
         { "986fd1ee9525cb0dcab7609401cef754", "1.9.4-SNAPSHOT" },  { "571ad5e6edd5ff40259570c9be588bb5", "1.9.4" },
         { "1cdd72f7232e45551f16cc8ffd27ccf3", "1.10.2-SNAPSHOT" }, { "8a7c21f32d77ee08b393dd3921ced8eb", "1.10.2" },
-        { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" }
+        { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" },
     };
 
     for (const auto& lib : m_version.libraries) {
@@ -1083,7 +1073,9 @@ void PackInstallTask::install()
     connect(task.get(), &Task::failed, this, &PackInstallTask::emitFailed);
     connect(task.get(), &Task::aborted, this, &PackInstallTask::emitAborted);
     propagateFromOther(task.get());
-    task->start();
+    if (!task->isRunning()) {
+        task->start();
+    }
 }
 
 void PackInstallTask::onLoaderListLoaded()
@@ -1100,12 +1092,8 @@ void PackInstallTask::onLoaderListLoaded()
 
     auto version = pickLoaderVersion(vlist);
     if (!version) {
-        if (m_version.loader.recommended || m_version.loader.latest) {
-            emitFailed(tr("Failed to find version for %1 loader, error: %2")
-                           .arg(ModPlatform::getModLoaderAsString(m_version.loader.type), version.error()));
-        } else {
-            emitFailed(tr("No loader version set for modpack!\nError: %1").arg(version.error()));
-        }
+        emitFailed(
+            tr("Failed to find version for %1 loader: %2").arg(ModPlatform::getModLoaderAsString(m_version.loader.type), version.error()));
         return;
     }
 
