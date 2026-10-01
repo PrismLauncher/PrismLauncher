@@ -94,7 +94,7 @@ class PackInstallTask : public InstanceTask {
     void executeTask() override;
 
    private slots:
-    void onDownloadSucceeded(QByteArray* responsePtr);
+    void onDownloadSucceeded(ATLauncher::PackVersion* responsePtr);
     void onDownloadFailed(QString reason);
     void onDownloadAborted();
 
