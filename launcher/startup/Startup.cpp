@@ -75,7 +75,12 @@ DataPathResult resolveDataPath(const std::filesystem::path& rootPath)
             source = DataPathSource::PersistentDataPath;
         }
     } else if (auto standardLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation); !standardLoc.isEmpty()) {
-        dataPath = QDir(FS::PathCombine(standardLoc, "..")).absolutePath().toStdU16String();
+        // make absolute and strip off Qt's auto added org and binary name
+        dataPath = std::filesystem::absolute(std::filesystem::path{standardLoc.toStdU16String()}).parent_path();
+        while (dataPath.filename() == BuildConfig.LAUNCHER_NAME.toStdU16String()) {
+            dataPath = dataPath.parent_path();
+        }
+        dataPath = dataPath / BuildConfig.LAUNCHER_NAME.toStdU16String();
         source = DataPathSource::PersistentDataPath;
     }
 

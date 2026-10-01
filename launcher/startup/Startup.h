@@ -42,6 +42,7 @@ struct DataPathResult {
     std::filesystem::path dataPath;
     DataPathSource source;
     bool portable;
+    auto operator<=>(const DataPathResult&) const = default;
 };
 
 /// resolve the data storage path
