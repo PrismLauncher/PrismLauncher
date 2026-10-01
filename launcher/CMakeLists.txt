@@ -791,6 +791,8 @@ SET(LAUNCHER_SOURCES
     config/GlobalConfig.cpp
     config/InstanceConfig.h
     config/InstanceConfig.cpp
+    config/PlayTimeConfig.h
+    config/PlayTimeConfig.cpp
 
     # console utils
     console/Console.h
