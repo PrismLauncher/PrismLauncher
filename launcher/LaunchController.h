@@ -73,6 +73,8 @@ class LaunchController : public Task {
     bool abort() override;
 
    private:
+    friend class OfflineAccountTest;
+
     void login();
     void launchInstance();
     void decideAccount();

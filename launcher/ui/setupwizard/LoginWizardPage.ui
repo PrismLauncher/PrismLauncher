@@ -30,7 +30,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>In order to play Minecraft, you must have at least one Microsoft account logged in. Do you want to log in now?</string>
+      <string>You can log in with Microsoft for authenticated play, or skip this step and add an offline account in Settings &gt; Accounts for local play.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

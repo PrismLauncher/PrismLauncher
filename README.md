@@ -1,3 +1,13 @@
+# RePrism Launcher
+
+RePrism Launcher is an independent fork maintained at https://github.com/PavlikPromix/RePrismLauncher. It is not affiliated with or endorsed by the Prism Launcher project.
+
+Offline accounts can be added and used for local play without a Microsoft account. Create a profile using Settings > Accounts > Add Offline and launch an instance normally. The first run of a new instance still needs Internet access to download the game files. Microsoft-authenticated servers require a Microsoft account that owns Minecraft.
+
+For the prepared Windows development environment, run `powershell -ExecutionPolicy Bypass -File scripts/build-reprism.ps1 -SkipSymlinkTests`. This builds, tests, and installs a portable launcher into `install/`. CurseForge is enabled using the default key in the source tree for this local development build. Find modpacks in Add Instance > CurseForge, or mods in Edit Instance > Mods > Download Mods > CurseForge. You can set your own key in Settings > APIs > CurseForge API key; restart the launcher after changing it. Use your own API identifiers for distributed builds. The script clears Microsoft and Imgur identifiers; offline profiles do not need these integrations. Pass -InstallDir to install beside a running launcher.
+
+The launcher remains licensed under GPL-3.0-only; the upstream logo and related assets retain their CC BY-SA 4.0 license.
+
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg">

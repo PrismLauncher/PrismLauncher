@@ -95,12 +95,12 @@ void LaunchController::decideAccount()
 
     if (!accounts->anyAccountIsValid()) {
         // Tell the user they need to log in at least one account in order to play.
-        auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in. "
-                                                     "Would you like to open the account manager to add an account now?"),
-                                                  QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
-                         ->exec();
+        auto reply =
+            CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
+                                         tr("Add an offline account for local play, or a Microsoft account for authenticated play. "
+                                            "Would you like to open the account manager to add an account now?"),
+                                         QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
+                ->exec();
 
         if (reply == QMessageBox::Yes) {
             // Open the account manager.
@@ -135,23 +135,14 @@ LaunchDecision LaunchController::decideLaunchMode()
         return LaunchDecision::Continue;
     }
 
-    const auto* accounts = APPLICATION->accounts();
-    MinecraftAccountPtr accountToCheck = nullptr;
-
-    if (m_accountToUse->accountType() != AccountType::Offline) {
-        accountToCheck = m_accountToUse->ownsMinecraft() ? m_accountToUse : nullptr;
-    } else if (const auto defaultAccount = accounts->defaultAccount(); defaultAccount && defaultAccount->ownsMinecraft()) {
-        accountToCheck = defaultAccount;
-    } else {
-        for (int i = 0; i < accounts->count(); i++) {
-            if (const auto account = accounts->at(i); account->ownsMinecraft()) {
-                accountToCheck = account;
-                break;
-            }
-        }
+    // Local profiles need no Microsoft authentication. Preserve the requested network mode for game downloads.
+    if (m_accountToUse->accountType() == AccountType::Offline) {
+        m_actualLaunchMode = m_wantedLaunchMode;
+        return LaunchDecision::Continue;
     }
 
-    if (!accountToCheck) {
+    const auto accountToCheck = m_accountToUse;
+    if (!accountToCheck->ownsMinecraft()) {
         m_actualLaunchMode = LaunchMode::Demo;
         return LaunchDecision::Continue;
     }
@@ -395,7 +386,7 @@ void LaunchController::launchInstance()
 
     // Prepend Online and Auth Status
     QString online_mode;
-    if (m_actualLaunchMode == LaunchMode::Normal) {
+    if (m_actualLaunchMode == LaunchMode::Normal && m_accountToUse->accountType() != AccountType::Offline) {
         online_mode = "online";
 
         // Prepend Server Status
