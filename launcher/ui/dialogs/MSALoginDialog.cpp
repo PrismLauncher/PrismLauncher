@@ -96,7 +96,7 @@ int MSALoginDialog::exec()
 {
     // Setup the login task and start it
     m_account = MinecraftAccount::createBlankMSA();
-    m_authflow_task = m_account->login(false);
+    m_authflow_task.reset(new AuthFlow(m_account->accountData(), AuthFlow::Action::Login));
     connect(m_authflow_task.get(), &Task::failed, this, &MSALoginDialog::onAuthFlowTaskFailed);
     connect(m_authflow_task.get(), &Task::succeeded, this, &QDialog::accept);
     connect(m_authflow_task.get(), &Task::aborted, this, &MSALoginDialog::reject);
