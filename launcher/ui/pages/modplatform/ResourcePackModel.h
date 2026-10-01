@@ -18,7 +18,7 @@ class ResourcePackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ResourcePackResourceModel(const BaseInstance&, const ResourceAPI*, const QString& debugName, QString metaEntryBase);
+    ResourcePackResourceModel(ResourceFolderModel*, const ResourceAPI*, const QString& debugName, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);
@@ -30,9 +30,6 @@ class ResourcePackResourceModel : public ResourceModel {
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
-
-   protected:
-    const BaseInstance& m_base_instance;
 
    private:
     QString m_debugName;

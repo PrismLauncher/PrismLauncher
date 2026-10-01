@@ -60,7 +60,7 @@ void LegacyFMLLibrariesTask::executeTask()
     setStatus(tr("Downloading FML libraries..."));
     NetJob::Ptr dljob{ new NetJob("FML libraries", APPLICATION->network()) };
     auto metacache = APPLICATION->metacache();
-    Net::NetRequest::Options options = Net::NetRequest::Option::MakeEternal;
+    Net::Request::Options options = Net::Request::Option::MakeEternal;
     const QString base = baseUrl();
     for (auto& lib : fmlLibsToProcess) {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);

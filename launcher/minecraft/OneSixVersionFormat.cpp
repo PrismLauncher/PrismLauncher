@@ -38,70 +38,68 @@
 #include <minecraft/MojangVersionFormat.h>
 #include <QList>
 #include "java/JavaMetadata.h"
-#include "minecraft/Agent.h"
-#include "minecraft/ParseUtils.h"
 
 #include <QRegularExpression>
+#include <memory>
 
 using namespace Json;
 
-static void readString(const QJsonObject& root, const QString& key, QString& variable)
+Result<QString> optionalString(const QJsonObject& root, const QString& key)
 {
     if (root.contains(key)) {
-        variable = requireString(root.value(key));
+        return requireString(root.value(key));
     }
+    return {};
 }
 
-LibraryPtr OneSixVersionFormat::libraryFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
+Result<LibraryPtr> OneSixVersionFormat::libraryFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
 {
-    LibraryPtr out = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
-    readString(libObj, "MMC-hint", out->m_hint);
-    readString(libObj, "MMC-absulute_url", out->m_absoluteURL);
-    readString(libObj, "MMC-absoluteUrl", out->m_absoluteURL);
-    readString(libObj, "MMC-filename", out->m_filename);
-    readString(libObj, "MMC-displayname", out->m_displayname);
+    TRY_INTO(const auto& out, MojangVersionFormat::libraryFromJson(problems, libObj, filename))
+    TRY_INTO(out->m_hint, optionalString(libObj, "MMC-hint"))
+    TRY_INTO(out->m_absoluteURL, optionalString(libObj, "MMC-absulute_url"))
+    TRY_INTO(out->m_absoluteURL, optionalString(libObj, "MMC-absoluteUrl"))
+    TRY_INTO(out->m_filename, optionalString(libObj, "MMC-filename"))
+    TRY_INTO(out->m_displayname, optionalString(libObj, "MMC-displayname"))
     return out;
 }
 
 QJsonObject OneSixVersionFormat::libraryToJson(Library* library)
 {
     QJsonObject libRoot = MojangVersionFormat::libraryToJson(library);
-    if (!library->m_absoluteURL.isEmpty())
+    if (!library->m_absoluteURL.isEmpty()) {
         libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
-    if (!library->m_hint.isEmpty())
+    }
+    if (!library->m_hint.isEmpty()) {
         libRoot.insert("MMC-hint", library->m_hint);
-    if (!library->m_filename.isEmpty())
+    }
+    if (!library->m_filename.isEmpty()) {
         libRoot.insert("MMC-filename", library->m_filename);
-    if (!library->m_displayname.isEmpty())
+    }
+    if (!library->m_displayname.isEmpty()) {
         libRoot.insert("MMC-displayname", library->m_displayname);
+    }
     return libRoot;
 }
 
-VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc, const QString& filename, const bool requireOrder)
+Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc, const QString& filename, const bool requireOrder)
 {
-    VersionFilePtr out(new VersionFile());
+    auto out = std::make_shared<VersionFile>();
     if (doc.isEmpty() || doc.isNull()) {
-        throw JSONValidationError(filename + " is empty or null");
+        return std::unexpected(filename + " is empty or null");
     }
     if (!doc.isObject()) {
-        throw JSONValidationError(filename + " is not an object");
+        return std::unexpected(filename + " is not an object");
     }
 
     QJsonObject root = doc.object();
 
-    Meta::MetadataVersion formatVersion = Meta::parseFormatVersion(root, false);
-    switch (formatVersion) {
-        case Meta::MetadataVersion::InitialRelease:
-            break;
-        case Meta::MetadataVersion::Invalid:
-            throw JSONValidationError(filename + " does not contain a recognizable version of the metadata format.");
-    }
+    TRY(Meta::parseFormatVersion(root, false))
 
     if (requireOrder) {
         if (root.contains("order")) {
-            out->order = requireInteger(root.value("order"));
+            TRY_INTO(out->order, requireInteger(root.value("order")))
         } else {
-            // FIXME: evaluate if we don't want to throw exceptions here instead
+            // FIXME: evaluate if we don't want to return unexpected
             qCritical() << filename << "doesn't contain an order field";
         }
     }
@@ -124,99 +122,114 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
 
     out->version = root.value("version").toString();
 
-    MojangVersionFormat::readVersionProperties(root, out.get());
+    TRY(MojangVersionFormat::readVersionProperties(root, out.get()))
 
     // added for legacy Minecraft window embedding, TODO: remove
-    readString(root, "appletClass", out->appletClass);
+    TRY_INTO(out->appletClass, optionalString(root, "appletClass"))
 
     if (root.contains("+tweakers")) {
-        for (auto tweakerVal : requireArray(root.value("+tweakers"))) {
-            out->addTweakers.append(requireString(tweakerVal));
+        TRY_INTO(const auto& arr, requireArray(root.value("+tweakers")))
+        for (auto tweakerVal : arr) {
+            TRY_INTO(const auto& v, requireString(tweakerVal))
+            out->addTweakers.append(v);
         }
     }
 
     if (root.contains("+traits")) {
-        for (auto tweakerVal : requireArray(root.value("+traits"))) {
-            out->traits.insert(requireString(tweakerVal));
+        TRY_INTO(const auto& arr, requireArray(root.value("+traits")))
+        for (auto tweakerVal : arr) {
+            TRY_INTO(const auto& v, requireString(tweakerVal))
+            out->traits.insert(v);
         }
     }
 
     if (root.contains("+jvmArgs")) {
-        for (auto arg : requireArray(root.value("+jvmArgs"))) {
-            out->addnJvmArguments.append(requireString(arg));
+        TRY_INTO(const auto& arr, requireArray(root.value("+jvmArgs")))
+        for (auto arg : arr) {
+            TRY_INTO(const auto& v, requireString(arg))
+            out->addnJvmArguments.append(v);
         }
     }
 
     if (root.contains("jarMods")) {
-        for (auto libVal : requireArray(root.value("jarMods"))) {
-            QJsonObject libObj = requireObject(libVal);
+        TRY_INTO(const auto& arr, requireArray(root.value("jarMods")))
+        for (auto libVal : arr) {
             // parse the jarmod
-            auto lib = OneSixVersionFormat::jarModFromJson(*out, libObj, filename);
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return OneSixVersionFormat::jarModFromJson(*out, v, filename);
+            }))
             // and add to jar mods
             out->jarMods.append(lib);
         }
     } else if (root.contains("+jarMods"))  // DEPRECATED: old style '+jarMods' are only here for backwards compatibility
     {
-        for (auto libVal : requireArray(root.value("+jarMods"))) {
-            QJsonObject libObj = requireObject(libVal);
+        TRY_INTO(const auto& arr, requireArray(root.value("+jarMods")))
+        for (auto libVal : arr) {
             // parse the jarmod
-            auto lib = OneSixVersionFormat::plusJarModFromJson(*out, libObj, filename, out->name);
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return OneSixVersionFormat::plusJarModFromJson(*out, v, filename, out->name);
+            }))
             // and add to jar mods
             out->jarMods.append(lib);
         }
     }
 
     if (root.contains("mods")) {
-        for (auto libVal : requireArray(root.value("mods"))) {
-            QJsonObject libObj = requireObject(libVal);
+        TRY_INTO(const auto& arr, requireArray(root.value("mods")))
+        for (auto libVal : arr) {
             // parse the jarmod
-            auto lib = OneSixVersionFormat::modFromJson(*out, libObj, filename);
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then(
+                                          [&out, filename](const auto& v) { return OneSixVersionFormat::modFromJson(*out, v, filename); }))
             // and add to jar mods
             out->mods.append(lib);
         }
     }
 
-    auto readLibs = [&root, &out, &filename](const char* which, QList<LibraryPtr>& outList) {
-        for (auto libVal : requireArray(root.value(which))) {
-            QJsonObject libObj = requireObject(libVal);
+    auto readLibs = [&root, &out, &filename](const char* which, QList<LibraryPtr>& outList) -> Result<> {
+        TRY_INTO(const auto& arr, requireArray(root.value(which)))
+        for (auto libVal : arr) {
             // parse the library
-            auto lib = libraryFromJson(*out, libObj, filename);
+            TRY_INTO(const auto& lib, requireObject(libVal).and_then([&out, filename](const auto& v) {
+                return OneSixVersionFormat::libraryFromJson(*out, v, filename);
+            }))
             outList.append(lib);
         }
+        return {};
     };
     bool hasPlusLibs = root.contains("+libraries");
     bool hasLibs = root.contains("libraries");
     if (hasPlusLibs && hasLibs) {
         out->addProblem(ProblemSeverity::Warning,
                         QObject::tr("Version file has both '+libraries' and 'libraries'. This is no longer supported."));
-        readLibs("libraries", out->libraries);
-        readLibs("+libraries", out->libraries);
+        TRY(readLibs("libraries", out->libraries))
+        TRY(readLibs("+libraries", out->libraries))
     } else if (hasLibs) {
-        readLibs("libraries", out->libraries);
+        TRY(readLibs("libraries", out->libraries))
     } else if (hasPlusLibs) {
-        readLibs("+libraries", out->libraries);
+        TRY(readLibs("+libraries", out->libraries))
     }
 
     if (root.contains("mavenFiles")) {
-        readLibs("mavenFiles", out->mavenFiles);
+        TRY(readLibs("mavenFiles", out->mavenFiles))
     }
 
     if (root.contains("+agents")) {
-        for (auto agentVal : requireArray(root.value("+agents"))) {
-            QJsonObject agentObj = requireObject(agentVal);
-            auto lib = libraryFromJson(*out, agentObj, filename);
+        TRY_INTO(const auto& arr, requireArray(root.value("+agents")))
+        for (auto agentVal : arr) {
+            TRY_INTO(const auto& agentObj, requireObject(agentVal))
+            TRY_INTO(const auto& lib, libraryFromJson(*out, agentObj, filename))
 
-            QString arg = "";
-            readString(agentObj, "argument", arg);
+            TRY_INTO(const auto& arg, optionalString(agentObj, "argument"))
 
-            out->agents.append(Agent{ lib, arg });
+            out->agents.append(Agent{ .library = lib, .argument = arg });
         }
     }
 
     // if we have mainJar, just use it
     if (root.contains("mainJar")) {
-        QJsonObject libObj = requireObject(root, "mainJar");
-        out->mainJar = libraryFromJson(*out, libObj, filename);
+        TRY_INTO(out->mainJar, requireObject(root, "mainJar").and_then([&out, filename](const auto& v) {
+            return OneSixVersionFormat::libraryFromJson(*out, v, filename);
+        }))
     }
     // else reconstruct it from downloads and id ... if that's available
     else if (!out->minecraftVersion.isEmpty()) {
@@ -224,9 +237,9 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
         lib->setRawName(GradleSpecifier(QString("com.mojang:minecraft:%1:client").arg(out->minecraftVersion)));
         // we have a reliable client download, use it.
         if (out->mojangDownloads.contains("client")) {
-            auto LibDLInfo = std::make_shared<MojangLibraryDownloadInfo>();
-            LibDLInfo->artifact = out->mojangDownloads["client"];
-            lib->setMojangDownloadInfo(LibDLInfo);
+            auto libDlInfo = std::make_shared<MojangLibraryDownloadInfo>();
+            libDlInfo->artifact = out->mojangDownloads["client"];
+            lib->setMojangDownloadInfo(libDlInfo);
         }
         // we got nothing...
         else {
@@ -238,28 +251,29 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
     }
 
     if (root.contains("requires")) {
-        Meta::parseRequires(root, &out->m_requires);
+        TRY(Meta::parseRequires(root, &out->m_requires))
     }
     QString dependsOnMinecraftVersion = root.value("mcVersion").toString();
     if (!dependsOnMinecraftVersion.isEmpty()) {
         Meta::Require mcReq;
         mcReq.uid = "net.minecraft";
         mcReq.equalsVersion = dependsOnMinecraftVersion;
-        if (out->m_requires.count(mcReq) == 0) {
+        if (!out->m_requires.contains(mcReq)) {
             out->m_requires.insert(mcReq);
         }
     }
     if (root.contains("conflicts")) {
-        Meta::parseRequires(root, &out->conflicts);
+        TRY(Meta::parseRequires(root, &out->conflicts))
     }
     if (root.contains("volatile")) {
-        out->m_volatile = requireBoolean(root, "volatile");
+        TRY_INTO(out->m_volatile, requireBoolean(root, "volatile"))
     }
 
     if (root.contains("runtimes")) {
         out->runtimes = {};
         for (auto runtime : root["runtimes"].toArray()) {
-            out->runtimes.append(Java::parseJavaMeta(runtime.toObject()));
+            TRY_INTO(const auto& runtimeMeta, Java::parseJavaMeta(runtime.toObject()))
+            out->runtimes.append(runtimeMeta);
         }
     }
 
@@ -291,7 +305,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
 
     writeString(root, "version", patch->version);
 
-    Meta::serializeFormatVersion(root, Meta::MetadataVersion::InitialRelease);
+    Meta::serializeFormatVersion(root, 1);
 
     MojangVersionFormat::writeVersionProperties(patch.get(), root);
 
@@ -306,8 +320,9 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
         QJsonArray array;
         for (const auto& value : patch->agents) {
             QJsonObject agentOut = OneSixVersionFormat::libraryToJson(value.library.get());
-            if (!value.argument.isEmpty())
+            if (!value.argument.isEmpty()) {
                 agentOut.insert("argument", value.argument);
+            }
 
             array.append(agentOut);
         }
@@ -315,28 +330,28 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     }
     if (!patch->libraries.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->libraries) {
+        for (const auto& value : patch->libraries) {
             array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("libraries", array);
     }
     if (!patch->mavenFiles.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->mavenFiles) {
+        for (const auto& value : patch->mavenFiles) {
             array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("mavenFiles", array);
     }
     if (!patch->jarMods.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->jarMods) {
+        for (const auto& value : patch->jarMods) {
             array.append(OneSixVersionFormat::jarModtoJson(value.get()));
         }
         root.insert("jarMods", array);
     }
     if (!patch->mods.isEmpty()) {
         QJsonArray array;
-        for (auto value : patch->jarMods) {
+        for (const auto& value : patch->jarMods) {
             array.append(OneSixVersionFormat::modtoJson(value.get()));
         }
         root.insert("mods", array);
@@ -358,14 +373,14 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     }
 }
 
-LibraryPtr OneSixVersionFormat::plusJarModFromJson([[maybe_unused]] ProblemContainer& problems,
-                                                   const QJsonObject& libObj,
-                                                   const QString& filename,
-                                                   const QString& originalName)
+Result<LibraryPtr> OneSixVersionFormat::plusJarModFromJson([[maybe_unused]] ProblemContainer& problems,
+                                                           const QJsonObject& libObj,
+                                                           const QString& filename,
+                                                           const QString& originalName)
 {
-    LibraryPtr out(new Library());
+    LibraryPtr out = std::make_shared<Library>();
     if (!libObj.contains("name")) {
-        throw JSONValidationError(filename + "contains a jarmod that doesn't have a 'name' field");
+        return std::unexpected(filename + " contains a jarmod that doesn't have a 'name' field");
     }
 
     // just make up something unique on the spot for the library name.
@@ -391,7 +406,7 @@ LibraryPtr OneSixVersionFormat::plusJarModFromJson([[maybe_unused]] ProblemConta
     return out;
 }
 
-LibraryPtr OneSixVersionFormat::jarModFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
+Result<LibraryPtr> OneSixVersionFormat::jarModFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
 {
     return libraryFromJson(problems, libObj, filename);
 }
@@ -401,7 +416,7 @@ QJsonObject OneSixVersionFormat::jarModtoJson(Library* jarmod)
     return libraryToJson(jarmod);
 }
 
-LibraryPtr OneSixVersionFormat::modFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
+Result<LibraryPtr> OneSixVersionFormat::modFromJson(ProblemContainer& problems, const QJsonObject& libObj, const QString& filename)
 {
     return libraryFromJson(problems, libObj, filename);
 }

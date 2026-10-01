@@ -2,7 +2,7 @@
 #include <QObject>
 
 #include "minecraft/auth/AuthStep.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 #include "net/NetJob.h"
 
 class EntitlementsStep : public AuthStep {
@@ -21,6 +21,6 @@ class EntitlementsStep : public AuthStep {
 
    private:
     QString m_entitlements_request_id;
-    Net::NetRequest::Ptr m_request;
+    Net::Request::Ptr m_request;
     NetJob::Ptr m_task;
 };

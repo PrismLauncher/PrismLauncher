@@ -29,6 +29,14 @@ runs:
   using: composite
 
   steps:
+      # NOTE: Avoid multiple matches for DLLs with CMake
+      # This will fallback to those provided by the toolchain (i.e., MSYS2, llvm-mingw)
+    - name: Cleanup Qt install (MinGW)
+      if: ${{ inputs.msystem != '' }}
+      shell: msys2 {0}
+      run: |
+        rm -f "$QT_ROOT_DIR"/bin/lib{c++,unwind}.dll
+
     - name: Package (MinGW)
       if: ${{ inputs.msystem != '' }}
       shell: msys2 {0}

@@ -1,0 +1,45 @@
+name: Run automatic labeling
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - edited
+
+permissions: {}
+
+jobs:
+  run-labels-script:
+    name: Run script
+    runs-on: ubuntu-slim
+    if: github.repository_owner == 'PrismLauncher'
+
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.PULL_REQUEST_APP_ID }}
+          private-key: ${{ secrets.PULL_REQUEST_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: '.github/scripts'
+
+      - name: Run labeling script
+        uses: actions/github-script@v9
+        with:
+          github-token: ${{ steps.generate-token.outputs.token || github.token }}
+          retries: 3
+          script: |
+            const script = require('.github/scripts/labels.js')
+            await script({github, context})

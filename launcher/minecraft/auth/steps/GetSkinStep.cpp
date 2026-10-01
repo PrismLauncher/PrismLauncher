@@ -16,7 +16,7 @@ void GetSkinStep::perform()
 {
     QUrl url(m_data->minecraftProfile.skin.url);
 
-    auto [request, response] = Net::NetRequest::makeByteArray(url);
+    auto [request, response] = Net::Request::makeByteArray(url);
     m_request = request;
     m_request->enableAutoRetry(true);
 

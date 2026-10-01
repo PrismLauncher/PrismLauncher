@@ -82,6 +82,8 @@ class ResourcePage : public QWidget, public BasePage {
     auto getDialog() const -> const ResourceDownloadDialog* { return m_parentDialog; }
     auto getModel() const -> ResourceModel* { return m_model; }
 
+    bool inProjectMode() const { return m_projectMode; }
+
    protected:
     ResourcePage(ResourceDownloadDialog* parent,
                  BaseInstance& baseInstance,
@@ -111,6 +113,8 @@ class ResourcePage : public QWidget, public BasePage {
 
     virtual void openProject(const QVariant& projectID);
 
+    void reloadCurrentVersions();
+
     void setSuppressInitialSearch(bool suppress);
 
    protected slots:
@@ -124,6 +128,9 @@ class ResourcePage : public QWidget, public BasePage {
     /** Associates regex expressions to pages in the order they're given in the map. */
     QMap<QString, QString> urlHandlers() const { return m_desc.urlHandlers; };
     void openUrl(QUrl);
+
+    void refreshVersionComboBox();
+    void restoreSelectedVersion(const ModPlatform::IndexedPack::Ptr& currentPack);
 
    public:
     BaseInstance& m_baseInstance;
@@ -142,6 +149,8 @@ class ResourcePage : public QWidget, public BasePage {
     QTimer m_searchTimer;
 
     bool m_doNotJumpToMod = false;
+
+    bool m_projectMode = false;
 
     QSet<int> m_enableQueue;
 

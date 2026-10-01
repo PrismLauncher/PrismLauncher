@@ -43,7 +43,9 @@
 #include <QPixmap>
 #include <QSet>
 #include <QUrl>
+#include "Application.h"
 #include "icons/IconUtils.h"
+#include "settings/SettingsObject.h"
 
 #define MAX_SIZE 1024
 
@@ -65,7 +67,10 @@ IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject
 
     m_watcher.reset(new QFileSystemWatcher());
     m_isWatching = false;
-    connect(m_watcher.get(), &QFileSystemWatcher::directoryChanged, this, &IconList::directoryChanged);
+    connect(m_watcher.get(), &QFileSystemWatcher::directoryChanged, this, [this] {
+        // NOTE: we don't want the path of the subdir, but of the root dir
+        directoryChanged(APPLICATION->settings()->get("IconsDir").toString());
+    });
     connect(m_watcher.get(), &QFileSystemWatcher::fileChanged, this, &IconList::fileChanged);
 
     directoryChanged(path);
@@ -88,8 +93,7 @@ void IconList::sortIconList()
     reindex();
 }
 
-// Helper function to add directories recursively
-bool IconList::addPathRecursively(const QString& path)
+bool IconList::addPath(const QString& path)
 {
     QDir dir(path);
     if (!dir.exists())
@@ -101,7 +105,7 @@ bool IconList::addPathRecursively(const QString& path)
     // Add all subdirectories
     QFileInfoList entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     for (const QFileInfo& entry : entries) {
-        if (addPathRecursively(entry.absoluteFilePath())) {
+        if (m_watcher->addPath(entry.absoluteFilePath())) {
             watching = true;
         }
     }
@@ -111,15 +115,13 @@ bool IconList::addPathRecursively(const QString& path)
 QStringList IconList::getIconFilePaths() const
 {
     QStringList iconFiles{};
-    QStringList directories{ m_dir.absolutePath() };
-    while (!directories.isEmpty()) {
-        QString first = directories.takeFirst();
-        QDir dir(first);
-        for (QFileInfo& fileInfo : dir.entryInfoList(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Name)) {
-            if (fileInfo.isDir())
-                directories.push_back(fileInfo.absoluteFilePath());
-            else
-                iconFiles.push_back(fileInfo.absoluteFilePath());
+    for (QFileInfo& topFile : m_dir.entryInfoList(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Name)) {
+        if (topFile.isDir()) {
+            for (QFileInfo& subFile : QDir(topFile.filePath()).entryInfoList(QDir::Files, QDir::Name)) {
+                iconFiles.push_back(subFile.absoluteFilePath());
+            }
+        } else {
+            iconFiles.push_back(topFile.absoluteFilePath());
         }
     }
     return iconFiles;
@@ -232,19 +234,11 @@ void IconList::fileChanged(const QString& path)
     emit iconUpdated(key);
 }
 
-void IconList::SettingChanged(const Setting& setting, const QVariant& value)
-{
-    if (setting.id() != "IconsDir")
-        return;
-
-    directoryChanged(value.toString());
-}
-
 void IconList::startWatching()
 {
     auto abs_path = m_dir.absolutePath();
     FS::ensureFolderPathExists(abs_path);
-    m_isWatching = addPathRecursively(abs_path);
+    m_isWatching = addPath(abs_path);
     if (m_isWatching) {
         qDebug() << "Started watching" << abs_path;
     } else {

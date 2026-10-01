@@ -3,14 +3,14 @@
  <class>NewInstanceDialog</class>
  <widget class="QDialog" name="NewInstanceDialog">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::WindowModality::ApplicationModal</enum>
   </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>730</width>
-    <height>127</height>
+    <height>157</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,7 +73,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0" rowspan="2">
+     <item row="0" column="0" rowspan="3">
       <widget class="QToolButton" name="iconButton">
        <property name="iconSize">
         <size>
@@ -88,7 +88,7 @@
    <item>
     <widget class="Line" name="line">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>

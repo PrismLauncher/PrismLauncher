@@ -54,20 +54,18 @@ ecm_add_test(Index_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}:
 ecm_add_test(Version_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME Version)
 
+ecm_add_test(ModrinthUrl_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME ModrinthUrl)
+
 ecm_add_test(MetaComponentParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME MetaComponentParse)
 
 ecm_add_test(CatPack_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME CatPack)
 
-ecm_add_test(SystemTheme_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME SystemTheme)
-
-if(APPLE)
-    ecm_add_test(MacOSThemeManager_test.mm LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-        TEST_NAME MacOSThemeManager)
-endif()
-
 
 ecm_add_test(XmlLogs_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME XmlLogs)
+
+ecm_add_test(Commandline_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME Commandline)

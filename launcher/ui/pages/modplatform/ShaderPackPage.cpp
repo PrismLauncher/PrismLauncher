@@ -40,7 +40,7 @@ ShaderPackResourcePage::ShaderPackResourcePage(ResourceDownloadDialog* dialog,
                                                const ResourceAPI* api)
     : ResourcePage(dialog, instance, prepareShaderPackDescriptor(), std::move(provider))
 {
-    m_model = new ShaderPackResourceModel(instance, api, debugName(), metaEntryBase());
+    m_model = new ShaderPackResourceModel(getDialog()->getBaseModel(), api, debugName(), metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

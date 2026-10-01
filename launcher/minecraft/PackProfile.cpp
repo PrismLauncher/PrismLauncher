@@ -42,18 +42,19 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>
 #include <QTimer>
 #include <QUuid>
-#include <algorithm>
-#include <utility>
+#include <expected>
+#include <memory>
 
 #include "Application.h"
-#include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "Result.h"
 #include "meta/Index.h"
 #include "meta/JsonFormat.h"
 #include "minecraft/Component.h"
@@ -68,17 +69,28 @@
 
 #include "minecraft/Logging.h"
 
-#include "ui/dialogs/CustomMessageBox.h"
+#include "settings/Setting.h"
 
-PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
+PackProfile::PackProfile(MinecraftInstance* instance)
 {
-    d.reset(new PackProfileData);
+    d = std::make_unique<PackProfileData>();
     d->m_instance = instance;
     d->m_saveTimer.setSingleShot(true);
     d->m_saveTimer.setInterval(5000);
     d->interactionDisabled = instance->isRunning();
     connect(d->m_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
     connect(&d->m_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
+    QTimer::singleShot(0, this, [this] {
+        auto latestVersion = d->m_instance->settings()->getSetting("UseLatestMinecraftVersion");
+        connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
+            for (int i = 0; i < d->components.size(); i++) {
+                if (d->components.at(i)->getID() == "net.minecraft") {
+                    emit dataChanged(createIndex(i, 0), createIndex(i, columnCount(QModelIndex()) - 1));
+                    break;
+                }
+            }
+        });
+    });
 }
 
 PackProfile::~PackProfile()
@@ -87,10 +99,11 @@ PackProfile::~PackProfile()
 }
 
 // BEGIN: component file format
+namespace {
 
 static const int currentComponentsFileVersion = 1;
 
-static QJsonObject componentToJsonV1(ComponentPtr component)
+QJsonObject componentToJsonV1(const ComponentPtr& component)
 {
     QJsonObject obj;
     // critical
@@ -123,11 +136,10 @@ static QJsonObject componentToJsonV1(ComponentPtr component)
     return obj;
 }
 
-static ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& componentJsonPattern, const QJsonObject& obj)
+Result<ComponentPtr> componentFromJsonV1(PackProfile* parent, const QJsonObject& obj)
 {
     // critical
-    auto uid = Json::requireString(obj.value("uid"));
-    auto filePath = componentJsonPattern.arg(uid);
+    TRY_INTO(const auto& uid, Json::requireString(obj.value("uid")))
     auto component = makeShared<Component>(parent, uid);
     component->m_version = obj.value("version").toString();
     component->m_dependencyOnly = obj.value("dependencyOnly").toBool();
@@ -137,8 +149,8 @@ static ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& comp
     // TODO @RESILIENCE: ignore invalid values/structure here?
     component->m_cachedVersion = obj.value("cachedVersion").toString();
     component->m_cachedName = obj.value("cachedName").toString();
-    Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires");
-    Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts");
+    TRY(Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires"))
+    TRY(Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts"))
     component->m_cachedVolatile = obj.value("volatile").toBool();
     bool disabled = obj.value("disabled").toBool();
     component->setEnabled(!disabled);
@@ -146,12 +158,12 @@ static ComponentPtr componentFromJsonV1(PackProfile* parent, const QString& comp
 }
 
 // Save the given component container data to a file
-static bool savePackProfile(const QString& filename, const ComponentContainer& container)
+bool savePackProfile(const QString& filename, const ComponentContainer& container)
 {
     QJsonObject obj;
     obj.insert("formatVersion", currentComponentsFileVersion);
     QJsonArray orderArray;
-    for (auto component : container) {
+    for (const auto& component : container) {
         orderArray.append(componentToJsonV1(component));
     }
     obj.insert("components", orderArray);
@@ -173,56 +185,49 @@ static bool savePackProfile(const QString& filename, const ComponentContainer& c
 }
 
 // Read the given file into component containers
-static PackProfile::Result loadPackProfile(PackProfile* parent,
-                                           const QString& filename,
-                                           const QString& componentJsonPattern,
-                                           ComponentContainer& container)
+Result<> loadPackProfile(PackProfile* parent, const QString& filename, ComponentContainer& container)
 {
-    QFile componentsFile(filename);
+    QFileInfo componentsFile(filename);
     if (!componentsFile.exists()) {
         auto message = QObject::tr("Components file %1 doesn't exist. This should never happen.").arg(filename);
         qCWarning(instanceProfileC) << message;
-        return PackProfile::Result::Error(message);
+        return std::unexpected(message);
     }
-    if (!componentsFile.open(QFile::ReadOnly)) {
-        auto message = QObject::tr("Couldn't open %1 for reading: %2").arg(componentsFile.fileName(), componentsFile.errorString());
-        qCCritical(instanceProfileC) << message;
-        qCWarning(instanceProfileC) << "Ignoring overridden order";
-        return PackProfile::Result::Error(message);
-    }
-
     // and it's valid JSON
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(componentsFile.readAll(), &error);
-    if (error.error != QJsonParseError::NoError) {
-        auto message = QObject::tr("Couldn't parse %1 as json: %2").arg(componentsFile.fileName(), error.errorString());
+    const auto what = componentsFile.fileName();
+    auto obj = Json::requireObject(filename, what);
+    if (!obj) {
+        auto message = QObject::tr("Couldn't parse file: %1").arg(obj.error());
         qCCritical(instanceProfileC) << message;
         qCWarning(instanceProfileC) << "Ignoring overridden order";
-        return PackProfile::Result::Error(message);
+        return std::unexpected(message);
     }
-
-    // and then read it and process it if all above is true.
-    try {
-        auto obj = Json::requireObject(doc);
+    auto parse = [&obj, &container, &parent] -> Result<> {
         // check order file version.
-        auto version = Json::requireInteger(obj.value("formatVersion"));
+        TRY_INTO(const auto& version, Json::requireInteger(obj->value("formatVersion")))
         if (version != currentComponentsFileVersion) {
-            throw JSONValidationError(QObject::tr("Invalid component file version, expected %1").arg(currentComponentsFileVersion));
+            return std::unexpected(QObject::tr("Invalid component file version, expected %1").arg(currentComponentsFileVersion));
         }
-        auto orderArray = Json::requireArray(obj.value("components"));
+        TRY_INTO(const auto& orderArray, Json::requireArray(obj->value("components")))
         for (auto item : orderArray) {
-            auto comp_obj = Json::requireObject(item, "Component must be an object.");
-            container.append(componentFromJsonV1(parent, componentJsonPattern, comp_obj));
+            TRY_INTO(const auto& comp, Json::requireObject(item, "Component must be an object.").and_then([&parent](const auto& v) {
+                return componentFromJsonV1(parent, v);
+            }))
+            container.append(comp);
         }
-    } catch ([[maybe_unused]] const JSONValidationError& err) {
+        return {};
+    };
+    if (auto res = parse(); !res) {
         auto message = QObject::tr("Couldn't parse %1 : bad file format").arg(componentsFile.fileName());
         qCCritical(instanceProfileC) << message;
-        qCWarning(instanceProfileC) << "error:" << err.what();
+        qCWarning(instanceProfileC) << "error:" << res.error();
         container.clear();
-        return PackProfile::Result::Error(message);
+        return std::unexpected(message);
     }
-    return PackProfile::Result::Success();
+
+    return {};
 }
+}  // namespace
 
 // END: component file format
 
@@ -290,13 +295,13 @@ bool PackProfile::save_internal()
     return false;
 }
 
-PackProfile::Result PackProfile::load()
+Result<> PackProfile::load()
 {
     auto filename = componentsFilePath();
 
     // load the new component list and swap it with the current one...
     ComponentContainer newComponents;
-    if (auto result = loadPackProfile(this, filename, patchesPattern(), newComponents); !result) {
+    if (auto result = loadPackProfile(this, filename, newComponents); !result) {
         qCritical() << d->m_instance->name() << "|" << "Failed to load the component config";
         return result;
     }
@@ -319,15 +324,15 @@ PackProfile::Result PackProfile::load()
     }
     endResetModel();
     d->loaded = true;
-    return Result::Success();
+    return {};
 }
 
-PackProfile::Result PackProfile::reload(Net::Mode netmode)
+Result<> PackProfile::reload(Net::Mode netmode)
 {
     // Do not reload when the update/resolve task is running. It is in control.
     if (d->m_updateTask) {
         if (d->m_updateTask->netMode() == netmode) {
-            return Result::Success();
+            return {};
         }
 
         // https://github.com/PrismLauncher/PrismLauncher/issues/5209
@@ -347,7 +352,7 @@ PackProfile::Result PackProfile::reload(Net::Mode netmode)
         return result;
     }
     resolve(netmode);
-    return Result::Success();
+    return {};
 }
 
 Task::Ptr PackProfile::getCurrentTask()
@@ -514,22 +519,25 @@ ComponentPtr PackProfile::getComponent(size_t index)
 
 QVariant PackProfile::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
+    if (!index.isValid()) {
+        return {};
+    }
 
     int row = index.row();
     int column = index.column();
 
-    if (row < 0 || row >= d->components.size())
-        return QVariant();
+    if (row < 0 || row >= d->components.size()) {
+        return {};
+    }
 
     auto patch = d->components.at(row);
 
     switch (role) {
         case Qt::CheckStateRole: {
-            if (column == NameColumn)
+            if (column == NameColumn) {
                 return patch->isEnabled() ? Qt::Checked : Qt::Unchecked;
-            return QVariant();
+            }
+            return {};
         }
         case Qt::DisplayRole: {
             switch (column) {
@@ -538,12 +546,14 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                 case VersionColumn: {
                     if (patch->isCustom()) {
                         return QString("%1 (Custom)").arg(patch->getVersion());
-                    } else {
-                        return patch->getVersion();
                     }
+                    if (patch->getID() == "net.minecraft" && d->m_instance->settings()->get("UseLatestMinecraftVersion").toBool()) {
+                        return QString("%1 (auto-update)").arg(patch->getVersion());
+                    }
+                    return patch->getVersion();
                 }
                 default:
-                    return QVariant();
+                    return {};
             }
         }
         case Qt::DecorationRole: {
@@ -555,13 +565,15 @@ QVariant PackProfile::data(const QModelIndex& index, int role) const
                     case ProblemSeverity::Error:
                         return "error";
                     default:
-                        return QVariant();
+                        return {};
                 }
             }
-            return QVariant();
+            return {};
         }
+        default:
+            break;
     }
-    return QVariant();
+    return {};
 }
 
 bool PackProfile::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
@@ -925,7 +937,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         agent->setDisplayName(sourceInfo.completeBaseName());
         agent->setHint("local");
 
-        versionFile->agents.append(Agent{agent, QString()});
+        versionFile->agents.append(Agent{ .library = agent, .argument = QString() });
 
         versionFile->name = targetName;
         versionFile->uid = targetId;
@@ -953,17 +965,13 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
 std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
 {
     if (!d->m_profile) {
-        try {
-            auto profile = std::make_shared<LaunchProfile>();
-            for (auto file : d->components) {
-                qCDebug(instanceProfileC) << d->m_instance->name() << "|" << "Applying" << file->getID()
-                                          << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
-                file->applyTo(profile.get());
-            }
-            d->m_profile = profile;
-        } catch (const Exception& error) {
-            qCWarning(instanceProfileC) << d->m_instance->name() << "|" << "Couldn't apply profile patches because:" << error.cause();
+        auto profile = std::make_shared<LaunchProfile>();
+        for (const auto& file : d->components) {
+            qCDebug(instanceProfileC) << d->m_instance->name() << "|" << "Applying" << file->getID()
+                                      << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
+            file->applyTo(profile.get());
         }
+        d->m_profile = profile;
     }
     return d->m_profile;
 }
@@ -1070,4 +1078,24 @@ QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
         result.append(ModPlatform::Forge);
     }
     return result;
+}
+
+bool PackProfile::updateLatestMinecraft(bool onlyRelease)
+{
+    const QString uid = "net.minecraft";
+    auto patch = getComponent(uid);
+    auto oldVersion = patch->getVersion();
+    patch->waitLoadMeta();  // make sure we have latest versions
+    auto list = patch->getVersionList();
+    if (!list) {
+        return false;
+    }
+
+    auto latest = list->getLatest(onlyRelease);
+
+    if (oldVersion != latest->descriptor()) {
+        qDebug() << "Change" << uid << "to" << latest.get();
+        setComponentVersion(uid, latest->descriptor(), true);
+    }
+    return oldVersion != latest->descriptor();
 }

@@ -68,8 +68,7 @@ void SystemTheme::apply(bool initial)
         } else {
             ITheme::apply(initial);
         }
-        m_colorPalette = QApplication::style()->standardPalette();
-        QApplication::setPalette(m_colorPalette);
+        QApplication::setPalette(QApplication::style()->standardPalette());
         m_colorPalette = QApplication::palette();
         return;
     }

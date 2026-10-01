@@ -67,16 +67,22 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
     setAttribute(Qt::WidgetAttribute::WA_QuitOnClose, true);
     changeProgress(0, 100);
     updateSize(true);
-    setSkipButton(false);
+    hideSkipButton();
 }
 
-void ProgressDialog::setSkipButton(bool present, QString label)
+void ProgressDialog::hideSkipButton() {
+    ui->skipButton->setEnabled(false);
+    ui->skipButton->setVisible(false);
+    updateSize();
+}
+
+void ProgressDialog::showSkipButton(const QString& label)
 {
     ui->skipButton->setAutoDefault(false);
     ui->skipButton->setDefault(false);
     ui->skipButton->setFocusPolicy(Qt::ClickFocus);
-    ui->skipButton->setEnabled(present);
-    ui->skipButton->setVisible(present);
+    ui->skipButton->setEnabled(true);
+    ui->skipButton->setVisible(true);
     ui->skipButton->setText(label);
     updateSize();
 }

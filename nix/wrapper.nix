@@ -16,6 +16,7 @@
   libXext,
   libXrandr,
   libXxf86vm,
+  libdecor,
   libjack2,
   libpulseaudio,
   libusb1,
@@ -29,6 +30,8 @@
   symlinkJoin,
   udev,
   vulkan-loader,
+  wayland,
+  wrapGAppsHook3,
   xrandr,
 
   additionalLibs ? [ ],
@@ -62,7 +65,10 @@ symlinkJoin {
 
   paths = [ prismlauncher' ];
 
-  nativeBuildInputs = [ kdePackages.wrapQtAppsHook ];
+  nativeBuildInputs = [
+    kdePackages.wrapQtAppsHook
+    wrapGAppsHook3
+  ];
 
   buildInputs = [
     kdePackages.qtbase
@@ -74,6 +80,10 @@ symlinkJoin {
   ) kdePackages.qtwayland;
 
   postBuild = ''
+    # Required for org.gtk.Settings.FileChooser
+    gappsWrapperArgsHook
+    qtWrapperArgs+=("''${gappsWrapperArgs[@]}")
+
     wrapQtAppsHook
   '';
 
@@ -99,6 +109,8 @@ symlinkJoin {
         libXext
         libXrandr
         libXxf86vm
+        wayland
+        libdecor
 
         udev # oshi
 

@@ -9,11 +9,11 @@
 
 namespace ResourceDownload {
 
-ShaderPackResourceModel::ShaderPackResourceModel(const BaseInstance& baseInst,
+ShaderPackResourceModel::ShaderPackResourceModel(ResourceFolderModel* resourceList,
                                                  const ResourceAPI* api,
                                                  const QString& debugName,
                                                  QString metaEntryBase)
-    : ResourceModel(api), m_baseInstance(baseInst), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
+    : ResourceModel(resourceList, api), m_debugName(debugName + " (Model)"), m_metaEntryBase(std::move(metaEntryBase))
 {}
 
 /******** Make data requests ********/
@@ -23,8 +23,8 @@ ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
     auto sort = getCurrentSortingMethodByIndex();
     return {
         .type = ModPlatform::ResourceType::ShaderPack,
-        .offset = m_next_search_offset,
-        .search = m_search_term,
+        .offset = m_nextSearchOffset,
+        .search = m_searchTerm,
         .sorting = sort,
         .loaders = {},
         .versions = {},
@@ -48,12 +48,12 @@ ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const 
 
 void ShaderPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)
 {
-    if (m_search_term == term && m_search_term.isNull() == term.isNull() && m_current_sort_index == sort) {
+    if (m_searchTerm == term && m_searchTerm.isNull() == term.isNull() && m_currentSortIndex == sort) {
         return;
     }
 
     setSearchTerm(term);
-    m_current_sort_index = sort;
+    m_currentSortIndex = sort;
 
     refresh();
 }

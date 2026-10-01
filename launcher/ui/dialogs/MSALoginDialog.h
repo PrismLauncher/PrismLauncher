@@ -38,7 +38,8 @@ class MSALoginDialog : public QDialog {
     explicit MSALoginDialog(QWidget* parent = 0);
 
    protected slots:
-    void onTaskFailed(QString reason);
+    void onAuthFlowTaskFailed(QString reason);
+    void onDeviceCodeTaskFailed(QString reason);
     void onDeviceFlowStatus(QString status);
     void onAuthFlowStatus(QString status);
     void authorizeWithBrowser(const QUrl& url);

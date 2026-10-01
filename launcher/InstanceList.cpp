@@ -37,7 +37,7 @@
 #include "InstanceList.h"
 
 #include <QDebug>
-#include <QDirIterator>
+#include <QDirListing>
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonArray>
@@ -48,6 +48,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <algorithm>
+#include "Json.h"
 
 #include "Application.h"
 #include "BaseInstance.h"
@@ -55,7 +56,6 @@
 #include "FileSystem.h"
 
 #include "InstanceTask.h"
-#include "NullInstance.h"
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
@@ -67,13 +67,12 @@
 const static int g_GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings)
+    : QAbstractListModel(parent), m_globalSettings(settings), m_watcher(new QFileSystemWatcher(this))
 {
     resumeWatch();
 
     connect(this, &InstanceList::instancesChanged, this, &InstanceList::providerUpdated);
 
-    m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
 
     for (const auto& dir : instDirs) {
@@ -481,21 +480,21 @@ QList<InstanceId> InstanceList::discoverInstances()
     m_instanceRootDirMap.clear();
     for (const auto& rootDir : m_instDirs) {
         qInfo() << "Discovering instances in" << rootDir;
-        QDirIterator iter(rootDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
-        while (iter.hasNext()) {
-            QString subDir = iter.next();
-            QFileInfo dirInfo(subDir);
-            if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
+        for (const auto& dirInfo :
+             QDirListing(rootDir, QDirListing::IteratorFlag::DirsOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                      QDirListing::IteratorFlag::IncludeHidden | QDirListing::IteratorFlag::FollowDirSymlinks)) {
+            if (!QFileInfo::exists(FS::PathCombine(dirInfo.absoluteFilePath(), "instance.cfg"))) {
                 continue;
+            }
             // if it is a symlink, ignore it if it goes to ANY configured instance
             if (dirInfo.isSymLink()) {
-                QFileInfo targetInfo(dirInfo.symLinkTarget());
+                QFileInfo targetInfo(dirInfo.fileInfo().symLinkTarget());
                 QString targetCanonical = targetInfo.canonicalFilePath();
                 bool pointsIntoAnyRoot = std::ranges::any_of(m_instDirs, [&targetCanonical](const QString& otherRoot) {
                     return targetCanonical.startsWith(QFileInfo(otherRoot).canonicalFilePath());
                 });
                 if (pointsIntoAnyRoot) {
-                    qDebug() << "Ignoring symlink" << subDir << "that leads into a configured instance root";
+                    qDebug() << "Ignoring symlink" << dirInfo.filePath() << "that leads into a configured instance root";
                     continue;
                 }
             }
@@ -789,11 +788,11 @@ void InstanceList::saveGroupList()
         toplevel.insert("ungrouped", ungrouped);
     }
     QJsonDocument doc(toplevel);
-    try {
-        FS::write(groupFileName, doc.toJson());
+    auto res = FS::write(groupFileName, doc.toJson());
+    if (!res) {
+        qCritical() << "Failed to write instance group file :" << res.error();
+    } else {
         qDebug() << "Group list saved.";
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to write instance group file :" << e.cause();
     }
 }
 
@@ -820,32 +819,23 @@ void InstanceList::loadGroupList()
         migratingLegacyGroups = true;
     }
 
-    QByteArray jsonData;
-    try {
-        jsonData = FS::read(groupFileName);
-    } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to read instance group file :" << e.cause();
+    auto res = FS::read(groupFileName);
+    if (!res) {
+        qCritical() << "Failed to read instance group file :" << res.error();
         return;
     }
+    const auto& jsonData = res.value();
 
-    QJsonParseError error;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);
+    auto jsonDoc = Json::requireObject(jsonData);
 
     // if the json was bad, fail
-    if (error.error != QJsonParseError::NoError) {
-        qCritical() << QString("Failed to parse instance group file: %1 at offset %2")
-                           .arg(error.errorString(), QString::number(error.offset))
-                           .toUtf8();
-        return;
-    }
-
     // if the root of the json wasn't an object, fail
-    if (!jsonDoc.isObject()) {
-        qWarning() << "Invalid group file. Root entry should be an object.";
+    if (!jsonDoc) {
+        qCritical() << QString("Failed to parse instance group file: %1").arg(jsonDoc.error()).toUtf8();
         return;
     }
 
-    QJsonObject rootObj = jsonDoc.object();
+    const auto& rootObj = jsonDoc.value();
 
     // Make sure the format version matches, otherwise fail.
     if (rootObj.value("formatVersion").toVariant().toInt() != g_GROUP_FILE_FORMAT_VERSION) {
@@ -859,7 +849,7 @@ void InstanceList::loadGroupList()
     }
 
     QJsonObject groupMapping = rootObj.value("groups").toObject();
-    for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
+    for (auto iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
         if (groupName.isEmpty()) {
             qWarning() << "Redundant empty group found";
@@ -921,23 +911,27 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
     QStringList candidates;
     candidates << instDir << additionalDirs;
     for (const auto& dir : candidates) {
-        if (dir.isEmpty())
+        if (dir.isEmpty()) {
             continue;
+        }
         QDir::current().mkpath(dir);
         QString canonical = QDir(dir).canonicalPath();
-        if (!canonical.isEmpty() && !newDirs.contains(canonical))
+        if (!canonical.isEmpty() && !newDirs.contains(canonical)) {
             newDirs << canonical;
+        }
     }
 
     if (newDirs != m_instDirs) {
         if (m_groupsLoaded) {
             saveGroupList();
         }
-        for (const auto& dir : m_instDirs)
+        for (const auto& dir : m_instDirs) {
             m_watcher->removePath(dir);
+        }
         m_instDirs = newDirs;
-        for (const auto& dir : m_instDirs)
+        for (const auto& dir : m_instDirs) {
             m_watcher->addPath(dir);
+        }
         m_groupsLoaded = false;
         beginRemoveRows(QModelIndex(), 0, count());
         m_instances.erase(m_instances.begin(), m_instances.end());
@@ -961,12 +955,12 @@ namespace {
 
 class InstanceStaging : public Task {
     Q_OBJECT
-    const unsigned minBackoff = 1;
-    const unsigned maxBackoff = 16;
+    const unsigned m_minBackoff = 1;
+    const unsigned m_maxBackoff = 16;
 
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings)
-        : m_parent(parent), m_backoff(minBackoff, maxBackoff)
+        : m_parent(parent), m_backoff(m_minBackoff, m_maxBackoff)
     {
         m_stagingPath = parent->getStagedInstancePath(child->targetDir());
 
@@ -1022,13 +1016,13 @@ class InstanceStaging : public Task {
             return;
         }
         // we actually failed, retry?
-        if (sleepTime == maxBackoff) {
+        if (sleepTime == m_maxBackoff) {
             m_backoffTimer.stop();
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
         qDebug() << "Failed to commit instance" << m_child->name() << "Initiating backoff:" << sleepTime;
-        m_backoffTimer.start(sleepTime * 500);
+        m_backoffTimer.start(static_cast<int>(sleepTime * 500));
     }
     void childFailed(const QString& reason)
     {
@@ -1118,7 +1112,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
     if (shouldOverride) {
         instID = instanceTask.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceTask.modifiedName(), targetDir);
+        instID = FS::DirNameFromString(instanceTask.modifiedName(), m_instDirs);
     }
 
     Q_ASSERT(!instID.isEmpty());

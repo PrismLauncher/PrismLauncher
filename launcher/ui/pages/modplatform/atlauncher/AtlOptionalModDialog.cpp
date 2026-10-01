@@ -171,24 +171,22 @@ void AtlOptionalModListModel::useShareCode(const QString& code)
 void AtlOptionalModListModel::shareCodeSuccess(QByteArray* responsePtr)
 {
     // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
-    QByteArray responseData = *std::move(responsePtr);
+    QByteArray responseData = std::move(*responsePtr);
     m_jobPtr.reset();
 
-    QJsonParseError parse_error{};
-    auto doc = QJsonDocument::fromJson(responseData, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATL at" << parse_error.offset << "reason:" << parse_error.errorString();
+    auto doc = Json::requireDocument(responseData);
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from ATL:" << doc.error();
         qWarning() << responseData;
         return;
     }
-    auto obj = doc.object();
+    auto obj = doc->object();
 
     ATLauncher::ShareCodeResponse response;
-    try {
-        ATLauncher::loadShareCodeResponse(response, obj);
-    } catch (const JSONValidationError& e) {
+    auto result = ATLauncher::loadShareCodeResponse(response, obj);
+    if (!result) {
         qDebug() << QString::fromUtf8(responseData);
-        qWarning() << "Error while reading response from ATLauncher:" << e.cause();
+        qWarning() << "Error while reading response from ATLauncher:" << result.error();
         return;
     }
 

@@ -143,7 +143,7 @@ class ResourceFolderModelTest : public QObject {
         for (auto mod : model.allMods())
             qDebug() << mod->name();
 
-        QCOMPARE(model.size(), 4);
+        QCOMPARE(model.size(), 2);
 
         model.stopWatching();
     }

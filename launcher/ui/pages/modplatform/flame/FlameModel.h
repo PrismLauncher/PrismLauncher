@@ -49,7 +49,7 @@ class ListModel : public QAbstractListModel {
     void logoLoaded(QString logo, QIcon out);
 
     void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>&);
-    void searchRequestFailed(QString reason);
+    void searchRequestFailed(const QString& reason);
     void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
 
    private:

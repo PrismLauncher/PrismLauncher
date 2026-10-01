@@ -35,6 +35,7 @@
 
 #include "ProfileUtils.h"
 #include <QDebug>
+#include <QFileInfo>
 #include "Json.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/VersionFilterData.h"
@@ -42,71 +43,30 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>
+#include <utility>
 
-namespace ProfileUtils {
+namespace {
 
-static const int currentOrderFileVersion = 1;
-
-bool readOverrideOrders(QString path, PatchOrder& order)
-{
-    QFile orderFile(path);
-    if (!orderFile.exists()) {
-        qWarning() << "Order file doesn't exist. Ignoring.";
-        return false;
-    }
-    if (!orderFile.open(QFile::ReadOnly)) {
-        qCritical() << "Couldn't open" << orderFile.fileName() << "for reading:" << orderFile.errorString();
-        qWarning() << "Ignoring overridden order";
-        return false;
-    }
-
-    // and it's valid JSON
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
-    if (error.error != QJsonParseError::NoError) {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
-        qWarning() << "Ignoring overridden order";
-        return false;
-    }
-
-    // and then read it and process it if all above is true.
-    try {
-        auto obj = Json::requireObject(doc);
-        // check order file version.
-        auto version = Json::requireInteger(obj.value("version"));
-        if (version != currentOrderFileVersion) {
-            throw JSONValidationError(QObject::tr("Invalid order file version, expected %1").arg(currentOrderFileVersion));
-        }
-        auto orderArray = Json::requireArray(obj.value("order"));
-        for (auto item : orderArray) {
-            order.append(Json::requireString(item));
-        }
-    } catch ([[maybe_unused]] const JSONValidationError& err) {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
-        qWarning() << "Ignoring overridden order";
-        order.clear();
-        return false;
-    }
-    return true;
-}
-
-static VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, QString error)
+VersionFilePtr createErrorVersionFile(QString fileId, QString filepath, const QString& error)
 {
     auto outError = std::make_shared<VersionFile>();
-    outError->uid = outError->name = fileId;
+    outError->uid = outError->name = std::move(fileId);
     // outError->filename = filepath;
     outError->addProblem(ProblemSeverity::Error, error);
     return outError;
 }
 
-static VersionFilePtr guardedParseJson(const QJsonDocument& doc, const QString& fileId, const QString& filepath, const bool& requireOrder)
+VersionFilePtr guardedParseJson(const QJsonDocument& doc, const QString& fileId, const QString& filepath, const bool& requireOrder)
 {
-    try {
-        return OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
-    } catch (const Exception& e) {
-        return createErrorVersionFile(fileId, filepath, e.cause());
+    auto res = OneSixVersionFormat::versionFileFromJson(doc, filepath, requireOrder);
+    if (!res) {
+        return createErrorVersionFile(fileId, filepath, res.error());
     }
+    return res.value();
 }
+
+}  // namespace
+namespace ProfileUtils {
 
 VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder)
 {

@@ -171,14 +171,14 @@ void ListModel::performPaginatedSearch()
         if (!projectId.isEmpty()) {
             ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
 
-            callbacks.on_fail = [this](QString reason, int network_error_code) {
-                if (network_error_code == 404) {
+            callbacks.onFail = [this](QString reason, int networkErrorCode) {
+                if (networkErrorCode == 404) {
                     m_searchState = ResetRequested;
                 }
                 searchRequestFailed(reason);
             };
-            callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
-            callbacks.on_abort = [this] {
+            callbacks.onSucceed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
+            callbacks.onAbort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
             };
@@ -196,9 +196,9 @@ void ListModel::performPaginatedSearch()
 
     ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
 
-    callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
-    callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
-    callbacks.on_abort = [this] {
+    callbacks.onSucceed = [this](auto& doc) { searchRequestFinished(doc); };
+    callbacks.onFail = [this](QString reason, int) { searchRequestFailed(reason); };
+    callbacks.onAbort = [this] {
         qCritical() << "Search task aborted by an unknown reason!";
         searchRequestFailed("Aborted");
     };
@@ -264,7 +264,7 @@ void Flame::ListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Pt
     endInsertRows();
 }
 
-void Flame::ListModel::searchRequestFailed(QString reason)
+void Flame::ListModel::searchRequestFailed(const QString& reason)
 {
     m_jobPtr.reset();
 

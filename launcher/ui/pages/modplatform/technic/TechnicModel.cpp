@@ -171,28 +171,27 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     jobPtr.reset();
 
-    QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Technic at" << parse_error.offset << "reason:" << parse_error.errorString();
+    auto doc = Json::requireObject(response);
+    if (!doc) {
+        qWarning() << "Error while parsing JSON response from Technic:" << doc.error();
         qWarning() << response;
         return;
     }
 
+    const auto& root = doc.value();
     QList<Modpack> newList;
-    try {
-        auto root = Json::requireObject(doc);
-
+    auto parse = [&root, this, &newList]() -> Result<> {
         switch (searchMode) {
             case List: {
-                auto objs = Json::requireArray(root, "modpacks");
+                TRY_INTO(const auto& objs, Json::requireArray(root, "modpacks"))
                 for (auto technicPack : objs) {
                     Modpack pack;
-                    auto technicPackObject = Json::requireObject(technicPack);
-                    pack.name = Json::requireString(technicPackObject, "name");
-                    pack.slug = Json::requireString(technicPackObject, "slug");
-                    if (pack.slug == "vanilla")
+                    TRY_INTO(const auto& technicPackObject, Json::requireObject(technicPack))
+                    TRY_INTO(pack.name, Json::requireString(technicPackObject, "name"))
+                    TRY_INTO(pack.slug, Json::requireString(technicPackObject, "slug"))
+                    if (pack.slug == "vanilla") {
                         continue;
+                    }
 
                     auto rawURL = technicPackObject["iconUrl"].toString("null");
                     if (rawURL == "null") {
@@ -214,12 +213,12 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
                 }
 
                 Modpack pack;
-                pack.name = Json::requireString(root, "displayName");
-                pack.slug = Json::requireString(root, "name");
+                TRY_INTO(pack.name, Json::requireString(root, "displayName"))
+                TRY_INTO(pack.slug, Json::requireString(root, "name"))
 
                 if (root.contains("icon")) {
-                    auto iconObj = Json::requireObject(root, "icon");
-                    auto iconUrl = Json::requireString(iconObj, "url");
+                    TRY_INTO(const auto& iconUrl,
+                             Json::requireObject(root, "icon").and_then([](const auto& v) { return Json::requireString(v, "url"); }))
 
                     pack.logoUrl = iconUrl;
                     pack.logoName = pack.slug + "." + QFileInfo(QUrl(iconUrl).fileName()).suffix();
@@ -233,15 +232,18 @@ void Technic::ListModel::searchRequestFinished(QByteArray* responsePtr)
                 break;
             }
         }
-    } catch (const JSONValidationError& err) {
-        qCritical() << "Couldn't parse technic search results:" << err.cause();
+        return {};
+    };
+    if (auto res = parse(); !res) {
+        qCritical() << "Couldn't parse technic search results:" << res.error();
         return;
     }
     searchState = Finished;
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (newList.size() == 0) {
         return;
+    }
 
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);

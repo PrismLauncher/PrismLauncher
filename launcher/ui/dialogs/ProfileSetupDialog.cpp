@@ -34,6 +34,7 @@
  */
 
 #include "ProfileSetupDialog.h"
+#include "Json.h"
 #include "net/RawHeaderProxy.h"
 #include "ui_ProfileSetupDialog.h"
 
@@ -47,7 +48,7 @@
 
 #include <Application.h>
 #include "minecraft/auth/Parsers.h"
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget* parent)
     : QDialog(parent), m_accountToSetup(accountToSetup), ui(new Ui::ProfileSetupDialog)
@@ -161,7 +162,7 @@ void ProfileSetupDialog::checkName(const QString& name)
 
     if (m_check_task)
         disconnect(m_check_task.get(), nullptr, this, nullptr);
-    auto [task, response] = Net::NetRequest::makeByteArray(url);
+    auto [task, response] = Net::Request::makeByteArray(url);
 
     m_check_task = task;
     m_check_task->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
@@ -175,8 +176,13 @@ void ProfileSetupDialog::checkName(const QString& name)
 void ProfileSetupDialog::checkFinished(QByteArray* response)
 {
     if (m_check_task->error() == QNetworkReply::NoError) {
-        auto doc = QJsonDocument::fromJson(*response);
-        auto root = doc.object();
+        auto doc = Json::requireDocument(*response);
+        if (!doc) {
+            setNameStatus(NameStatus::Error, tr("Unhandled profile name status: %1").arg(doc.error()));
+            isChecking = false;
+            return;
+        }
+        auto root = doc->object();
         auto statusValue = root.value("status").toString("INVALID");
         if (statusValue == "AVAILABLE") {
             setNameStatus(NameStatus::Available);
@@ -206,7 +212,7 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
                                            { "Accept", "application/json" },
                                            { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    auto [task, response] = Net::NetRequest::makeByteArray(url, payloadTemplate.arg(profileName).toUtf8());
+    auto [task, response] = Net::Request::makeByteArray(url, payloadTemplate.arg(profileName).toUtf8());
     m_profile_task = task;
     m_profile_task->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
 

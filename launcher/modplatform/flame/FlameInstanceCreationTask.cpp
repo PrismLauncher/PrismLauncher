@@ -111,13 +111,13 @@ void FlameCreationTask::executeTask()
         }
     }
 
+    m_rootPath = QFileInfo(inst->gameRoot()).fileName();
+
     const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
 
-    try {
-        Flame::loadManifest(m_pack, indexPath);
-    } catch (const JSONValidationError&) {
+    if (!Flame::loadManifest(m_pack, indexPath)) {
         // emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-        createInstance();  // to keep the backwards comatibility here just create the instance
+        createInstance();  // to keep the backwards compatibility here just create the instance
         return;
     }
 
@@ -166,7 +166,10 @@ void FlameCreationTask::executeTask()
 
     if (oldIndexFile.exists()) {
         Flame::Manifest oldPack;
-        Flame::loadManifest(oldPack, oldIndexPath);
+        auto res = Flame::loadManifest(oldPack, oldIndexPath);
+        if (!res) {
+            qWarning() << "Error while parsing old manifest: " << res.error();
+        }
 
         auto oldFiles = oldPack.files;
 
@@ -212,39 +215,39 @@ void FlameCreationTask::executeTask()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, rawResponse] = FlameAPI::get().getFiles(fileIds);
+        auto [job, rawResponse] = FlameAPI::getFiles(fileIds);
 
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
                     // Parse the API response
-                    QJsonParseError parseError{};
-                    auto doc = QJsonDocument::fromJson(*rawResponse, &parseError);
-                    if (parseError.error != QJsonParseError::NoError) {
-                        qWarning() << "Error while parsing JSON response from Flame files task at" << parseError.offset
-                                   << "reason:" << parseError.errorString();
+                    auto doc = Json::requireObject(*rawResponse).and_then([fileIds](const auto& v) -> Result<QJsonArray> {
+                        if (fileIds.size() == 1) {
+                            TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
+                            return { { obj } };
+                        }
+                        return Json::requireArray(v, "data");
+                    });
+                    if (!doc) {
+                        qWarning() << "Error while parsing JSON response from Flame files task:" << doc.error();
                         qWarning() << *rawResponse;
                         return;
                     }
 
-                    try {
-                        QJsonArray entries;
-                        if (fileIds.size() == 1) {
-                            entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                        } else {
-                            entries = Json::requireArray(Json::requireObject(doc), "data");
-                        }
-
-                        for (auto entry : entries) {
-                            auto entryObj = Json::requireObject(entry);
+                    for (auto entry : doc.value()) {
+                        auto parse = [&entry, &oldFiles] -> Result<> {
+                            TRY_INTO(const auto& entryObj, Json::requireObject(entry))
 
                             Flame::File file;
                             // We don't care about blocked mods, we just need local data to delete the file
-                            file.version = FlameMod::loadIndexedPackVersion(entryObj);
-                            auto id = Json::requireInteger(entryObj, "id");
+                            TRY_INTO(file.version, FlameMod::loadIndexedPackVersion(entryObj))
+                            TRY_INTO(const auto& id, Json::requireInteger(entryObj, "id"))
                             oldFiles.insert(id, file);
+                            return {};
+                        };
+                        if (auto res = parse(); !res) {
+                            qCritical() << res.error();
+                            break;
                         }
-                    } catch (Json::JsonException& e) {
-                        qCritical() << e.cause() << e.what();
                     }
 
                     // Delete the files
@@ -352,12 +355,13 @@ bool FlameCreationTask::promptForUntrustedMods()
 
     QStringList untrustedMods;
 
-    const QDir mcDir{ FS::PathCombine(m_stagingPath, "minecraft") };
-    const QString modsPath{ FS::PathCombine(m_stagingPath, "minecraft/mods") };
+    const QDir mcDir{ FS::PathCombine(m_stagingPath, m_rootPath) };
+    const QString modsPath{ FS::PathCombine(m_stagingPath, m_rootPath, "mods") };
     if (QDir(modsPath).exists()) {
-        QDirIterator iter{ modsPath, QDir::Files, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks };
-        while (iter.hasNext()) {
-            untrustedMods.append(mcDir.relativeFilePath(iter.next()));
+        for (const auto& entry :
+             QDirListing(modsPath, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::ResolveSymlinks |
+                                       QDirListing::IteratorFlag::FollowDirSymlinks | QDirListing::IteratorFlag::Recursive)) {
+            untrustedMods.append(mcDir.relativeFilePath(entry.absoluteFilePath()));
         }
     }
 
@@ -373,29 +377,33 @@ void FlameCreationTask::createInstance()
 {
     const QString parentFolder(FS::PathCombine(m_stagingPath, "flame"));
 
-    try {
-        const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
-        if (!m_pack.isLoaded) {
-            Flame::loadManifest(m_pack, indexPath);
+    const QString indexPath(FS::PathCombine(m_stagingPath, "manifest.json"));
+    if (!m_pack.isLoaded) {
+        auto res = Flame::loadManifest(m_pack, indexPath);
+        if (!res) {
+            emitFailed(tr("Could not understand pack manifest:\n") + res.error());
+            return;
         }
-
-        // Keep index file in case we need it some other time (like when changing versions)
-        const QString newIndexPlace(FS::PathCombine(parentFolder, "manifest.json"));
-        FS::ensureFilePathExists(newIndexPlace);
-        FS::move(indexPath, newIndexPlace);
-
-    } catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-        return;
     }
 
+    // Keep index file in case we need it some other time (like when changing versions)
+    const QString newIndexPlace(FS::PathCombine(parentFolder, "manifest.json"));
+    FS::ensureFilePathExists(newIndexPlace);
+    FS::move(indexPath, newIndexPlace);
+
     if (!m_pack.overrides.isEmpty()) {
-        QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
+        const auto overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
+        if (!QUrl::fromLocalFile(m_stagingPath).isParentOf(QUrl::fromLocalFile(overridePath))) {
+            // This means we somehow got out of the root folder, so abort here to prevent exploits
+            emitFailed(tr("The overrides has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
+                           .arg(m_pack.overrides));
+            return;
+        }
         if (QFile::exists(overridePath)) {
             // Create a list of overrides in "overrides.txt" inside flame/
             Override::createOverrides("overrides", parentFolder, overridePath);
 
-            QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
+            QString mcPath = FS::PathCombine(m_stagingPath, m_rootPath);
             if (!FS::move(overridePath, mcPath)) {
                 emitFailed(tr("Could not rename the overrides folder:\n") + m_pack.overrides);
                 return;
@@ -482,21 +490,21 @@ void FlameCreationTask::createInstance()
 
     // only set memory if this is a fresh instance
     if (!m_oldInstance && recommendedRAM > 0) {
-        const uint64_t sysMiB = HardwareInfo::totalRamMiB();
-        const uint64_t max = sysMiB * 0.9;
+        const auto sysMiB = HardwareInfo::totalRamMiB();
+        const auto max = static_cast<double>(sysMiB) * 0.9;
 
-        if (static_cast<uint64_t>(recommendedRAM) > max) {
+        if (static_cast<double>(recommendedRAM) > max) {
             logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAM—reducing it from %1 MiB to %2 MiB!")
                            .arg(recommendedRAM)
                            .arg(max));
-            recommendedRAM = max;
+            recommendedRAM = static_cast<int>(max);
         }
 
         m_newInstance->settings()->set("OverrideMemory", true);
         m_newInstance->settings()->set("MaxMemAlloc", recommendedRAM);
     }
 
-    QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    QString jarmodsPath = FS::PathCombine(m_stagingPath, m_rootPath, "jarmods");
     QFileInfo jarmodsInfo(jarmodsPath);
     if (jarmodsInfo.isDir()) {
         // install all the jar mods
@@ -556,7 +564,7 @@ void FlameCreationTask::idResolverSucceeded()
     QList<BlockedMod> blockedMods;
     auto anyBlocked = false;
     for (const auto& result : results.values()) {
-        if (result.resourceType != ModPlatform::ResourceType::Mod) {
+        if (result.pack.resourceType != ModPlatform::ResourceType::Mod) {
             m_otherResources.append(std::make_pair(result.version.fileName, result.targetFolder));
         }
 
@@ -617,7 +625,7 @@ void FlameCreationTask::setupDownloadJob()
             relpath += ".disabled";
         }
 
-        relpath = FS::PathCombine("minecraft", relpath);
+        relpath = FS::PathCombine(m_rootPath, relpath);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
         if (!result.version.downloadUrl.isEmpty()) {
@@ -660,7 +668,7 @@ void FlameCreationTask::copyBlockedMods(const QList<BlockedMod>& blockedMods)
             continue;
         }
 
-        auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+        auto destPath = FS::PathCombine(m_stagingPath, m_rootPath, mod.targetFolder, mod.name);
         if (mod.disabled) {
             destPath += ".disabled";
         }
@@ -692,14 +700,14 @@ void FlameCreationTask::validateOtherResources()
     QStringList zipMods;
     for (const auto& [fileName, targetFolder] : m_otherResources) {
         qDebug() << "Checking" << fileName << "...";
-        auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
+        auto localPath = FS::PathCombine(m_stagingPath, m_rootPath, targetFolder, fileName);
 
         /// @brief check the target and move the the file
         /// @return path where file can now be found
         auto validatePath = [&localPath, this](const QString& fileName, const QString& targetFolder, const QString& realTarget) {
             if (targetFolder != realTarget) {
                 qDebug() << "Target folder of" << fileName << "is incorrect, it belongs in" << realTarget;
-                auto destPath = FS::PathCombine(m_stagingPath, "minecraft", realTarget, fileName);
+                auto destPath = FS::PathCombine(m_stagingPath, m_rootPath, realTarget, fileName);
                 qDebug() << "Moving" << localPath << "to" << destPath;
                 if (FS::move(localPath, destPath)) {
                     return destPath;
@@ -717,7 +725,7 @@ void FlameCreationTask::validateOtherResources()
             if (!w.isValid()) {
                 qDebug() << "World at" << worldPath << "is not valid, skipping install.";
             } else {
-                w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
+                w.install(FS::PathCombine(m_stagingPath, m_rootPath, "saves"));
             }
         };
 
@@ -759,12 +767,12 @@ void FlameCreationTask::validateOtherResources()
     // TODO make this work with other sorts of resource
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
-    auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
+    auto folder = FS::PathCombine(m_stagingPath, m_rootPath, "mods", ".index");
     for (const auto& file : results) {
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
         }
-        task->addTask(makeShared<LocalResourceUpdateTask>(folder, file.pack, file.version));
+        task->addTask(makeShared<LocalResourceUpdateTask>(folder, file.pack, file.version, true));
     }
     connect(task.get(), &Task::finished, this, &FlameCreationTask::finishInstall);
     m_processUpdateFileInfoJob = task;

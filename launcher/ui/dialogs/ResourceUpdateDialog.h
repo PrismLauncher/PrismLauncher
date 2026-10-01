@@ -21,13 +21,14 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   ResourceFolderModel* resourceModel,
                                   QList<Resource*>& searchFor,
                                   bool includeDeps,
-                                  QList<ModPlatform::ModLoaderType> loadersList = {});
+                                  QList<ModPlatform::ModLoaderType> loadersList = {},
+                                  std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
 
     void checkCandidates();
 
     void appendResource(const CheckUpdateTask::Update& info, QStringList requiredBy = {});
 
-    const QList<ResourceDownloadTask::Ptr> getTasks();
+    QList<ResourceDownloadTask::Ptr> getTasks() const;
     auto indexDir() const -> QDir { return m_resourceModel->indexDir(); }
 
     auto noUpdates() const -> bool { return m_noUpdates; };
@@ -65,4 +66,5 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     bool m_aborted = false;
     bool m_includeDeps = false;
     QList<ModPlatform::ModLoaderType> m_loadersList;
+    std::vector<ModPlatform::IndexedVersionType> m_releaseTypes;
 };

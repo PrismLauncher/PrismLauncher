@@ -154,6 +154,7 @@ class BaseInstance : public QObject {
     QString notes() const;
     void setNotes(const QString& val);
 
+    QString getPreLoadCommand();
     QString getPreLaunchCommand();
     QString getPostExitCommand();
     QString getWrapperCommand();
@@ -235,15 +236,6 @@ class BaseInstance : public QObject {
         }
     }
 
-    bool hasUpdateAvailable() const { return m_hasUpdate; }
-    void setUpdateAvailable(bool value)
-    {
-        if (m_hasUpdate != value) {
-            m_hasUpdate = value;
-            emit propertiesChanged();
-        }
-    }
-
     bool hasCrashed() const { return m_crashed; }
     void setCrashed(bool value)
     {
@@ -279,10 +271,10 @@ class BaseInstance : public QObject {
    protected:
     void changeStatus(Status newStatus);
 
-    SettingsObject* globalSettings() const { return m_global_settings; }
+    SettingsObject* globalSettings() const { return m_globalSettings; }
 
-    bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
-    void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
+    bool isSpecificSettingsLoaded() const { return m_specificSettingsLoaded; }
+    void setSpecificSettingsLoaded(bool loaded) { m_specificSettingsLoaded = loaded; }
 
    signals:
     /*!
@@ -314,11 +306,10 @@ class BaseInstance : public QObject {
     QString m_uuid;
     Status m_status = Status::Present;
     bool m_crashed = false;
-    bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
 
-    SettingsObject* m_global_settings;
-    bool m_specific_settings_loaded = false;
+    SettingsObject* m_globalSettings;
+    bool m_specificSettingsLoaded = false;
 };
 
 Q_DECLARE_METATYPE(shared_qobject_ptr<BaseInstance>)

@@ -21,7 +21,7 @@
 #include <QTimer>
 
 #include <minecraft/auth/MinecraftAccount.h>
-#include "net/NetRequest.h"
+#include "net/Request.h"
 
 namespace Ui {
 class ProfileSetupDialog;
@@ -68,6 +68,6 @@ class ProfileSetupDialog : public QDialog {
 
     QTimer checkStartTimer;
 
-    Net::NetRequest::Ptr m_check_task;
-    Net::NetRequest::Ptr m_profile_task;
+    Net::Request::Ptr m_check_task;
+    Net::Request::Ptr m_profile_task;
 };

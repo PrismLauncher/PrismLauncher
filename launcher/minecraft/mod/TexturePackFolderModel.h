@@ -52,10 +52,15 @@ class TexturePackFolderModel : public ResourceFolderModel {
         ProviderColumn,
         SizeColumn,
         FileNameColumn,
+        LockUpdateColumn,
         NumColumns
     };
 
-    explicit TexturePackFolderModel(const QDir& dir, MinecraftInstance* instance, bool isIndexed, bool createDir, QObject* parent = nullptr);
+    explicit TexturePackFolderModel(const QDir& dir,
+                                    MinecraftInstance* instance,
+                                    bool isIndexed,
+                                    bool createDir,
+                                    QObject* parent = nullptr);
 
     QString id() const override { return "texturepacks"; }
 

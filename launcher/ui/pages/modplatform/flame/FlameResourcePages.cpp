@@ -74,7 +74,8 @@ ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourceDownload
 
 TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new TexturePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get(), new FlameTexturePackModel(instance));
+    return new TexturePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get(),
+                                       new FlameTexturePackModel(dialog->getBaseModel()));
 }
 
 ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
