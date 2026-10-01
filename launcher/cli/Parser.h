@@ -19,7 +19,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
 #include "cli/Commands.h"
@@ -28,5 +27,29 @@
 
 namespace Cli {
 
-   void parseArgs(int argc, char** argv, Args& args);
-}
+// struct to hold options and mid parse storage
+struct LegacyCli {
+    CLI::App* launchGroup{};
+    CLI::Option* launch{};
+    CLI::Option* server{};
+    CLI::Option* world{};
+    CLI::Option* account{};
+    CLI::Option* offline{};
+    CLI::Option* showMain{};
+    CLI::Option* showInstance{};
+    CLI::Option* alive{};
+    CLI::Option* import{};
+    std::optional<Cmd::Launch> processingLaunch;
+
+    void addLegacyArgs(CLI::App& app, Args& args);
+};
+
+struct Cli {
+    LegacyCli legacyCli{};
+
+
+    void attach(CLI::App& app, Args& args);
+};
+
+void parseArgs(int argc, char** argv, Args& args);
+}  // namespace Cli
