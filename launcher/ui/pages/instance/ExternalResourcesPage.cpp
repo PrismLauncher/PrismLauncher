@@ -162,6 +162,9 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
 
     connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::showHeaderContextMenu);
 
+    // always use the smallest possible size to avoid wasted space
+    m_ui->treeView->header()->resizeSection(0, 0);
+
     m_model->loadColumns(m_ui->treeView);
     connect(m_ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(m_ui->treeView); });
     connect(m_ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
@@ -239,6 +242,15 @@ bool ExternalResourcesPage::listFilter(QKeyEvent* keyEvent)
             break;
     }
     return QWidget::eventFilter(m_ui->treeView, keyEvent);
+}
+
+bool ExternalResourcesPage::event(QEvent* ev)
+{
+    if (ev->type() == QEvent::StyleChange) {
+        // NOTE: style can change minimum size
+        m_ui->treeView->header()->resizeSection(0, 0);
+    }
+    return true;
 }
 
 bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)

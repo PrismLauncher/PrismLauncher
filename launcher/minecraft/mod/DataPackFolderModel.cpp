@@ -46,12 +46,13 @@ DataPackFolderModel::DataPackFolderModel(const QString& dir, MinecraftInstance* 
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
     m_columnNames = QStringList({ "Enable", "Name", "Version", "Pack Format", "Last Modified", "Size", "File Name", "Update" });
-    m_columnNamesTranslated = QStringList(
-        { tr("Enable"), tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"), tr("Size"), tr("File Name"), tr("Update") });
+    m_columnNamesTranslated =
+        QStringList({ "", tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"), tr("Size"), tr("File Name"), tr("Update") });
     m_columnSortKeys = { SortType::Enabled, SortType::Name, SortType::Version,  SortType::PackFormat,
                          SortType::Date,    SortType::Size, SortType::Filename, SortType::LockUpdate };
-    m_columnResizeModes = { QHeaderView::Interactive,      QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::Interactive,
-                            QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,          QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::ResizeToContents, QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, false, true, true, true, true, true, true };
 }
 

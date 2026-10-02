@@ -65,12 +65,12 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
     m_columnNames = QStringList({ "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders", "Minecraft Versions",
                                   "Release Type", "Requires", "Required By", "File Name", "Update" });
     m_columnNamesTranslated =
-        QStringList({ tr("Enable"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("Side"), tr("Loaders"),
+        QStringList({ "", tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("Side"), tr("Loaders"),
                       tr("Minecraft Versions"), tr("Release Type"), tr("Requires"), tr("Required By"), tr("File Name"), tr("Update") });
     m_columnSortKeys = { SortType::Enabled,  SortType::Name,       SortType::Version,  SortType::Date,       SortType::Provider,
                          SortType::Size,     SortType::Side,       SortType::Loaders,  SortType::McVersions, SortType::ReleaseType,
                          SortType::Requires, SortType::RequiredBy, SortType::Filename, SortType::LockUpdate };
-    m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::ResizeToContents,
+    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::ResizeToContents,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive };
