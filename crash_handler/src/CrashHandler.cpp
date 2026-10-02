@@ -150,7 +150,7 @@ LONG WINAPI handleException(EXCEPTION_POINTERS* exceptionInfo)
 
             CrashContext ctx{
                 .message = "Caught unhandled SEH exception",
-                .skipFrames = 8,  // get back to the actual exception frame through SEH path
+                .skipFrames = 7,  // get back to the actual exception frame through SEH path
                 .exceptionPointers = exceptionInfo,
                 .exceptionCode = static_cast<int32_t>(code),
                 .processId = GetCurrentProcessId(),

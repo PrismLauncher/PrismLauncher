@@ -49,6 +49,14 @@ class CrashHandlerDialog : public QDialog {
    private:
     Ui::CrashHandlerDialog* m_ui;
     CrashTrace m_trace;
+    std::string m_formattedTrace;
+    QTextCharFormat m_defaultFormat;
+
+    void formatTrace();
+    void reflowTrace();
+
+    void copyTraceToClipboard() const;
+    static void openGithubIssue();
 
     void parseEscapeSequence(std::uint32_t attribute,
                              QListIterator<QString>& i,
