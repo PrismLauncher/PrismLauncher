@@ -20,17 +20,23 @@
  */
 
 #include "crash_handler/CrashHandlerDialog.h"
-#include "rainbow.h"
 #include "ui_CrashHandlerDialog.h"
+
+#include "BuildConfig.h"
+#include "rainbow.h"
 
 #include <cstdint>
 
+#include <QtVersion>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFont>
 #include <QFontDatabase>
 #include <QRegularExpression>
 #include <QStandardPaths>
+
+#include <QClipboard>
+#include <QDesktopServices>
 
 #include <QScrollBar>
 
@@ -46,19 +52,75 @@ CrashHandlerDialog::CrashHandlerDialog(QWidget* parent, const QString& title, co
 
     setWindowTitle(title);
 
-    auto formatted =
-        cpptrace::formatter{}.hide_exception_machinery(true).colors(cpptrace::formatter::color_mode::always).format(m_trace.stacktrace);
-
     QFont monospace = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     monospace.setStyleHint(QFont::Monospace);
     m_ui->traceText->setCurrentFont(monospace);
+    m_defaultFormat = m_ui->traceText->currentCharFormat();
 
-    setTextWithTermFormatting(m_ui->traceText, QString::fromStdString(formatted));
-    m_ui->traceText->verticalScrollBar()->setValue(0);
+    connect(m_ui->copyButton, &QPushButton::clicked, this, [this]() { copyTraceToClipboard(); });
+
+    connect(m_ui->issueButton, &QPushButton::clicked, this, []() { CrashHandlerDialog::openGithubIssue(); });
+
+    formatTrace();
 }
 
-// based on information: http://en.m.wikipedia.org/wiki/ANSI_escape_code http://misc.flogisoft.com/bash/tip_colors_and_formatting
+namespace {
+
+cpptrace::formatter defaultTraceFormatter()
+{
+    return cpptrace::formatter{}
+        .break_before_filename()
+        .hide_exception_machinery(true)
+        .colors(cpptrace::formatter::color_mode::always)
+        .symbols(cpptrace::formatter::symbol_mode::pretty)
+        .paths(cpptrace::formatter::path_mode::full)
+        .snippets(true)
+        .snippet_context(2);
+}
+
+}  // namespace
+
+void CrashHandlerDialog::copyTraceToClipboard() const
+{
+    auto trace = defaultTraceFormatter().snippets(false).colors(cpptrace::formatter::color_mode::none).format(m_trace.stacktrace);
+    QGuiApplication::clipboard()->setText(QString::fromStdString(trace), QClipboard::Clipboard);
+}
+
+void CrashHandlerDialog::openGithubIssue()
+{
+    QDesktopServices::openUrl(QUrl(QStringLiteral("%1/issues/new?template=bug_report.yml").arg(BuildConfig.LAUNCHER_GIT)));
+}
+
+void CrashHandlerDialog::formatTrace()
+{
+    m_formattedTrace = defaultTraceFormatter().format(m_trace.stacktrace);
+    reflowTrace();
+}
+
+void CrashHandlerDialog::reflowTrace()
+{
+    auto programInfo = QStringLiteral("%1 : %2\nBuild Platform: %3\nBuild Date: %4\nQt Version: %5")
+                           .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM,
+                                BuildConfig.BUILD_DATE, QString(qVersion()));
+    auto trace = QStringLiteral("%1\n\nMessage: %2\n\nProcess Id: %3\nThread Id: %4\n\n%5")
+                     .arg(programInfo, QString::fromStdString(m_trace.header.message), QString::number(m_trace.header.processId),
+                          QString::number(m_trace.header.threadId), QString::fromStdString(m_formattedTrace));
+
+    setTextWithTermFormatting(m_ui->traceText, trace);
+
+    auto cur = m_ui->traceText->textCursor();
+    cur.movePosition(QTextCursor::Start);
+    m_ui->traceText->setTextCursor(cur);
+    m_ui->traceText->verticalScrollBar()->setValue(0);
+    m_ui->traceText->ensureCursorVisible();
+}
+
+// based on information:
+// http://en.m.wikipedia.org/wiki/ANSI_escape_code
+// http://misc.flogisoft.com/bash/tip_colors_and_formatting
 // http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+//
+// apply ANSI escaped formatting codes to text format
 void CrashHandlerDialog::parseEscapeSequence(std::uint32_t attribute,
                                              QListIterator<QString>& i,
                                              QTextCharFormat& textFormat,
@@ -566,25 +628,40 @@ void CrashHandlerDialog::parseEscapeSequence(std::uint32_t attribute,
     }
 }
 
-static void ensureTextContrast(QTextCharFormat& textFormat)
+namespace {
+
+void ensureTextContrast(QTextCharFormat& textFormat)
 {
     auto bgColor = textFormat.background().color();
     auto fgColor = textFormat.foreground().color();
 
     auto bgLuma = Rainbow::luma(bgColor);
+    auto fgLuma = Rainbow::luma(fgColor);
+
     auto contrast = Rainbow::contrastRatio(fgColor, bgColor);
     // if contrast isn't readable
-    if (contrast < 5.0) {
+    if (contrast < 8.0) {
+        // invert strait black / white and darken / lighten others
         if (bgLuma < 0.5) {
-            // background is dark lighten by half the bg color's distance to white
-            fgColor = Rainbow::lighten(fgColor, bgLuma / 2.0);
+            if (fgColor == Qt::black) {
+                fgColor = Qt::white;
+            } else {
+                // background is dark, lighten (the darker the color the more lightening it needs)
+                fgColor = Rainbow::lighten(fgColor, (1.0 - fgLuma) - ((1.0 - bgLuma) / 2));
+            }
         } else {
-            // backgorund is light, darken by half the bg color's distance to black
-            fgColor = Rainbow::darken(fgColor, (1.0 - bgLuma) / 2.0);
+            if (fgColor == Qt::white) {
+                fgColor = Qt::black;
+            } else {
+                // background is light, darken (the brighter the color the more darkening it needs)
+                fgColor = Rainbow::darken(fgColor, fgLuma + ((1.0 - bgLuma) / 2));
+            }
         }
         textFormat.setForeground(fgColor);
     }
 }
+
+}  // namespace
 
 void CrashHandlerDialog::setTextWithTermFormatting(QTextEdit* textEdit, const QString& text)
 {
@@ -592,30 +669,49 @@ void CrashHandlerDialog::setTextWithTermFormatting(QTextEdit* textEdit, const QS
     const QRegularExpression escapeSeq(R"(\x1B\[([\d;]+)m)");
     QTextCursor cursor(document);
     const QTextCharFormat defaultFormat = textEdit->currentCharFormat();
+
     cursor.beginEditBlock();
+
+    // find ANSI escape sequences
     auto match = escapeSeq.match(text);
     auto offset = match.capturedStart();
+
+    // insert text to the first offset
     cursor.insertText(text.mid(0, offset));
     QTextCharFormat textFormat = defaultFormat;
+
+    // while there are ANSI Codes...
     while (!(offset < 0)) {
+        // update offset
         auto lastOffset = offset + match.capturedLength();
+
+        // split multi codes from one sequence
         QStringList escapeSequences = match.capturedTexts().back().split(';');
         QListIterator<QString> iter(escapeSequences);
+        // apply codes to text format
         while (iter.hasNext()) {
             bool ok = false;
             std::uint32_t attribute = iter.next().toUInt(&ok);
             Q_ASSERT(ok);
             parseEscapeSequence(attribute, iter, textFormat, defaultFormat);
         }
+
+        // find next escape sequence
         match = escapeSeq.match(text, lastOffset);
         offset = match.capturedStart();
+
+        // ensure applied format is readable with current text background
         ensureTextContrast(textFormat);
+
+        // insert text under current formating
         if (offset < 0) {
             cursor.insertText(text.mid(lastOffset), textFormat);
         } else {
             cursor.insertText(text.mid(lastOffset, offset - lastOffset), textFormat);
         }
     }
+
+    // reset formatting to default
     cursor.setCharFormat(defaultFormat);
     cursor.endEditBlock();
     textEdit->setTextCursor(cursor);

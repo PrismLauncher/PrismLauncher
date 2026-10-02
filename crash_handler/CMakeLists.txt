@@ -27,6 +27,7 @@ set_target_properties(CrashHandler PROPERTIES
 target_link_libraries(CrashHandler
     PUBLIC cpptrace::cpptrace
     PRIVATE Launcher_rainbow
+    PRIVATE BuildConfig
     PUBLIC Qt${QT_VERSION_MAJOR}::Widgets
     PUBLIC Qt${QT_VERSION_MAJOR}::Core
 )
