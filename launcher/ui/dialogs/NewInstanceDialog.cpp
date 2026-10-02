@@ -107,9 +107,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not
     // move this below.
-    // Same is for m_copyTemplateDirCheckbox.
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    m_copyTemplateDirCheckbox = new QCheckBox(this);
 
     m_container = new PageContainer(this, {}, this);
     m_container->useSidebarStyle(false);
@@ -117,6 +115,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     ui->verticalLayout->insertWidget(2, m_container);
 
+    m_copyTemplateDirCheckbox = new QCheckBox(this);
     m_copyTemplateDirCheckbox->setText(tr("Use instance template"));
 
     QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
