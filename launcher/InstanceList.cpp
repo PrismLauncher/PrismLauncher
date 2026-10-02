@@ -979,7 +979,7 @@ class InstanceStaging : public Task {
         connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
         connect(child, &Task::stepProgress, this, &InstanceStaging::propagateStepProgress);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
+        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::commitWithRetry);
     }
 
     ~InstanceStaging() override = default;
@@ -1009,6 +1009,24 @@ class InstanceStaging : public Task {
 
    private slots:
     void childSucceeded()
+    {
+        if (m_child->shouldCopyTemplateDir()) {
+            QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
+            if (!templateDir.isEmpty() && QDir(templateDir).exists()) {
+                qDebug() << "trying to copy instance template directory";
+                FS::copy folderCopy(templateDir, m_stagingPath);
+                folderCopy.followSymlinks(false).copyDirectories(true).overwrite(true);
+
+                if (!folderCopy()) {
+                    qWarning() << "Failed to copy instance template";
+                }
+            }
+        } else {
+            qDebug() << "Skip template copy";
+        }
+        commitWithRetry();
+    }
+    void commitWithRetry()
     {
         const unsigned sleepTime = m_backoff();
         if (m_parent->commitStagedInstance(m_stagingPath, *m_child, m_child->group())) {
@@ -1139,23 +1157,6 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
         }
 
         m_instanceSet.insert(instID);
-
-        if (instanceTask.shouldCopyTemplateDir()) {
-            QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
-            if (!templateDir.isEmpty() && QDir(templateDir).exists()) {
-                qDebug() << "trying to copy instance template directory";
-                FS::copy folderCopy(templateDir, destination);
-                folderCopy.followSymlinks(false);
-                folderCopy.copyDirectories(true);
-                folderCopy.overwrite(true);
-
-                if (!folderCopy()) {
-                    qWarning() << "Failed to copy instance template";
-                }
-            }
-        } else {
-            qDebug() << "Skip template copy";
-        }
 
         emit instancesChanged();
         emit instanceSelectRequest(instID);
