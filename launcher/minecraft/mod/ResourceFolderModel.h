@@ -8,9 +8,9 @@
 #include <QTreeView>
 
 #include "Resource.h"
-
 #include "tasks/ConcurrentTask.h"
 #include "tasks/Task.h"
+#include "ui/MultiDecorationItemDelegate.h"
 
 class MinecraftInstance;
 class QSortFilterProxyModel;
@@ -163,12 +163,16 @@ class ResourceFolderModel : public QAbstractListModel {
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
+    virtual QList<MultiDecorationItemDelegate::Icon> icons(int row) const;
+
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     void setupHeaderAction(QAction* act, int column) const;
     void saveColumns(QTreeView* tree);
     void loadColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);
+
+    virtual bool supportsImage() const { return false; }
 
     /** This creates a proxy model to filter / sort the model for a UI.
      *
@@ -196,6 +200,7 @@ class ResourceFolderModel : public QAbstractListModel {
    signals:
     void updateFinished();
     void parseFinished();
+    void sizeHintChanged();
 
    protected:
     [[nodiscard]] virtual Task* createPreUpdateTask() { return nullptr; }
@@ -246,14 +251,15 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual void onParseFailed(int ticket, const QString& resourceId);
 
    protected:
+    bool m_showImages = true;
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version,  SortType::Date,
                                          SortType::Provider, SortType::Size, SortType::Filename, SortType::LockUpdate };
     QStringList m_columnNames = { "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "File Name", "Update" };
-    QStringList m_columnNamesTranslated = { tr("Enable"),   tr("Name"), tr("Version"),   tr("Last Modified"),
-                                            tr("Provider"), tr("Size"), tr("File Name"), tr("Update") };
-    QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Interactive, QHeaderView::Stretch,
+    QStringList m_columnNamesTranslated = { "",         tr("Name"),      tr("Version"), tr("Last Modified"), tr("Provider"),
+                                            tr("Size"), tr("File Name"), tr("Update") };
+    QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,
                                                            QHeaderView::Interactive, QHeaderView::ResizeToContents,
                                                            QHeaderView::Interactive, QHeaderView::Interactive,
                                                            QHeaderView::Interactive, QHeaderView::Interactive };

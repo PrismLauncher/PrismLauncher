@@ -34,6 +34,7 @@
  */
 
 #include "ExternalResourcesPage.h"
+#include "ui/MultiDecorationItemDelegate.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ExternalResourcesPage.h"
 
@@ -104,6 +105,7 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     // keep the Update at the end of the list(otherwise there will be a need to iterate over the columns)
     auto lockColumn = static_cast<int>(model->columnNames(false).size()) - 1;
     m_ui->treeView->setItemDelegateForColumn(lockColumn, new LockDelegate(m_ui->treeView));
+    m_ui->treeView->setItemDelegateForColumn(ResourceFolderModel::NameColumn, new MultiDecorationItemDelegate(this));
     // must come after setModel
     m_ui->treeView->setResizeModes(m_model->columnResizeModes());
 
@@ -152,11 +154,16 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(m_model, &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::dataChanged, this, [this] { updateActions(); });
+    connect(m_model, &ResourceFolderModel::sizeHintChanged, m_ui->treeView->itemDelegate(),
+            [this] { m_ui->treeView->itemDelegate()->sizeHintChanged(QModelIndex()); });
 
     auto* viewHeader = m_ui->treeView->header();
     viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::showHeaderContextMenu);
+
+    // always use the smallest possible size to avoid wasted space
+    m_ui->treeView->header()->resizeSection(0, 0);
 
     m_model->loadColumns(m_ui->treeView);
     connect(m_ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(m_ui->treeView); });
@@ -235,6 +242,15 @@ bool ExternalResourcesPage::listFilter(QKeyEvent* keyEvent)
             break;
     }
     return QWidget::eventFilter(m_ui->treeView, keyEvent);
+}
+
+bool ExternalResourcesPage::event(QEvent* ev)
+{
+    if (ev->type() == QEvent::StyleChange) {
+        // NOTE: style can change minimum size
+        m_ui->treeView->header()->resizeSection(0, 0);
+    }
+    return true;
 }
 
 bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
