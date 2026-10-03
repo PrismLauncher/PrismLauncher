@@ -47,13 +47,7 @@ struct URLValidator : CLI::Validator {
         func_ = [](const std::string& uri) -> std::string {
             auto uriStr = QString::fromStdString(uri);
 
-            QUrl url = QUrl::fromUserInput(uriStr);
-
-            if (url.isLocalFile()) {
-                return { "Is a local file" };
-            }
-
-            url.setUrl(uriStr, QUrl::TolerantMode);
+            const QUrl url(uriStr);
             if (!url.isValid()) {
                 return url.errorString().toStdString();
             }
