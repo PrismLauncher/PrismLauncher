@@ -10,8 +10,28 @@
 
 #include "meta/Index.h"
 #include "meta/Version.h"
+#include "tasks/Task.h"
 
 static std::vector<Version> s_availableVersions = {};
+
+namespace {
+Version maximumTexturePackVersion()
+{
+    return { "1.6" };
+}
+
+void loadVersions(const Meta::VersionList::Ptr& versionList)
+{
+    s_availableVersions.clear();
+    for (auto&& version : versionList->versions()) {
+        // FIXME: This duplicates the logic in meta for the 'texturepacks' trait. However, we don't have access to that
+        //        information from the index file alone. Also, downloading every version's file isn't a very good idea.
+        if (auto ver = version->toComparableVersion(); ver <= maximumTexturePackVersion()) {
+            s_availableVersions.push_back(ver);
+        }
+    }
+}
+}  // namespace
 
 namespace ResourceDownload {
 TexturePackResourceModel::TexturePackResourceModel(ResourceFolderModel* inst,
@@ -19,54 +39,31 @@ TexturePackResourceModel::TexturePackResourceModel(ResourceFolderModel* inst,
                                                    const QString& debugName,
                                                    QString metaEntryBase)
     : ResourcePackResourceModel(inst, api, debugName, std::move(metaEntryBase))
-    , m_version_list(APPLICATION->metadataIndex()->get("net.minecraft"))
+    , m_versionList(APPLICATION->metadataIndex()->get("net.minecraft"))
 {
-    if (!m_version_list->isLoaded()) {
+    if (!m_versionList->isLoaded()) {
         qDebug() << "Loading version list...";
-        m_task = m_version_list->getLoadTask();
-        if (!m_task->isRunning())
+        m_task = m_versionList->getLoadTask();
+        connect(m_task.get(), &Task::finished, this, [this] { loadVersions(m_versionList); });
+        if (!m_task->isRunning()) {
             m_task->start();
+        }
     }
-}
-
-void waitOnVersionListLoad(Meta::VersionList::Ptr version_list)
-{
-    QEventLoop load_version_list_loop;
-
-    QTimer time_limit_for_list_load;
-    time_limit_for_list_load.setTimerType(Qt::TimerType::CoarseTimer);
-    time_limit_for_list_load.setSingleShot(true);
-    time_limit_for_list_load.callOnTimeout(&load_version_list_loop, &QEventLoop::quit);
-    time_limit_for_list_load.start(4000);
-
-    auto task = version_list->getLoadTask();
-    QObject::connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
-    if (!task->isRunning())
-        task->start();
-    load_version_list_loop.exec();
-    if (time_limit_for_list_load.isActive())
-        time_limit_for_list_load.stop();
 }
 
 ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
 {
-    if (s_availableVersions.empty())
-        waitOnVersionListLoad(m_version_list);
-
     auto args = ResourcePackResourceModel::createSearchArguments();
 
-    if (!m_version_list->isLoaded()) {
+    args.versions = { maximumTexturePackVersion() };
+
+    if (!m_versionList->isLoaded()) {
         qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
         return args;
     }
 
     if (s_availableVersions.empty()) {
-        for (auto&& version : m_version_list->versions()) {
-            // FIXME: This duplicates the logic in meta for the 'texturepacks' trait. However, we don't have access to that
-            //        information from the index file alone. Also, downloading every version's file isn't a very good idea.
-            if (auto ver = version->toComparableVersion(); ver <= maximumTexturePackVersion())
-                s_availableVersions.push_back(ver);
-        }
+        loadVersions(m_versionList);
     }
 
     Q_ASSERT(!s_availableVersions.empty());
@@ -80,7 +77,7 @@ ResourceAPI::VersionSearchArgs TexturePackResourceModel::createVersionsArguments
 {
     auto args = ResourcePackResourceModel::createVersionsArguments(entry);
     args.resourceType = ModPlatform::ResourceType::TexturePack;
-    if (!m_version_list->isLoaded()) {
+    if (!m_versionList->isLoaded()) {
         qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
         return args;
     }
