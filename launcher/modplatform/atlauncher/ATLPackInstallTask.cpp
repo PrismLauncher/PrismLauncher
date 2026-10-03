@@ -38,6 +38,7 @@
 
 #include <QtConcurrent>
 #include <algorithm>
+#include <expected>
 #include <utility>
 
 #include "FileSystem.h"
@@ -348,61 +349,57 @@ QString PackInstallTask::getDirForModType(ModType type, const QString& raw)
     return nullptr;
 }
 
-QString PackInstallTask::getVersionForLoader(const QString& uid)
+Result<QString> PackInstallTask::pickLoaderVersion(const Meta::VersionList::Ptr& vlist)
 {
-    if (m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
-        auto vlist = APPLICATION->metadataIndex()->get(uid);
-        if (!vlist) {
-            emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
-            return nullptr;
-        }
+    if (m_version.loader.recommended || m_version.loader.latest) {
+        for (int i = 0; i < vlist->versions().size(); i++) {
+            auto version = vlist->versions().at(i);
+            auto reqs = version->requiredSet();
 
-        vlist->waitToLoad();
-
-        if (m_version.loader.recommended || m_version.loader.latest) {
-            for (int i = 0; i < vlist->versions().size(); i++) {
-                auto version = vlist->versions().at(i);
-                auto reqs = version->requiredSet();
-
-                // filter by minecraft version, if the loader depends on a certain version.
-                // not all mod loaders depend on a given Minecraft version, so we won't do this
-                // filtering for those loaders.
-                if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
-                    auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
-                    if (iter == reqs.end()) {
-                        continue;
-                    }
-                    if (iter->equalsVersion != m_version.minecraft) {
-                        continue;
-                    }
+            // filter by minecraft version, if the loader depends on a certain version.
+            // not all mod loaders depend on a given Minecraft version, so we won't do this
+            // filtering for those loaders.
+            if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
+                auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
+                if (iter == reqs.end()) {
+                    continue;
                 }
-
-                if (m_version.loader.recommended) {
-                    // first recommended build we find, we use.
-                    if (!version->isRecommended()) {
-                        continue;
-                    }
+                if (iter->equalsVersion != m_version.minecraft) {
+                    continue;
                 }
-
-                return version->descriptor();
             }
 
-            emitFailed(tr("Failed to find version for %1 loader").arg(ModPlatform::getModLoaderAsString(m_version.loader.type)));
-            return nullptr;
-        }
-        if (m_version.loader.choose) {
-            // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
-                return m_support->chooseVersion(vlist, nullptr);
+            if (m_version.loader.recommended) {
+                // first recommended build we find, we use.
+                if (!version->isRecommended()) {
+                    continue;
+                }
             }
 
-            return m_support->chooseVersion(vlist, m_version.minecraft);
+            return version->descriptor();
         }
+
+        return std::unexpected("No recommended version.");
+    }
+    if (m_version.loader.choose) {
+        // Fabric Loader doesn't depend on a given Minecraft version.
+        if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
+            auto choosenVersion = m_support->chooseVersion(vlist, nullptr);
+            if (choosenVersion.isEmpty()) {
+                return std::unexpected("No choosen version");
+            }
+            return choosenVersion;
+        }
+
+        auto choosenVersion = m_support->chooseVersion(vlist, m_version.minecraft);
+        if (choosenVersion.isEmpty()) {
+            return std::unexpected("No choosen version");
+        }
+        return choosenVersion;
     }
 
-    if (m_version.loader.version == nullptr || m_version.loader.version.isEmpty()) {
-        emitFailed(tr("No loader version set for modpack!"));
-        return nullptr;
+    if (m_version.loader.version.isEmpty()) {
+        return std::unexpected("Missing version");
     }
 
     return m_version.loader.version;
@@ -1037,43 +1034,93 @@ void PackInstallTask::install()
 
         // Minecraft
         components->setComponentVersion("net.minecraft", m_version.minecraft, true);
+    }
+
+    switch (m_version.loader.type) {
+        case ModPlatform::ModLoaderType::NeoForge:
+            m_loaderUid = "net.neoforged";
+            break;
+        case ModPlatform::ModLoaderType::Forge:
+            m_loaderUid = "net.minecraftforge";
+            break;
+        case ModPlatform::ModLoaderType::Fabric:
+            m_loaderUid = "net.fabricmc.fabric-loader";
+            break;
+        case ModPlatform::ModLoaderType::None:
+            m_loaderUid.clear();
+            break;
+        default: {
+            emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
+            return;
+        }
+    }
+
+    if (m_loaderUid.isEmpty()) {
+        finishInstall({});
+        return;
+    }
+
+    if (!m_version.loader.recommended && !m_version.loader.latest && !m_version.loader.choose) {
+        // The pack pins the loader version, so no metadata lookup is needed.
+        finishInstall(m_version.loader.version);
+        return;
+    }
+
+    auto vlist = APPLICATION->metadataIndex()->get(m_loaderUid);
+    if (!vlist) {
+        emitFailed(tr("Failed to get local metadata index for %1").arg(m_loaderUid));
+        return;
+    }
+
+    if (vlist->isLoaded()) {
+        onLoaderListLoaded();
+        return;
+    }
+
+    setStatus(tr("Loading mod loader metadata..."));
+    auto task = vlist->getLoadTask();
+    connect(task.get(), &Task::succeeded, this, &PackInstallTask::onLoaderListLoaded);
+    connect(task.get(), &Task::failed, this, &PackInstallTask::emitFailed);
+    connect(task.get(), &Task::aborted, this, &PackInstallTask::emitAborted);
+    propagateFromOther(task.get());
+    task->start();
+}
+
+void PackInstallTask::onLoaderListLoaded()
+{
+    if (!isRunning()) {
+        return;
+    }
+
+    auto vlist = APPLICATION->metadataIndex()->get(m_loaderUid);
+    if (!vlist || !vlist->isLoaded()) {
+        emitFailed(tr("Failed to get local metadata index for %1").arg(m_loaderUid));
+        return;
+    }
+
+    auto version = pickLoaderVersion(vlist);
+    if (!version) {
+        if (m_version.loader.recommended || m_version.loader.latest) {
+            emitFailed(tr("Failed to find version for %1 loader, error: %2")
+                           .arg(ModPlatform::getModLoaderAsString(m_version.loader.type), version.error()));
+        } else {
+            emitFailed(tr("No loader version set for modpack!\nError: %1").arg(version.error()));
+        }
+        return;
+    }
+
+    finishInstall(*version);
+}
+
+void PackInstallTask::finishInstall(const QString& loaderVersion)
+{
+    {
+        SettingsObject::Lock lock(m_instance->settings());
+        auto* components = m_instance->getPackProfile();
 
         // Loader
-        switch (m_version.loader.type) {
-            case ModPlatform::ModLoaderType::NeoForge: {
-                auto version = getVersionForLoader("net.neoforged");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.neoforged", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::Forge: {
-                auto version = getVersionForLoader("net.minecraftforge");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.minecraftforge", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::Fabric: {
-                auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.fabricmc.fabric-loader", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::None: {
-                break;
-            }
-            default: {
-                emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
-                return;
-            }
+        if (!loaderVersion.isEmpty()) {
+            components->setComponentVersion(m_loaderUid, loaderVersion);
         }
 
         for (const auto& componentUid : m_componentsToInstall.keys()) {
