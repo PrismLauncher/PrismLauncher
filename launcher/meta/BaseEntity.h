@@ -37,7 +37,7 @@ class BaseEntity {
 
     virtual QString localFilename() const = 0;
     virtual QUrl url() const;
-    bool isLoaded() const;
+    virtual bool isLoaded() const;
     LoadStatus status() const;
 
     /* for parsers */
@@ -62,9 +62,11 @@ class BaseEntityLoadTask : public Task {
     explicit BaseEntityLoadTask(BaseEntity* parent, Net::Mode mode, bool forceReload);
     ~BaseEntityLoadTask() override = default;
 
-    void executeTask() override;
     bool canAbort() const override;
     bool abort() override;
+
+   protected:
+    void executeTask() override;
 
    private:
     BaseEntity* m_entity;
