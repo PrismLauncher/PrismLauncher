@@ -376,10 +376,15 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
-find_package(cpptrace REQUIRED)
-if (WIN32)
-    set(CPPTRACE_UNWIND_WITH_DBGHELP "ON")
+option(Launcher_ENABLE_CRASH_HANDLER
+    "Build with a cpptrace crash handler to catch and trace unexpected crashes"
+    ON)
+
+if(Launcher_ENABLE_CRASH_HANDLER)
+    find_package(cpptrace REQUIRED)
 endif()
+
+
 
 find_package(CLI11 CONFIG REQUIRED)
 

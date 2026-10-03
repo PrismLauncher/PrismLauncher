@@ -33,10 +33,13 @@
  *      limitations under the License.
  */
 
+#include <cstdlib>
 #include <exception>
 
+#ifdef Launcher_ENABLE_CRASH_HANDLER
 #include "crash_handler/CrashHandler.h"
 #include "crash_handler/CrashHandlerDialog.h"
+#endif
 
 #include <BuildConfig.h>
 
@@ -68,35 +71,47 @@ int main(int argc, char* argv[])
     // get default dataPath before cli alterations
     const auto dataPathResult = Startup::resolveDataPath(exePath.parent_path());
 
+#ifdef Launcher_ENABLE_CRASH_HANDLER
     const std::string crashHandlerFlag = "--crash-handler";
-
     CrashHandler::attach(CrashHandler::CrashConfig{
         .crashHandlerFlag = crashHandlerFlag,
         .processExePath = { exePath.string() },
         .dataPath = { dataPathResult.dataPath.string() },
     });
+    bool handleCrash{ false };
+#endif
 
     Cli::Args args{
         .dataPath = dataPathResult,
         .commands = {},
     };
 
-    bool handleCrash{ false };
     try {
-        Cli::parseArgs(argc, argv, args, { [&crashHandlerFlag, &handleCrash](CLI::App& parser) {
-                           // add flag and hide it by giving it an empty group
-                           parser.add_flag(crashHandlerFlag, handleCrash, "(for internal use) trace a crash trace from stdin")->group("");
-                       } });
+        Cli::parseArgs(
+            argc, argv, args,
+            {
+#ifdef Launcher_ENABLE_CRASH_HANDLER
+                [&crashHandlerFlag, &handleCrash](CLI::App& parser) {
+                    // add flag and hide it by giving it an empty group
+                    parser.add_flag(crashHandlerFlag, handleCrash, "(for internal use) trace a crash trace from stdin")->group("");
+                }
+#endif
+            });
     } catch (const std::exception& err) {
         /// we did a bad job setting up the cli parser
         std::cerr << "BUG! Failed to parse cli args: " << err.what();
         return 1;
     }
 
+#ifdef Launcher_ENABLE_CRASH_HANDLER
     if (handleCrash) {
         std::cerr << "HANDLING CRASH!\n";
 
         auto trace = CrashHandler::readTraceFromStdin();
+        if (!trace.valid) {
+            std::cerr << "failed to read valid object trace";
+            std::exit(1);
+        }
 
         // std::cerr << "stacktrace:\n\n" << trace << "\n";
 
@@ -110,6 +125,7 @@ int main(int argc, char* argv[])
 
         std::exit(0);
     }
+#endif
 
     // initialize Qt
     Application app(argc, argv, args);
