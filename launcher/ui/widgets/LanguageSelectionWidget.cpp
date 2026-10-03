@@ -7,8 +7,7 @@
 #include <QVBoxLayout>
 #include "Application.h"
 #include "BuildConfig.h"
-#include "settings/Setting.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 #include "translations/TranslationsModel.h"
 
 LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
@@ -37,7 +36,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
     m_verticalLayout->addWidget(m_helpUsLabel);
 
     m_formatCheckbox->setObjectName(QStringLiteral("formatCheckbox"));
-    m_formatCheckbox->setCheckState(APPLICATION->settings()->get("UseSystemLocale").toBool() ? Qt::Checked : Qt::Unchecked);
+    m_formatCheckbox->setCheckState(APPLICATION->config()->useSystemLocale ? Qt::Checked : Qt::Unchecked);
     connect(m_formatCheckbox, &QCheckBox::checkStateChanged, this,
             [this]() { APPLICATION->translations()->setUseSystemLocale(m_formatCheckbox->isChecked()); });
     m_verticalLayout->addWidget(m_formatCheckbox);
@@ -51,8 +50,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget* parent)
     connect(m_languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageSelectionWidget::languageRowChanged);
     m_verticalLayout->setContentsMargins(0, 0, 0, 0);
 
-    auto languageSetting = APPLICATION->settings()->getSetting("Language");
-    connect(languageSetting.get(), &Setting::SettingChanged, this, &LanguageSelectionWidget::languageSettingChanged);
+    connect(&APPLICATION->config(), &GlobalConfigHolder::updated, this, &LanguageSelectionWidget::languageSettingChanged);
 }
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const
@@ -80,7 +78,7 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     translations->updateLanguage(key);
 }
 
-void LanguageSelectionWidget::languageSettingChanged(const Setting& /*unused*/, const QVariant& /*unused*/)
+void LanguageSelectionWidget::languageSettingChanged()
 {
     auto* translations = APPLICATION->translations();
     auto index = translations->selectedIndex();

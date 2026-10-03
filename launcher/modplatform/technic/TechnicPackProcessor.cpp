@@ -19,13 +19,13 @@
 #include <Json.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/PackProfile.h>
-#include <settings/INISettingsObject.h>
+#include "config/INIFile.h"
+#include "config/InstanceConfig.h"
 
 #include <memory>
 #include "archive/ArchiveReader.h"
 
-void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
-                                        const QString& instName,
+void Technic::TechnicPackProcessor::run(const QString& instName,
                                         const QString& instIcon,
                                         const QString& stagingPath,
                                         const QString& minecraftVersion,
@@ -33,8 +33,8 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
 {
     QString minecraftPath = FS::PathCombine(stagingPath, "minecraft");
     QString configPath = FS::PathCombine(stagingPath, "instance.cfg");
-    auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
-    MinecraftInstance instance(globalSettings, std::move(instanceSettings), stagingPath);
+    auto confTmp = std::make_unique<InstanceConfigHolder>(configPath, InstanceConfig::loadDefaults());
+    MinecraftInstance instance(std::move(confTmp), stagingPath);
 
     instance.setName(instName);
 
@@ -65,7 +65,10 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                 }
                 QByteArray fmlVersionData = file->readAll();
                 INIFile iniFile;
-                iniFile.loadFile(fmlVersionData);
+                if (const auto loadResult = iniFile.loadFile(fmlVersionData); !loadResult) {
+                    emit failed(tr("Unable to read \"fmlversion.properties\": %1").arg(loadResult.error()));
+                    return;
+                }
                 // If not present, this evaluates to a null string
                 fmlMinecraftVersion = iniFile["fmlbuild.mcversion"].toString();
             }
@@ -95,7 +98,11 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
                 }
                 auto forgeVersionData = file->readAll();
                 INIFile iniFile;
-                iniFile.loadFile(forgeVersionData);
+                if (const auto loadResult = iniFile.loadFile(forgeVersionData); !loadResult) {
+                    emit failed(tr("Unable to load \"forgeversion.properties\": %1").arg(loadResult.error()));
+                    return;
+                }
+
                 QString major, minor, revision, build;
                 major = iniFile["forge.major.number"].toString();
                 minor = iniFile["forge.minor.number"].toString();
@@ -194,5 +201,11 @@ void Technic::TechnicPackProcessor::run(SettingsObject* globalSettings,
     }
 
     components->saveNow();
+
+    if (const auto saveResult = instance.config().save(); !saveResult) {
+        emit failed(tr("Failed to save instance config: %1").arg(saveResult.error()));
+        return;
+    }
+
     emit succeeded();
 }

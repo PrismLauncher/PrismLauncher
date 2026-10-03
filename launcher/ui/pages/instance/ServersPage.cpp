@@ -37,6 +37,7 @@
 
 #include "ServersPage.h"
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "ServerPingTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ServersPage.h"
@@ -439,7 +440,7 @@ class ServersModel : public QAbstractListModel {
         }
 
         m_currentQueryTask = ConcurrentTask::Ptr(
-            new ConcurrentTask("Query servers status", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+            new ConcurrentTask("Query servers status", APPLICATION->config()->numberOfConcurrentTasks));
         int row = 0;
         for (Server& server : m_servers) {
             // reset current players

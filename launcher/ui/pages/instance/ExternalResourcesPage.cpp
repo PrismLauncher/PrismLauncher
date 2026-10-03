@@ -34,6 +34,7 @@
  */
 
 #include "ExternalResourcesPage.h"
+#include "config/GlobalConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ExternalResourcesPage.h"
 
@@ -255,7 +256,7 @@ void ExternalResourcesPage::addItem()
 {
     auto list = GuiUtil::browseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
-        m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+        m_fileSelectionFilter.arg(displayName()), APPLICATION->config()->centralModsDir, this->parentWidget());
 
     if (!list.isEmpty()) {
         for (const auto& filename : list) {

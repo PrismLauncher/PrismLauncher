@@ -51,15 +51,16 @@
 
 #include "minecraft/auth/MinecraftAccount.h"
 
+class GlobalConfigHolder;
 class LaunchController;
 class LocalPeer;
 class InstanceWindow;
 class MainWindow;
+class PlayTimeConfigHolder;
 class ViewLogWindow;
 class GenericPageProvider;
 class QFile;
 class HttpMetaCache;
-class SettingsObject;
 class InstanceList;
 class AccountList;
 class IconList;
@@ -116,8 +117,9 @@ class Application : public QApplication {
 
     bool event(QEvent* event) override;
 
-    SettingsObject* settings() const { return m_settings.get(); }
-    SettingsObject* playtimeSettings() const { return m_playtimeSettings.get(); }
+    GlobalConfigHolder& config() { return *m_config; }
+
+    PlayTimeConfigHolder& playTimeConfig() { return *m_playTimeConfig; }
 
     qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
@@ -253,8 +255,8 @@ class Application : public QApplication {
     std::unique_ptr<HttpMetaCache> m_metacache;
     std::unique_ptr<Meta::Index> m_metadataIndex;
 
-    std::unique_ptr<SettingsObject> m_settings;
-    std::unique_ptr<SettingsObject> m_playtimeSettings;
+    std::unique_ptr<GlobalConfigHolder> m_config;
+    std::unique_ptr<PlayTimeConfigHolder> m_playTimeConfig;
     std::unique_ptr<InstanceList> m_instances;
     std::unique_ptr<IconList> m_icons;
     std::unique_ptr<JavaInstallList> m_javalist;
