@@ -69,6 +69,8 @@ set(CORE_SOURCES
     FileSystem.h
     FileSystem.cpp
 
+    CappedLogFile.h
+
     Result.h
 
     # RW lock protected map
