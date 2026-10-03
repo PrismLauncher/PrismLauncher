@@ -79,8 +79,6 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     connect(profile, &QAbstractItemModel::rowsRemoved, this, updateLoaderWarning);
     updateLoaderWarning();
 
-    m_ui->installLoader->setEnabled(!m_instance->isRunning());
-    connect(m_instance, &BaseInstance::runningStatusChanged, m_ui->installLoader, &QWidget::setDisabled);
     connect(m_ui->installLoader, &QPushButton::clicked, this, [this, profile] {
         InstallLoaderDialog dialog(profile, QString(), this);
         dialog.exec();
