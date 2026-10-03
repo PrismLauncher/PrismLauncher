@@ -104,6 +104,8 @@ class MinecraftInstance : public BaseInstance {
     /** Returns whether the instance, with its version, has support for demo mode. */
     bool supportsDemo() const;
 
+    MinecraftAccountPtr accountToUse();
+
     void updateRuntimeContext() override;
 
     //////  Profile management //////

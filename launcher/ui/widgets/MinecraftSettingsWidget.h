@@ -39,6 +39,7 @@
 #include <QWidget>
 #include "JavaSettingsWidget.h"
 #include "minecraft/MinecraftInstance.h"
+#include "net/NetJob.h"
 
 namespace Ui {
 class MinecraftSettingsWidget;
@@ -56,6 +57,7 @@ class MinecraftSettingsWidget : public QWidget {
     void openGlobalSettings();
     void updateAccountsMenu(SettingsObject& settings) const;
     bool isQuickPlaySupported();
+    void loadRealms();
    private slots:
     void saveSelectedLoaders();
     void saveDataPacksPath();
@@ -68,4 +70,5 @@ class MinecraftSettingsWidget : public QWidget {
     Ui::MinecraftSettingsWidget* m_ui;
     JavaSettingsWidget* m_javaSettings = nullptr;
     bool m_quickPlaySingleplayer = false;
+    NetJob::Ptr m_realmsJob;
 };
