@@ -42,6 +42,7 @@
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
+#include <QAbstractItemModel>
 #include <QAction>
 #include <QEvent>
 #include <QKeyEvent>
