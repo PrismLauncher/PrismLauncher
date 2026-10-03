@@ -72,6 +72,20 @@
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
+    auto* profile = m_instance->getPackProfile();
+    auto updateLoaderWarning = [this, profile] { m_ui->loaderWarning->setVisible(!profile->getModLoaders().has_value()); };
+    connect(profile, &QAbstractItemModel::modelReset, this, updateLoaderWarning);
+    connect(profile, &QAbstractItemModel::dataChanged, this, updateLoaderWarning);
+    connect(profile, &QAbstractItemModel::rowsInserted, this, updateLoaderWarning);
+    connect(profile, &QAbstractItemModel::rowsRemoved, this, updateLoaderWarning);
+    updateLoaderWarning();
+
+    connect(m_ui->installLoader, &QPushButton::clicked, this, [this, profile] {
+        InstallLoaderDialog dialog(profile, QString(), this);
+        dialog.exec();
+        m_container->refreshContainer();
+    });
+
     m_ui->actionDownloadItem->setText(tr("Download Mods"));
     m_ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
     m_ui->actionDownloadItem->setEnabled(true);
