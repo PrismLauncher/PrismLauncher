@@ -84,24 +84,20 @@ DataPathResult resolveDataPath(const std::filesystem::path& rootPath)
         source = DataPathSource::PersistentDataPath;
     }
 
-    bool portable = false;
 #ifndef Q_OS_MACOS
     auto root = QString::fromStdU16String(rootPath.u16string());
     if (auto portableUserData = FS::PathCombine(root, "UserData"); QDir(portableUserData).exists()) {
         dataPath = portableUserData.toStdU16String();
         source = DataPathSource::PortableUserData;
-        portable = true;
     } else if (QFile::exists(FS::PathCombine(root, "portable.txt"))) {
         dataPath = root.toStdU16String();
         source = DataPathSource::PortableData;
-        portable = true;
     }
 #endif
 
     return {
         .dataPath = dataPath,
         .source = source,
-        .portable = portable,
     };
 }
 
