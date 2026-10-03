@@ -42,15 +42,11 @@
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
-#include <QAbstractItemModel>
 #include <QAction>
 #include <QEvent>
-#include <QHBoxLayout>
 #include <QKeyEvent>
-#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <algorithm>
 #include <memory>
@@ -75,27 +71,17 @@
 ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent)
     : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
-    auto* loaderWarning = new QWidget(this);
-    auto* warningLayout = new QHBoxLayout(loaderWarning);
-    warningLayout->setContentsMargins(0, 0, 0, 0);
-    auto* warningText = new QLabel(tr("No mod loader is installed."), loaderWarning);
-    warningText->setWordWrap(true);
-    warningLayout->addWidget(warningText, 1);
-    auto* installLoader = new QPushButton(tr("Install Loader"), loaderWarning);
-    warningLayout->addWidget(installLoader);
-    m_ui->gridLayout->addWidget(loaderWarning, 0, 1, 1, 2);
-
     auto* profile = m_instance->getPackProfile();
-    auto updateLoaderWarning = [profile, loaderWarning] { loaderWarning->setVisible(!profile->getModLoaders().has_value()); };
+    auto updateLoaderWarning = [this, profile] { m_ui->loaderWarning->setVisible(!profile->getModLoaders().has_value()); };
     connect(profile, &QAbstractItemModel::modelReset, this, updateLoaderWarning);
     connect(profile, &QAbstractItemModel::dataChanged, this, updateLoaderWarning);
     connect(profile, &QAbstractItemModel::rowsInserted, this, updateLoaderWarning);
     connect(profile, &QAbstractItemModel::rowsRemoved, this, updateLoaderWarning);
     updateLoaderWarning();
 
-    installLoader->setEnabled(!m_instance->isRunning());
-    connect(m_instance, &BaseInstance::runningStatusChanged, installLoader, &QWidget::setDisabled);
-    connect(installLoader, &QPushButton::clicked, this, [this, profile] {
+    m_ui->installLoader->setEnabled(!m_instance->isRunning());
+    connect(m_instance, &BaseInstance::runningStatusChanged, m_ui->installLoader, &QWidget::setDisabled);
+    connect(m_ui->installLoader, &QPushButton::clicked, this, [this, profile] {
         InstallLoaderDialog dialog(profile, QString(), this);
         dialog.exec();
         m_container->refreshContainer();

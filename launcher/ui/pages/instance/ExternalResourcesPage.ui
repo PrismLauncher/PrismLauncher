@@ -24,6 +24,44 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
+    <item row="0" column="1" colspan="2">
+     <widget class="QWidget" name="loaderWarning" native="true">
+      <property name="visible">
+       <bool>false</bool>
+      </property>
+      <layout class="QHBoxLayout" name="loaderWarningLayout" stretch="1,0">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="loaderWarningText">
+         <property name="text">
+          <string>No mod loader is installed.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="installLoader">
+         <property name="text">
+          <string>Install Loader</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
     <item row="1" column="1" colspan="2">
      <widget class="ModListView" name="treeView">
       <property name="sizePolicy">
