@@ -14,6 +14,7 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 
 class FlameAPI final : public ResourceAPI {
    public:
@@ -24,7 +25,6 @@ class FlameAPI final : public ResourceAPI {
     }
 
     static QString getModFileChangelog(int modId, int fileId);
-    static QString getModDescription(int modId);
 
     static std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
                                                                        const QList<ModPlatform::ModLoaderType>& instanceLoaders,
@@ -146,7 +146,7 @@ class FlameAPI final : public ResourceAPI {
     QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object()["data"].toArray(); }
     Result<> loadIndexedPack(ModPlatform::IndexedPack& m, const QJsonObject& obj) const override
     {
-        return FlameMod::loadIndexedPack(m, obj);
+        return Flame::Parse::loadIndexedPack(m, obj);
     }
     Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
     {
@@ -163,14 +163,12 @@ class FlameAPI final : public ResourceAPI {
         }
         return ModPlatform::IndexedVersion{};
     };
-    Result<> loadExtraPackInfo(ModPlatform::IndexedPack& m, [[maybe_unused]] QJsonObject& /*unused*/) const override
-    {
-        FlameMod::loadBody(m);
-        return {};
-    }
+
+   public slots:
+    Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
+    std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& pack) const override;
 
    private:
-    std::optional<QString> getInfoURL(const QString& id) const override { return QString(BuildConfig.FLAME_BASE_URL + "/mods/%1").arg(id); }
     std::optional<QString> getDependencyURL(const DependencySearchArgs& args) const override
     {
         auto addonId = args.dependency.addonId.toString();

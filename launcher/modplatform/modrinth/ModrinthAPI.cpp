@@ -185,6 +185,16 @@ QString ModrinthAPI::resourceTypeParameter(ModPlatform::ResourceType type)
     qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
     return "";
 }
+Net::RPC::Spec<ModPlatform::IndexedPack> ModrinthAPI::getProject(const QString& id) const
+{
+    // https://docs.modrinth.com/api/operations/getproject/
+    return { { .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/project/" + id) },
+             [id](const auto& response) -> Result<ModPlatform::IndexedPack> {
+                 ModPlatform::IndexedPack pack = { .addonId = id };
+                 TRY(Json::requireObject(response).and_then([&pack](const auto& v) { return Modrinth::Parse::loadIndexedPack(pack, v); }))
+                 return pack;
+             } };
+}
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
 {

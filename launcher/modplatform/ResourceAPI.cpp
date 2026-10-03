@@ -1,6 +1,7 @@
 #include "modplatform/ResourceAPI.h"
 
 #include <algorithm>
+#include <memory>
 
 #include "Application.h"
 #include "Json.h"
@@ -9,6 +10,7 @@
 #include "modplatform/ModIndex.h"
 
 #include "net/ApiRequest.h"
+#include "net/RPCSink.h"
 
 Task::Ptr ResourceAPI::searchProjects(const SearchArgs& args, const Callback<QList<ModPlatform::IndexedPack::Ptr>>& callbacks) const
 {
@@ -151,54 +153,6 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectInfo(const ProjectInfoArgs& args,
-                                      const Callback<ModPlatform::IndexedPack::Ptr>& callbacks,
-                                      bool askRetry) const
-{
-    auto [job, response] = getProject(args.pack->addonId.toString(), askRetry);
-
-    QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, response, callbacks, args] {
-        auto pack = args.pack;
-        auto parse = [this, &pack, &response]() -> Result<> {
-            TRY_INTO(auto obj, Json::requireObject(*response))
-            if (obj.contains("data")) {
-                TRY_INTO(obj, Json::requireObject(obj, "data"))
-            }
-            TRY(loadIndexedPack(*pack, obj))
-
-            return loadExtraPackInfo(*pack, obj);
-        };
-        if (auto res = parse(); !res) {
-            qWarning() << "Error while reading" << debugName() << "resource info:" << res.error();
-            callbacks.onFail(res.error(), -1);
-            return;
-        }
-
-        callbacks.onSucceed(pack);
-    });
-    // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
-    // This prevents the lambda from extending the lifetime of the shared resource,
-    // as it only temporarily locks the resource when needed.
-    auto weak = job.toWeakRef();
-    QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, callbacks](const QString& reason) {
-        int networkErrorCode = -1;
-        if (auto job = weak.lock()) {
-            if (auto netJob = qSharedPointerDynamicCast<NetJob>(job)) {
-                if (auto* failedAction = netJob->getFailedActions().at(0); failedAction) {
-                    networkErrorCode = failedAction->replyStatusCode();
-                }
-            }
-        }
-        callbacks.onFail(reason, networkErrorCode);
-    });
-    QObject::connect(job.get(), &NetJob::aborted, job.get(), [callbacks] {
-        if (callbacks.onAbort != nullptr) {
-            callbacks.onAbort();
-        }
-    });
-    return job;
-}
-
 Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, const Callback<ModPlatform::IndexedVersion>& callbacks) const
 {
     auto versionsUrlOptional = getDependencyURL(args);
@@ -294,20 +248,24 @@ QString ResourceAPI::mapMCVersionToModrinth(const Version& v)
     return verStr;
 }
 
-std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(const QString& addonId, bool askRetry) const
+std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> ResourceAPI::getProjectTask(const QString& addonId, bool loadExtra, bool askRetry) const
 {
-    auto projectUrlOptional = getInfoURL(addonId);
-    if (!projectUrlOptional.has_value()) {
-        return { nullptr, nullptr };
-    }
-
-    const auto& projectUrl = projectUrlOptional.value();
-
     auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
     netJob->setAskRetry(askRetry);
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(projectUrl));
+    auto spec = getProject(addonId);
+    auto [action, response] = Net::RPC::make<ModPlatform::IndexedPack>(spec);
     netJob->addNetAction(action);
+    netJob->setMaxConcurrent(1);  // force extra to load in sync
+
+    response->addonId = addonId;
+    if (loadExtra) {
+        auto extraSpec = getProjectExtra(*response);
+        if (extraSpec.has_value()) {
+            auto [extraAction, _] = Net::RPC::make<bool>(extraSpec.value());
+            netJob->addNetAction(extraAction);
+        }
+    }
 
     return { netJob, response };
 }

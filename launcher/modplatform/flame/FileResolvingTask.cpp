@@ -24,6 +24,7 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -218,7 +219,7 @@ void Flame::FileResolvingTask::getFlameProjects()
                 auto file = std::ranges::find_if(m_manifest.files, [id](const Flame::File& file) { return file.projectId == id; });
                 if (file != m_manifest.files.end()) {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                    TRY(FlameMod::loadIndexedPack(file->pack, entryObj))
+                    TRY(Flame::Parse::loadIndexedPack(file->pack, entryObj))
                     if (file->pack.resourceType == ModPlatform::ResourceType::World) {
                         file->targetFolder = "saves";
                     }

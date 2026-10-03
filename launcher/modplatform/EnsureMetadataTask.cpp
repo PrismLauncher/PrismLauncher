@@ -11,6 +11,7 @@
 
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -278,29 +279,37 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
         addonIds.insert(data.addonId.toString(), data.hash);
     }
 
-    Task::Ptr projTask;
-    QByteArray* response = nullptr;
-
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
-    } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = ModrinthAPI::get().getProject(*addonIds.keyBegin());
-    } else {
-        std::tie(projTask, response) = ModrinthAPI::get().getProjects(addonIds.keys());
+        return nullptr;
     }
+    if (addonIds.size() == 1) {
+        auto [projTask, response] = ModrinthAPI::get().getProjectTask(*addonIds.keyBegin());
+        connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
+            auto hash = addonIds.find(response->addonId.toString()).value();
+
+            auto resourceIter = m_resources.find(hash);
+            if (resourceIter == m_resources.end()) {
+                qWarning() << "Invalid project id from the API response.";
+            }
+
+            auto* resource = resourceIter.value();
+
+            setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
+
+            updateMetadata(*response, m_tempVersions.find(hash).value(), resource);
+        });
+        return projTask;
+    }
+    auto [projTask, response] = ModrinthAPI::get().getProjects(addonIds.keys());
 
     // Prevents unfortunate timings when aborting the task
     if (!projTask) {
-        return Task::Ptr{ nullptr };
+        return nullptr;
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        auto doc = Json::requireDocument(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
-            if (addonIds.size() == 1) {
-                return { { v.object() } };
-            }
-            return Json::requireArray(v);
-        });
+        auto doc = Json::requireDocument(*response).and_then([addonIds](const auto& v) { return Json::requireArray(v); });
         if (!doc) {
             qWarning() << "Error while parsing JSON response from Modrinth projects task:" << doc.error();
             qWarning() << *response;
@@ -311,7 +320,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
             ModPlatform::IndexedPack pack;
 
             auto parse = [this, &entry, &pack, &addonIds]() -> Result<> {
-                TRY(Json::requireObject(entry).and_then([&pack](const auto& v) { return Modrinth::loadIndexedPack(pack, v); }))
+                TRY(Json::requireObject(entry).and_then([&pack](const auto& v) { return Modrinth::Parse::loadIndexedPack(pack, v); }))
 
                 auto hash = addonIds.find(pack.addonId.toString()).value();
 
@@ -418,30 +427,37 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         }
     }
 
-    Task::Ptr projTask;
-    QByteArray* response = nullptr;
-
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
-    } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.keyBegin());
-    } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds.keys());
+        return nullptr;
     }
+    if (addonIds.size() == 1) {
+        auto [projTask, response] = FlameAPI::get().getProjectTask(*addonIds.keyBegin());
+        connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
+            auto hash = addonIds.find(response->addonId.toString()).value();
+
+            auto resourceIter = m_resources.find(hash);
+            if (resourceIter == m_resources.end()) {
+                qWarning() << "Invalid project id from the API response.";
+            }
+
+            auto* resource = resourceIter.value();
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
+
+            updateMetadata(*response, m_tempVersions.find(hash).value(), resource);
+        });
+        return projTask;
+    }
+
+    auto [projTask, response] = FlameAPI::get().getProjects(addonIds.keys());
 
     // Prevents unfortunate timings when aborting the task
     if (!projTask) {
-        return Task::Ptr{ nullptr };
+        return nullptr;
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        auto entries = Json::requireObject(*response).and_then([addonIds](const auto& v) -> Result<QJsonArray> {
-            if (addonIds.size() == 1) {
-                TRY_INTO(const auto& obj, Json::requireObject(v, "data", "data"))
-                return { { obj } };
-            }
-            return Json::requireArray(v, "data");
-        });
+        auto entries = Json::requireObject(*response).and_then([addonIds](const auto& v) { return Json::requireArray(v, "data"); });
         if (!entries) {
             qWarning() << "Error while parsing JSON response from Flame projects task:" << entries.error();
             qWarning() << *response;
@@ -469,7 +485,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
             ModPlatform::IndexedPack pack;
             setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
-            auto loadRes = FlameMod::loadIndexedPack(pack, entryObj.value());
+            auto loadRes = Flame::Parse::loadIndexedPack(pack, entryObj.value());
             if (!loadRes) {
                 qDebug() << loadRes.error();
                 qDebug() << *entries;
