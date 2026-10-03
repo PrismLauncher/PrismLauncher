@@ -40,7 +40,7 @@
 #include "MessageLevel.h"
 
 LoggedProcess::LoggedProcess(const QStringConverter::Encoding output_codec, QObject* parent)
-    : QProcess(parent), m_err_decoder(output_codec), m_out_decoder(output_codec)
+    : QProcess(parent), m_err_decoder(output_codec), m_out_decoder(output_codec), m_fallback_decoder(QStringConverter::System)
 {
     // QProcess has a strange interface... let's map a lot of those into a few.
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
@@ -60,6 +60,15 @@ LoggedProcess::~LoggedProcess()
 QStringList LoggedProcess::reprocess(const QByteArray& data, QStringDecoder& decoder)
 {
     QString str = decoder(data);
+
+    // Some programs (e.g. modloaders on non-UTF-8 Windows) emit output in the
+    // system code page rather than UTF-8. When the primary decoder (usually
+    // UTF-8) fails to decode a chunk, fall back to the system codec so the text
+    // is not replaced with U+FFFD. This keeps #2419 (UTF-8 logs) working while
+    // fixing #5739 (garbled logs on Chinese Windows).
+    if (str.contains(QChar(0xFFFD))) {
+        str = m_fallback_decoder(data);
+    }
 
     if (!m_leftover_line.isEmpty()) {
         str.prepend(m_leftover_line);
