@@ -69,8 +69,8 @@ void ModMinecraftJar::executeTask()
         QStringList jars, temp1, temp2, temp3, temp4;
         mainJar->getApplicableFiles(m_inst->runtimeContext(), jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
         auto sourceJarPath = jars[0];
-        if (!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods)) {
-            emitFailed(tr("Failed to create the custom Minecraft jar file."));
+        if (const auto result = MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods); !result) {
+            emitFailed(tr("Failed to create the custom Minecraft jar file: %1").arg(result.error()));
             return;
         }
     }
