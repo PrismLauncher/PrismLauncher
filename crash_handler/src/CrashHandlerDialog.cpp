@@ -27,16 +27,15 @@
 
 #include <cstdint>
 
-#include <QtVersion>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFont>
 #include <QFontDatabase>
 #include <QRegularExpression>
 #include <QStandardPaths>
+#include <QtVersion>
 
 #include <QClipboard>
-#include <QDesktopServices>
 
 #include <QScrollBar>
 
@@ -56,6 +55,12 @@ CrashHandlerDialog::CrashHandlerDialog(QWidget* parent, const QString& title, co
     monospace.setStyleHint(QFont::Monospace);
     m_ui->traceText->setCurrentFont(monospace);
     m_defaultFormat = m_ui->traceText->currentCharFormat();
+
+    auto defaultPalette = QGuiApplication::palette();
+    auto defaultTextBg = defaultPalette.color(QPalette::Disabled, QPalette::Base);
+    auto defaultTextFg = defaultPalette.color(QPalette::Disabled, QPalette::Text);
+    m_ui->traceText->setTextBackgroundColor(defaultTextBg);
+    m_ui->traceText->setTextColor(defaultTextFg);
 
     connect(m_ui->copyButton, &QPushButton::clicked, this, [this]() { copyTraceToClipboard(); });
 
@@ -654,7 +659,7 @@ void ensureTextContrast(QTextCharFormat& textFormat)
                 fgColor = Qt::black;
             } else {
                 // background is light, darken (the brighter the color the more darkening it needs)
-                fgColor = Rainbow::darken(fgColor, fgLuma + ((1.0 - bgLuma) / 2));
+                fgColor = Rainbow::darken(fgColor, fgLuma + (bgLuma / 2));
             }
         }
         textFormat.setForeground(fgColor);
@@ -668,7 +673,10 @@ void CrashHandlerDialog::setTextWithTermFormatting(QTextEdit* textEdit, const QS
     QTextDocument* document = textEdit->document();
     const QRegularExpression escapeSeq(R"(\x1B\[([\d;]+)m)");
     QTextCursor cursor(document);
-    const QTextCharFormat defaultFormat = textEdit->currentCharFormat();
+    auto bg = textEdit->textBackgroundColor();
+    qDebug() << "textedit bg color" << bg;
+    QTextCharFormat defaultFormat = textEdit->currentCharFormat();
+    defaultFormat.setBackground(bg);
 
     cursor.beginEditBlock();
 

@@ -25,13 +25,12 @@ set_target_properties(CrashHandler PROPERTIES
 )
 
 target_link_libraries(CrashHandler
-    PUBLIC cpptrace::cpptrace
-    PRIVATE Launcher_rainbow
-    PRIVATE BuildConfig
-    PUBLIC Qt${QT_VERSION_MAJOR}::Widgets
-    PUBLIC Qt${QT_VERSION_MAJOR}::Core
+    cpptrace::cpptrace
+    Launcher_rainbow
+    BuildConfig
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Core
 )
-
 
 # Set basic compiler warning/error flags for all targets
 get_property(Launcher_TARGETS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY
