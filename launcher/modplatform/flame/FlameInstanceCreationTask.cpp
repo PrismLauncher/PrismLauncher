@@ -60,6 +60,8 @@
 
 #include <QDebug>
 #include <QFileInfo>
+#include <algorithm>
+#include <expected>
 #include <utility>
 
 #include "HardwareInfo.h"
@@ -281,60 +283,30 @@ void FlameCreationTask::executeTask()
                                       "be duplicated. Do you want to continue?"));
 }
 
-QString FlameCreationTask::getVersionForLoader(const QString& uid,
-                                               const QString& loaderType,
-                                               const QString& loaderVersion,
-                                               const QString& mcVersion)
+Result<QString> FlameCreationTask::pickLoaderVersion(const Meta::VersionList::Ptr& vlist)
 {
-    if (loaderVersion == "recommended") {
-        auto vlist = APPLICATION->metadataIndex()->get(uid);
-        if (!vlist) {
-            emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
-            return {};
+    // Only called when the loader version is "recommended", so the list is needed.
+    for (const auto& version : vlist->versions()) {
+        // first recommended build we find, we use.
+        if (!version->isRecommended()) {
+            continue;
         }
+        auto reqs = version->requiredSet();
 
-        if (!vlist->isLoaded()) {
-            QEventLoop loadVersionLoop;
-            auto task = vlist->getLoadTask();
-            connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-            if (!task->isRunning()) {
-                task->start();
-            }
-
-            loadVersionLoop.exec();
-        }
-
-        for (const auto& version : vlist->versions()) {
-            // first recommended build we find, we use.
-            if (!version->isRecommended()) {
+        // filter by minecraft version, if the loader depends on a certain version.
+        // not all mod loaders depend on a given Minecraft version, so we won't do this
+        // filtering for those loaders.
+        if (m_loaderType == "forge" || m_loaderType == "neoforge") {
+            auto iter = std::ranges::find_if(
+                reqs, [this](const Meta::Require& req) { return req.uid == "net.minecraft" && req.equalsVersion == m_mcVersion; });
+            if (iter == reqs.end()) {
                 continue;
             }
-            auto reqs = version->requiredSet();
-
-            // filter by minecraft version, if the loader depends on a certain version.
-            // not all mod loaders depend on a given Minecraft version, so we won't do this
-            // filtering for those loaders.
-            if (loaderType == "forge" || loaderType == "neoforge") {
-                auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
-                    return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
-                });
-                if (iter == reqs.end()) {
-                    continue;
-                }
-            }
-            return version->descriptor();
         }
-
-        emitFailed(tr("Failed to find version for %1 loader").arg(loaderType));
-        return {};
+        return version->descriptor();
     }
 
-    if (loaderVersion.isEmpty()) {
-        emitFailed(tr("No loader version set for modpack!"));
-        return {};
-    }
-
-    return loaderVersion;
+    return std::unexpected(tr("No matching version was found."));
 }
 
 void FlameCreationTask::setManagedPack(BaseInstance* instance)
@@ -463,15 +435,79 @@ void FlameCreationTask::createInstance()
         logWarning(tr("Mysterious trailing dots removed from Minecraft version while importing pack."));
     }
 
-    auto* components = m_newInstance->getPackProfile();
-    components->buildingFromScratch();
-    components->setComponentVersion("net.minecraft", mcVersion, true);
-    if (!loaderType.isEmpty()) {
-        auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
-        if (version.isEmpty()) {  // because there are more info in getVersionForLoader the emitFailed is trigered inside it
+    {
+        SettingsObject::Lock lock(m_newInstance->settings());
+        auto* components = m_newInstance->getPackProfile();
+        components->buildingFromScratch();
+        components->setComponentVersion("net.minecraft", mcVersion, true);
+    }
+
+    m_loaderType = std::move(loaderType);
+    m_loaderUid = std::move(loaderUid);
+    m_loaderVersion = std::move(loaderVersion);
+    m_mcVersion = std::move(mcVersion);
+
+    if (m_loaderUid.isEmpty()) {
+        continueCreateInstance({});
+        return;
+    }
+
+    if (m_loaderVersion != "recommended") {
+        // The pack pins the loader version, so no metadata lookup is needed.
+        if (m_loaderVersion.isEmpty()) {
+            emitFailed(tr("No loader version set for modpack!"));
             return;
         }
-        components->setComponentVersion(loaderUid, version);
+        continueCreateInstance(m_loaderVersion);
+        return;
+    }
+
+    auto vlist = APPLICATION->metadataIndex()->get(m_loaderUid);
+    if (!vlist) {
+        emitFailed(tr("Failed to get local metadata index for %1").arg(m_loaderUid));
+        return;
+    }
+
+    if (vlist->isLoaded()) {
+        onLoaderListLoaded();
+        return;
+    }
+
+    setStatus(tr("Loading mod loader metadata..."));
+    auto task = vlist->getLoadTask();
+    connect(task.get(), &Task::succeeded, this, &FlameCreationTask::onLoaderListLoaded);
+    connect(task.get(), &Task::failed, this, &FlameCreationTask::emitFailed);
+    connect(task.get(), &Task::aborted, this, &FlameCreationTask::emitAborted);
+    propagateFromOther(task.get());
+    task->start();
+}
+
+void FlameCreationTask::onLoaderListLoaded()
+{
+    if (!isRunning()) {
+        return;
+    }
+
+    auto vlist = APPLICATION->metadataIndex()->get(m_loaderUid);
+    if (!vlist || !vlist->isLoaded()) {
+        emitFailed(tr("Failed to get local metadata index for %1").arg(m_loaderUid));
+        return;
+    }
+
+    auto version = pickLoaderVersion(vlist);
+    if (!version) {
+        emitFailed(tr("Failed to find version for %1 loader: %2").arg(m_loaderType, version.error()));
+        return;
+    }
+
+    continueCreateInstance(*version);
+}
+
+void FlameCreationTask::continueCreateInstance(const QString& loaderVersion)
+{
+    if (!m_loaderUid.isEmpty() && !loaderVersion.isEmpty()) {
+        SettingsObject::Lock lock(m_newInstance->settings());
+        m_newInstance->getPackProfile()->setComponentVersion(m_loaderUid, loaderVersion);
     }
 
     if (m_instIcon != "default") {
