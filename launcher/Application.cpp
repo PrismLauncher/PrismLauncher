@@ -528,7 +528,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             FS::move(s_logBase.arg(i - 1), s_logBase.arg(i));
         }
 
-        logFile = std::make_unique<QFile>(s_logBase.arg(0));
+        logFile = std::make_unique<CappedLogFile>(s_logBase.arg(0));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
             showFatalErrorMessage("The launcher data folder is not writable!",
                                   QString("The launcher couldn't create a log file - %1.\n"

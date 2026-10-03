@@ -58,6 +58,27 @@ class CappedLogFileTest : public QObject {
         QVERIFY(contents.count("this line is exactly forty characters long!") == 2);
         QVERIFY(contents.contains("maximum size of 100 bytes"));
     }
+
+    void test_discardsWritesAfterLimit()
+    {
+        QTemporaryDir dir;
+        QString path = dir.filePath("log.txt");
+
+        CappedLogFile log(path, 10);
+        QVERIFY(log.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate));
+        log.write("0123456789");
+        log.flush();
+        log.write("this write would exceed the limit\n");
+        log.write("and so would this one\n");
+        log.flush();
+        QCOMPARE(log.bytesWritten(), 10);
+
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QByteArray contents = file.readAll();
+        contents.replace("\r\n", "\n");
+        QCOMPARE(contents.count("maximum size of 10 bytes"), 1);
+    }
 };
 
 QTEST_GUILESS_MAIN(CappedLogFileTest)

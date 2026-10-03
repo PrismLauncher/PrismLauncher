@@ -37,6 +37,7 @@
 #include <memory>
 #include <optional>
 
+#include "CappedLogFile.h"
 #include "QObjectPtr.h"
 #include "net/Request.h"
 
@@ -133,7 +134,7 @@ class PrismUpdaterApp : public QApplication {
     QList<GitHubRelease> m_releases;
 
    public:
-    std::unique_ptr<QFile> logFile;
+    std::unique_ptr<CappedLogFile> logFile;
     bool logToConsole = false;
 
 #if defined Q_OS_WIN32

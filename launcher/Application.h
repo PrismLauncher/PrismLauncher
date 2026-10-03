@@ -47,6 +47,7 @@
 #include <QMutex>
 #include <QUrl>
 
+#include "CappedLogFile.h"
 #include "QObjectPtr.h"
 
 #include "minecraft/auth/MinecraftAccount.h"
@@ -311,7 +312,7 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     bool m_showMainWindow = false;
-    std::unique_ptr<QFile> logFile;
+    std::unique_ptr<CappedLogFile> logFile;
     std::unique_ptr<LogModel> logModel;
 
    public:
