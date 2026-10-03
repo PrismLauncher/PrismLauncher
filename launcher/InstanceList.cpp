@@ -996,7 +996,9 @@ class InstanceStaging : public Task {
                 folderCopy.followSymlinks(false).copyDirectories(true).overwrite(true);
 
                 if (!folderCopy()) {
-                    qWarning() << "Failed to copy instance template";
+                    logWarning(
+                        tr("Failed to copy instance template. The instance has still been created, but has only partial or no template "
+                           "files."));
                 }
             }
         } else {
