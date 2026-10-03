@@ -40,9 +40,9 @@
 #include <QDir>
 #include <QRegularExpression>
 #include <QString>
+#include <QtConcurrent>
 #include <algorithm>
 
-#include "MTPixmapCache.h"
 #include "Resource.h"
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
@@ -291,14 +291,13 @@ QPixmap Mod::setIcon(const QImage& newImage) const
     Q_ASSERT(!newImage.isNull());
 
     if (m_packImageCacheKey.key.isValid()) {
-        PixmapCache::remove(m_packImageCacheKey.key);
+        QPixmapCache::remove(m_packImageCacheKey.key);
     }
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap =
-        QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    auto pixmap = QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-    m_packImageCacheKey.key = PixmapCache::insert(pixmap);
+    m_packImageCacheKey.key = QPixmapCache::insert(pixmap);
     m_packImageCacheKey.wasEverUsed = true;
     m_packImageCacheKey.wasReadAttempt = true;
     return pixmap;
@@ -314,7 +313,7 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
     };
 
     QPixmap cachedImage;
-    if (PixmapCache::find(m_packImageCacheKey.key, &cachedImage)) {
+    if (QPixmapCache::find(m_packImageCacheKey.key, &cachedImage)) {
         return pixmapTransform(cachedImage);
     }
 
@@ -325,10 +324,10 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
 
     if (m_packImageCacheKey.wasEverUsed) {
         qDebug() << "Mod" << name() << "Had it's icon evicted from the cache. reloading...";
-        PixmapCache::markCacheMissByEviciton();
     }
     // Image got evicted from the cache or an attempt to load it has not been made. load it and retry.
     m_packImageCacheKey.wasReadAttempt = true;
+
     if (ModUtils::loadIconFile(*this, &cachedImage)) {
         return pixmapTransform(cachedImage);
     }

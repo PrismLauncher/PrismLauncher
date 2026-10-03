@@ -48,6 +48,8 @@ int main(int argc, char* argv[])
     console::WindowsConsoleGuard _consoleGuard;
 #endif
 
+    QPixmapCache::setCacheLimit(1024 * 20);
+
     // initialize Qt
     Application app(argc, argv);
     switch (app.status()) {
