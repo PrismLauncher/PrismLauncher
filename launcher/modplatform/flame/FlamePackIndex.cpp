@@ -1,13 +1,62 @@
-#include "FlameModIndex.h"
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2026 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-#include <algorithm>
+#include "FlamePackIndex.h"
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "Result.h"
+#include "Version.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/ResourceType.h"
 
-Result<> FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
+namespace {
+const auto g_classIDMappings = std::array{
+    std::pair{ ModPlatform::ResourceType::Mod, 6 },        std::pair{ ModPlatform::ResourceType::ResourcePack, 12 },
+    std::pair{ ModPlatform::ResourceType::World, 17 },     std::pair{ ModPlatform::ResourceType::ShaderPack, 6552 },
+    std::pair{ ModPlatform::ResourceType::Modpack, 4471 }, std::pair{ ModPlatform::ResourceType::DataPack, 6945 },
+};
+
+QString enumToString(int hashAlgorithm)
+{
+    switch (hashAlgorithm) {
+        default:
+        case 1:
+            return "sha1";
+        case 2:
+            return "md5";
+    }
+}
+
+ModPlatform::ResourceType getResourceType(int classId)
+{
+    for (auto&& [type, c] : g_classIDMappings) {
+        if (c == classId) {
+            return type;
+        }
+    }
+    return ModPlatform::ResourceType::Unknown;
+}
+
+}  // namespace
+
+namespace Flame::Parse {
+Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
 {
     TRY_INTO(pack.addonId, Json::requireInteger(obj, "id"))
     pack.provider = ModPlatform::ResourceProvider::FLAME;
@@ -35,14 +84,9 @@ Result<> FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonOb
         }
     }
 
-    pack.resourceType = FlameAPI::getResourceType(obj["classId"].toInt(0));
+    pack.resourceType = getResourceType(obj["classId"].toInt(0));
     pack.extraDataLoaded = false;
-    loadURLs(pack, obj);
-    return {};
-}
 
-void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
-{
     auto linksObj = obj["links"].toObject();
 
     pack.extraData.issuesUrl = linksObj["issuesUrl"].toString();
@@ -63,39 +107,29 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
     if (!pack.extraData.body.isEmpty()) {
         pack.extraDataLoaded = true;
     }
+    return {};
 }
 
-void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
-{
-    pack.extraData.body = FlameAPI::getModDescription(pack.addonId.toInt());
-
-    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty()) {
-        pack.extraDataLoaded = true;
-    }
-}
-
-namespace {
-QString enumToString(int hashAlgorithm)
-{
-    switch (hashAlgorithm) {
-        default:
-        case 1:
-            return "sha1";
-        case 2:
-            return "md5";
-    }
-}
-}  // namespace
-
-Result<> FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, const QJsonArray& arr)
+Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonArray& arr,
+                                                                   const QString& addonId,
+                                                                   ModPlatform::ResourceType resourceType)
 {
     QList<ModPlatform::IndexedVersion> unsortedVersions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
         TRY_INTO(auto file, loadIndexedPackVersion(obj))
+        if (resourceType == ModPlatform::ResourceType::TexturePack) {
+            // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
+            const auto& mcVersions = file.mcVersion;
+
+            if (!std::any_of(mcVersions.constBegin(), mcVersions.constEnd(),
+                             [](const auto& mcVersion) { return Version(mcVersion) <= Version("1.6"); })) {
+                continue;
+            }
+        }
         if (!file.addonId.isValid()) {
-            file.addonId = pack.addonId;
+            file.addonId = addonId;
         }
 
         if (file.fileId.isValid()) {  // Heuristic to check if the returned value is valid
@@ -108,12 +142,10 @@ Result<> FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, const
         return a.date > b.date;
     };
     std::ranges::sort(unsortedVersions, orderSortPredicate);
-    pack.versions = unsortedVersions;
-    pack.versionsLoaded = true;
-    return {};
+    return unsortedVersions;
 }
 
-Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJsonObject& obj, bool loadChangelog)
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj)
 {
     TRY_INTO(const auto& versionArray, Json::requireArray(obj, "gameVersions"))
 
@@ -217,9 +249,34 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJson
         file.dependencies.append(dependency);
     }
 
-    if (loadChangelog) {
-        file.changelog = FlameAPI::getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
-    }
-
     return file;
 }
+
+Result<QList<ModPlatform::IndexedPack>> parseProjectList(const QByteArray& response)
+{
+    QList<ModPlatform::IndexedPack> newList;
+    TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
+                           .and_then([](const auto& v) { return Json::requireObject(v); })
+                           .and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
+
+    for (auto packRaw : doc) {
+        auto packObj = packRaw.toObject();
+
+        ModPlatform::IndexedPack pack;
+        TRY(Flame::Parse::loadIndexedPack(pack, packObj))
+        newList << pack;
+    }
+    return newList;
+}
+
+int getClassId(ModPlatform::ResourceType type)
+{
+    for (auto&& [e, classId] : g_classIDMappings) {
+        if (e == type) {
+            return classId;
+        }
+    }
+    return 0;
+}
+
+}  // namespace Flame::Parse

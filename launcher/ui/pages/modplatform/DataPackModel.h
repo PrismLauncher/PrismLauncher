@@ -7,10 +7,6 @@
 
 #include <QAbstractListModel>
 
-#include "BaseInstance.h"
-
-#include "modplatform/ModIndex.h"
-
 #include "ui/pages/modplatform/ResourceModel.h"
 
 class Version;
@@ -32,7 +28,6 @@ class DataPackResourceModel : public ResourceModel {
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
-    ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    private:
     QString m_debugName;

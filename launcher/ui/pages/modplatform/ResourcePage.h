@@ -111,7 +111,7 @@ class ResourcePage : public QWidget, public BasePage {
     QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
 
-    virtual void openProject(const QVariant& projectID);
+    virtual void openProject(const QVariant& projectID, const QString& btnTxt = {});
 
     void reloadCurrentVersions();
 
