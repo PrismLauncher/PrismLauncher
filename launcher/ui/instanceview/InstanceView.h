@@ -139,6 +139,11 @@ class InstanceView : public QAbstractItemView {
     QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
     QPoint m_lastDragPosition;
 
+    // group drag-reorder state
+    bool m_draggingGroup = false;
+    QString m_draggedGroupName;
+    int m_groupDragTargetIndex = -1;
+
     VisualGroup* category(const QModelIndex& index) const;
     VisualGroup* category(const QString& cat) const;
     VisualGroup* categoryAt(const QPoint& pos, VisualGroup::HitResults& result) const;
