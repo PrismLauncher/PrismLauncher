@@ -278,6 +278,8 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     }
 
     m_dataPath = dataPath;
+    // store if this is a portable datapast
+    m_portable = args.dataPath.isPortable();
 
     /*
      * Establish the mechanism for communication with an already running PrismLauncher that uses the same data path.
@@ -356,8 +358,9 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 
         // search the dataPath()
         // seach app data standard path
-        if (!foundLoggingRules && !isPortable() && args.dataPath.source != Startup::DataPathSource::Commandline &&
+        if (!foundLoggingRules && !args.dataPath.isPortable() && args.dataPath.source != Startup::DataPathSource::Commandline &&
             args.dataPath.source != Startup::DataPathSource::SystemEnvironment) {
+            qInfo() << "Testing standard app data paths for" << logRulesFile << "...";
             logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, FS::PathCombine("..", logRulesFile));
             if (!logRulesPath.isEmpty()) {
                 qInfo() << "Found" << logRulesPath << "...";

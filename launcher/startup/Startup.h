@@ -41,8 +41,19 @@ enum class DataPathSource : std::uint8_t {
 struct DataPathResult {
     std::filesystem::path dataPath;
     DataPathSource source;
-    bool portable;
     auto operator<=>(const DataPathResult&) const = default;
+    bool isPortable() const
+    {
+        switch (source) {
+            case DataPathSource::PortableUserData:
+            case DataPathSource::PortableData: {
+                return true;
+            }
+            default: {
+                return false;
+            }
+        }
+    }
 };
 
 /// resolve the data storage path

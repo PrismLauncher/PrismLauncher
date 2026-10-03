@@ -70,15 +70,14 @@ QByteArray ApplicationMessage::serialize() const
 
 Result<Cli::Command> ApplicationMessage::toCliCommand() const
 {
+    const QString notFoundMsg = "missing `%1` for Launch command";
     // Launch
     if (command == "launch") {
-        TRY_INTO_CHECK_UNEXPECTED(auto targetType, args.value("targetType"), !targetType.isEmpty(),
-                                  "missing `targetType` for  Launch command");
-        TRY_INTO_CHECK_UNEXPECTED(auto target, args.value("target"), !target.isEmpty(), "missing `target` for  Launch command");
-        TRY_INTO_CHECK_UNEXPECTED(auto accountType, args.value("accountType"), !accountType.isEmpty(),
-                                  "missing `accountType` for  Launch command");
-        TRY_INTO_CHECK_UNEXPECTED(auto account, args.value("account"), !account.isEmpty(), "missing `account` for  Launch command");
-        TRY_INTO_CHECK_UNEXPECTED(auto id, args.value("id"), !id.isEmpty(), "missing `id` for  Launch command");
+        TRY_INTO(auto targetType, Try::findByMapKey(args, "targetType", notFoundMsg));
+        TRY_INTO(auto target, Try::findByMapKey(args, "target", notFoundMsg));
+        TRY_INTO(auto accountType, Try::findByMapKey(args, "accountType", notFoundMsg));
+        TRY_INTO(auto account, Try::findByMapKey(args, "account", notFoundMsg));
+        TRY_INTO(auto id, Try::findByMapKey(args, "id", notFoundMsg));
 
         Cli::Cmd::Launch launch{
             .id = id.toStdString(),
@@ -118,7 +117,7 @@ Result<Cli::Command> ApplicationMessage::toCliCommand() const
 
     // ProcessUri
     if (command == "processUri") {
-        TRY_INTO_CHECK_UNEXPECTED(auto uri, args.value("uri"), !uri.isEmpty(), "missing `uri` for  ProcessURI command");
+        TRY_INTO(auto uri, Try::findByMapKey(args, "uri", notFoundMsg));
 
         return Cli::Cmd::ProcessURI{ .uri = uri.toStdString() };
     }
@@ -130,14 +129,14 @@ Result<Cli::Command> ApplicationMessage::toCliCommand() const
 
     // ShowInstanceWindow
     if (command == "showInstanceWindow") {
-        TRY_INTO_CHECK_UNEXPECTED(auto id, args.value("id"), !id.isEmpty(), "missing `id` for  ShowInstanceWindow command");
+        TRY_INTO(auto id, Try::findByMapKey(args, "id", notFoundMsg));
 
         return Cli::Cmd::ShowInstanceWindow{ .id = id.toStdString() };
     }
 
     // Alive
     if (command == "alive") {
-        TRY_INTO_CHECK_UNEXPECTED(auto path, args.value("path"), !path.isEmpty(), "missing `path` for  Alive command");
+        TRY_INTO(auto path, Try::findByMapKey(args, "path", notFoundMsg));
         return Cli::Cmd::Alive{ .path = path.toStdU16String() };
     }
 
