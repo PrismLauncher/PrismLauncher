@@ -20,12 +20,14 @@
 #include "Result.h"
 #include "modplatform/ModIndex.h"
 
-namespace Modrinth {
+namespace Modrinth::Parse {
 
 Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
-Result<> loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
 Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj,
                                                            const QString& preferredHashType = "sha512",
                                                            const QString& preferredFileName = "");
+Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonArray& arr, const QString& addonId = {});
 
-}  // namespace Modrinth
+QString resourceTypeParameter(ModPlatform::ResourceType type);
+
+}  // namespace Modrinth::Parse

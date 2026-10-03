@@ -79,7 +79,7 @@ class ResourceModel : public QAbstractListModel {
 
     virtual ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
 
-    virtual ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) = 0;
+    ModPlatform::IndexedPack::Ptr createInfoArguments(const QModelIndex& index) { return m_packs[index.row()]; }
 
     /** Requests the API for more entries. */
     virtual void search();
@@ -142,7 +142,7 @@ class ResourceModel : public QAbstractListModel {
 
    private:
     /* Default search request callbacks */
-    void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
+    void searchRequestSucceeded(const QList<ModPlatform::IndexedPack>&);
     void searchRequestForOneSucceeded(const ModPlatform::IndexedPack::Ptr&);
     void searchRequestFailed(const QString& reason, int networkErrorCode);
     void searchRequestAborted();

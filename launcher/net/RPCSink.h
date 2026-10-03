@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <expected>
 #include <utility>
 
+#include "AssertHelpers.h"
 #include "Result.h"
 #include "net/ByteArraySink.h"
 #include "net/Request.h"
@@ -52,21 +52,21 @@ class Sink : public ByteArraySink {
 };
 
 template <typename T>
-struct Spec : public Request::Spec {
-    Sink<T>::ParseFunc parse = nullptr;
+using Spec = std::pair<Request::Spec, typename Sink<T>::ParseFunc>;
 
-    bool isValid() { return url.isValid() && parse; }
-    std::pair<Request::Ptr, T*> make()
-    {
-        if (!isValid()) {
-            return { nullptr, nullptr };
-        }
-        options |= Request::Option::AutoRetry | Request::Option::AddAPIHeaders;
-        auto req = Request::makeCustomRequest(this);
-        auto sink = std::make_unique<Sink<T>>(parse);
-        auto output = sink->result();
-        req->setSink(std::move(sink));
-        return { std::move(req), output };
+template <typename T>
+std::pair<Request::Ptr, T*> make(const Spec<T>& specPair)
+{
+    auto [spec, parse] = std::move(specPair);
+    if (ASSERT_NEVER(!spec.url.isValid() || !parse)) {
+        return { nullptr, nullptr };
     }
-};
+    spec.options |= Request::Option::AutoRetry | Request::Option::AddAPIHeaders;
+    auto req = Request::makeCustomRequest(spec);
+    auto sink = std::make_unique<Sink<T>>(parse);
+    auto output = sink->result();
+    req->setSink(std::move(sink));
+    return { std::move(req), output };
+}
+
 }  // namespace Net::RPC
