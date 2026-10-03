@@ -107,7 +107,10 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     m_ui->treeView->setItemDelegateForColumn(lockColumn, new LockDelegate(m_ui->treeView));
     m_ui->treeView->setItemDelegateForColumn(ResourceFolderModel::NameColumn, new MultiDecorationItemDelegate(this));
     // must come after setModel
-    m_ui->treeView->setResizeModes(m_model->columnResizeModes());
+    const auto& resizeModes = m_model->columnResizeModes();
+    for (int i = 0; i < resizeModes.count(); ++i) {
+        m_ui->treeView->header()->setSectionResizeMode(i, resizeModes[i]);
+    }
 
     m_ui->treeView->installEventFilter(this);
     m_ui->treeView->sortByColumn(1, Qt::AscendingOrder);
@@ -123,8 +126,8 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(m_ui->actionViewConfigs, &QAction::triggered, this, &ExternalResourcesPage::viewConfigs);
     connect(m_ui->actionViewFolder, &QAction::triggered, this, &ExternalResourcesPage::viewFolder);
 
-    connect(m_ui->treeView, &ModListView::customContextMenuRequested, this, &ExternalResourcesPage::showContextMenu);
-    connect(m_ui->treeView, &ModListView::activated, this, &ExternalResourcesPage::itemActivated);
+    connect(m_ui->treeView, &QWidget::customContextMenuRequested, this, &ExternalResourcesPage::showContextMenu);
+    connect(m_ui->treeView, &QAbstractItemView::activated, this, &ExternalResourcesPage::itemActivated);
 
     connect(m_ui->actionLockUpdates, &QAction::triggered, this, &ExternalResourcesPage::lockUpdates);
     connect(m_ui->actionUnlockUpdates, &QAction::triggered, this, &ExternalResourcesPage::unlockUpdates);
