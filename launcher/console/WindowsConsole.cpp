@@ -28,32 +28,35 @@
 #include <fcntl.h>
 #include <fileapi.h>
 #include <io.h>
-#include <stdio.h>
-#include <cstddef>
+#include <cstdio>
 #include <iostream>
 
-namespace console {
+namespace Console {
 
-void RedirectHandle(DWORD handle, FILE* stream, const char* mode)
+namespace {
+
+void redirectHandle(DWORD handle, FILE* stream, const char* mode)
 {
     HANDLE stdHandle = GetStdHandle(handle);
     if (stdHandle != INVALID_HANDLE_VALUE) {
-        int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        int fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(stdHandle), _O_TEXT);
         if (fileDescriptor != -1) {
             FILE* file = _fdopen(fileDescriptor, mode);
-            if (file != NULL) {
+            if (file != nullptr) {
                 int dup2Result = _dup2(_fileno(file), _fileno(stream));
                 if (dup2Result == 0) {
-                    setvbuf(stream, NULL, _IONBF, 0);
+                    setvbuf(stream, nullptr, _IONBF, 0);
                 }
             }
         }
     }
 }
+}  // namespace
 
 // taken from https://stackoverflow.com/a/25927081
 // getting a proper output to console with redirection support on windows is apparently hell
-void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr)
+void bindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr)
 {
     // Re-initialize the C runtime "FILE" handles with clean handles bound to "nul". We do this because it has been
     // observed that the file number of our standard handle file objects can be assigned internally to a value of -2
@@ -63,31 +66,31 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
     // use the "nul" device, which will place them into a valid state, after which we can redirect them to our target
     // using the "_dup2" function.
     if (bindStdIn) {
-        FILE* dummyFile;
+        FILE* dummyFile = nullptr;
         freopen_s(&dummyFile, "nul", "r", stdin);
     }
     if (bindStdOut) {
-        FILE* dummyFile;
+        FILE* dummyFile = nullptr;
         freopen_s(&dummyFile, "nul", "w", stdout);
     }
     if (bindStdErr) {
-        FILE* dummyFile;
+        FILE* dummyFile = nullptr;
         freopen_s(&dummyFile, "nul", "w", stderr);
     }
 
     // Redirect unbuffered stdin from the current standard input handle
     if (bindStdIn) {
-        RedirectHandle(STD_INPUT_HANDLE, stdin, "r");
+        redirectHandle(STD_INPUT_HANDLE, stdin, "r");
     }
 
     // Redirect unbuffered stdout to the current standard output handle
     if (bindStdOut) {
-        RedirectHandle(STD_OUTPUT_HANDLE, stdout, "w");
+        redirectHandle(STD_OUTPUT_HANDLE, stdout, "w");
     }
 
     // Redirect unbuffered stderr to the current standard error handle
     if (bindStdErr) {
-        RedirectHandle(STD_ERROR_HANDLE, stderr, "w");
+        redirectHandle(STD_ERROR_HANDLE, stderr, "w");
     }
 
     // Clear the error state for each of the C++ standard stream objects. We need to do this, as attempts to access the
@@ -108,7 +111,7 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
     }
 }
 
-bool AttachWindowsConsole()
+bool attachWindowsConsole()
 {
     auto stdinType = GetFileType(GetStdHandle(STD_INPUT_HANDLE));
     auto stdoutType = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
@@ -128,41 +131,42 @@ bool AttachWindowsConsole()
         bindStdErr = true;
     }
 
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-        BindCrtHandlesToStdHandles(bindStdIn, bindStdOut, bindStdErr);
+    if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
+        bindCrtHandlesToStdHandles(bindStdIn, bindStdOut, bindStdErr);
         return true;
     }
 
     return false;
 }
 
-std::error_code EnableAnsiSupport()
+std::error_code enableAnsiSupport()
 {
     // ref: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew
     // Using `CreateFileW("CONOUT$", ...)` to retrieve the console handle works correctly even if STDOUT and/or STDERR are redirected
-    HANDLE console_handle = CreateFileW(L"CONOUT$", FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
-    if (console_handle == INVALID_HANDLE_VALUE) {
-        return std::error_code(GetLastError(), std::system_category());
+    // NOLINTNEXTLINE(misc-redundant-expression)
+    HANDLE consoleHandle = CreateFileW(L"CONOUT$", FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (consoleHandle == INVALID_HANDLE_VALUE) {
+        return {static_cast<int>(GetLastError()), std::system_category()};
     }
 
     // ref: https://docs.microsoft.com/en-us/windows/console/getconsolemode
-    DWORD console_mode;
-    if (0 == GetConsoleMode(console_handle, &console_mode)) {
-        return std::error_code(GetLastError(), std::system_category());
+    DWORD consoleMode = 0;
+    if (0 == GetConsoleMode(consoleHandle, &consoleMode)) {
+        return {static_cast<int>(GetLastError()), std::system_category()};
     }
 
     // VT processing not already enabled?
-    if ((console_mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0) {
+    if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0) {
         // https://docs.microsoft.com/en-us/windows/console/setconsolemode
-        if (0 == SetConsoleMode(console_handle, console_mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
-            return std::error_code(GetLastError(), std::system_category());
+        if (0 == SetConsoleMode(consoleHandle, consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING)) {
+            return {static_cast<int>(GetLastError()), std::system_category()};
         }
     }
 
     return {};
 }
 
-void FreeWindowsConsole()
+void freeWindowsConsole()
 {
     fclose(stdout);
     fclose(stdin);
@@ -172,10 +176,10 @@ void FreeWindowsConsole()
 
 WindowsConsoleGuard::WindowsConsoleGuard() : m_consoleAttached(false)
 {
-    if (console::AttachWindowsConsole()) {
+    if (Console::attachWindowsConsole()) {
         m_consoleAttached = true;
-        if (auto err = console::EnableAnsiSupport(); err) {
-            std::cout << "Error setting up ansi console" << err.message() << std::endl;
+        if (auto err = Console::enableAnsiSupport(); err) {
+            std::cout << "Error setting up ansi console" << err.message() << '\n';
         }
     }
 }
@@ -184,8 +188,8 @@ WindowsConsoleGuard::~WindowsConsoleGuard()
 {
     // Detach from Windows console
     if (m_consoleAttached) {
-        console::FreeWindowsConsole();
+        Console::freeWindowsConsole();
     }
 }
 
-}  // namespace console
+}  // namespace Console
