@@ -20,6 +20,10 @@ set(Launcher_ENVName "PRISMLAUNCHER" PARENT_SCOPE)
 set(Launcher_Domain "${Launcher_Domain}" PARENT_SCOPE)
 set(Launcher_Git "${Launcher_Git}" PARENT_SCOPE)
 
+set(Launcher_AppSummary
+    "Custom Minecraft Launcher to easily manage multiple Minecraft installations at once"
+    PARENT_SCOPE)
+
 set(Launcher_SVGFileName "${Launcher_AppID}.svg")
 set(Launcher_Copyright "© 2022-2026 Prism Launcher Contributors\\n© 2021-2022 PolyMC Contributors\\n© 2012-2021 MultiMC Contributors")
 set(Launcher_Copyright_Mac "© 2022-2026 Prism Launcher Contributors, © 2021-2022 PolyMC Contributors and © 2012-2021 MultiMC Contributors" PARENT_SCOPE)

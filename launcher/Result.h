@@ -39,7 +39,10 @@
 
 #include <QDebug>
 #include <QString>
+#include <algorithm>
+#include <concepts>
 #include <expected>
+#include <iterator>
 
 template <typename T = void, typename E = QString>
 using Result = std::expected<T, E>;
@@ -59,3 +62,81 @@ using Result = std::expected<T, E>;
     auto&& TRY_INTO_VAR_ = (expr); \
     TRY(TRY_INTO_VAR_)             \
     decl = TRY_INTO_VAR_.value();
+
+namespace Try {
+
+namespace detail {
+
+template <class ContainerT>
+concept mapContainer = requires(ContainerT a, const ContainerT::key_type& k) {
+    requires std::ranges::range<ContainerT>;
+    { a.find(k) } -> std::same_as<std::ranges::iterator_t<ContainerT>>;
+};
+
+}  // namespace detail
+
+/// @breif try find a value in a mapping container by key
+template <detail::mapContainer Container>
+Result<typename Container::const_iterator::value_type> findByMapKey(const Container& container,
+                                                                    const typename Container::key_type& key,
+                                                                    const QString& msg)
+{
+    auto&& var = container.find(key);
+    if (var == container.end()) {
+        return std::unexpected{ msg.arg(key) };
+    }
+    return *var;
+}
+
+/// @breif try to find a value in a container by key projection (std::ranges::find)
+template <std::ranges::range Container, class T, class Proj = std::identity>
+    requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<typename Container::const_iterator, Proj>, const T*>
+Result<typename Container::const_iterator::value_type> find(const Container& container, const T& key, const QString& msg, Proj proj = {})
+{
+    auto&& var = std::ranges::find(container, key, proj);
+    if (var == container.end()) {
+        return std::unexpected{ msg.arg(key) };
+    }
+    return *var;
+}
+
+/// @breif try to find a value in a range by key projection (std::ranges::find)
+template <std::input_iterator I, std::sentinel_for<I> S, class T, class Proj = std::identity>
+    requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<I, Proj>, const T*>
+Result<typename I::value_type> find(I first, S last, const T& key, const QString& msg, Proj proj = {})
+{
+    auto&& var = std::ranges::find(first, last, key, proj);
+    if (var == last) {
+        return std::unexpected{ msg.arg(key) };
+    }
+    return *var;
+}
+
+/// @breif try to find a value in a container by predicate
+template <std::ranges::range Container,
+          class Proj = std::identity,
+          std::indirect_unary_predicate<std::projected<typename Container::const_iterator, Proj>> Pred>
+Result<typename Container::const_iterator::value_type> findIf(const Container& container, Pred pred, const QString& msg, Proj proj = {})
+{
+    auto&& var = std::ranges::find_if(container, pred, proj);
+    if (var == container.end()) {
+        return std::unexpected{ msg };
+    }
+    return *var;
+}
+
+/// @breif try to find a value in a range by predicate
+template <std::input_iterator I,
+          std::sentinel_for<I> S,
+          class Proj = std::identity,
+          std::indirect_unary_predicate<std::projected<I, Proj>> Pred>
+Result<typename I::value_type> findIf(I first, S last, Pred pred, const QString& msg, Proj proj = {})
+{
+    auto&& var = std::ranges::find_if(first, last, pred, proj);
+    if (var == last) {
+        return std::unexpected{ msg };
+    }
+    return *var;
+}
+
+}  // namespace Try

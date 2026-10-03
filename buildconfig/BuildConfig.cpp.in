@@ -54,6 +54,7 @@ Config::Config()
 
     USER_AGENT = "@Launcher_UserAgent@";
 
+    LAUNCHER_SUMMARY = "@Launcher_AppSummary@";
     // Version information
     VERSION_MAJOR = @Launcher_VERSION_MAJOR@;
     VERSION_MINOR = @Launcher_VERSION_MINOR@;

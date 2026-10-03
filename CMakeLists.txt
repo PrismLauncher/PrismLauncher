@@ -376,6 +376,17 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
+option(Launcher_ENABLE_CRASH_HANDLER
+    "Build with a cpptrace crash handler to catch and trace unexpected crashes"
+    ON)
+
+if(Launcher_ENABLE_CRASH_HANDLER)
+    find_package(cpptrace REQUIRED)
+endif()
+
+
+
+find_package(CLI11 CONFIG REQUIRED)
 
 include(ECMQtDeclareLoggingCategory)
 
@@ -538,6 +549,7 @@ add_subdirectory(libraries/qdcss) # css parser
 ############################### Built Artifacts ###############################
 
 add_subdirectory(buildconfig)
+add_subdirectory(crash_handler)
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
