@@ -72,10 +72,8 @@
 #include <QToolButton>
 #include <QWidget>
 #include <QWidgetAction>
-#include <memory>
 
 #include <BaseInstance.h>
-#include <BuildConfig.h>
 #include <DesktopServices.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
@@ -90,10 +88,7 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstanceWindow.h"
 
-#include "ui/GuiUtil.h"
-#include "ui/ViewLogWindow.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CreateShortcutDialog.h"
@@ -124,15 +119,12 @@
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
 #include "InstanceDirUpdate.h"
-
-#include "Json.h"
 
 #include "MMCTime.h"
 
@@ -995,27 +987,13 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 extra_info.insert("pack_id", addonId);
                 extra_info.insert("pack_version_id", fileId);
 
-                auto [job, array] = FlameAPI::getFile(addonId, fileId);
+                auto [job, versionRes] = FlameAPI::get().getVersionTask(addonId, fileId);
 
                 connect(job.get(), &Task::failed, this, [this](const QString& reason) {
                     CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
                 });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
-                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
-                    auto doc = Json::requireDocument(*array);
-                    if (!doc) {
-                        CustomMessageBox::selectable(this, tr("Error"), doc.error(), QMessageBox::Critical)->show();
-                        return;
-                    }
-                    auto data = doc->object()["data"].toObject();
-                    // No way to find out if it's a mod or a modpack before here
-                    // And also we need to check if it ends with .zip, instead of any better way
-                    auto versionRes = FlameMod::loadIndexedPackVersion(data);
-                    if (!versionRes) {
-                        CustomMessageBox::selectable(this, tr("Error"), versionRes.error(), QMessageBox::Critical)->show();
-                        return;
-                    }
-                    version = versionRes.value();
+                connect(job.get(), &Task::succeeded, this, [this, versionRes, addonId, fileId, &dl_url, &version] {
+                    version = *versionRes;
                     auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding

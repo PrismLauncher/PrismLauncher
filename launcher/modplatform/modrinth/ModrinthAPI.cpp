@@ -3,13 +3,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ModrinthAPI.h"
-#include <array>
+#include <utility>
 
 #include "Application.h"
+#include "BuildConfig.h"
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
-#include "net/ApiRequest.h"
+#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
+#include "net/Request.h"
 
 QString ModrinthAPI::getModpackIdFromUrl(const QUrl& url)
 {
@@ -25,36 +28,118 @@ QString ModrinthAPI::getModpackIdFromUrl(const QUrl& url)
     return segments.constFirst().trimmed();
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
+namespace {
+
+QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
-
-    auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hashFormat));
-    netJob->addNetAction(action);
-
-    return { netJob, response };
+    QStringList l;
+    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt, ModPlatform::LiteLoader,
+                         ModPlatform::DataPack, ModPlatform::Babric, ModPlatform::BTA, ModPlatform::LegacyFabric, ModPlatform::Ornithe,
+                         ModPlatform::Rift }) {
+        if ((types & loader) != 0U) {
+            l << getModLoaderAsString(loader);
+        }
+    }
+    return l;
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersions(const QStringList& hashes, const QString& hashFormat)
+QString getModLoaderFilters(ModPlatform::ModLoaderTypes types)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-
-    Json::writeStringList(bodyObj, "hashes", hashes);
-    Json::writeString(bodyObj, "algorithm", hashFormat);
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), bodyRaw);
-    netJob->addNetAction(action);
-    netJob->setAskRetry(false);
-    return { netJob, response };
+    QStringList l;
+    for (const auto& loader : getModLoaderStrings(types)) {
+        l << QString("\"categories:%1\"").arg(loader);
+    }
+    return l.join(',');
 }
 
-static void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
+QString mapMCVersionToModrinth(const Version& v)
+{
+    static const QString s_preString = " Pre-Release ";
+    auto verStr = v.toString();
+
+    if (verStr.contains(s_preString)) {
+        verStr.replace(s_preString, "-pre");
+    }
+    verStr.replace(" ", "-");
+    return verStr;
+}
+
+QString getGameVersionsString(const std::vector<Version>& mcVersions)
+{
+    QString s;
+    for (const auto& ver : mcVersions) {
+        s += QString("\"%1\",").arg(mapMCVersionToModrinth(ver));
+    }
+    s.remove(s.length() - 1, 1);  // remove last comma
+    return s;
+}
+
+QString getGameVersionsArray(const std::vector<Version>& mcVersions)
+{
+    QString s;
+    for (const auto& ver : mcVersions) {
+        s += QString(R"("versions:%1",)").arg(mapMCVersionToModrinth(ver));
+    }
+    s.remove(s.length() - 1, 1);  // remove last comma
+    return s.isEmpty() ? QString() : s;
+}
+
+QString getSideFilters(ModPlatform::SideType side)
+{
+    switch (side.value()) {
+        case ModPlatform::SideType::ClientSide:
+            return {
+                R"("environment:client_only","environment:client_only_server_optional","environment:singleplayer_only","environment:client_or_server","environment:client_or_server_prefers_both")"
+            };
+        case ModPlatform::SideTypeValue::ServerSide:
+            return {
+                R"("environment:server_only","environment:server_only_client_optional","environment:dedicated_server_only","environment:client_or_server","environment:client_or_server_prefers_both")"
+            };
+        case ModPlatform::SideTypeValue::UniversalSide:
+            return { R"("environment:client_and_server","client_or_server_prefers_both")" };
+        case ModPlatform::SideTypeValue::NoSide:
+        // fallthrough
+        default:
+            return {};
+    }
+}
+
+QString createFacets(const ResourceAPI::SearchArgs& args)
+{
+    QStringList facetsList;
+
+    if (args.loaders.has_value() && args.loaders.value() != 0) {
+        facetsList.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
+    }
+    if (args.versions.has_value() && !args.versions.value().empty()) {
+        facetsList.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+    }
+    if (args.side.has_value()) {
+        auto side = getSideFilters(args.side.value());
+        if (!side.isEmpty()) {
+            facetsList.append(QString("[%1]").arg(side));
+        }
+    }
+    if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
+        for (const auto& category : args.categoryIds.value()) {
+            facetsList.append(QString(R"(["categories:%1"])").arg(category));
+        }
+    }
+    if (!args.excludeDisclosureTypes.empty()) {
+        for (const auto& d : args.excludeDisclosureTypes) {
+            facetsList.append(QString("[\"disclosure_types!=%1\"]").arg(d.toString()));
+        }
+    }
+    if (args.openSource) {
+        facetsList.append("[\"open_source:true\"]");
+    }
+
+    facetsList.append(QString("[\"project_type:%1\"]").arg(Modrinth::Parse::resourceTypeParameter(args.type)));
+
+    return QString("[%1]").arg(facetsList.join(','));
+}
+
+void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
 {
     if (releaseTypes.has_value() && !releaseTypes->empty()) {
         const auto versionTypes = ModPlatform::IndexedVersionType::toModrinthList(releaseTypes.value());
@@ -64,86 +149,7 @@ static void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vecto
     }
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
-                                                             const QString& hashFormat,
-                                                             std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders,
-                                                             std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-
-    if (loaders.has_value()) {
-        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
-    }
-
-    if (mcVersions.has_value()) {
-        QStringList gameVersions;
-        for (auto& ver : mcVersions.value()) {
-            gameVersions.append(mapMCVersionToModrinth(ver));
-        }
-        Json::writeStringList(bodyObj, "game_versions", gameVersions);
-    }
-
-    addVersionTypes(bodyObj, releaseTypes);
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hashFormat), bodyRaw);
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
-    const QStringList& hashes,
-    const QString& hashFormat,
-    std::optional<std::vector<Version>> mcVersions,
-    std::optional<ModPlatform::ModLoaderTypes> loaders,
-    std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
-
-    QJsonObject bodyObj;
-
-    Json::writeStringList(bodyObj, "hashes", hashes);
-    Json::writeString(bodyObj, "algorithm", hashFormat);
-
-    if (loaders.has_value()) {
-        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
-    }
-
-    if (mcVersions.has_value()) {
-        QStringList gameVersions;
-        for (auto& ver : mcVersions.value()) {
-            gameVersions.append(mapMCVersionToModrinth(ver));
-        }
-        Json::writeStringList(bodyObj, "game_versions", gameVersions);
-    }
-
-    addVersionTypes(bodyObj, releaseTypes);
-
-    QJsonDocument body(bodyObj);
-    auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), bodyRaw);
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
-
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getProjects(QStringList addonIds) const
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
-    auto searchUrl = getMultipleModInfoURL(addonIds);
-
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
-    netJob->addNetAction(action);
-
-    return { netJob, response };
-}
+}  // namespace
 
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
@@ -154,72 +160,268 @@ QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
              { .index = 4, .name = "newest", .readableName = QObject::tr("Sort by Newest") },
              { .index = 5, .name = "updated", .readableName = QObject::tr("Sort by Last Updated") } };
 }
-namespace {
-const auto g_resourceTypeMap = std::array{
-    std::pair{ ModPlatform::ResourceType::Mod, "mod" },           std::pair{ ModPlatform::ResourceType::ResourcePack, "resourcepack" },
-    std::pair{ ModPlatform::ResourceType::ShaderPack, "shader" }, std::pair{ ModPlatform::ResourceType::DataPack, "datapack" },
-    std::pair{ ModPlatform::ResourceType::Modpack, "modpack" },
+bool ModrinthAPI::validateModLoaders(ModPlatform::ModLoaderTypes loaders)
+{
+    return loaders.testAnyFlags(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt |
+                                ModPlatform::LiteLoader | ModPlatform::DataPack | ModPlatform::Babric | ModPlatform::BTA |
+                                ModPlatform::LegacyFabric | ModPlatform::Ornithe | ModPlatform::Rift);
+}
+
+Net::RPC::Spec<ModPlatform::IndexedPack> ModrinthAPI::getProject(const QString& id) const
+{
+    // https://docs.modrinth.com/api/operations/getproject/
+    return { { .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/project/" + id) },
+             [id](const auto& response) -> Result<ModPlatform::IndexedPack> {
+                 ModPlatform::IndexedPack pack = { .addonId = id };
+                 TRY(Json::requireObject(response).and_then([&pack](const auto& v) { return Modrinth::Parse::loadIndexedPack(pack, v); }))
+                 return pack;
+             } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedPack>> ModrinthAPI::getProjects(const QStringList& addonIds) const
+{
+    // https://docs.modrinth.com/api/operations/getprojects/
+    auto url = BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(addonIds.join("\",\""));
+
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
+                QList<ModPlatform::IndexedPack> newList;
+                TRY_INTO(auto doc,
+                         Json::requireDocument(response, "ResourceAPI").and_then([](const auto& v) { return Json::requireArray(v); }))
+
+                for (auto packRaw : doc) {
+                    auto packObj = packRaw.toObject();
+
+                    ModPlatform::IndexedPack pack;
+                    TRY(Modrinth::Parse::loadIndexedPack(pack, packObj))
+                    newList << pack;
+                }
+                return newList;
+            } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedPack>> ModrinthAPI::searchProjects(const SearchArgs& args) const
+{
+    // https://docs.modrinth.com/api/operations/searchprojects/
+    auto url = searchProjectsURL(args);
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
+                QList<ModPlatform::IndexedPack> newList;
+                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
+                                       .and_then([](const auto& v) { return Json::requireObject(v); })
+                                       .and_then([](const auto& v) { return Json::requireArray(v, "hits"); }))
+
+                for (auto packRaw : doc) {
+                    auto packObj = packRaw.toObject();
+
+                    ModPlatform::IndexedPack pack;
+                    TRY(Modrinth::Parse::loadIndexedPack(pack, packObj))
+                    newList << pack;
+                }
+                return newList;
+            } };
+}
+
+QUrl ModrinthAPI::searchProjectsURL(const SearchArgs& args)
+{
+    if (args.loaders.has_value() && args.loaders.value() != 0) {
+        if (!validateModLoaders(args.loaders.value())) {
+            qWarning() << "Modrinth - or our interface - does not support any the provided mod loaders!";
+            return {};
+        }
+    }
+
+    QStringList getArguments;
+    getArguments.append(QString("offset=%1").arg(args.offset));
+    getArguments.append(QString("limit=25"));
+    if (args.search.has_value()) {
+        getArguments.append(QString("query=%1").arg(args.search.value()));
+    }
+    if (args.sorting.has_value()) {
+        getArguments.append(QString("index=%1").arg(args.sorting.value().name));
+    }
+    getArguments.append(QString("facets=%1").arg(createFacets(args)));
+
+    return BuildConfig.MODRINTH_PROD_URL + "/search?" + getArguments.join('&');
 };
+
+Net::RPC::Spec<QList<ModPlatform::Category>> ModrinthAPI::getCategories(ModPlatform::ResourceType type) const
+{  // https://docs.modrinth.com/api/operations/categorylist/
+    auto projectType = Modrinth::Parse::resourceTypeParameter(type);
+    return { { .url = BuildConfig.MODRINTH_PROD_URL + "/tag/category" },
+             [projectType](const auto& response) -> Result<QList<ModPlatform::Category>> {
+                 QList<ModPlatform::Category> categories;
+                 TRY_INTO(const auto& doc, Json::requireArray(response))
+
+                 for (auto val : doc) {
+                     TRY_INTO(const auto& cat, Json::requireObject(val))
+                     TRY_INTO(const auto& name, Json::requireString(cat, "name"))
+                     if (cat["project_type"].toString() == projectType) {
+                         categories.push_back({ .name = name, .id = name });
+                     }
+                 }
+                 return categories;
+             } };
 }
 
-ModPlatform::ResourceType ModrinthAPI::getResourceType(const QString& param)
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(const VersionSearchArgs& args) const
+{  // https://docs.modrinth.com/api/operations/getprojectversions/
+    auto url = getVersionsURL(args);
+    return { { .url = url }, [args](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
+                TRY_INTO(auto doc, Json::requireArray(response, "ResourceAPI::getVersions"))
+
+                TRY_INTO(args.pack->versions, Modrinth::Parse::loadIndexedPackVersions(doc, args.pack->addonId.toString()))
+                args.pack->versionsLoaded = true;
+                return args.pack->versions;
+            } };
+}
+
+Net::RPC::Spec<ModPlatform::IndexedVersion> ModrinthAPI::getVersion(const QString& /*id*/, const QString& versionId) const
 {
-    for (const auto& [key, value] : g_resourceTypeMap) {
-        if (value == param) {
-            return key;
+    // https://docs.modrinth.com/api/operations/getversion/
+    auto url = QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, versionId);
+    return { { .url = url }, [](const auto& response) -> Result<ModPlatform::IndexedVersion> {
+                return Json::requireObject(response, "ResourceAPI::getVersion").and_then([](const auto& v) {
+                    return Modrinth::Parse::loadIndexedPackVersion(v);
+                });
+            } };
+}
+
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> ModrinthAPI::getVersions(const QStringList& versionIds) const
+{  // https://docs.modrinth.com/api/operations/getversions/
+    auto url = BuildConfig.MODRINTH_PROD_URL + QString("/versions?ids=[\"%1\"]").arg(versionIds.join("\",\""));
+    return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
+                TRY_INTO(auto doc, Json::requireArray(response, "ResourceAPI::getVersions"))
+
+                return Modrinth::Parse::loadIndexedPackVersions(doc);
+            } };
+}
+
+Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::latestVersions(
+    const QStringList& hashes,
+    const QString& hashFormat,
+    std::optional<std::vector<Version>> mcVersions,
+    std::optional<ModPlatform::ModLoaderTypes> loaders,
+    const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
+{
+    // https://docs.modrinth.com/api/operations/getlatestversionsfromhashes/
+    QString loaderFilter;
+    if (loaders.has_value() && loaders != 0) {
+        auto modLoaders = ModPlatform::modLoaderTypesToList(*loaders);
+        if (!modLoaders.isEmpty()) {
+            loaderFilter = ModPlatform::getModLoaderAsString(modLoaders.first());
         }
     }
 
-    qWarning() << "Invalid resource type for Modrinth API!" << param;
-    return ModPlatform::ResourceType::Unknown;
-}
+    QJsonObject bodyObj;
 
-QString ModrinthAPI::resourceTypeParameter(ModPlatform::ResourceType type)
-{
-    for (const auto& [key, value] : g_resourceTypeMap) {
-        if (key == type) {
-            return value;
-        }
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
+
+    if (loaders.has_value()) {
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
     }
 
-    qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
-    return "";
+    if (mcVersions.has_value()) {
+        QStringList gameVersions;
+        for (auto& ver : mcVersions.value()) {
+            gameVersions.append(mapMCVersionToModrinth(ver));
+        }
+        Json::writeStringList(bodyObj, "game_versions", gameVersions);
+    }
+
+    addVersionTypes(bodyObj, releaseTypes);
+
+    auto body = QJsonDocument(bodyObj).toJson();
+    return { { .method = Net::HttpMethod::Post, .url = BuildConfig.MODRINTH_PROD_URL + "/version_files/update", .data = body },
+             [loaderFilter, hashFormat](const auto& response) -> Result<QHash<QString, ModPlatform::IndexedVersion>> {
+                 TRY_INTO(auto doc, Json::requireObject(response, "ModrinthCheckUpdate"))
+
+                 QHash<QString, ModPlatform::IndexedVersion> matches;
+                 for (auto hash : doc.keys()) {
+                     TRY_INTO(auto version, Json::requireObject(doc, hash))
+
+                     // Currently, we rely on a couple heuristics to determine whether an update is actually available or not:
+                     // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the
+                     // loader_filter
+                     // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the
+                     // case) Such is the pain of having arbitrary files for a given version .-.
+                     TRY_INTO(auto projectVer, Modrinth::Parse::loadIndexedPackVersion(version, hashFormat, loaderFilter))
+                     if (projectVer.downloadUrl.isEmpty()) {
+                         qCritical() << "Modrinth mod without download url!" << projectVer.fileName;
+                         continue;
+                     }
+                     matches[hash] = projectVer;
+                 }
+
+                 return matches;
+             } };
 }
 
-std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const
+std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> ModrinthAPI::latestVersionsTask(
+    const QStringList& hashes,
+    const QString& hashFormat,
+    std::optional<std::vector<Version>> mcVersions,
+    std::optional<ModPlatform::ModLoaderTypes> loaders,
+    const std::optional<std::vector<ModPlatform::IndexedVersionType>>& releaseTypes)
 {
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"));
+    auto spec = latestVersions(hashes, hashFormat, std::move(mcVersions), loaders, releaseTypes);
+
+    auto netJob = makeShared<NetJob>("Modrinth::latestVersionsTask", APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QHash<QString, ModPlatform::IndexedVersion>>(spec);
     netJob->addNetAction(action);
-    QObject::connect(netJob.get(), &Task::failed, netJob.get(),
-                     [](const QString& msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
+
+    return { netJob, response };
+}
+Net::RPC::Spec<QHash<QString, ModPlatform::IndexedVersion>> ModrinthAPI::currentVersions(const QStringList& hashes,
+                                                                                         const QString& hashFormat)
+{
+    // https://docs.modrinth.com/api/operations/versionsfromhashes/
+    QJsonObject bodyObj;
+
+    Json::writeStringList(bodyObj, "hashes", hashes);
+    Json::writeString(bodyObj, "algorithm", hashFormat);
+
+    ;
+    auto body = QJsonDocument(bodyObj).toJson();
+
+    return { { .method = Net::HttpMethod::Post, .url = BuildConfig.MODRINTH_PROD_URL + "/version_files", .data = body },
+             [](const auto& response) -> Result<QHash<QString, ModPlatform::IndexedVersion>> {
+                 TRY_INTO(auto doc, Json::requireObject(response, "ModrinthCheckUpdate"))
+
+                 QHash<QString, ModPlatform::IndexedVersion> matches;
+                 for (auto hash : doc.keys()) {
+                     TRY_INTO(matches[hash], Json::requireObject(doc, hash).and_then(
+                                                 [](const auto& v) { return Modrinth::Parse::loadIndexedPackVersion(v); }))
+                 }
+
+                 return matches;
+             } };
+}
+
+std::pair<NetJob::Ptr, QHash<QString, ModPlatform::IndexedVersion>*> ModrinthAPI::currentVersionsTask(const QStringList& hashes,
+                                                                                                      const QString& hashFormat)
+{
+    auto spec = currentVersions(hashes, hashFormat);
+
+    auto netJob = makeShared<NetJob>("Modrinth::latestVersionsTask", APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QHash<QString, ModPlatform::IndexedVersion>>(spec);
+    netJob->addNetAction(action);
 
     return { netJob, response };
 }
 
-QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& response, const QString& projectType)
+QUrl ModrinthAPI::getVersionsURL(const VersionSearchArgs& args)
 {
-    QList<ModPlatform::Category> categories;
-    auto parse = [&response, &projectType, &categories] -> Result<> {
-        TRY_INTO(const auto& doc, Json::requireArray(response))
-
-        for (auto val : doc) {
-            TRY_INTO(const auto& cat, Json::requireObject(val))
-            TRY_INTO(const auto& name, Json::requireString(cat, "name"))
-            if (cat["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name, .id = name });
-            }
-        }
-        return {};
-    };
-    if (auto res = parse(); !res) {
-        qWarning() << "Error while parsing JSON response from categories:" << res.error();
-        qWarning() << response;
+    QStringList getArguments;
+    if (args.mcVersions.has_value()) {
+        getArguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
     }
-    return categories;
-}
+    if (args.loaders.has_value()) {
+        getArguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
+    }
+    getArguments.append(QString("include_changelog=%1").arg(args.includeChangelog ? "true" : "false"));
 
-QList<ModPlatform::Category> ModrinthAPI::loadModCategories(const QByteArray& response) const
-{
-    return loadCategories(response, "mod");
+    return QString("%1/project/%2/version%3%4")
+        .arg(BuildConfig.MODRINTH_PROD_URL, args.pack->addonId.toString(), getArguments.isEmpty() ? "" : "?", getArguments.join('&'));
 }

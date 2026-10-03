@@ -49,8 +49,6 @@
 
 #include "modplatform/flame/FlameAPI.h"
 
-#include "Json.h"
-
 #include "InstanceImportTask.h"
 #include "net/NetJob.h"
 
@@ -132,42 +130,32 @@ void ImportPage::updateState()
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
 
-            auto [job, array] = FlameAPI::getFile(addonId, fileId);
+            auto [job, versionRes] = FlameAPI::get().getVersionTask(addonId, fileId);
 
             connect(job.get(), &NetJob::failed, this, [this](const QString& reason) {
                 CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             });
-            connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
-                qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
-                auto doc = Json::requireDocument(*array);
-                if (!doc) {
-                    CustomMessageBox::selectable(this, tr("Error"), doc.error(), QMessageBox::Critical)->show();
-                    return;
-                }
-                auto data = doc->object()["data"].toObject();
-                // No way to find out if it's a mod or a modpack before here
-                // And also we need to check if it ends with .zip, instead of any better way
-                auto fileName = data["fileName"].toString();
-                if (fileName.endsWith(".zip")) {
+            connect(job.get(), &NetJob::succeeded, this, [this, versionRes, addonId, fileId] {
+                if (versionRes->fileName.endsWith(".zip")) {
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    auto dl_url = QUrl(data["downloadUrl"].toString(""));
-                    if (!dl_url.isValid()) {
+                    auto dlUrl = QUrl(versionRes->downloadUrl);
+                    if (!dlUrl.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
-                            tr("The modpack %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            tr("The modpack %1 is blocked for third-parties! Please download it manually.").arg(versionRes->fileName),
                             QMessageBox::Critical)
                             ->show();
                         return;
                     }
 
-                    QFileInfo dl_file(dl_url.fileName());
-                    QString pack_name = data["displayName"].toString(dl_file.completeBaseName());
+                    QFileInfo dlFile(dlUrl.fileName());
+                    QString packName = versionRes->version.isEmpty() ? dlFile.completeBaseName() : versionRes->version;
 
-                    QMap<QString, QString> extra_info;
-                    extra_info.insert("pack_id", addonId);
-                    extra_info.insert("pack_version_id", fileId);
+                    QMap<QString, QString> extraInfo;
+                    extraInfo.insert("pack_id", addonId);
+                    extraInfo.insert("pack_version_id", fileId);
 
-                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, false, this, std::move(extra_info)));
+                    dialog->setSuggestedPack(packName, new InstanceImportTask(dlUrl, false, this, std::move(extraInfo)));
                     dialog->setSuggestedIcon("default");
 
                 } else {

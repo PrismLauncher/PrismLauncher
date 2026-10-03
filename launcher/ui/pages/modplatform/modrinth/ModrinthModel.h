@@ -84,7 +84,7 @@ class ModpackListModel : public QAbstractListModel {
     };
 
    public slots:
-    void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& newList);
+    void searchRequestFinished(const QList<ModPlatform::IndexedPack>& newList);
     void searchRequestFailed(const QString& reason, int networkErrorCode);
     void searchRequestForOneSucceeded(ModPlatform::IndexedPack::Ptr);
 
