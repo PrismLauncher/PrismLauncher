@@ -67,7 +67,7 @@ class InstanceTask : public Task {
 
     bool m_overrideExisting = false;
     bool m_confirmUpdate = true;
-    bool m_copyTemplateDir = true;
+    bool m_copyTemplateDir = false;
 
     QString m_originalInstanceId;
 
