@@ -1335,8 +1335,14 @@ endif()
 
 target_link_libraries(${Launcher_Name}
   Launcher_logic
-  CrashHandler
 )
+
+if (Launcher_ENABLE_CRASH_HANDLER)
+    target_compile_definitions(${Launcher_Name} PRIVATE Launcher_ENABLE_CRASH_HANDLER)
+    target_link_libraries(${Launcher_Name}
+        CrashHandler
+    )
+endif()
 
 if(DEFINED Launcher_APP_BINARY_NAME)
     set_target_properties(${Launcher_Name} PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}")

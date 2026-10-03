@@ -1096,9 +1096,11 @@ CrashTrace readTraceFromStdin()
     switch (traceType) {
         case detail::ObjectFrameTypeValue::Safe: {
             std::cerr << "detected a safe_object_trace\n";
+            break;
         }
         case detail::ObjectFrameTypeValue::Normal: {
             std::cerr << "detected a normal_object_trace\n";
+            break;
         }
     }
 

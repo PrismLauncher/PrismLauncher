@@ -28,7 +28,7 @@
     },
     "tomlplusplus",
     "zlib",
-    "cpptrace",
-    "cli11"
+    "cli11",
+    "cpptrace"
   ]
 }
