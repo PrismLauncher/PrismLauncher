@@ -50,6 +50,7 @@
 #include "modplatform/ModIndex.h"
 
 class MinecraftInstance;
+class QVBoxLayout;
 
 namespace Ui {
 class ModFilterWidget;
@@ -140,4 +141,5 @@ class ModFilterWidget : public QTabWidget {
     VersionProxyModel* m_versionsProxy = nullptr;
 
     QList<ModPlatform::Category> m_categories;
+    QVBoxLayout* m_categoryLayout = nullptr;
 };
