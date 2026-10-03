@@ -45,6 +45,7 @@ class NewInstanceDialog;
 }
 
 class PageContainer;
+class QCheckBox;
 class QDialogButtonBox;
 class ImportPage;
 class FlamePage;
@@ -72,6 +73,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QList<BasePage*> getPages() override;
 
     QString instName() const;
+    bool copyTemplateDir() const;
     QString instGroup() const;
     QString iconKey() const;
     QString instDir() const;
@@ -94,6 +96,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     Ui::NewInstanceDialog* ui = nullptr;
     PageContainer* m_container = nullptr;
     QDialogButtonBox* m_buttons = nullptr;
+    QCheckBox* m_copyTemplateDirCheckbox = nullptr;
 
     QString m_instIconKey;
     ImportPage* m_importPage = nullptr;
