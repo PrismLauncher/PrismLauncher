@@ -101,9 +101,10 @@ class PackInstallTask : public InstanceTask {
     void onModsDownloaded();
     void onModsExtracted();
 
+    void onLoaderListLoaded();
+
    private:
     QString getDirForModType(ModType type, const QString& raw);
-    QString getVersionForLoader(const QString& uid);
     static QString detectLibrary(const VersionLibrary& library);
 
     bool createLibrariesComponent(const QString& instanceRoot, PackProfile* profile);
@@ -117,6 +118,9 @@ class PackInstallTask : public InstanceTask {
                      const QMap<QString, VersionMod>& toDecomp,
                      const QMap<QString, QString>& toCopy);
     void install();
+    void finishInstall(const QString& loaderVersion);
+
+    Result<QString> pickLoaderVersion(const Meta::VersionList::Ptr& vlist);
 
    private:
     UserInteractionSupport* m_support;
@@ -124,6 +128,8 @@ class PackInstallTask : public InstanceTask {
     bool m_abortable = false;
 
     NetJob::Ptr m_jobPtr;
+
+    QString m_loaderUid;
 
     InstallMode m_installMode;
     QString m_packName;
