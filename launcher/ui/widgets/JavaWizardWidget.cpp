@@ -546,5 +546,11 @@ void JavaWizardWidget::onSpinBoxValueChanged(int /*unused*/)
 
 JavaWizardWidget::~JavaWizardWidget()
 {
+    if (m_verticalLayout) {
+        int index = m_verticalLayout->indexOf(m_verticalSpacer);
+        if (index >= 0) {
+            m_verticalLayout->removeItem(m_verticalSpacer);
+        }
+    }
     delete m_verticalSpacer;
 };
