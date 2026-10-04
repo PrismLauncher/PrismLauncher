@@ -75,8 +75,7 @@ class ServersPage : public QMainWindow, public BasePage {
     bool saveIsScheduled() const;
 
    private slots:
-    void currentChanged(const QModelIndex& current, const QModelIndex& previous);
-    void rowsRemoved(const QModelIndex& parent, int first, int last);
+    void selectionChanged();
 
     void on_actionAdd_triggered();
     void on_actionRemove_triggered();
