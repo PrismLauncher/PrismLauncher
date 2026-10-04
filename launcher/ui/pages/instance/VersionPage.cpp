@@ -228,7 +228,7 @@ void VersionPage::updateButtons(int row)
     ui->actionRemove->setEnabled(patch && patch->isRemovable());
     ui->actionMove_down->setEnabled(patch && patch->isMoveable());
     ui->actionMove_up->setEnabled(patch && patch->isMoveable());
-    ui->actionChange_version->setEnabled(patch && patch->isVersionChangeable(false));
+    ui->actionChange_version->setEnabled(patch && patch->isVersionChangeable());
     ui->actionEdit->setEnabled(patch && patch->isCustom());
     ui->actionCustomize->setEnabled(patch && patch->isCustomizable());
     ui->actionRevert->setEnabled(patch && patch->isRevertible());
