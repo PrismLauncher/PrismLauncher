@@ -247,15 +247,11 @@ class TaskTest : public QObject {
 
     void test_stackOverflowInConcurrentTask()
     {
-        QEventLoop loop;
-
         BigConcurrentTaskThread thread;
-
-        connect(&thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
 
         thread.start();
 
-        loop.exec();
+        QVERIFY2(QTest::qWaitFor([&thread] { return thread.isFinished(); }, 15000), "Thread didn't finish as it should.");
 
         QVERIFY(!thread.passed_the_deadline);
     }

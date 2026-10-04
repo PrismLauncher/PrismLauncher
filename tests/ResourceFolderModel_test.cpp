@@ -33,9 +33,9 @@
  *      limitations under the License.
  */
 
+#include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
-#include <QTimer>
 #include "BaseInstance.h"
 
 #include <FileSystem.h>
@@ -43,23 +43,10 @@
 #include <minecraft/mod/ModFolderModel.h>
 #include <minecraft/mod/ResourceFolderModel.h>
 
-#define EXEC_UPDATE_TASK(EXEC, VERIFY)                                                  \
-    QEventLoop loop;                                                                    \
-                                                                                        \
-    connect(&model, &ResourceFolderModel::updateFinished, &loop, &QEventLoop::quit);    \
-                                                                                        \
-    QTimer expire_timer;                                                                \
-    expire_timer.callOnTimeout(&loop, &QEventLoop::quit);                               \
-    expire_timer.setSingleShot(true);                                                   \
-    expire_timer.start(10000);                                                          \
-                                                                                        \
-    VERIFY(EXEC);                                                                       \
-    loop.exec();                                                                        \
-                                                                                        \
-    QVERIFY2(expire_timer.isActive(), "Timer has expired. The update never finished."); \
-    expire_timer.stop();                                                                \
-                                                                                        \
-    disconnect(&model, nullptr, &loop, nullptr);
+#define EXEC_UPDATE_TASK(EXEC, VERIFY)                            \
+    QSignalSpy spy(&model, &ResourceFolderModel::updateFinished); \
+    VERIFY(EXEC);                                                 \
+    QVERIFY2(spy.count() || spy.wait(10000), "Timer has expired. The update never finished.");
 
 class ResourceFolderModelTest : public QObject {
     Q_OBJECT
@@ -85,23 +72,12 @@ class ResourceFolderModelTest : public QObject {
             QString folder = source;
             QTemporaryDir tempDir;
 
-            QEventLoop loop;
-
             ModFolderModel m(tempDir.path(), nullptr, true, true);
-
-            connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
-
-            QTimer expire_timer;
-            expire_timer.callOnTimeout(&loop, &QEventLoop::quit);
-            expire_timer.setSingleShot(true);
-            expire_timer.start(10000);
+            QSignalSpy spy(&m, &ModFolderModel::updateFinished);
 
             m.installResource(folder);
 
-            loop.exec();
-
-            QVERIFY2(expire_timer.isActive(), "Timer has expired. The update never finished.");
-            expire_timer.stop();
+            QVERIFY2(spy.count() || spy.wait(10000), "Timer has expired. The update never finished.");
 
             verify(tempDir.path());
         }
@@ -110,22 +86,12 @@ class ResourceFolderModelTest : public QObject {
         {
             QString folder = source + '/';
             QTemporaryDir tempDir;
-            QEventLoop loop;
             ModFolderModel m(tempDir.path(), nullptr, true, true);
-
-            connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
-
-            QTimer expire_timer;
-            expire_timer.callOnTimeout(&loop, &QEventLoop::quit);
-            expire_timer.setSingleShot(true);
-            expire_timer.start(10000);
+            QSignalSpy spy(&m, &ModFolderModel::updateFinished);
 
             m.installResource(folder);
 
-            loop.exec();
-
-            QVERIFY2(expire_timer.isActive(), "Timer has expired. The update never finished.");
-            expire_timer.stop();
+            QVERIFY2(spy.count() || spy.wait(10000), "Timer has expired. The update never finished.");
 
             verify(tempDir.path());
         }
