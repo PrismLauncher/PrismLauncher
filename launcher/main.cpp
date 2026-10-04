@@ -47,13 +47,13 @@
 #include <QString>
 
 #include "Application.h"
+#include "CLI/CLI.hpp"
+#include "cli/Commands.h"
+#include "cli/Parser.h"
 
 #if defined Q_OS_WIN32
 #include "console/WindowsConsole.h"
 #endif
-
-#include "cli/Commands.h"
-#include "cli/Parser.h"
 
 #include "startup/Startup.h"
 
@@ -74,7 +74,6 @@ int main(int argc, char* argv[])
     CrashHandler::attach(CrashHandler::CrashConfig{
         .crashHandlerFlag = crashHandlerFlag,
         .processExePath = { exePath.string() },
-        .dataPath = { dataPathResult.dataPath.string() },
     });
     bool handleCrash{ false };
 #endif
@@ -111,11 +110,10 @@ int main(int argc, char* argv[])
             std::exit(1);
         }
 
-        // std::cerr << "stacktrace:\n\n" << trace << "\n";
-
         QApplication crashApp(argc, argv);
         QString msg = QObject::tr("%1 has Crashed").arg(BuildConfig.LAUNCHER_DISPLAYNAME);
-        CrashHandler::CrashHandlerDialog crashDialog(nullptr, msg, msg, std::move(trace));
+        CrashHandler::CrashHandlerDialog crashDialog(nullptr, msg, msg, std::move(trace), dataPathResult.dataPath / "logs",
+                                                     QStringLiteral("%1-crash").arg(BuildConfig.LAUNCHER_NAME).toStdString(), "txt");
 
         crashDialog.show();
 
