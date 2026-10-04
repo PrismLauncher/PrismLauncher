@@ -226,6 +226,38 @@ class RegressionTests : public QObject {
                                                                    ProcessURI{ .uri = "path/to/import2" },
                                                                    ProcessURI{ .uri = "path/to/import3" }, }, }
                                        << std::optional<CLIErrorType>{};
+
+            QTest::newRow("accepts a datapath")
+                << std::vector<std::string>{ "-d", "~/prism" }
+                << Cli::Args{ .dataPath = { .dataPath = "~/prism", .source = Startup::DataPathSource::Commandline }, .commands = {} }
+                << std::optional<CLIErrorType>{};
+
+            QTest::newRow("accepts a datapath with other commands")
+                << std::vector<std::string>{ "-d",
+                                             "~/prism",
+                                             "-l",
+                                             "an_instance",
+                                             "-o",
+                                             "offline_name",
+                                             "-I",
+                                             "path/to/import",
+                                             "positional/import",
+                                             "another/positional/import",
+                                             "--show-window", }
+                << Cli::Args{ .dataPath = { .dataPath = "~/prism", .source = Startup::DataPathSource::Commandline },
+                              .commands = { Launch{
+                                                .id = "an_instance",
+                                                .target = Launch::NoTarget{},
+                                                .account = Launch::AccountOffline{ .name = "offline_name" },
+
+                                            },
+                                            ShowMainWindow{},
+                                            ProcessURI{ .uri = "path/to/import" },
+                                            ProcessURI{ .uri = "positional/import" },
+                                            ProcessURI{ .uri = "another/positional/import" },
+
+                              }, }
+                << std::optional<CLIErrorType>{};
         }
     }
 
