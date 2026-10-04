@@ -169,22 +169,32 @@ void ListModel::performPaginatedSearch()
     if (m_searchState != ResetRequested && s_projectIdExpr.match(m_currentSearchTerm).hasMatch()) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack::Ptr> callbacks;
+            auto [job, response] = FlameAPI::get().getProjectTask(projectId, true, false);
 
-            callbacks.onFail = [this](QString reason, int networkErrorCode) {
+            QObject::connect(job.get(), &NetJob::succeeded, job.get(), [response, this] {
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                *pack = *response;
+                searchRequestForOneSucceeded(pack);
+            });
+            auto weak = job.toWeakRef();
+            QObject::connect(job.get(), &NetJob::failed, job.get(), [weak, this](const QString& reason) {
+                int networkErrorCode = -1;
+                if (auto job = weak.lock()) {
+                    if (auto* failedAction = job->getFailedActions().at(0); failedAction) {
+                        networkErrorCode = failedAction->replyStatusCode();
+                    }
+                }
                 if (networkErrorCode == 404) {
                     m_searchState = ResetRequested;
                 }
                 searchRequestFailed(reason);
-            };
-            callbacks.onSucceed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
-            callbacks.onAbort = [this] {
+            });
+            QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
-            };
-            auto project = std::make_shared<ModPlatform::IndexedPack>();
-            project->addonId = projectId;
-            if (auto job = FlameAPI::get().getProjectInfo({ project }, std::move(callbacks), false); job) {
+            });
+
+            if (job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }

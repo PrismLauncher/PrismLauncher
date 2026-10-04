@@ -489,6 +489,8 @@ set(API_SOURCES
 
     modplatform/flame/FlameAPI.h
     modplatform/flame/FlameAPI.cpp
+    modplatform/flame/FlamePackIndex.h
+    modplatform/flame/FlamePackIndex.cpp
     modplatform/modrinth/ModrinthAPI.h
     modplatform/modrinth/ModrinthAPI.cpp
     modplatform/helpers/HashUtils.h
