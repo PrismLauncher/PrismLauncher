@@ -1,7 +1,6 @@
 // Licensed under the Apache-2.0 license. See README.md for details.
 
 #include "ProgressWidget.h"
-#include <QEventLoop>
 #include <QLabel>
 #include <QProgressBar>
 #include <QVBoxLayout>
@@ -66,20 +65,6 @@ void ProgressWidget::start(Task* task)
     watch(task);
     if (!m_task->isRunning())
         QMetaObject::invokeMethod(m_task, "start", Qt::QueuedConnection);
-}
-
-bool ProgressWidget::exec(std::shared_ptr<Task> task)
-{
-    QEventLoop loop;
-
-    connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
-
-    start(task.get());
-
-    if (task->isRunning())
-        loop.exec();
-
-    return task->wasSuccessful();
 }
 
 void ProgressWidget::show()

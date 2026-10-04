@@ -32,9 +32,6 @@ class ProgressWidget : public QWidget {
     /** Watch the progress of a task, and start it if needed */
     void start(Task* task);
 
-    /** Blocking way of waiting for a task to finish. */
-    bool exec(std::shared_ptr<Task> task);
-
     /** Un-hide the widget if needed. */
     void show();
 
