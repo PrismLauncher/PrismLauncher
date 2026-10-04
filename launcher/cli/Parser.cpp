@@ -238,7 +238,6 @@ void Cli::attach(CLI::App& app, Args& args)
                args.dataPath.source = Startup::DataPathSource::Commandline;
            },
            "Use a custom path as application root (use '.' for current directory)")
-        ->expected(0, -1)
         ->default_str(args.dataPath.dataPath.string() + dPathSource);
 
     legacyCli.addLegacyArgs(app, args);
