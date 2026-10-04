@@ -26,7 +26,9 @@
 #include <QString>
 #include <QTextEdit>
 #include <QTextFormat>
+
 #include <cstdint>
+#include <filesystem>
 
 #include <crash_handler/CrashHandler.h>
 
@@ -44,7 +46,13 @@ class CrashHandlerDialog : public QDialog {
     Q_OBJECT
 
    public:
-    CrashHandlerDialog(QWidget* parent, const QString& title, const QString& message, CrashTrace&& trace);
+    CrashHandlerDialog(QWidget* parent,
+                       const QString& title,
+                       const QString& message,
+                       CrashTrace&& trace,
+                       std::filesystem::path dataPath,
+                       std::string traceFileBase,
+                       std::string traceFileExt);
 
    private:
     Ui::CrashHandlerDialog* m_ui;
@@ -52,6 +60,11 @@ class CrashHandlerDialog : public QDialog {
     std::string m_formattedTrace;
     QTextCharFormat m_defaultFormat;
 
+    std::filesystem::path m_dataPath;
+    std::string m_traceFileBase;
+    std::string m_traceFileExt;
+
+    QString traceHeader() const;
     void formatTrace();
     void reflowTrace();
 
@@ -63,5 +76,8 @@ class CrashHandlerDialog : public QDialog {
                              QTextCharFormat& textFormat,
                              const QTextCharFormat& defaultFormat);
     void setTextWithTermFormatting(QTextEdit* textEdit, const QString& text);
+
+    void saveTrace();
 };
+
 }  // namespace CrashHandler

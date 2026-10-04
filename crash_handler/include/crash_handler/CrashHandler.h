@@ -30,6 +30,7 @@
 #include <cpptrace/forward.hpp>
 #include <cstdint>
 #include <cstdlib>
+#include <exception>
 #include <optional>
 #include <span>
 #include <string>
@@ -135,11 +136,22 @@ struct ObjectFrameHelper {
     static constexpr ObjectFrameTypeValue Type = ObjectFrameType<T>::Type;
     template <writable Out>
     static bool writeObjectFrame(Out& out, T&);
-    template <readable In>
-    static bool readObjectFrame(In& in, T&);
+    static bool readObjectFrame(std::istream& in, T&);
 };
 
 }  // namespace detail
+
+#ifdef __linux__
+using TheadIdT = pid_t;
+#elifdef __FreeBSD__
+using TheadIdT = long;
+#elifdef __NetBSD__
+using TheadIdT = int;
+#elifdef __OpenBSD__
+using TheadIdT = pid_t;
+#elifdef __APPLE__
+using TheadIdT = uint64_t;
+#endif
 
 struct CrashContext {
     std::string_view message;
@@ -152,7 +164,7 @@ struct CrashContext {
     uint32_t threadId = 0;
 #else
     pid_t processId = 0;
-    pid_t threadId = 0;
+    TheadIdT threadId = 0;
 #endif
 
     template <detail::writable Out>
@@ -166,11 +178,10 @@ struct TraceHeader {
     uint32_t threadId;
 #else
     pid_t processId;
-    pid_t threadId;
+    TheadIdT threadId = 0;
 #endif
 
-    template <detail::readable In>
-    bool readTraceHeader(In& in);
+    bool readTraceHeader(std::istream& in);
 };
 
 // Config for a crash handler.  pass to `attach`
@@ -179,14 +190,6 @@ struct CrashConfig {
     ::std::string crashHandlerFlag = "--crash-handler";
     // full path to the executable, if not passed attempts to capture it in a platform dependant way
     ::std::optional<::std::string> processExePath = std::nullopt;
-    // path to a directory where binary crash traces should be saved
-    // if not set, traces are nto saved
-    ::std::optional<::std::string> dataPath = std::nullopt;
-    // base name of a crash trace full name will be "${base}${n?}.$[ext]".
-    // typically "crash.trace" or "crash1.trace"
-    ::std::string traceFileNameBase = "crash";
-    // extention used for crash trace
-    ::std::string traceFileNameExt = "trace";
 };
 
 // NOLINTNEXTLINE readability-identifier-naming
@@ -204,7 +207,6 @@ class CrashHandler {
 
     bool execSelfEnabled() const;
     const ::std::string& capturedExePath() const;
-    void setDataPath(std::string&& path);
 
     // signal handlers
    private:
@@ -247,10 +249,6 @@ class CrashHandler {
     ::std::string m_exePath;
     ::std::string m_crashHandlerFlag;
 
-    ::std::optional<::std::string> m_dataPath;
-    ::std::string m_traceFileNameBase;
-    ::std::string m_traceFileNameExt;
-
 #ifdef _MSC_VER
     // pre computation of windows start cmd
     ::std::wstring m_cliCommand;
@@ -274,9 +272,6 @@ class CrashHandler {
     void doObjectTrace(CrashContext& ctx);
 
    private:
-    // save trace
-    template <detail::objectFrame FrameType>
-    void saveObjectTrace(const CrashContext& ctx, ::std::span<FrameType> trace);
     // send trace to crash handler
     template <detail::objectFrame FrameType>
     void sendObjectTraceToProcess(const CrashContext& ctx, detail::PipedProcess p, ::std::span<FrameType> trace);
@@ -297,6 +292,4 @@ struct CrashTrace {
 // when running as a crash handler call this to read the crash trace frm stdin
 CrashTrace readTraceFromStdin();
 
-// set a data path for the current crash handler to save traces
-void setDataPath(std::string&& path);
 };  // namespace CrashHandler

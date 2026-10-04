@@ -26,6 +26,8 @@
 #include "rainbow.h"
 
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -40,11 +42,24 @@
 #include <QScrollBar>
 
 #include <cpptrace/formatting.hpp>
+#include <iostream>
+#include <utility>
 
 namespace CrashHandler {
 
-CrashHandlerDialog::CrashHandlerDialog(QWidget* parent, const QString& title, const QString& message, CrashTrace&& trace)
-    : QDialog(parent), m_ui(new Ui::CrashHandlerDialog), m_trace(std::move(trace))
+CrashHandlerDialog::CrashHandlerDialog(QWidget* parent,
+                                       const QString& title,
+                                       const QString& message,
+                                       CrashTrace&& trace,
+                                       std::filesystem::path dataPath,
+                                       std::string traceFileBase,
+                                       std::string traceFileExt)
+    : QDialog(parent)
+    , m_ui(new Ui::CrashHandlerDialog)
+    , m_trace(std::move(trace))
+    , m_dataPath(std::move(dataPath))
+    , m_traceFileBase(std::move(traceFileBase))
+    , m_traceFileExt(std::move(traceFileExt))
 {
     m_ui->setupUi(this);
     m_ui->messageLabel->setText(message);
@@ -56,17 +71,12 @@ CrashHandlerDialog::CrashHandlerDialog(QWidget* parent, const QString& title, co
     m_ui->traceText->setCurrentFont(monospace);
     m_defaultFormat = m_ui->traceText->currentCharFormat();
 
-    auto defaultPalette = QGuiApplication::palette();
-    auto defaultTextBg = defaultPalette.color(QPalette::Disabled, QPalette::Base);
-    auto defaultTextFg = defaultPalette.color(QPalette::Disabled, QPalette::Text);
-    m_ui->traceText->setTextBackgroundColor(defaultTextBg);
-    m_ui->traceText->setTextColor(defaultTextFg);
-
     connect(m_ui->copyButton, &QPushButton::clicked, this, [this]() { copyTraceToClipboard(); });
 
     connect(m_ui->issueButton, &QPushButton::clicked, this, []() { CrashHandlerDialog::openGithubIssue(); });
 
     formatTrace();
+    saveTrace();
 }
 
 namespace {
@@ -84,11 +94,23 @@ cpptrace::formatter defaultTraceFormatter()
 }
 
 }  // namespace
+QString CrashHandlerDialog::traceHeader() const
+{
+    auto programInfo = QStringLiteral("%1 : %2\nBuild Platform: %3\nBuild Date: %4\nQt Version: %5")
+                           .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM,
+                                BuildConfig.BUILD_DATE, QString(qVersion()));
+    auto traceHdr = QStringLiteral("%1\n\nMessage: %2\n\nProcess Id: %3\nThread Id: %4\n\n%5")
+                        .arg(programInfo, QString::fromStdString(m_trace.header.message), QString::number(m_trace.header.processId),
+                             QString::number(m_trace.header.threadId));
+
+    return traceHdr;
+}
 
 void CrashHandlerDialog::copyTraceToClipboard() const
 {
-    auto trace = defaultTraceFormatter().snippets(false).colors(cpptrace::formatter::color_mode::none).format(m_trace.stacktrace);
-    QGuiApplication::clipboard()->setText(QString::fromStdString(trace), QClipboard::Clipboard);
+    auto traceBody = defaultTraceFormatter().colors(cpptrace::formatter::color_mode::none).format(m_trace.stacktrace);
+    auto trace = traceHeader().arg(QString::fromStdString(traceBody));
+    QGuiApplication::clipboard()->setText(trace, QClipboard::Clipboard);
 }
 
 void CrashHandlerDialog::openGithubIssue()
@@ -104,14 +126,7 @@ void CrashHandlerDialog::formatTrace()
 
 void CrashHandlerDialog::reflowTrace()
 {
-    auto programInfo = QStringLiteral("%1 : %2\nBuild Platform: %3\nBuild Date: %4\nQt Version: %5")
-                           .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM,
-                                BuildConfig.BUILD_DATE, QString(qVersion()));
-    auto trace = QStringLiteral("%1\n\nMessage: %2\n\nProcess Id: %3\nThread Id: %4\n\n%5")
-                     .arg(programInfo, QString::fromStdString(m_trace.header.message), QString::number(m_trace.header.processId),
-                          QString::number(m_trace.header.threadId), QString::fromStdString(m_formattedTrace));
-
-    setTextWithTermFormatting(m_ui->traceText, trace);
+    setTextWithTermFormatting(m_ui->traceText, traceHeader().arg(m_formattedTrace));
 
     auto cur = m_ui->traceText->textCursor();
     cur.movePosition(QTextCursor::Start);
@@ -407,6 +422,7 @@ void CrashHandlerDialog::parseEscapeSequence(std::uint32_t attribute,
         case 45:
         case 46:
         case 47: {
+            break;  // ignore bg color changes
             std::uint32_t colorIndex = attribute - 40;
             QColor color;
             switch (colorIndex) {
@@ -450,6 +466,7 @@ void CrashHandlerDialog::parseEscapeSequence(std::uint32_t attribute,
             break;
         }
         case 48: {
+            break;  // ignore bg color changes
             if (i.hasNext()) {
                 bool ok = false;
                 int selector = i.next().toInt(&ok);
@@ -638,6 +655,10 @@ namespace {
 void ensureTextContrast(QTextCharFormat& textFormat)
 {
     auto bgColor = textFormat.background().color();
+    if (bgColor.alpha() == 0) {
+        auto defaultPalette = QGuiApplication::palette();
+        bgColor = defaultPalette.color(QPalette::Disabled, QPalette::Base);
+    }
     auto fgColor = textFormat.foreground().color();
 
     auto bgLuma = Rainbow::luma(bgColor);
@@ -674,7 +695,6 @@ void CrashHandlerDialog::setTextWithTermFormatting(QTextEdit* textEdit, const QS
     const QRegularExpression escapeSeq(R"(\x1B\[([\d;]+)m)");
     QTextCursor cursor(document);
     auto bg = textEdit->textBackgroundColor();
-    qDebug() << "textedit bg color" << bg;
     QTextCharFormat defaultFormat = textEdit->currentCharFormat();
     defaultFormat.setBackground(bg);
 
@@ -685,7 +705,7 @@ void CrashHandlerDialog::setTextWithTermFormatting(QTextEdit* textEdit, const QS
     auto offset = match.capturedStart();
 
     // insert text to the first offset
-    cursor.insertText(text.mid(0, offset));
+    cursor.insertText(text.mid(0, offset), defaultFormat);
     QTextCharFormat textFormat = defaultFormat;
 
     // while there are ANSI Codes...
@@ -723,6 +743,53 @@ void CrashHandlerDialog::setTextWithTermFormatting(QTextEdit* textEdit, const QS
     cursor.setCharFormat(defaultFormat);
     cursor.endEditBlock();
     textEdit->setTextCursor(cursor);
+}
+
+void CrashHandlerDialog::saveTrace()
+{
+    if (m_dataPath.empty() || !std::filesystem::exists(m_dataPath)) {
+        return;
+    }
+
+    ::std::filesystem::path crashPath = m_dataPath / (m_traceFileBase + "." + m_traceFileExt);
+    if (::std::filesystem::exists(crashPath)) {
+        // rotate old traces
+        for (auto i = 0; i < 4; i++) {
+            ::std::filesystem::path oldName =
+                m_dataPath / (m_traceFileBase + (i > 0 ? std::to_string(i - 1) : ::std::string()) + ::std::string(m_traceFileBase));
+            if (::std::filesystem::exists(oldName)) {
+                ::std::filesystem::path newName =
+                    m_dataPath / (m_traceFileBase + std::to_string(i + 1) + ::std::string(".") + m_traceFileExt);
+                ::std::filesystem::rename(oldName, newName);
+            }
+        }
+    }
+
+    std::ofstream file{};
+    try {
+        file.open(crashPath, std::ios_base::out | std::ios_base::binary);
+
+    } catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "failed to open file to save trace: " << e.what() << "\n";
+        return;
+    }
+
+    auto traceBody = defaultTraceFormatter().colors(cpptrace::formatter::color_mode::none).format(m_trace.stacktrace);
+    auto trace = traceHeader().arg(QString::fromStdString(traceBody));
+
+    try {
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+        auto body = trace.toUtf8();
+        if (!file.write(body.data(), body.size())) {
+            std::cerr << "failed to write trace to \"" << crashPath << "\" \n";
+            return;
+        }
+    } catch (const ::std::filesystem::filesystem_error& e) {
+        std::cerr << "failed to write trace to file: " << e.what() << "\n";
+        file.close();
+        return;
+    }
+    file.close();
 }
 
 }  // namespace CrashHandler

@@ -22,15 +22,16 @@
 #include "crash_handler/CrashHandler.h"
 
 #include <array>
+#include <bit>
 #include <csignal>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <filesystem>
-#include <fstream>
+#include <iomanip>
 #include <ios>
 #include <iostream>
+#include <istream>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -50,6 +51,17 @@
 #else
 #include <sys/wait.h>
 #include <cstring>
+#ifdef __linux__
+#include <sys/types.h>
+#elifdef __FreeBSD__
+#include <sys/thr.h>
+#elifdef __NetBSD__
+#include <lwp.h>
+#elifdef __OpenBSD__
+// <unistd.h> included in header
+#elifdef __APPLE__
+#include <pthread.h>
+#endif
 #endif
 
 #ifdef CRASH_HANDLER_HAVE_SIGALTSTACK
@@ -237,6 +249,29 @@ void handlePurecall()
 
 namespace {
 
+#ifndef _MSC_VER
+
+TheadIdT getThreadId()
+{
+#ifdef __linux__
+    return gettid();
+#elifdef __FreeBSD__
+    long tid;
+    thr_self(&tid);
+    return tid;
+#elifdef __NetBSD__
+    return _lwp_self();
+#elifdef __OpenBSD__
+    return getthrid();
+#elifdef __APPLE__
+    uint64_t tid{ 0 };
+    pthread_threadid_np(nullptr, &tid);
+    return tid;
+#endif
+}
+
+#endif
+
 [[noreturn]] void signalHandler(int sig)
 {
     std::cerr << "called signalHandler()\n";
@@ -268,7 +303,7 @@ namespace {
             }
             CrashContext ctx{
                 .message = msg,
-                .skipFrames = 2, // libc + this
+                .skipFrames = 2,  // libc + this
                 .preferSafe = true,
 #ifdef _MSC_VER
                 .exceptionPointers = nullptr,
@@ -277,7 +312,7 @@ namespace {
                 .threadId = GetCurrentThreadId(),
 #else
                 .processId = getpid(),
-                .threadId = gettid(),
+                .threadId = getThreadId(),
 #endif  // _MSC_VER
             };
             CURRENT_EXCEPTION_HANDLER->captureTraceAndExit(ctx);
@@ -308,11 +343,14 @@ void terminateHandler()
             } catch (cpptrace::exception&) {
                 CrashContext ctx{
                     .message = msg,
-                    .skipFrames = 2, // libc++ + this
+                    .skipFrames = 2,  // libc++ + this
 #ifdef _MSC_VER
                     .exceptionPointers = nullptr,
                     .processId = GetCurrentProcessId(),
                     .threadId = GetCurrentThreadId(),
+#else
+                    .processId = getpid(),
+                    .threadId = getThreadId(),
 #endif  // _MSC_VER
                 };
                 CURRENT_EXCEPTION_HANDLER->captureTraceAndExit(ctx);
@@ -324,6 +362,9 @@ void terminateHandler()
                     .exceptionPointers = nullptr,
                     .processId = GetCurrentProcessId(),
                     .threadId = GetCurrentThreadId(),
+#else
+                    .processId = getpid(),
+                    .threadId = getThreadId(),
 #endif  // _MSC_VER
                 };
                 CURRENT_EXCEPTION_HANDLER->captureTraceAndExit(ctx);
@@ -335,6 +376,9 @@ void terminateHandler()
                     .exceptionPointers = nullptr,
                     .processId = GetCurrentProcessId(),
                     .threadId = GetCurrentThreadId(),
+#else
+                    .processId = getpid(),
+                    .threadId = getThreadId(),
 #endif  // _MSC_VER
                 };
                 CURRENT_EXCEPTION_HANDLER->captureTraceAndExit(ctx);
@@ -485,12 +529,7 @@ void CrashHandler::restorePreviousHandlers() noexcept
 }
 
 CrashHandler::CrashHandler(CrashConfig&& cfg)
-    : m_exePath(cfg.processExePath.value_or(""))
-    , m_crashHandlerFlag(std::move(cfg.crashHandlerFlag))
-    , m_dataPath(std::move(cfg.dataPath))
-    , m_traceFileNameBase(std::move(cfg.traceFileNameBase))
-    , m_traceFileNameExt(std::move(cfg.traceFileNameExt))
-
+    : m_exePath(cfg.processExePath.value_or("")), m_crashHandlerFlag(std::move(cfg.crashHandlerFlag))
 {
     auto _ = std::move(cfg);  // finish moving the cfg to make clang-tidy happy
 
@@ -515,13 +554,9 @@ bool CrashHandler::execSelfEnabled() const
     return m_execSelfEnabled;
 }
 
-void CrashHandler::setDataPath(std::string&& path)
-{
-    m_dataPath = std::move(path);
-}
-
 #ifdef _MSC_VER
 namespace {
+
 std::string_view msgFromExceptionCode(int32_t code)
 {
     switch (code) {
@@ -569,6 +604,7 @@ std::string_view msgFromExceptionCode(int32_t code)
             return "UNKNOWN";
     }
 }
+
 }  // namespace
 #endif
 
@@ -595,8 +631,7 @@ bool ObjectFrameHelper<cpptrace::frame_ptr>::writeObjectFrame(Out& out, cpptrace
 }
 
 template <>
-template <readable In>
-bool ObjectFrameHelper<cpptrace::safe_object_frame>::readObjectFrame(In& in, cpptrace::safe_object_frame& frame)
+bool ObjectFrameHelper<cpptrace::safe_object_frame>::readObjectFrame(std::istream& in, cpptrace::safe_object_frame& frame)
 {
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
     try {
@@ -627,7 +662,7 @@ bool ObjectFrameHelper<cpptrace::object_frame>::writeObjectFrame(Out& out, cpptr
             return false;
         }
         std::size_t pathlen = frame.object_path.size();
-        if (!out.write(reinterpret_cast<char*>(&pathlen), sizeof(pathlen))) {
+        if (!out.write(reinterpret_cast<char*>(&pathlen), sizeof(std::size_t))) {
             std::cerr << "failed to write object_path length\n";
             return false;
         }
@@ -647,8 +682,7 @@ bool ObjectFrameHelper<cpptrace::object_frame>::writeObjectFrame(Out& out, cpptr
 }
 
 template <>
-template <readable In>
-bool ObjectFrameHelper<cpptrace::object_frame>::readObjectFrame(In& in, cpptrace::object_frame& frame)
+bool ObjectFrameHelper<cpptrace::object_frame>::readObjectFrame(std::istream& in, cpptrace::object_frame& frame)
 {
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
     try {
@@ -661,13 +695,13 @@ bool ObjectFrameHelper<cpptrace::object_frame>::readObjectFrame(In& in, cpptrace
             return false;
         }
         std::size_t pathlen = 0;
-        if (!in.read(reinterpret_cast<char*>(&pathlen), sizeof(pathlen))) {
+        if (!in.read(reinterpret_cast<char*>(&pathlen), sizeof(std::size_t))) {
             std::cerr << "failed to read object_path length\n";
             return false;
         }
         // resize
         frame.object_path.resize(pathlen);
-        if (!in.read(frame.object_path.data(), pathlen)) {
+        if (!in.read(frame.object_path.data(), static_cast<std::streamsize>(pathlen))) {
             std::cerr << "failed to read object_path\n";
             return false;
         }
@@ -697,7 +731,7 @@ bool CrashContext::writeTraceHeader(Out& out) const
             return false;
         }
         std::size_t messageLen = message.size();
-        if (!out.write(reinterpret_cast<char*>(&messageLen), sizeof(messageLen))) {
+        if (!out.write(reinterpret_cast<const char*>(&messageLen), sizeof(std::size_t))) {
             std::cerr << "failed to write message length\n";
             return false;
         }
@@ -716,8 +750,7 @@ bool CrashContext::writeTraceHeader(Out& out) const
     return true;
 }
 
-template <detail::readable In>
-bool TraceHeader::readTraceHeader(In& in)
+bool TraceHeader::readTraceHeader(std::istream& in)
 {
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
     try {
@@ -729,15 +762,15 @@ bool TraceHeader::readTraceHeader(In& in)
             std::cerr << "failed to read threadId id\n";
             return false;
         }
-        std::size_t messageLen = 0;
-        if (!in.read(reinterpret_cast<char*>(&messageLen), sizeof(messageLen))) {
+        std::size_t messageLen{ 0 };
+        if (!in.read(reinterpret_cast<char*>(&messageLen), sizeof(std::size_t))) {
             std::cerr << "failed to read message length\n";
             return false;
         }
         // resize
         message.resize(messageLen);
-        if (!in.read(message.data(), messageLen)) {
-            std::cerr << "failed to read message\n";
+        if (!in.read(message.data(), static_cast<std::streamsize>(messageLen))) {
+            std::cerr << "failed to read message string\n";
             return false;
         }
     } catch (const ::std::exception& e) {
@@ -780,8 +813,6 @@ void CrashHandler::doSignalSafeObjectTrace(CrashContext& ctx)
 
     std::span trace(buffer.data(), count);
 
-    saveObjectTrace<cpptrace::frame_ptr>(ctx, trace);
-
     detail::PipedProcess process{};
 
 #ifdef _MSC_VER
@@ -800,8 +831,6 @@ void CrashHandler::doObjectTrace(CrashContext& ctx)
     ctx.skipFrames += 1;
     cpptrace::object_trace trace = cpptrace::generate_object_trace(ctx.skipFrames);
 
-    saveObjectTrace<cpptrace::object_frame>(ctx, trace.frames);
-
     detail::PipedProcess process{};
 
 #ifdef _MSC_VER
@@ -818,6 +847,7 @@ void CrashHandler::doObjectTrace(CrashContext& ctx)
 template <detail::objectFrame FrameType>
 void CrashHandler::sendObjectTraceToProcess(const CrashContext& ctx, detail::PipedProcess p, ::std::span<FrameType> trace)
 {
+    std::cerr << "sending trace to process\n";
     // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
     if (!ctx.writeTraceHeader(p)) {
         std::cerr << "failed to write trace header\n";
@@ -839,76 +869,8 @@ void CrashHandler::sendObjectTraceToProcess(const CrashContext& ctx, detail::Pip
             return;
         }
     }
+    std::cerr << "done\n";
     // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-}
-
-template <detail::objectFrame FrameType>
-void CrashHandler::saveObjectTrace(const CrashContext& ctx, ::std::span<FrameType> trace)
-{
-    if (!m_dataPath.has_value()) {
-        return;
-    }
-
-    ::std::filesystem::path dataPath = m_dataPath.value();
-
-    if (dataPath.empty() || !std::filesystem::exists(dataPath)) {
-        return;
-    }
-
-    ::std::filesystem::path crashPath = dataPath / (m_traceFileNameBase + "." + m_traceFileNameExt);
-    if (::std::filesystem::exists(crashPath)) {
-        // rotate old traces
-        for (auto i = 0; i < 4; i++) {
-            ::std::filesystem::path oldName = dataPath / (m_traceFileNameBase + (i > 0 ? std::to_string(i - 1) : ::std::string()) +
-                                                          ::std::string(".") + m_traceFileNameExt);
-            if (::std::filesystem::exists(oldName)) {
-                ::std::filesystem::path newName =
-                    dataPath / (m_traceFileNameBase + std::to_string(i + 1) + ::std::string(".") + m_traceFileNameExt);
-                ::std::filesystem::rename(oldName, newName);
-            }
-        }
-    }
-
-    std::ofstream file{};
-    try {
-        file.open(crashPath, std::ios_base::out | std::ios_base::binary);
-
-    } catch (const std::filesystem::filesystem_error& e) {
-        std::cerr << "failed to open file to save trace: " << e.what() << "\n";
-        return;
-    }
-
-    try {
-        if (!ctx.writeTraceHeader(file)) {
-            std::cerr << "failed to write trace header\n";
-            return;
-        }
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
-        detail::ObjectFrameTypeValue frameType = detail::ObjectFrameHelper<FrameType>::Type;
-        if (!file.write(reinterpret_cast<char*>(&frameType), sizeof(frameType))) {
-            std::cerr << "failed to write trace type\n";
-            return;
-        }
-        ::std::size_t count = trace.size();
-        if (!file.write(reinterpret_cast<char*>(&count), sizeof(count))) {
-            std::cerr << "failed to write trace frame count\n";
-            return;
-        }
-        // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-
-        for (FrameType f : trace) {
-            if (!detail::ObjectFrameHelper<FrameType>::writeObjectFrame(file, f)) {
-                std::cerr << "writing frame failed\n";
-                return;
-            }
-        }
-
-    } catch (const ::std::filesystem::filesystem_error& e) {
-        std::cerr << "failed to write trace to file: " << e.what() << "\n";
-        file.close();
-        return;
-    }
-    file.close();
 }
 
 namespace {
@@ -946,17 +908,6 @@ void detach()
         std::scoped_lock lock(CURRENT_EXCEPTION_HANDLER_GUARD);
 
         CURRENT_EXCEPTION_HANDLER.reset();
-    }
-}
-
-void setDataPath(std::string&& path)
-{
-    {
-        std::scoped_lock lock(CURRENT_EXCEPTION_HANDLER_GUARD);
-
-        if (CURRENT_EXCEPTION_HANDLER) {
-            CURRENT_EXCEPTION_HANDLER->setDataPath(std::move(path));
-        }
     }
 }
 
@@ -1003,8 +954,12 @@ bool PipedProcess::open(const ::std::string& processPath, const ::std::string& a
     }
 #else
     // Setup pipe and spawn child
-    pipe(input_pipe.fd.data());
-    const pid_t pid = ::fork();
+    if (::pipe(input_pipe.fd.data()) == -1) {
+        const char* forkFailureMessage = "pipe() failed\n";
+        ::write(STDERR_FILENO, forkFailureMessage, ::strlen(forkFailureMessage));
+        return false;
+    }
+    pid = ::fork();
     if (pid == -1) {
         const char* forkFailureMessage = "fork() failed\n";
         ::write(STDERR_FILENO, forkFailureMessage, ::strlen(forkFailureMessage));
@@ -1044,12 +999,13 @@ void PipedProcess::close() const
     ::close(input_pipe.read_end());
     ::close(input_pipe.write_end());
 #endif
+
     wait();
+
 #ifdef _MSC_VER
     ::CloseHandle(inputPipe.read_end);
     ::CloseHandle(pi.hThread);
     ::CloseHandle(pi.hProcess);
-
 #endif  // _MSC_VER
 }
 
@@ -1080,6 +1036,7 @@ CrashTrace readTraceFromStdin()
     _setmode(_fileno(stdin), _O_BINARY);
 #endif  // _MSC_VER
 
+    std::cerr << "reading trace header \n";
     CrashTrace trace{};
 
     if (!trace.header.readTraceHeader(std::cin)) {
@@ -1087,6 +1044,7 @@ CrashTrace readTraceFromStdin()
         return trace;
     }
 
+    std::cerr << "reading trace type \n";
     detail::ObjectFrameTypeValue traceType = detail::ObjectFrameTypeValue::Safe;
     // NOLINTBEGIN)cppcoreguidelines-pro-type-reinterpret-cast
     if (!std::cin.read(reinterpret_cast<char*>(&traceType), sizeof(traceType))) {
@@ -1102,8 +1060,13 @@ CrashTrace readTraceFromStdin()
             std::cerr << "detected a normal_object_trace\n";
             break;
         }
+        default: {
+            std::cerr << "unknown trace type: " << static_cast<int>(traceType) << "\n";
+            return trace;
+        }
     }
 
+    std::cerr << "reading trace type \n";
     std::size_t frameCount;
     if (!std::cin.read(reinterpret_cast<char*>(&frameCount), sizeof(frameCount))) {
         std::cerr << "Failed to read trace frame count!\n";
@@ -1151,6 +1114,7 @@ CrashTrace readTraceFromStdin()
     }
     std::cerr << "resolving " << objectTrace.frames.size() << " frames from object trace\n";
     trace.stacktrace = objectTrace.resolve();
+    trace.valid = true;
 
     return trace;
 }
