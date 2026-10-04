@@ -58,6 +58,10 @@
 #include <QApplication>
 #include <QProcess>
 
+// TODO: Use this in other files
+// TODO: Make other strings, like "ModMetadataDisabled" etc, to be literals not copy-paste over whole project, tf
+const QString g_instanceSortMode = QStringLiteral("InstSortMode");
+
 // FIXME: possibly move elsewhere
 enum InstSortMode {
     // Sort alphabetically by name.
@@ -66,6 +70,8 @@ enum InstSortMode {
     Sort_LastLaunch,
     // Sort by which instance has the most playtime.
     Sort_Playtime,
+    // Sort instances by a user-defined order within each group.
+    Sort_Manual,
 };
 
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
@@ -75,6 +81,7 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
     ui->sortingModeGroup->setId(ui->sortByPlaytimeBtn, Sort_Playtime);
+    ui->sortingModeGroup->setId(ui->sortManualBtn, Sort_Manual);
 
     loadSettings();
 
@@ -263,14 +270,17 @@ void LauncherPage::applySettings()
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
     switch (sortMode) {
         case Sort_LastLaunch:
-            s->set("InstSortMode", "LastLaunch");
+            s->set(g_instanceSortMode, "LastLaunch");
             break;
         case Sort_Playtime:
-            s->set("InstSortMode", "Playtime");
+            s->set(g_instanceSortMode, "Playtime");
+            break;
+        case Sort_Manual:
+            s->set(g_instanceSortMode, "Manual");
             break;
         case Sort_Name:
         default:
-            s->set("InstSortMode", "Name");
+            s->set(g_instanceSortMode, "Name");
             break;
     }
 
@@ -337,11 +347,13 @@ void LauncherPage::loadSettings()
     ui->downloadsDirMoveCheckBox->setChecked(s->get("MoveModsFromDownloadsDir").toBool());
 
     // Instance
-    QString sortMode = s->get("InstSortMode").toString();
+    QString sortMode = s->get(g_instanceSortMode).toString();
     if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
     } else if (sortMode == "Playtime") {
         ui->sortByPlaytimeBtn->setChecked(true);
+    } else if (sortMode == "Manual") {
+        ui->sortManualBtn->setChecked(true);
     } else {
         ui->sortByNameBtn->setChecked(true);
     }
