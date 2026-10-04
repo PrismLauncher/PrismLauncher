@@ -44,6 +44,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QDirListing>
+#include <QEventLoop>
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
@@ -485,28 +486,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
             qDebug() << "attempting to run symlinking with privilege";
 
-            QEventLoop loop;
-            bool gotPrivResults = false;
-
-            connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&gotPrivResults, &loop](bool gotResults) {
-                if (!gotResults) {
-                    qDebug() << "Privileged run exited without results!";
-                }
-                gotPrivResults = gotResults;
-                loop.quit();
-            });
-            folderLink.runPrivileged();
-
-            loop.exec();  // wait for the finished signal
-
-            for (auto result : folderLink.getResults()) {
-                if (result.err_value != 0) {
-                    thereWereErrors = true;
-                }
-            }
-            if (thereWereErrors) {
-                qDebug() << "errors encountered while trying to link files";
-            }
+            thereWereErrors = !folderLink.runPrivilegedAndWait();
         }
     }
 #endif
@@ -653,14 +633,13 @@ void create_link::runPrivileged(const QString& offset)
     m_linked = 0;  // reset counter
     m_pathResults.clear();
     m_linksToMake.clear();
-
-    bool gotResults = false;
+    m_gotPrivilegedResults = false;
 
     makeLinkList(offset);
 
     QString serverName = BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink_server" + StringUtils::getRandomAlphaNumeric();
 
-    connect(&m_linkServer, &QLocalServer::newConnection, this, [this, &gotResults]() {
+    connect(&m_linkServer, &QLocalServer::newConnection, this, [this]() {
         qDebug() << "Client connected, sending out pairs";
         // construct block of data to send
         QByteArray block;
@@ -727,7 +706,7 @@ void create_link::runPrivileged(const QString& offset)
                 }
                 m_pathResults.append(result);
             }
-            gotResults = true;
+            m_gotPrivilegedResults = true;
             qDebug() << "results received, closing connection";
             clientConnection->close();
         });
@@ -740,14 +719,39 @@ void create_link::runPrivileged(const QString& offset)
     qDebug() << "Listening on pipe" << serverName;
     if (!m_linkServer.listen(serverName)) {
         qDebug() << "Unable to start local pipe server on" << serverName << ":" << m_linkServer.errorString();
+        QMetaObject::invokeMethod(this, [this]() { emit finishedPrivileged(false); }, Qt::QueuedConnection);
         return;
     }
 
     auto* linkFileProcess = new ExternalLinkFileProcess(serverName, m_useHardLinks, this);
-    connect(linkFileProcess, &ExternalLinkFileProcess::processExited, this, [this, &gotResults]() { emit finishedPrivileged(gotResults); });
+    connect(linkFileProcess, &ExternalLinkFileProcess::processExited, this, [this]() { emit finishedPrivileged(m_gotPrivilegedResults); });
     connect(linkFileProcess, &ExternalLinkFileProcess::finished, linkFileProcess, &QObject::deleteLater);
 
     linkFileProcess->start();
+}
+
+bool create_link::runPrivilegedAndWait(const QString& offset)
+{
+    QEventLoop loop;
+    bool gotResults = false;
+
+    connect(this, &create_link::finishedPrivileged, &loop, [&gotResults, &loop](bool results) {
+        if (!results) {
+            qDebug() << "Privileged run exited without results!";
+        }
+        gotResults = results;
+        loop.quit();
+    });
+    runPrivileged(offset);
+
+    loop.exec();  // wait for the finished signal
+
+    bool thereWereErrors =
+        std::any_of(m_pathResults.cbegin(), m_pathResults.cend(), [](const LinkResult& result) { return result.err_value != 0; });
+    if (thereWereErrors) {
+        qDebug() << "errors encountered while trying to link files";
+    }
+    return gotResults && !thereWereErrors;
 }
 
 void ExternalLinkFileProcess::runLinkFile()

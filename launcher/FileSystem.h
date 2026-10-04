@@ -256,6 +256,8 @@ class create_link : public QObject {
     void runPrivileged() { runPrivileged(QString()); }
     void runPrivileged(const QString& offset);
 
+    bool runPrivilegedAndWait(const QString& offset = QString());
+
     QList<LinkResult> getResults() const { return m_pathResults; }
 
    signals:
@@ -285,6 +287,7 @@ class create_link : public QObject {
     int m_linked{};
     bool m_debug = false;
     std::error_code m_osErr;
+    bool m_gotPrivilegedResults = false;
 
     QLocalServer m_linkServer;
 };
