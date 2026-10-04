@@ -1346,7 +1346,7 @@ void Application::messageReceived(const QByteArray& message)
 
     auto commandResult = received.toCliCommand();
     if (!commandResult) {
-        qWarning() << "Received invalid command:" << res.error();
+        qWarning() << "Received invalid command:" << commandResult.error();
         return;
     }
     auto command = commandResult.value();
