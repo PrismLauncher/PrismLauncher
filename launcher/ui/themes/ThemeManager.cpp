@@ -38,7 +38,11 @@
 ThemeManager::ThemeManager()
 {
     QIcon::setFallbackThemeName(QIcon::themeName());
-    QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << m_iconThemeFolder.path());
+    auto searchPaths = QIcon::themeSearchPaths();
+    searchPaths.removeOne(":/icons");
+    searchPaths.prepend(m_iconThemeFolder.path());
+    searchPaths.prepend(":/icons");
+    QIcon::setThemeSearchPaths(searchPaths);
 
     themeDebugLog() << "Determining System Widget Theme...";
     const auto& style = QApplication::style();
