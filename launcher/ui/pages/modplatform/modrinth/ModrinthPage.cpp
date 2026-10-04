@@ -153,7 +153,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             m_current->versionsLoaded = versionsLoaded;
 
             QVariant currentUpdated;
-            currentUpdated.setValue(response);
+            currentUpdated.setValue(m_current);
 
             if (!m_model->setData(curr, currentUpdated, Qt::UserRole)) {
                 qWarning() << "Failed to cache extra info for the current pack!";
