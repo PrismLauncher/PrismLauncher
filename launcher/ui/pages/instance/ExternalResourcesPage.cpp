@@ -310,6 +310,11 @@ void ExternalResourcesPage::removeItem()
                   "This may be permanent and it will be gone from the parent folder.\n\n"
                   "Are you sure?")
                    .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName());
+    } else if (count == 1) {
+        text = tr("You are about to remove \"%1\".\n"
+                  "The file may be permanently deleted.\n\n"
+                  "Are you sure?")
+                   .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName());
     }
 
     if (!text.isEmpty()) {
