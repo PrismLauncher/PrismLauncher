@@ -155,48 +155,9 @@ void DataPack::setDescription(QString new_description)
     m_description = new_description;
 }
 
-void DataPack::setImage(QImage new_image) const
+void DataPack::loadIcon()
 {
-    QMutexLocker locker(&m_data_lock);
-
-    Q_ASSERT(!new_image.isNull());
-
-    if (m_pack_image_cache_key.key.isValid())
-        QPixmapCache::remove(m_pack_image_cache_key.key);
-
-    // scale the image to avoid flooding the pixmapcache
-    auto pixmap =
-        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
-    m_pack_image_cache_key.key = QPixmapCache::insert(pixmap);
-    m_pack_image_cache_key.was_ever_used = true;
-
-    // This can happen if the pixmap is too big to fit in the cache :c
-    if (!m_pack_image_cache_key.key.isValid()) {
-        qWarning() << "Could not insert a image cache entry! Ignoring it.";
-        m_pack_image_cache_key.was_ever_used = false;
-    }
-}
-
-QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
-{
-    QPixmap cached_image;
-    if (QPixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
-        if (size.isNull())
-            return cached_image;
-        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
-    }
-
-    // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used) {
-        return {};
-    } else {
-        qDebug() << "Data Pack" << name() << "Had it's image evicted from the cache. reloading...";
-    }
-
-    // Imaged got evicted from the cache. Re-process it and retry.
-    DataPackUtils::processPackPNG(this);
-    return image(size);
+    m_iconCache.loadIcon([type = type(), path = fileinfo().filePath()] { return DataPackUtils::processPackPNG(type, path); });
 }
 
 static std::pair<Version, Version> map(std::pair<int, int> format, const QMap<std::pair<int, int>, std::pair<Version, Version>>& versions)

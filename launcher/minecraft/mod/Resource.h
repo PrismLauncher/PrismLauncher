@@ -35,12 +35,19 @@
 
 #pragma once
 
-#include <cstdint>
-
+#include <QApplication>
 #include <QDateTime>
 #include <QFileInfo>
+#include <QIcon>
+#include <QMetaObject>
 #include <QObject>
+#include <QPixmap>
+#include <QPixmapCache>
 #include <QPointer>
+#include <QThreadPool>
+#include <Qt>
+#include <cstdint>
+#include <functional>
 #include <memory>
 
 #include "MetadataHandler.h"
@@ -90,7 +97,9 @@ enum class EnableAction : std::uint8_t { ENABLE, DISABLE, TOGGLE };
  *
  *  Subclass it to add additional data / behavior, such as Mods or Resource packs.
  */
-class Resource {
+class Resource : public QObject {
+    Q_OBJECT
+
    public:
     Resource(const Resource&) = delete;
     Resource& operator=(const Resource&) = delete;
@@ -184,6 +193,15 @@ class Resource {
 
     bool isMoreThanOneHardLink() const;
 
+    virtual QPixmap icon(QSize /*size*/) const { return {}; }
+
+    virtual QIcon fallbackIcon() const { return {}; }
+
+    virtual void loadIcon() {}
+
+   signals:
+    void iconChanged();
+
    protected:
     /* The file corresponding to this resource. */
     QFileInfo m_fileInfo{};
@@ -215,4 +233,22 @@ class Resource {
     QString m_sizeStr;
     qint64 m_sizeInfo = 0;
     std::uintmax_t m_hardLinkCount = 0;
+};
+
+class ResourceIconCache : public QObject {
+    Q_OBJECT
+
+   public:
+    void loadIcon(std::function<QPixmap()> load);
+
+    QPixmap icon(QSize size) const;
+
+   signals:
+    void iconLoaded();
+
+   private:
+    QPixmapCache::Key m_cacheKey;
+    bool m_wasEverUsed = false;
+    bool m_wasReadAttempt = false;
+    bool m_isLoading = false;
 };

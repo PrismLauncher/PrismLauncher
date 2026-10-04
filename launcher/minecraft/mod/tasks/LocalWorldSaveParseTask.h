@@ -29,13 +29,10 @@
 #include "tasks/Task.h"
 
 namespace WorldSaveUtils {
+bool process(WorldSave& save);
 
-enum class ProcessingLevel { Full, BasicInfoOnly };
-
-bool process(WorldSave& save, ProcessingLevel level = ProcessingLevel::Full);
-
-bool processZIP(WorldSave& pack, ProcessingLevel level = ProcessingLevel::Full);
-bool processFolder(WorldSave& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(WorldSave& pack);
+bool processFolder(WorldSave& pack);
 
 bool validate(QFileInfo file);
 

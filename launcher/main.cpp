@@ -33,6 +33,7 @@
  *      limitations under the License.
  */
 
+#include <QPixmapCache>
 #include <iostream>
 
 #include "Application.h"

@@ -26,20 +26,20 @@
 
 namespace TexturePackUtils {
 
-bool process(TexturePack& pack, ProcessingLevel level)
+bool process(TexturePack& pack)
 {
     switch (pack.type()) {
         case ResourceType::FOLDER:
-            return TexturePackUtils::processFolder(pack, level);
+            return TexturePackUtils::processFolder(pack);
         case ResourceType::ZIPFILE:
-            return TexturePackUtils::processZIP(pack, level);
+            return TexturePackUtils::processZIP(pack);
         default:
             qWarning() << "Invalid type for resource pack parse task!";
             return false;
     }
 }
 
-bool processFolder(TexturePack& pack, ProcessingLevel level)
+bool processFolder(TexturePack& pack)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
@@ -61,58 +61,22 @@ bool processFolder(TexturePack& pack, ProcessingLevel level)
         return false;
     }
 
-    if (level == ProcessingLevel::BasicInfoOnly)
-        return true;
-
-    QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
-    if (image_file_info.isFile()) {
-        QFile mcmeta_file(image_file_info.filePath());
-        if (!mcmeta_file.open(QIODevice::ReadOnly))
-            return false;
-
-        auto data = mcmeta_file.readAll();
-
-        bool packPNG_result = TexturePackUtils::processPackPNG(pack, std::move(data));
-
-        mcmeta_file.close();
-        if (!packPNG_result) {
-            return false;
-        }
-    } else {
-        return false;
-    }
-
     return true;
 }
 
-bool processZIP(TexturePack& pack, ProcessingLevel level)
+bool processZIP(TexturePack& pack)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
     MMCZip::ArchiveReader zip(pack.fileinfo().filePath());
-    bool packProcessed = false;
-    bool iconProcessed = false;
-
-    return zip.parse([&packProcessed, &iconProcessed, &pack, level](MMCZip::ArchiveReader::File* file) -> Result<bool> {
-        if (!packProcessed && file->filename() == "pack.txt") {
-            packProcessed = true;
-            TRY_INTO(auto data, file->readAll())
-            if (!TexturePackUtils::processPackTXT(pack, std::move(data))) {
-                return std::unexpected{"Could not parse texture pack txt"};
-            }
-            return packProcessed && (iconProcessed || level == ProcessingLevel::BasicInfoOnly);
-        }
-        if (!iconProcessed && file->filename() == "pack.png") {
-            iconProcessed = true;
-            TRY_INTO(auto data, file->readAll())
-            if (!TexturePackUtils::processPackPNG(pack, std::move(data))) {
-                return std::unexpected{"Could not parse texture pack png"};
-            }
-            return packProcessed && iconProcessed;
-        }
-        TRY(file->skip());
+    const auto data = zip.readFile("pack.txt");
+    if (!data.has_value()) {
+        qWarning() << "Could not read pack.txt from texture pack at" << pack.fileinfo().filePath() << "-" << data.error();
         return false;
-    }).has_value(); // TODO: propagate result
+    }
+
+    pack.setDescription(QString::fromUtf8(data.value()));
+    return true;
 }
 
 bool processPackTXT(TexturePack& pack, QByteArray&& raw_data)
@@ -121,28 +85,16 @@ bool processPackTXT(TexturePack& pack, QByteArray&& raw_data)
     return true;
 }
 
-bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data)
+QPixmap processPackPNG(ResourceType type, const QString& path)
 {
-    auto img = QImage::fromData(raw_data);
-    if (!img.isNull()) {
-        pack.setImage(img);
-    } else {
-        qWarning() << "Failed to parse pack.png.";
-        return false;
-    }
-    return true;
-}
-
-bool processPackPNG(const TexturePack& pack)
-{
-    auto png_invalid = [&pack]() {
-        qWarning() << "Texture pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
-        return false;
+    auto png_invalid = [&path]() {
+        qWarning() << "Texture pack at" << path << "does not have a valid pack.png";
+        return QPixmap();
     };
 
-    switch (pack.type()) {
+    switch (type) {
         case ResourceType::FOLDER: {
-            QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
+            QFileInfo image_file_info(FS::PathCombine(path, "pack.png"));
             if (image_file_info.exists() && image_file_info.isFile()) {
                 QFile pack_png_file(image_file_info.filePath());
                 if (!pack_png_file.open(QIODevice::ReadOnly))
@@ -150,39 +102,38 @@ bool processPackPNG(const TexturePack& pack)
 
                 auto data = pack_png_file.readAll();
 
-                bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(data));
-
-                pack_png_file.close();
-                if (!pack_png_result) {
-                    return png_invalid();  // pack.png invalid
+                QPixmap result;
+                if (!result.loadFromData(data)) {
+                    return png_invalid();
                 }
-            } else {
-                return png_invalid();  // pack.png does not exists or is not a valid file.
+
+                return result;
             }
-            return false;
+
+            return png_invalid();  // pack.png does not exists or is not a valid file.
         }
         case ResourceType::ZIPFILE: {
-            MMCZip::ArchiveReader zip(pack.fileinfo().filePath());
+            MMCZip::ArchiveReader zip(path);
 
             if (auto dataRes = zip.readFile("pack.png"); dataRes) {
-                bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(dataRes.value()));
-
-                if (!pack_png_result) {
-                    return png_invalid();  // pack.png invalid
+                QPixmap result;
+                if (!result.loadFromData(dataRes.value())) {
+                    return png_invalid();
                 }
+                return result;
             }
             return png_invalid();  // could not set pack.mcmeta as current file.
         }
         default:
             qWarning() << "Invalid type for resource pack parse task!";
-            return false;
+            return {};
     }
 }
 
 bool validate(QFileInfo file)
 {
     TexturePack rp{ file };
-    return TexturePackUtils::process(rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+    return TexturePackUtils::process(rp) && rp.valid();
 }
 
 }  // namespace TexturePackUtils

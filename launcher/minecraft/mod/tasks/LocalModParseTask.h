@@ -15,18 +15,15 @@ ModDetails ReadQuiltModInfo(const QByteArray& contents);
 ModDetails ReadForgeInfo(const QByteArray& contents);
 ModDetails ReadLiteModInfo(const QByteArray& contents);
 
-enum class ProcessingLevel { Full, BasicInfoOnly };
+bool process(Mod& mod);
 
-bool process(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
-
-bool processZIP(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
-bool processLitemod(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(Mod& mod);
+bool processLitemod(Mod& mod);
 
 /** Checks whether a file is valid as a mod or not. */
 bool validate(QFileInfo file);
 
-bool processIconPNG(const Mod& mod, QByteArray&& raw_data, QPixmap* pixmap);
-bool loadIconFile(const Mod& mod, QPixmap* pixmap);
+QPixmap loadIconFile(ResourceType type, const QString& path, const QString& iconPath);
 }  // namespace ModUtils
 
 class LocalModParseTask : public Task {

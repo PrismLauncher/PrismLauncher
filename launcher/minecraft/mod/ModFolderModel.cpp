@@ -43,7 +43,6 @@
 #include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QHeaderView>
-#include <QIcon>
 #include <QMimeData>
 #include <QString>
 #include <QStyle>
@@ -187,47 +186,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
     }
 
     return {};
-}
-
-namespace {
-QIcon fallbackIcon(ModPlatform::ModLoaderType type)
-{
-    switch (type) {
-        default:
-            return QIcon::fromTheme("loadermods");
-        case ModPlatform::ModLoaderType::NeoForge:
-            return QIcon::fromTheme("neoforged");
-        case ModPlatform::ModLoaderType::Forge:
-            return QIcon::fromTheme("forge");
-        case ModPlatform::ModLoaderType::LiteLoader:
-            return QIcon::fromTheme("liteloader");
-        case ModPlatform::ModLoaderType::Fabric:
-            return QIcon::fromTheme("fabricmc");
-        case ModPlatform::ModLoaderType::Quilt:
-            return QIcon::fromTheme("quiltmc");
-    }
-}
-};  // namespace
-
-QList<MultiDecorationItemDelegate::Icon> ModFolderModel::icons(int row) const
-{
-    auto result = ResourceFolderModel::icons(row);
-    static const QSize s_iconSize = { 32, 32 };
-
-    if (m_showImages) {
-        const auto& mod = at(row);
-
-        QIcon icon;
-        if (const auto pixmap = mod.icon(s_iconSize, Qt::KeepAspectRatio); pixmap.isNull()) {
-            icon = fallbackIcon(mod.details().loader);
-        } else {
-            icon = pixmap;
-        }
-
-        result.prepend({ .icon = icon, .size = s_iconSize });
-    }
-
-    return result;
 }
 
 QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
