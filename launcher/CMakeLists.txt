@@ -1207,8 +1207,6 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/pe_blue/pe_blue.qrc
     resources/breeze_dark/breeze_dark.qrc
     resources/breeze_light/breeze_light.qrc
-    resources/OSX/OSX.qrc
-    resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
