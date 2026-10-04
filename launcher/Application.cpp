@@ -295,13 +295,20 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
         if (m_peerInstance->isClient()) {
             int timeout = 2000;
 
-            for (const auto& cmd : args.commands) {
+            auto send = [this, timeout](const Cli::Command& cmd) {
                 auto msg = ApplicationMessage::fromCliCommand(cmd);
                 if (!m_peerInstance->sendMessage(msg.serialize(), timeout)) {
                     std::cerr << "Unable to redirect command `" << msg.command.toStdString().c_str() << "` to already running instance\n";
                     // C function not Qt function - event loop not started yet
                     ::std::exit(1);
                 }
+            };
+
+            if (args.commands.empty()) {
+                send(Cli::Cmd::ShowMainWindow{});
+            }
+            for (const auto& cmd : args.commands) {
+                send(cmd);
             }
 
             // exit this instance
