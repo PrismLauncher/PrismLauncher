@@ -59,7 +59,8 @@
 #include <QProcess>
 
 // TODO: Use this in other files
-// TODO: Make other strings, like "ModMetadataDisabled" etc, to be literals not copy-paste over whole project, tf
+// TODO: Make other strings, like "ModMetadataDisabled" etc
+    // to be literals not copy-paste over whole project
 const QString g_instanceSortMode = QStringLiteral("InstSortMode");
 
 // FIXME: possibly move elsewhere
