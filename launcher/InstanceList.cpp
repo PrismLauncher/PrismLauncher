@@ -502,7 +502,7 @@ bool InstanceList::undoTrashInstance()
     increaseGroupCount(top.groupName);
     if (top.manualOrder >= 0) {
         auto& manualOrder = m_manualOrder[top.groupName];
-        const auto& minSize = qMin(top.manualOrder, static_cast<int>(manualOrder.size()));
+        const int minSize = qMin(top.manualOrder, static_cast<int>(manualOrder.size()));
         manualOrder.insert(minSize, top.id);
     }
 
