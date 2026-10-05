@@ -228,6 +228,10 @@ void ModrinthCreationTask::createInstance()
         components->setComponentVersion("org.quiltmc.quilt-loader", m_quiltVersion);
         loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::Quilt);
     }
+    if (!m_ornitheVersion.isEmpty()) {
+        components->setComponentVersion("net.ornithemc.fabric-loader", m_ornitheVersion);
+        loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::Ornithe);
+    }
     if (!m_forgeVersion.isEmpty()) {
         components->setComponentVersion("net.minecraftforge", m_forgeVersion);
         loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::Forge);
@@ -394,6 +398,8 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
                     TRY_INTO(m_fabricVersion, Json::requireString(*it, "Fabric Loader version"))
                 } else if (name == "quilt-loader") {
                     TRY_INTO(m_quiltVersion, Json::requireString(*it, "Quilt Loader version"))
+                } else if (name == "ornithe-loader") {
+                    TRY_INTO(m_ornitheVersion, Json::requireString(*it, "Ornithe Loader version"))
                 } else if (name == "forge") {
                     TRY_INTO(m_forgeVersion, Json::requireString(*it, "Forge version"))
                 } else if (name == "neoforge") {
