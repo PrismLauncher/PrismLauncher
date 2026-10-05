@@ -37,7 +37,6 @@
 #include "World.h"
 #include <QDebug>
 #include <QDir>
-#include <QDirIterator>
 #include <QString>
 
 #include <FileSystem.h>

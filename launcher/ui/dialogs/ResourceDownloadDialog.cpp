@@ -187,7 +187,7 @@ void ResourceDownloadDialog::confirm()
 
         // Check for updates
         ProgressDialog progressDialog(this);
-        progressDialog.setSkipButton(true, tr("Abort"));
+        progressDialog.showSkipButton();
         progressDialog.setWindowTitle(tr("Checking for dependencies..."));
         auto ret = progressDialog.execWithTask(task.get());
 

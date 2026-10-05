@@ -278,17 +278,20 @@ auto V1::getIndexForMod(const QDir& indexDir, const QString& slug) -> Mod
 
     toml::table table;
 #if TOML_EXCEPTIONS
+    // Catch std::exception instead of toml::parse_error to work around
+    // the latter not being caught here when compiled with libc++.
+    // See https://github.com/PrismLauncher/PrismLauncher/issues/6047.
     try {
         table = toml::parse_file(StringUtils::toStdString(indexDir.absoluteFilePath(realFname)));
-    } catch (const toml::parse_error& err) {
+    } catch (const std::exception& err) {
         qWarning() << QString("Could not open file %1!").arg(normalizedFname);
         qWarning() << "Reason:" << QString(err.what());
         return {};
     }
 #else
-    toml::parse_result result = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
+    toml::parse_result result = toml::parse_file(StringUtils::toStdString(indexDir.absoluteFilePath(realFname)));
     if (!result) {
-        qWarning() << QString("Could not open file %1!").arg(normalized_fname);
+        qWarning() << QString("Could not open file %1!").arg(normalizedFname);
         qWarning() << "Reason:" << result.error().description();
         return {};
     }

@@ -161,6 +161,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
+
+#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 #include <QStyleHints>
 #endif
 
@@ -1236,11 +1239,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         installEventFilter(new ToolTipFilter);
     }
 
-    if (createSetupWizard()) {
-        return;
+    // the setup wizard applies the selected theme itself before it is shown
+    if (!createSetupWizard()) {
+        m_themeManager->applyCurrentlySelectedTheme(true);
     }
-
-    m_themeManager->applyCurrentlySelectedTheme(true);
     performMainStartupAction();
 }
 
@@ -1279,7 +1281,7 @@ bool Application::createSetupWizard()
             settings()->set("IconTheme", QString("pe_colored"));
         }
         if (!validWidgets) {
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS)
             const QString style =
                 QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark ? QStringLiteral("dark") : QStringLiteral("bright");
 #else
@@ -1291,33 +1293,34 @@ bool Application::createSetupWizard()
 
         m_themeManager->applyCurrentlySelectedTheme(true);
 
-        m_setupWizard = new SetupWizard(nullptr);
+        SetupWizard setupWizard;
         if (languageRequired) {
-            m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
+            setupWizard.addPage(new LanguageWizardPage(&setupWizard));
         }
 
         if (javaRequired) {
-            m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+            setupWizard.addPage(new JavaWizardPage(&setupWizard));
         } else if (askjava) {
-            m_setupWizard->addPage(new AutoJavaWizardPage(m_setupWizard));
+            setupWizard.addPage(new AutoJavaWizardPage(&setupWizard));
         }
 
         if (pasteInterventionRequired) {
-            m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
+            setupWizard.addPage(new PasteWizardPage(&setupWizard));
         }
 
         if (themeInterventionRequired) {
-            m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
+            setupWizard.addPage(new ThemeWizardPage(&setupWizard));
         }
 
         if (login) {
-            m_setupWizard->addPage(new LoginWizardPage(m_setupWizard));
+            setupWizard.addPage(new LoginWizardPage(&setupWizard));
         }
-        connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
-        m_setupWizard->show();
+        if (setupWizard.exec() != QDialog::Accepted) {
+            qWarning() << "Setup wizard was not completed; continuing with the current settings";
+        }
     }
 
-    return wizardRequired || login;
+    return wizardRequired;
 }
 
 bool Application::updaterEnabled()
@@ -1362,12 +1365,6 @@ bool Application::event(QEvent* event)
     }
 
     return QApplication::event(event);
-}
-
-void Application::setupWizardFinished(int status)
-{
-    qDebug() << "Wizard result =" << status;
-    performMainStartupAction();
 }
 
 void Application::performMainStartupAction()
@@ -1920,7 +1917,11 @@ QString Application::getJarPath(const QString& jarFile)
         FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"), FS::PathCombine(applicationDirPath(), "jars"),
+#if defined(Q_OS_MACOS)
+        FS::PathCombine(applicationDirPath(), "../../../..", "jars")  // from inside build dir, for debuging
+#else
         FS::PathCombine(applicationDirPath(), "..", "jars")  // from inside build dir, for debuging
+#endif
     };
     for (const auto& p : potentialPaths) {
         QString jarPath = FS::PathCombine(p, jarFile);

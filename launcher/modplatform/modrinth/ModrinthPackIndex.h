@@ -22,10 +22,14 @@
 
 namespace Modrinth {
 
-Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
-Result<> loadExtraPackData(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
 Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj,
                                                            const QString& preferredHashType = "sha512",
                                                            const QString& preferredFileName = "");
 
 }  // namespace Modrinth
+
+namespace Modrinth::Parse {
+
+Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
+
+}  // namespace Modrinth::Parse

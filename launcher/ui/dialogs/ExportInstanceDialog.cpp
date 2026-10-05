@@ -158,7 +158,7 @@ void ExportInstanceDialog::doExport()
     connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
 
     ProgressDialog progress(this);
-    progress.setSkipButton(true, tr("Abort"));
+    progress.showSkipButton();
     auto result = progress.execWithTask(task.get());
     QDialog::done(result);
 }

@@ -42,6 +42,9 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
 {
     MMCZip::ArchiveReader zip(source);
     QDir directory(targetFolder);
+    if (directory.exists()) {
+        directory.setPath(directory.canonicalPath());
+    }
 
     auto extPtr = MMCZip::ArchiveWriter::createDiskWriter();
     auto ext = extPtr.get();

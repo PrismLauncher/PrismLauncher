@@ -36,6 +36,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     void retranslate() override;
 
    protected:
+    bool event(QEvent* ev) override;
     bool eventFilter(QObject* obj, QEvent* ev) override;
     bool listFilter(QKeyEvent* keyEvent);
     QMenu* createPopupMenu() override;

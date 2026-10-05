@@ -146,12 +146,6 @@
         <file>32x32/loadermods.png</file>
         <file>64x64/loadermods.png</file>
 
-        <!-- Plugin (red recolor), LGPL3, Oxygen icons. -->
-        <file>16x16/jarmods.png</file>
-        <file>24x24/jarmods.png</file>
-        <file>32x32/jarmods.png</file>
-        <file>64x64/jarmods.png</file>
-
         <!-- Plugin (green original), LGPL3, Oxygen icons. -->
         <file>16x16/coremods.png</file>
         <file>24x24/coremods.png</file>
@@ -198,7 +192,7 @@
         <file>64x64/lock.png</file>
         <file>128x128/lock.png</file>
         <file>256x256/lock.png</file>
-        
+
         <file>8x8/unlock.png</file>
         <file>16x16/unlock.png</file>
         <file>22x22/unlock.png</file>
@@ -348,7 +342,7 @@
         <file>scalable/appearance.svg</file>
         <file>scalable/about.svg</file>
         <file>scalable/new.svg</file>
-        <file>scalable/checkupdate.svg</file>  
+        <file>scalable/checkupdate.svg</file>
 
         <file>scalable/instances/quiltmc.svg</file>  <!-- CC0 QuiltMC -->
         <file>scalable/instances/fabricmc.svg</file>  <!-- CC0 unascribed, https://github.com/FabricMC/community/blob/main/media/unascribed/README.md -->

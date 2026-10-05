@@ -15,7 +15,8 @@ Checks:
     -readability-avoid-unconditional-preprocessor-if,
     -readability-function-cognitive-complexity,
     -readability-identifier-length,
-    -readability-redundant-access-specifiers"
+    -readability-redundant-access-specifiers,
+    google-readability-casting"
 
 CheckOptions:
     misc-include-cleaner.MissingIncludes: false

@@ -265,12 +265,10 @@ bool Component::isMoveable()
     return true;
 }
 
-bool Component::isVersionChangeable(bool wait)
+bool Component::isVersionChangeable() const
 {
     auto list = getVersionList();
     if (list) {
-        if (wait)
-            list->waitToLoad();
         return list->count() != 0;
     }
     return false;

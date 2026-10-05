@@ -105,6 +105,9 @@ class ModFilterWidget : public QTabWidget {
    signals:
     void filterChanged();
 
+   public:
+    void setLoaderVersionOnly(bool only);
+
    public slots:
     void setCategories(const QList<ModPlatform::Category>&);
 

@@ -489,6 +489,8 @@ set(API_SOURCES
 
     modplatform/flame/FlameAPI.h
     modplatform/flame/FlameAPI.cpp
+    modplatform/flame/FlamePackIndex.h
+    modplatform/flame/FlamePackIndex.cpp
     modplatform/modrinth/ModrinthAPI.h
     modplatform/modrinth/ModrinthAPI.cpp
     modplatform/helpers/HashUtils.h
@@ -646,7 +648,6 @@ set(PRISMUPDATER_SOURCES
     ui/dialogs/ProgressDialog.h
     ui/widgets/SubTaskProgressBar.h
     ui/widgets/SubTaskProgressBar.cpp
-
 )
 
 if(WIN32)
@@ -811,16 +812,20 @@ SET(LAUNCHER_SOURCES
     logs/AnonymizeLog.h
 
     # GUI - windows
-    ui/GuiUtil.h
-    ui/GuiUtil.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h
     ui/ViewLogWindow.cpp
+
+    # GUI - utilities
+    ui/GuiUtil.h
+    ui/GuiUtil.cpp
     ui/ToolTipFilter.h
     ui/ToolTipFilter.cpp
+    ui/MultiDecorationItemDelegate.h
+    ui/MultiDecorationItemDelegate.cpp
 
     # FIXME: maybe find a better home for this.
     FileIgnoreProxy.cpp
@@ -1202,8 +1207,6 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/pe_blue/pe_blue.qrc
     resources/breeze_dark/breeze_dark.qrc
     resources/breeze_light/breeze_light.qrc
-    resources/OSX/OSX.qrc
-    resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc

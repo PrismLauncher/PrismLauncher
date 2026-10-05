@@ -156,7 +156,7 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
     });
 
     ProgressDialog loadDialog(this);
-    loadDialog.setSkipButton(true, tr("Abort"));
+    loadDialog.showSkipButton();
     loadDialog.execWithTask(wrappedTask.get());
 
     return wrappedTask->wasSuccessful();

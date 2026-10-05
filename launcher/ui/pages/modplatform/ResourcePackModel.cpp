@@ -40,12 +40,6 @@ ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArgument
     return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ResourcePack };
 }
 
-ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
-{
-    auto pack = m_packs[entry.row()];
-    return { .pack = pack };
-}
-
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)
 {
     if (m_searchTerm == term && m_searchTerm.isNull() == term.isNull() && m_currentSortIndex == sort) {

@@ -11,6 +11,20 @@
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
+QString ModrinthAPI::getModpackIdFromUrl(const QUrl& url)
+{
+    if (url.scheme().compare("modrinth", Qt::CaseInsensitive) != 0 || url.host().compare("modpack", Qt::CaseInsensitive) != 0) {
+        return {};
+    }
+
+    const auto segments = QUrl::fromPercentEncoding(url.path().toUtf8()).split('/', Qt::SkipEmptyParts);
+    if (segments.size() != 1) {
+        return {};
+    }
+
+    return segments.constFirst().trimmed();
+}
+
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::currentVersion(const QString& hash, const QString& hashFormat)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
@@ -170,6 +184,16 @@ QString ModrinthAPI::resourceTypeParameter(ModPlatform::ResourceType type)
 
     qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
     return "";
+}
+Net::RPC::Spec<ModPlatform::IndexedPack> ModrinthAPI::getProject(const QString& id) const
+{
+    // https://docs.modrinth.com/api/operations/getproject/
+    return { { .url = QUrl(BuildConfig.MODRINTH_PROD_URL + "/project/" + id) },
+             [id](const auto& response) -> Result<ModPlatform::IndexedPack> {
+                 ModPlatform::IndexedPack pack = { .addonId = id };
+                 TRY(Json::requireObject(response).and_then([&pack](const auto& v) { return Modrinth::Parse::loadIndexedPack(pack, v); }))
+                 return pack;
+             } };
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories() const

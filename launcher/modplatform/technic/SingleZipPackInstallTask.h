@@ -31,7 +31,7 @@ class SingleZipPackInstallTask : public InstanceTask {
     Q_OBJECT
 
    public:
-    SingleZipPackInstallTask(const QUrl& sourceUrl, const QString& minecraftVersion);
+    SingleZipPackInstallTask(QUrl sourceUrl, QString minecraftVersion);
 
     bool canAbort() const override { return true; }
     bool abort() override;

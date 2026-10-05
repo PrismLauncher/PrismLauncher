@@ -5,6 +5,7 @@
 #pragma once
 
 #include "BuildConfig.h"
+#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -13,6 +14,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 #include <utility>
 
 class ModrinthAPI final : public ResourceAPI {
@@ -43,6 +45,8 @@ class ModrinthAPI final : public ResourceAPI {
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
 
+    static QString getModpackIdFromUrl(const QUrl& url);
+
     std::pair<Task::Ptr, QByteArray*> getModCategories() const override;
     static QList<ModPlatform::Category> loadCategories(const QByteArray& response, const QString& projectType);
     QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const override;
@@ -70,15 +74,6 @@ class ModrinthAPI final : public ResourceAPI {
         QStringList l;
         for (const auto& loader : getModLoaderStrings(types)) {
             l << QString("\"categories:%1\"").arg(loader);
-        }
-        return l.join(',');
-    }
-
-    static auto getCategoriesFilters(const QStringList& categories) -> QString
-    {
-        QStringList l;
-        for (const auto& cat : categories) {
-            l << QString("\"categories:%1\"").arg(cat);
         }
         return l.join(',');
     }
@@ -139,7 +134,9 @@ class ModrinthAPI final : public ResourceAPI {
             }
         }
         if (args.categoryIds.has_value() && !args.categoryIds->empty()) {
-            facetsList.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+            for (const auto& category : args.categoryIds.value()) {
+                facetsList.append(QString(R"(["categories:%1"])").arg(category));
+            }
         }
         if (!args.excludeDisclosureTypes.empty()) {
             for (const auto& d : args.excludeDisclosureTypes) {
@@ -177,11 +174,6 @@ class ModrinthAPI final : public ResourceAPI {
         getArguments.append(QString("facets=%1").arg(createFacets(args)));
 
         return BuildConfig.MODRINTH_PROD_URL + "/search?" + getArguments.join('&');
-    };
-
-    auto getInfoURL(const QString& id) const -> std::optional<QString> override
-    {
-        return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
     static auto getMultipleModInfoURL(const QStringList& ids) -> QString
@@ -236,11 +228,13 @@ class ModrinthAPI final : public ResourceAPI {
     QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object().value("hits").toArray(); }
     Result<> loadIndexedPack(ModPlatform::IndexedPack& m, const QJsonObject& obj) const override
     {
-        return Modrinth::loadIndexedPack(m, obj);
+        return Modrinth::Parse::loadIndexedPack(m, obj);
     }
     Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType /*unused*/) const override
     {
         return Modrinth::loadIndexedPackVersion(obj);
     };
-    Result<> loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { return Modrinth::loadExtraPackData(m, obj); }
+
+   public slots:
+    Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;
 };

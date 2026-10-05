@@ -141,7 +141,7 @@ void ResourceUpdateDialog::checkCandidates()
 
     // Check for updates
     ProgressDialog progressDialog(m_parent);
-    progressDialog.setSkipButton(true, tr("Abort"));
+    progressDialog.showSkipButton();
     progressDialog.setWindowTitle(tr("Checking for updates..."));
     auto ret = progressDialog.execWithTask(&checkTask);
 
@@ -241,7 +241,7 @@ void ResourceUpdateDialog::checkCandidates()
             });
 
             ProgressDialog progressDialogDeps(m_parent);
-            progressDialogDeps.setSkipButton(true, tr("Abort"));
+            progressDialogDeps.showSkipButton();
             progressDialogDeps.setWindowTitle(tr("Checking for dependencies..."));
             auto dret = progressDialogDeps.execWithTask(depTask.get());
 
@@ -410,7 +410,7 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // execute all the tasks
     ProgressDialog checkingDialog(m_parent);
-    checkingDialog.setSkipButton(true, tr("Abort"));
+    checkingDialog.showSkipButton();
     checkingDialog.setWindowTitle(tr("Generating metadata..."));
     auto retMetadata = checkingDialog.execWithTask(&seq);
 

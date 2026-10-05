@@ -677,9 +677,13 @@ void ResourcePage::openUrl(QUrl url)
 
 void ResourcePage::openProject(const QVariant& projectID)
 {
+    m_projectMode = true;
+
     m_ui->sortByBox->hide();
     m_ui->searchEdit->hide();
-    m_ui->resourceFilterButton->hide();
+    if (!supportsFiltering()) {
+        m_ui->resourceFilterButton->hide();
+    }
     m_ui->packView->hide();
     m_ui->resourceSelectionButton->hide();
     m_doNotJumpToMod = true;
@@ -725,5 +729,18 @@ void ResourcePage::openProject(const QVariant& projectID)
     } else {
         jump();
     }
+}
+
+void ResourcePage::reloadCurrentVersions()
+{
+    auto index = m_ui->packView->currentIndex();
+    auto pack = getCurrentPack();
+    if (!index.isValid() || !pack) {
+        return;
+    }
+
+    pack->versionsLoaded = false;
+    pack->versions.clear();
+    m_model->loadEntry(index);
 }
 }  // namespace ResourceDownload
