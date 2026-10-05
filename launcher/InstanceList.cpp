@@ -500,6 +500,7 @@ bool InstanceList::undoTrashInstance()
 
     m_instanceGroupIndex[top.id] = top.groupName;
     increaseGroupCount(top.groupName);
+    // -1 when instance has no saved position (in group)
     if (top.manualOrder >= 0) {
         auto& manualOrder = m_manualOrder[top.groupName];
         const int minSize = qMin(top.manualOrder, static_cast<int>(manualOrder.size()));
