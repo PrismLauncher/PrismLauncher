@@ -87,31 +87,13 @@ void InstanceCopyTask::executeTask()
 
                     qDebug() << "attempting to run with privelage";
 
-                    QEventLoop loop;
-                    bool got_priv_results = false;
-
-                    connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&got_priv_results, &loop](bool gotResults) {
-                        if (!gotResults) {
-                            qDebug() << "Privileged run exited without results!";
-                        }
-                        got_priv_results = gotResults;
-                        loop.quit();
-                    });
-                    folderLink.runPrivileged();
-
-                    loop.exec();  // wait for the finished signal
-
-                    for (auto result : folderLink.getResults()) {
-                        if (result.err_value != 0) {
-                            there_were_errors = true;
-                        }
-                    }
+                    bool linked = folderLink.runPrivilegedAndWait();
 
                     if (savesCopy) {
-                        there_were_errors |= !(*savesCopy)();
+                        linked &= (*savesCopy)();
                     }
 
-                    return got_priv_results && !there_were_errors;
+                    return linked;
                 }
 #else
                 qDebug() << "Link Failed!" << folderLink.getOSError().value() << folderLink.getOSError().message().c_str();
