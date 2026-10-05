@@ -51,6 +51,7 @@
 
 namespace ShortcutUtils {
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 /// Quote a single argument for use in a .desktop file Exec line.
 /// Single quotes are used, with embedded single quotes escaped per the desktop entry spec
 static inline QString quoteDesktopArg(const QString& arg)
@@ -83,6 +84,7 @@ static QString buildDesktopEntry(const QString& appPath, const QStringList& args
 
     return desktopEntry;
 }
+#endif
 
 static void prepareInstanceLaunchArgs(const Shortcut& shortcut, QString& appPath, QStringList& args)
 {
