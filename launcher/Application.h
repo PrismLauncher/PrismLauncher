@@ -80,6 +80,11 @@ class LogModel;
 struct MinecraftTarget;
 class MinecraftAccount;
 
+namespace Cli {
+struct Args;
+struct Command;
+}  // namespace Cli
+
 namespace Meta {
 class Index;
 }
@@ -111,7 +116,7 @@ class Application : public QApplication {
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
    public:
-    Application(int& argc, char** argv);
+    Application(int& argc, char** argv, const Cli::Args& args);
     ~Application() override;
 
     bool event(QEvent* event) override;
@@ -199,6 +204,8 @@ class Application : public QApplication {
 
     static QUrl normalizeImportUrl(const QString& url);
 
+    void processCommand(const Cli::Command& cmd);
+
    signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -243,6 +250,8 @@ class Application : public QApplication {
     mutable QMutex m_qsaveResourcesMutex;
 
    private:
+    std::vector<Cli::Command> m_commands;
+
     QDateTime m_startTime;
 
     std::unique_ptr<QNetworkAccessManager> m_network;
@@ -298,18 +307,12 @@ class Application : public QApplication {
     LocalPeer* m_peerInstance = nullptr;
 
    public:
+    QString m_appID;
+
     QString m_detectedGLFWPath;
     QString m_detectedOpenALPath;
     QString m_detectedSDLPath;
-    QString m_instanceIdToLaunch;
-    QString m_serverToJoin;
-    QString m_worldToJoin;
-    QString m_profileToUse;
-    bool m_launchOffline = false;
-    QString m_offlineName;
-    bool m_liveCheck = false;
-    QList<QUrl> m_urlsToImport;
-    QString m_instanceIdToShowWindowOf;
+
     bool m_showMainWindow = false;
     std::unique_ptr<QFile> logFile;
     std::unique_ptr<LogModel> logModel;

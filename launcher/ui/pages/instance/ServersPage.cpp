@@ -447,7 +447,7 @@ class ServersModel : public QAbstractListModel {
             emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
 
             // Start task to query server status
-            auto target = MinecraftTarget::parse(server.m_address, false);
+            auto target = MinecraftTarget::fromServerAddress(server.m_address);
             auto* task = new ServerPingTask(target.address, target.port);
             m_currentQueryTask->addTask(Task::Ptr(task));
 
@@ -761,7 +761,7 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto& address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false)));
+    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::fromServerAddress(address)));
 }
 
 void ServersPage::on_actionRefresh_triggered()
