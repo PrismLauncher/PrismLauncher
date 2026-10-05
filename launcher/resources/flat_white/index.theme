@@ -1,6 +1,6 @@
 [Icon Theme]
-Name=Flat (White)
-Comment=White version of the flat icons (dark mode)
+Name=Material (White)
+Comment=Icon theme based on Google's Material Icons
 Inherits=multimc
 Directories=scalable
 

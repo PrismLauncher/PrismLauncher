@@ -1,6 +1,6 @@
 [Icon Theme]
-Name=Flat
-Comment=Flat icons
+Name=Material (Black)
+Comment=Icon theme based on Google's Material Icons
 Inherits=multimc
 Directories=scalable
 

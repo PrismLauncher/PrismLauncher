@@ -42,12 +42,12 @@
         <file>scalable/viewfolder.svg</file>
         <file>scalable/worlds.svg</file>
         <file>scalable/delete.svg</file>
-        <file>scalable/export.svg</file>
-        <file>scalable/rename.svg</file>
         <file>scalable/tag.svg</file>
         <file>scalable/unlock.svg</file>
-        <file>scalable/launch.svg</file>
+        <file>scalable/export.svg</file>
+        <file>scalable/rename.svg</file>
         <file>scalable/server.svg</file>
+        <file>scalable/launch.svg</file>
         <file>scalable/appearance.svg</file>
     </qresource>
 </RCC>
