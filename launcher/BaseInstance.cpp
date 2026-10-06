@@ -437,7 +437,10 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
     // FIXME: if no change, do not set. setting involves saving a file.
     QJsonArray array;
     for (const auto& elem : shortcuts) {
-        array.append(QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } });
+        array.append(QJsonObject{ { "name", elem.name },
+                                  { "filePath", elem.filePath },
+                                  { "target", static_cast<int>(elem.target) },
+                                  { "isPortal", elem.isPortal } });
     }
 
     QJsonDocument document;
@@ -469,14 +472,12 @@ QList<ShortcutData> BaseInstance::shortcuts() const
 
         QString shortcutName = dict["name"].toString();
         QString filePath = dict["filePath"].toString();
-        // Portal launchers are registered by their desktop file id (no path separators),
-        // which is not a local file, so only skip real file paths that are missing
-        bool isFilePath = filePath.contains('/') || filePath.contains('\\');
-        if (isFilePath && !QFileInfo::exists(filePath)) {
+        bool isPortal = dict.value("isPortal").toBool();
+        if (!isPortal && !QFileInfo::exists(filePath)) {
             qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
             continue;
         }
-        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value) });
+        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value), .isPortal = isPortal });
     }
     return results;
 }

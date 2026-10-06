@@ -361,8 +361,8 @@ bool InstanceList::trashInstance(const InstanceId& id)
     m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
 
     // Also trash all of its shortcuts; we remove the shortcuts if trash fails since it is invalid anyway
-    for (const auto& [name, filePath, target] : inst->shortcuts()) {
-        if (DynamicLauncherPortal::isPortalAvailable() && !filePath.contains('/') && filePath.endsWith(".desktop")) {
+    for (const auto& [name, filePath, target, isPortal] : inst->shortcuts()) {
+        if (isPortal) {
             auto uninstallResult = DynamicLauncherPortal::uninstallLauncher(filePath);
             if (uninstallResult) {
                 qDebug() << "Portal shortcut" << name << "(" << filePath << ") for instance" << id
@@ -463,8 +463,8 @@ void InstanceList::deleteInstance(const InstanceId& id)
 
     qDebug() << "Instance" << id << "has been deleted by the launcher.";
 
-    for (const auto& [name, filePath, target] : inst->shortcuts()) {
-        if (DynamicLauncherPortal::isPortalAvailable() && !filePath.contains('/') && filePath.endsWith(".desktop")) {
+    for (const auto& [name, filePath, target, isPortal] : inst->shortcuts()) {
+        if (isPortal) {
             auto uninstallResult = DynamicLauncherPortal::uninstallLauncher(filePath);
             if (uninstallResult) {
                 qDebug() << "Portal shortcut" << name << "(" << filePath << ") for instance" << id

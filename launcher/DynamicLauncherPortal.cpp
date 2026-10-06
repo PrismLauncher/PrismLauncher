@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QObject>
-#include <QRegularExpression>
 #include <QTimer>
 #include <QVariantMap>
 
@@ -109,10 +108,7 @@ bool isPortalAvailable()
 QString buildDesktopFileId(const QString& name)
 {
     QString appId = BuildConfig.LAUNCHER_APPID;
-    QString safeName = name;
-    safeName.replace(QRegularExpression(QStringLiteral("[^a-zA-Z0-9_\\-.]")), QStringLiteral("_"));
-
-    return appId + "." + safeName + ".desktop";
+    return appId + "." + name + ".desktop";
 }
 
 Result<> installLauncher(const QString& name, const QByteArray& icon, const QString& desktopEntry)
