@@ -446,7 +446,7 @@ void SkinManageDialog::on_userBtn_clicked()
                                                   } });
     auto [getUUID, b] = Net::RPC::make<bool>({ { .url = "https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user },
                                                [&getProfile](const auto& v) -> Result<bool> {
-                                                   TRY_INTO(auto root, Json::requireObject(v, "Minecraft skin service"))
+                                                   TRY_INTO(auto root, Json::requireObject(v, "Minecraft profile lookup"))
                                                    auto id = root["id"].toString();
                                                    if (id.isEmpty()) {
                                                        return std::unexpected(tr("user id is empty"));
