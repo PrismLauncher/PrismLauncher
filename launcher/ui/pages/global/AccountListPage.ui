@@ -93,6 +93,9 @@
    <property name="text">
     <string>Add &amp;Offline</string>
    </property>
+   <property name="toolTip">
+    <string>Add an offline account to play without signing in</string>
+   </property>
   </action>
   <action name="actionRefresh">
    <property name="text">
