@@ -44,6 +44,7 @@
 #include "BuildConfig.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "modplatform/helpers/HashUtils.h"
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
 
@@ -593,6 +594,10 @@ void TranslationsModel::downloadTranslation(const QString& key)
     d->m_downloadingTranslation = key;
     const MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
+    if (Hashing::hash(entry->getFullPath(), Hashing::Algorithm::Sha1) != lang->fileSha1) {
+        entry->setETag({});
+        entry->setRemoteChangedTimestamp({});
+    }
 
     auto dl = Net::Request::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->fileName), entry);
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->fileSha1));
