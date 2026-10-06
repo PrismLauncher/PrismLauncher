@@ -289,7 +289,7 @@ void VersionList::waitToLoad()
 
 Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QString& version)
 {
-    auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](const Version::Ptr& ver) -> bool {
+    auto foundExplicit = std::ranges::find_if(m_versions, [uid, version](const Version::Ptr& ver) -> bool {
         const auto& reqs = ver->requiredSet();
         auto parentReq = std::ranges::find_if(
             reqs, [uid, version](const Require& req) -> bool { return req.uid == uid && req.equalsVersion == version; });
