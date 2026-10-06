@@ -86,6 +86,8 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     account->data.minecraftProfile.id = uuidFromUsername(username).toString(QUuid::Id128);
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Validity::Certain;
+    account->data.validity_ = Validity::Certain;
+    account->data.accountState = AccountState::Online;
     return account;
 }
 
@@ -212,7 +214,7 @@ bool MinecraftAccount::shouldRefresh() const
      * Don't refresh broken accounts.
      * Refresh accounts that would expire in the next 12 hours (fresh token validity is 24 hours).
      */
-    if (isInUse()) {
+    if (accountType() == AccountType::Offline || isInUse()) {
         return false;
     }
     switch (data.validity_) {
