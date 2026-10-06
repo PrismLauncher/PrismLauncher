@@ -53,9 +53,14 @@
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
+    
+    // Enhanced empty state message supporting offline mode
     ui->listView->setEmptyString(
-        tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Microsoft\" button to link your Microsoft account."));
+        tr("Welcome to Prism Launcher!\n\n"
+           "You can either:\n"
+           "• Link a Microsoft account for online play\n"
+           "• Create an offline account for local play (no account required)\n\n"
+           "Click 'Add Microsoft' to link your account, or 'Add Offline' to play offline."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -66,8 +71,6 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
-
-    // Expand the account column
 
     QItemSelectionModel* selectionModel = ui->listView->selectionModel();
 
@@ -140,25 +143,29 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 
 void AccountListPage::on_actionAddOffline_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
-        QMessageBox::warning(this, tr("Error"),
-                             tr("You must add a Microsoft account that owns Minecraft before you can add an offline account."
-                                "<br><br>"
-                                "If you have lost your account you can contact Microsoft for support."));
-        return;
-    }
-
-    ChooseOfflineNameDialog dialog(tr("Please enter your desired username to add your offline account."), this);
+    // NO RESTRICTIONS - Offline mode works with NO Microsoft account required
+    ChooseOfflineNameDialog dialog(tr("Enter a username for your offline account.\n\n"
+                                      "This allows you to play Minecraft without any online authentication."), this);
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
     if (const MinecraftAccountPtr account = MinecraftAccount::createOffline(dialog.getUsername())) {
-        account->login()->start();  // The task will complete here.
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
             m_accounts->setDefaultAccount(account);
         }
+        
+        // Show success message
+        CustomMessageBox::selectable(
+            this,
+            tr("Offline Account Created"),
+            tr("Successfully created offline account: %1\n\n"
+               "You can now play Minecraft without any online authentication.").arg(dialog.getUsername()),
+            QMessageBox::Information,
+            QMessageBox::Ok,
+            QMessageBox::Ok
+        )->exec();
     }
 }
 
