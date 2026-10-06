@@ -107,7 +107,12 @@ class HttpMetaCache : public QObject {
     auto getEntry(const QString& base, const QString& resourcePath) -> MetaEntryPtr;
 
     // get the entry from cache and verify that it isn't stale (within reason)
-    auto resolveEntry(const QString& base, QString resourcePath) -> MetaEntryPtr;
+    auto resolveEntry(const QString& base, QString resourcePath, bool checkMd5 = false) -> MetaEntryPtr;
+
+    // returns `entry` if its file is unchanged or the md5sum still matches,
+    // otherwise disowns it and returns a fresh stale entry for the same path.
+    // may hash the file, so call it from a task
+    auto verifyEntry(const MetaEntryPtr& entry) -> MetaEntryPtr;
 
     // add a previously resolved stale entry
     auto updateEntry(const MetaEntryPtr& staleEntry) -> bool;
