@@ -45,6 +45,7 @@
 #include <QDebug>
 #include <utility>
 
+#include "modplatform/helpers/HashUtils.h"
 #include "net/Logging.h"
 
 auto MetaEntry::getFullPath() const -> QString
@@ -83,7 +84,7 @@ auto HttpMetaCache::getEntry(const QString& base, const QString& resourcePath) -
     return {};
 }
 
-auto HttpMetaCache::resolveEntry(const QString& base, QString resourcePath) -> MetaEntryPtr
+auto HttpMetaCache::resolveEntry(const QString& base, QString resourcePath, bool checkMd5) -> MetaEntryPtr
 {
     resourcePath = FS::RemoveInvalidPathChars(resourcePath);
     auto entry = getEntry(base, resourcePath);
@@ -93,7 +94,7 @@ auto HttpMetaCache::resolveEntry(const QString& base, QString resourcePath) -> M
     }
 
     auto& selectedBase = m_entries[base];
-    QString realPath = FS::PathCombine(selectedBase.basePath, resourcePath);
+    auto realPath = FS::PathCombine(selectedBase.basePath, resourcePath);
     QFileInfo finfo(realPath);
 
     // is the file really there? if not -> stale
@@ -106,20 +107,16 @@ auto HttpMetaCache::resolveEntry(const QString& base, QString resourcePath) -> M
     // if the file changed, check md5sum
     qint64 fileLastChanged = finfo.lastModified().toUTC().toMSecsSinceEpoch();
     if (fileLastChanged != entry->m_localChangedTimestamp) {
-        QFile input(realPath);
-        if (!input.open(QIODevice::ReadOnly)) {
-            qWarning() << "Failed to open file" << input.fileName() << "for reading:" << input.errorString();
-            return staleEntry(base, resourcePath);
-        }
-        QString md5sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Md5).toHex().constData();
-        if (entry->m_md5sum != md5sum) {
+        if (entry->m_md5sum.isEmpty()) {
             selectedBase.entryList.remove(resourcePath);
             return staleEntry(base, resourcePath);
         }
-
-        // md5sums matched... keep entry and save the new state to file
-        entry->m_localChangedTimestamp = fileLastChanged;
-        saveEventually();
+        if (checkMd5) {
+            auto verified = verifyEntry(entry);
+            if (verified != entry) {
+                return verified;
+            }
+        }
     }
 
     // Get rid of old entries, to prevent cache problems
@@ -133,6 +130,40 @@ auto HttpMetaCache::resolveEntry(const QString& base, QString resourcePath) -> M
 
     // entry passed all the checks we cared about.
     entry->m_basePath = getBasePath(base);
+    return entry;
+}
+
+auto HttpMetaCache::verifyEntry(const MetaEntryPtr& entry) -> MetaEntryPtr
+{
+    // no md5sum to check against, so we can't verify it
+    if (entry->m_md5sum.isEmpty()) {
+        return entry;
+    }
+    auto& selectedBase = m_entries[entry->m_baseId];
+    auto realPath = FS::PathCombine(selectedBase.basePath, entry->m_relativePath);
+
+    QFileInfo finfo(realPath);
+    qint64 fileLastChanged = finfo.lastModified().toUTC().toMSecsSinceEpoch();
+    if (fileLastChanged == entry->m_localChangedTimestamp) {
+        return entry;
+    }
+
+    // the file changed: disown the entry and hand out a fresh stale one,
+    // so other holders of the old entry are left untouched
+    QFile input(realPath);
+    if (!input.open(QIODevice::ReadOnly)) {
+        qWarning() << "Failed to open file" << input.fileName() << "for reading:" << input.errorString();
+        selectedBase.entryList.remove(entry->m_relativePath);
+        return staleEntry(entry->m_baseId, entry->m_relativePath);
+    }
+    if (entry->m_md5sum != Hashing::hash(&input, Hashing::Algorithm::Md5)) {
+        selectedBase.entryList.remove(entry->m_relativePath);
+        return staleEntry(entry->m_baseId, entry->m_relativePath);
+    }
+
+    // md5sums matched... keep entry and save the new state to file
+    entry->m_localChangedTimestamp = fileLastChanged;
+    saveEventually();
     return entry;
 }
 
