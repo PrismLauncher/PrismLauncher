@@ -17,13 +17,13 @@
  */
 
 #include "SkinManageDialog.h"
+#include "net/RPCSink.h"
 #include "ui/dialogs/skins/draw/SkinOpenGLWindow.h"
 #include "ui_SkinManageDialog.h"
 
 #include <FileSystem.h>
 #include <QAction>
 #include <QDialog>
-#include <QEventLoop>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QKeyEvent>
@@ -423,34 +423,6 @@ void SkinManageDialog::on_urlBtn_clicked()
     }
 }
 
-namespace {
-class WaitTask : public Task {
-   public:
-    WaitTask() = default;
-    ~WaitTask() override = default;
-
-   public slots:
-    void quit()
-    {
-        m_done = true;
-        m_loop.quit();
-    }
-
-   protected:
-    void executeTask() override
-    {
-        if (!m_done) {
-            m_loop.exec();
-        }
-        emitSucceeded();
-    };
-
-   private:
-    QEventLoop m_loop;
-    bool m_done{};
-};
-}  // namespace
-
 void SkinManageDialog::on_userBtn_clicked()
 {
     auto user = m_ui->urlLine->text();
@@ -463,23 +435,32 @@ void SkinManageDialog::on_userBtn_clicked()
     NetJob::Ptr job{ new NetJob(tr("Download user skin"), APPLICATION->network(), 1) };
     job->setAskRetry(false);
 
-    auto uuidLoop = makeShared<WaitTask>();
-    auto profileLoop = makeShared<WaitTask>();
-
-    auto [getUUID, uuidOut] = Net::Request::makeByteArray("https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user);
-    auto [getProfile, profileOut] = Net::Request::makeByteArray(QUrl());
     auto downloadSkin = Net::Request::makeFile(QUrl(), path);
+    // use a valid url to trick the make to actually create the task
+    // the actual url will be set in the getUUID parse function
+    auto [getProfile, a] = Net::RPC::make<bool>({ { .url = { "https://sessionserver.mojang.com/session/minecraft/profile/" } },
+                                                  [downloadSkin, &mcProfile](const auto& v) -> Result<bool> {
+                                                      TRY(Parsers::parseMinecraftProfileMojang(v, mcProfile))
+                                                      downloadSkin->setUrl(mcProfile.skin.url);
+                                                      return {};
+                                                  } });
+    auto [getUUID, b] = Net::RPC::make<bool>({ { .url = "https://api.minecraftservices.com/minecraft/profile/lookup/name/" + user },
+                                               [&getProfile](const auto& v) -> Result<bool> {
+                                                   TRY_INTO(auto root, Json::requireObject(v, "Minecraft profile lookup"))
+                                                   auto id = root["id"].toString();
+                                                   if (id.isEmpty()) {
+                                                       return std::unexpected(tr("user id is empty"));
+                                                   }
+                                                   getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
+                                                   return {};
+                                               } });
 
     QString failReason;
 
-    connect(getUUID.get(), &Task::aborted, uuidLoop.get(), &WaitTask::quit);
     connect(getUUID.get(), &Task::failed, this, [&failReason](const QString& reason) {
         qCritical() << "Couldn't get user UUID:" << reason;
         failReason = tr("failed to get user UUID");
     });
-    connect(getUUID.get(), &Task::failed, uuidLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::aborted, profileLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::failed, profileLoop.get(), &WaitTask::quit);
     connect(getProfile.get(), &Task::failed, this, [&failReason](const QString& reason) {
         qCritical() << "Couldn't get user profile:" << reason;
         failReason = tr("failed to get user profile");
@@ -489,39 +470,8 @@ void SkinManageDialog::on_userBtn_clicked()
         failReason = tr("failed to download skin");
     });
 
-    connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
-        auto doc = Json::requireDocument(*uuidOut, "Minecraft skin service");
-        if (!doc) {
-            qWarning() << "Error while parsing JSON response from Minecraft skin service:" << doc.error();
-            failReason = tr("failed to parse get user UUID response");
-            uuidLoop->quit();
-            return;
-        }
-        const auto root = doc->object();
-        auto id = root["id"].toString();
-        if (!id.isEmpty()) {
-            getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
-        } else {
-            failReason = tr("user id is empty");
-            job->abort();
-        }
-        uuidLoop->quit();
-    });
-
-    connect(getProfile.get(), &Task::succeeded, this, [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin, &failReason] {
-        if (Parsers::parseMinecraftProfileMojang(*profileOut, mcProfile)) {
-            downloadSkin->setUrl(mcProfile.skin.url);
-        } else {
-            failReason = tr("failed to parse get user profile response");
-            job->abort();
-        }
-        profileLoop->quit();
-    });
-
     job->addNetAction(getUUID);
-    job->addTask(uuidLoop);
     job->addNetAction(getProfile);
-    job->addTask(profileLoop);
     job->addNetAction(downloadSkin);
     ProgressDialog dlg(this);
     dlg.execWithTask(job.get());
