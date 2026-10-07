@@ -11,37 +11,39 @@
 
 namespace Hashing {
 
-Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
+Hasher::Ptr createHasher(QString filePath, ModPlatform::ResourceProvider provider)
 {
     switch (provider) {
         case ModPlatform::ResourceProvider::MODRINTH:
-            return makeShared<Hasher>(file_path,
+            return makeShared<Hasher>(std::move(filePath),
                                       ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first());
         case ModPlatform::ResourceProvider::FLAME:
-            return makeShared<Hasher>(file_path, Algorithm::Murmur2);
+            return makeShared<Hasher>(std::move(filePath), Algorithm::Murmur2);
         default:
             qCritical() << "[Hashing]" << "Unrecognized mod platform!";
             return nullptr;
     }
 }
 
-Hasher::Ptr createHasher(QString file_path, QString type)
+Hasher::Ptr createHasher(QString filePath, const QString& type)
 {
-    return makeShared<Hasher>(file_path, type);
+    return makeShared<Hasher>(std::move(filePath), type);
 }
 
+namespace {
 class QIODeviceReader : public Murmur2::Reader {
    public:
-    QIODeviceReader(QIODevice* device) : m_device(device) {}
-    virtual ~QIODeviceReader() = default;
-    virtual int read(char* s, int n) { return m_device->read(s, n); }
-    virtual bool eof() { return m_device->atEnd(); }
-    virtual void goToBeginning() { m_device->seek(0); }
-    virtual void close() { m_device->close(); }
+    explicit QIODeviceReader(QIODevice* device) : m_device(device) {}
+    ~QIODeviceReader() override = default;
+    int read(char* s, int n) override { return static_cast<int>(m_device->read(s, n)); }
+    bool eof() override { return m_device->atEnd(); }
+    void goToBeginning() override { m_device->seek(0); }
+    void close() { m_device->close(); }
 
    private:
     QIODevice* m_device;
 };
+}  // namespace
 
 QString algorithmToString(Algorithm type)
 {
@@ -65,27 +67,34 @@ QString algorithmToString(Algorithm type)
     return "unknown";
 }
 
-Algorithm algorithmFromString(QString type)
+Algorithm algorithmFromString(const QString& type)
 {
-    if (type == "md4")
+    if (type == "md4") {
         return Algorithm::Md4;
-    if (type == "md5")
+    }
+    if (type == "md5") {
         return Algorithm::Md5;
-    if (type == "sha1")
+    }
+    if (type == "sha1") {
         return Algorithm::Sha1;
-    if (type == "sha256")
+    }
+    if (type == "sha256") {
         return Algorithm::Sha256;
-    if (type == "sha512")
+    }
+    if (type == "sha512") {
         return Algorithm::Sha512;
-    if (type == "murmur2")
+    }
+    if (type == "murmur2") {
         return Algorithm::Murmur2;
+    }
     return Algorithm::Unknown;
 }
 
 QString hash(QIODevice* device, Algorithm type)
 {
-    if (!device->isOpen() && !device->open(QFile::ReadOnly))
+    if (!device->isOpen() && !device->open(QFile::ReadOnly)) {
         return "";
+    }
     QCryptographicHash::Algorithm alg = QCryptographicHash::Sha1;
     switch (type) {
         case Algorithm::Md4:
@@ -104,9 +113,9 @@ QString hash(QIODevice* device, Algorithm type)
             alg = QCryptographicHash::Algorithm::Sha512;
             break;
         case Algorithm::Murmur2: {  // CF-specific
-            auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
+            auto shouldFilterOut = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
             auto reader = std::make_unique<QIODeviceReader>(device);
-            auto result = QString::number(Murmur2::hash(reader.get(), 4 * MiB, should_filter_out));
+            auto result = QString::number(Murmur2::hash(reader.get(), 4L * MiB, shouldFilterOut));
             device->close();
             return result;
         }
@@ -138,22 +147,23 @@ QString hash(QIODevice* device, Algorithm type)
     return result;
 }
 
-QString hash(QString fileName, Algorithm type)
+QString hash(const QString& fileName, Algorithm type)
 {
     QFile file(fileName);
     return hash(&file, type);
 }
 
-QString hash(QByteArray data, Algorithm type)
+QString hash(const QByteArray& data, Algorithm type)
 {
-    QBuffer buff(&data);
+    QBuffer buff;
+    buff.setData(data);
     return hash(&buff, type);
 }
 
 void Hasher::executeTask()
 {
     m_future = QtConcurrent::run(
-        QThreadPool::globalInstance(), [](QString fileName, Algorithm type) { return hash(fileName, type); }, m_path, m_alg);
+        QThreadPool::globalInstance(), [](const QString& fileName, Algorithm type) { return hash(fileName, type); }, m_path, m_alg);
     connect(&m_watcher, &QFutureWatcher<QString>::finished, this, [this] {
         if (m_future.isCanceled()) {
             emitAborted();
