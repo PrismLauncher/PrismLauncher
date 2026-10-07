@@ -1,8 +1,10 @@
 #include "HashUtils.h"
 
 #include <QBuffer>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
+#include <QThread>
 #include <QtConcurrentRun>
 
 #include <MurmurHash2.h>
@@ -114,8 +116,21 @@ QString hash(QIODevice* device, Algorithm type)
     }
 
     QCryptographicHash hash(alg);
-    if (!hash.addData(device))
-        qCritical() << "Failed to read JAR to create hash!";
+
+    const bool isMainThread = QCoreApplication::instance() != nullptr && QThread::currentThread() == QCoreApplication::instance()->thread();
+    constexpr auto chunkSize = 1024L * 1024;  // 1 MB
+    while (!device->atEnd()) {
+        const auto chunk = device->read(chunkSize);
+        if (chunk.isEmpty()) {
+            qCritical() << "Failed to read when generating hash:" << device->errorString();
+            device->close();
+            return "";
+        }
+        hash.addData(chunk);
+        if (isMainThread) {
+            QCoreApplication::processEvents();
+        }
+    }
 
     Q_ASSERT(hash.result().length() == hash.hashLength(alg));
     auto result = hash.result().toHex();
