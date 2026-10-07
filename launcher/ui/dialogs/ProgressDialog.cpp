@@ -38,6 +38,7 @@
 #include "ui_ProgressDialog.h"
 
 #include <QDebug>
+#include <QEventLoop>
 #include <QKeyEvent>
 #include <limits>
 
@@ -143,9 +144,9 @@ int ProgressDialog::execWithTask(Task* task)
         return QDialog::DialogCode::Accepted;
     }
 
-    QDialog::DialogCode result{};
-    if (handleImmediateResult(result)) {
-        return result;
+    QDialog::DialogCode immediateResult{};
+    if (handleImmediateResult(immediateResult)) {
+        return immediateResult;
     }
 
     // Connect signals.
@@ -172,7 +173,32 @@ int ProgressDialog::execWithTask(Task* task)
         changeProgress(task->getProgress(), task->getTotalProgress());
     }
 
-    return QDialog::exec();
+    // QDialog::exec() makes the dialog modal, even when its window modality is
+    // set to NonModal. Keep the synchronous API for callers, but run a local
+    // event loop around a normal show() so other launcher windows stay usable.
+    QEventLoop eventLoop;
+    this->setWindowModality(Qt::NonModal);
+    this->m_taskConnections.push_back(connect(this, &QDialog::finished, &eventLoop, &QEventLoop::quit));
+    this->m_taskConnections.push_back(connect(task, &Task::aborted, &eventLoop, &QEventLoop::quit));
+
+    // A parented dialog is a transient window and some window managers keep
+    // it above its parent even when it is non-modal. Detach it so the parent
+    // window can be raised above it when clicked.
+    auto parent = parentWidget();
+    QPoint center;
+    if (parent) {
+        center = parent->mapToGlobal(parent->rect().center());
+    }
+    auto flags = windowFlags();
+    setParent(nullptr, flags);
+    if (parent) {
+        move(center.x() - width() / 2, center.y() - height() / 2);
+    }
+    show();
+    if (isVisible()) {
+        eventLoop.exec();
+    }
+    return result();
 }
 
 // TODO: only provide the unique_ptr overloads
