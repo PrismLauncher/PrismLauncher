@@ -395,7 +395,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // auto accounts = APPLICATION->accounts();
 
     // load the news
-    {
+    if (BuildConfig.NEWS_RSS_URL.isEmpty()) {
+        // no feed configured: take the news bar out entirely so a saved window state can't bring it back
+        removeToolBar(ui->newsToolBar);
+        ui->newsToolBar->toggleViewAction()->setVisible(false);
+        ui->actionMoreNews->setVisible(false);
+    } else {
         m_newsChecker->reloadNews();
         updateNewsLabel();
     }
@@ -958,7 +963,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 } else {
                     CustomMessageBox::selectable(
                         this, tr("Error"),
-                        tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modpack links such as "
+                        tr("Unsupported Modrinth link.\n\nFacet currently only supports modpack links such as "
                            "modrinth://modpack/fabulously-optimized."),
                         QMessageBox::Critical)
                         ->show();

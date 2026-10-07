@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 200 200">
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="48" viewBox="0 0 600 200">
   <title>Facet</title>
   <polygon points="100,20 169.3,60 134.6,80 100,60" fill="#8EF0C3"/>
   <polygon points="169.3,60 169.3,140 134.6,120 134.6,80" fill="#5EE6A8"/>
@@ -8,4 +8,5 @@
   <polygon points="30.7,140 30.7,60 65.4,80 65.4,120" fill="#2FB57C"/>
   <polygon points="30.7,60 100,20 100,60 65.4,80" fill="#5EE6A8"/>
   <polygon points="100,60 134.6,80 134.6,120 100,140 65.4,120 65.4,80" fill="#CFFAE6"/>
+  <text x="222" y="146" fill="#111214" font-family="Geist, 'Helvetica Neue', Arial, sans-serif" font-size="136" font-weight="600" letter-spacing="-5">facet</text>
 </svg>

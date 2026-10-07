@@ -302,7 +302,7 @@
           <item row="4" column="0">
            <widget class="QLabel" name="labelJavaDir">
             <property name="toolTip">
-             <string>Folder where Prism Launcher stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</string>
+             <string>Folder where Facet stores automatically downloaded Java versions. Do NOT set this to your system Java installation.</string>
             </property>
             <property name="text">
              <string>&amp;Auto Downloaded Java:</string>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>@Launcher_AppID@</id>
+  <name>Facet</name>
+  <summary>A calmer way to manage and play Minecraft instances</summary>
+  <developer id="io.github.cakeru">
+    <name>Facet Contributors</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>Facet is a custom launcher for Minecraft with a streamlined interface. It is a fork of Prism Launcher, which descends from PolyMC and MultiMC.</p>
+    <p>Facet is not affiliated with or endorsed by the Prism Launcher project, PolyMC, MultiMC, Mojang or Microsoft.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Easily install game modifications, such as Fabric, Forge and Quilt</li>
+      <li>Easily install and update modpacks from the launcher</li>
+      <li>Control your Java settings, and enable Mangohud or Gamemode with a toggle</li>
+      <li>Manage worlds and resource packs from the launcher</li>
+      <li>See logs and other details easily through a dashboard</li>
+      <li>Kill Minecraft in case of a crash/freeze</li>
+      <li>Isolate Minecraft instances to keep everything clean</li>
+      <li>Install and update mods directly from the launcher</li>
+    </ul>
+  </description>
+  <releases>
+    <release version="@Launcher_VERSION_NAME@" date="@Launcher_BUILD_TIMESTAMP@"></release>
+  </releases>
+  <url type="homepage">https://github.com/cakeru/PrismReLauncher</url>
+  <url type="bugtracker">https://github.com/cakeru/PrismReLauncher/issues</url>
+  <url type="vcs-browser">https://github.com/cakeru/PrismReLauncher</url>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-fantasy">moderate</content_attribute>
+    <content_attribute id="social-chat">intense</content_attribute>
+  </content_rating>
+  <launchable type="desktop-id">@Launcher_AppID@.desktop</launchable>
+</component>

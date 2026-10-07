@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <title>Facet</title>
+  <rect width="1280" height="640" fill="#0F1012"/>
+  <g transform="translate(150 170) scale(1.5)">
+    <polygon points="100,20 169.3,60 134.6,80 100,60" fill="#8EF0C3"/>
+    <polygon points="169.3,60 169.3,140 134.6,120 134.6,80" fill="#5EE6A8"/>
+    <polygon points="169.3,140 100,180 100,140 134.6,120" fill="#2FB57C"/>
+    <polygon points="100,180 30.7,140 65.4,120 100,140" fill="#1E8A5C"/>
+    <polygon points="30.7,140 30.7,60 65.4,80 65.4,120" fill="#2FB57C"/>
+    <polygon points="30.7,60 100,20 100,60 65.4,80" fill="#5EE6A8"/>
+    <polygon points="100,60 134.6,80 134.6,120 100,140 65.4,120 65.4,80" fill="#CFFAE6"/>
+  </g>
+  <text x="500" y="330" fill="#EDEEF0" font-family="Geist, 'Helvetica Neue', Arial, sans-serif" font-size="150" font-weight="600" letter-spacing="-6">facet</text>
+  <text x="506" y="410" fill="#A0A4AC" font-family="Geist, 'Helvetica Neue', Arial, sans-serif" font-size="40">A calmer way to launch Minecraft</text>
+</svg>
