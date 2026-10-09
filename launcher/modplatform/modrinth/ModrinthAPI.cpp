@@ -113,7 +113,10 @@ QString createFacets(const ResourceAPI::SearchArgs& args)
         }
     }
     if (args.versions.has_value() && !args.versions.value().empty()) {
-        facetsList.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+        auto versions = getGameVersionsArray(args.versions.value());
+        if (!versions.isEmpty()) {
+            facetsList.append(QString("[%1]").arg(versions));
+        }
     }
     if (args.side.has_value()) {
         auto side = getSideFilters(args.side.value());
@@ -321,7 +324,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack>> ModrinthAPI::searchProjects(cons
     auto url = searchProjectsURL(args);
     return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
                 QList<ModPlatform::IndexedPack> newList;
-                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
+                TRY_INTO(auto doc, Json::requireDocument(response, "Modrinth project search")
                                        .and_then([](const auto& v) { return Json::requireObject(v); })
                                        .and_then([](const auto& v) { return Json::requireArray(v, "hits"); }))
 

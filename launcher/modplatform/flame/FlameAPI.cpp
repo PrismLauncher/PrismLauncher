@@ -238,7 +238,7 @@ Net::RPC::Spec<QList<ModPlatform::IndexedPack>> FlameAPI::searchProjects(const S
     auto url = searchProjectsURL(args);
     return { { .url = url }, [](const auto& response) -> Result<QList<ModPlatform::IndexedPack>> {
                 QList<ModPlatform::IndexedPack> newList;
-                TRY_INTO(auto doc, Json::requireDocument(response, "ResourceAPI")
+                TRY_INTO(auto doc, Json::requireDocument(response, "Flame project search")
                                        .and_then([](const auto& v) { return Json::requireObject(v); })
                                        .and_then([](const auto& v) { return Json::requireArray(v, "data"); }))
 
