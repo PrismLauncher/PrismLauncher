@@ -57,16 +57,24 @@ void ModListView::setModel(QAbstractItemModel* model)
 void ModListView::setResizeModes(const QList<QHeaderView::ResizeMode>& modes)
 {
     auto head = header();
+    m_adjustingColumnSizes = true;
     for (int i = 0; i < modes.count(); i++) {
         // Stretch marks the principal column. Qt does not let the user drag a Stretch section,
         // so keep it Interactive and fill the spare width by hand.
         if (modes[i] == QHeaderView::Stretch) {
             m_principalColumn = i;
             head->setSectionResizeMode(i, QHeaderView::Interactive);
+        } else if (modes[i] == QHeaderView::ResizeToContents) {
+            // Qt blocks dragging these too, so size the column once and hand it back to the user
+            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+            int contentsSize = head->sectionSize(i);
+            head->setSectionResizeMode(i, QHeaderView::Interactive);
+            head->resizeSection(i, contentsSize);
         } else {
             head->setSectionResizeMode(i, modes[i]);
         }
     }
+    m_adjustingColumnSizes = false;
 }
 
 void ModListView::resizeEvent(QResizeEvent* event)
