@@ -37,11 +37,13 @@
  */
 
 #include "ModFolderPage.h"
+#include <qmessagebox.h>
 #include "minecraft/mod/Resource.h"
 #include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
+#include <QAbstractButton>
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QEvent>
@@ -435,16 +437,17 @@ inline bool ModFolderPage::handleNoModLoader()
             return false;
         }
     }
-    int resp = QMessageBox::question(
-        this, ModFolderPage::tr("Missing Mod Loader"),
-        ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    auto* msgBox = CustomMessageBox::selectable(
+        this, tr("Missing Mod Loader"), tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
+        QMessageBox::Question, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+    msgBox->button(QMessageBox::Cancel)->setText(tr("Install Mods Anyway"));
+    const int resp = msgBox->exec();
     if (resp == QMessageBox::Yes) {
         // Should be safe
         InstallLoaderDialog dialog(profile, QString(), this);
         // true if the user went through the install loader dialog
         // false if the dialog got canceled/closed
-        bool dialogAccepted = dialog.exec() != 0;
+        const bool dialogAccepted = dialog.exec() != 0;
         this->m_container->refreshContainer();
 
         if (!dialogAccepted) {
@@ -459,5 +462,5 @@ inline bool ModFolderPage::handleNoModLoader()
     }
     // Nothing happens the dialog is already closing
     // returning true so the caller doesn't go and continue with opening it's dialog without a mod loader
-    return true;
+    return resp == QMessageBox::No;
 }
