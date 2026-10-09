@@ -1014,7 +1014,8 @@ class InstanceStaging : public Task {
             QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
             if (!templateDir.isEmpty() && QDir(templateDir).exists()) {
                 qDebug() << "trying to copy instance template directory";
-                FS::copy folderCopy(templateDir, m_stagingPath);
+
+                FS::copy folderCopy(templateDir, FS::PathCombine(m_stagingPath, "minecraft"));
                 folderCopy.followSymlinks(false).copyDirectories(true).overwrite(true);
 
                 if (!folderCopy()) {
