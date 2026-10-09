@@ -150,8 +150,8 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
 
     ui->packageView->setModel(m_filterModel);
     ui->packageView->installEventFilter(this);
-    ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->packageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
     auto smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
@@ -159,7 +159,7 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
     connect(m_profile, &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
     updateVersionControls();
     preselect(0);
-    connect(ui->packageView, &ModListView::customContextMenuRequested, this, &VersionPage::showContextMenu);
+    connect(ui->packageView, &QWidget::customContextMenuRequested, this, &VersionPage::showContextMenu);
     connect(ui->packageView, &QAbstractItemView::activated, this, [this](const QModelIndex& index) {
         auto component = m_profile->getComponent(index.row());
         component->setEnabled(!component->isEnabled());
