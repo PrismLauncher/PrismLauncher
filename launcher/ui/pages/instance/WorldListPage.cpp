@@ -40,6 +40,7 @@
 #include "Commandline.h"
 #include "minecraft/WorldList.h"
 #include "settings/SettingsObject.h"
+#include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_WorldListPage.h"
@@ -58,6 +59,7 @@
 #include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <Qt>
+#include <algorithm>
 #include <memory>
 
 #include "FileSystem.h"
@@ -124,7 +126,9 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     head->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
-    connect(m_ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WorldListPage::worldChanged);
+    connect(m_ui->worldTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &WorldListPage::worldChanged);
+    connect(proxy, &QAbstractItemModel::rowsRemoved, this, &WorldListPage::worldChanged);
+    connect(proxy, &QAbstractItemModel::modelReset, this, &WorldListPage::worldChanged);
 
     m_ui->actionWorldTools->setMenu(m_worldToolsMenu);
     connect(m_ui->actionWorldTools, &QAction::triggered, this, [this] {
@@ -134,7 +138,7 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     });
     connect(APPLICATION->settings()->getSetting("WorldTools").get(), &Setting::SettingChanged, this, [this] { populateWorldToolsMenu(); });
 
-    worldChanged(QModelIndex(), QModelIndex());
+    worldChanged();
 }
 
 void WorldListPage::openedImpl()
@@ -205,28 +209,39 @@ bool WorldListPage::eventFilter(QObject* obj, QEvent* ev)
 
 void WorldListPage::on_actionRemove_triggered()
 {
-    auto proxiedIndex = getSelectedWorld();
-    if (!proxiedIndex.isValid()) {
+    const auto selected = getSelectedWorlds();
+    if (selected.isEmpty()) {
         return;
     }
 
-    const auto& world = m_worlds->allWorlds().at(proxiedIndex.row());
+    QString text;
+    if (selected.size() == 1) {
+        const auto& world = m_worlds->allWorlds().at(selected.first().row());
+        text = tr("You are about to delete \"%1\".\n"
+                  "The world may be gone forever (A LONG TIME).\n\n"
+                  "Are you sure?")
+                   .arg(world.name());
+    } else {
+        text =
+            tr("You are about to delete %n world(s).\n"
+               "These worlds may be gone forever (A LONG TIME).\n\n"
+               "Are you sure?",
+               nullptr, static_cast<int>(selected.size()));
+    }
 
-    auto result = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
-                                               tr("You are about to delete \"%1\".\n"
-                                                  "The world may be gone forever (A LONG TIME).\n\n"
-                                                  "Are you sure?")
-                                                   .arg(world.name()),
-                                               QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+    auto result = CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
+                                               QMessageBox::No)
                       ->exec();
 
     if (result != QMessageBox::Yes) {
         return;
     }
 
-    auto task = m_worlds->createDeleteWorldTask(proxiedIndex.row());
-    if (!task) {
-        return;
+    auto task = std::make_unique<ConcurrentTask>(tr("Deleting worlds"));
+    for (const auto& index : selected) {
+        if (auto deleteTask = m_worlds->createDeleteWorldTask(index.row())) {
+            task->addTask(Task::Ptr(deleteTask.release()));
+        }
     }
 
     m_worlds->stopWatching();
@@ -300,23 +315,26 @@ void WorldListPage::on_actionData_Packs_triggered()
 
 void WorldListPage::on_actionReset_Icon_triggered()
 {
-    auto proxiedIndex = getSelectedWorld();
-
-    if (!proxiedIndex.isValid()) {
-        return;
+    for (const auto& index : getSelectedWorlds()) {
+        m_worlds->resetIcon(index.row());
     }
-
-    if (m_worlds->resetIcon(proxiedIndex.row())) {
-        m_ui->actionReset_Icon->setEnabled(false);
-    }
+    worldChanged();
 }
 
 QModelIndex WorldListPage::getSelectedWorld()
 {
-    auto index = m_ui->worldTreeView->selectionModel()->currentIndex();
+    const auto selected = getSelectedWorlds();
+    return selected.size() == 1 ? selected.first() : QModelIndex();
+}
 
+QModelIndexList WorldListPage::getSelectedWorlds()
+{
     auto* proxy = dynamic_cast<QSortFilterProxyModel*>(m_ui->worldTreeView->model());
-    return proxy->mapToSource(index);
+    QModelIndexList result;
+    for (const auto& index : m_ui->worldTreeView->selectionModel()->selectedRows()) {
+        result.append(proxy->mapToSource(index));
+    }
+    return result;
 }
 
 void WorldListPage::on_actionCopy_Seed_triggered()
@@ -387,18 +405,19 @@ void WorldListPage::launchWorldTool(const QString& name, const QString& command)
     }
 }
 
-void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void WorldListPage::worldChanged()
 {
     QModelIndex index = getSelectedWorld();
     bool enable = index.isValid();
     m_ui->actionCopy_Seed->setEnabled(enable);
-    m_ui->actionRemove->setEnabled(enable);
+    m_ui->actionRemove->setEnabled(m_ui->worldTreeView->selectionModel()->hasSelection());
     m_ui->actionCopy->setEnabled(enable);
     m_ui->actionRename->setEnabled(enable);
     m_ui->actionData_Packs->setEnabled(enable);
     m_ui->actionWorldTools->setEnabled(enable);
-    bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
-    m_ui->actionReset_Icon->setEnabled(enable && hasIcon);
+    const auto selected = getSelectedWorlds();
+    const bool anyHasIcon = std::ranges::any_of(selected, [](const auto& world) { return !world.data(WorldList::IconFileRole).isNull(); });
+    m_ui->actionReset_Icon->setEnabled(anyHasIcon);
 
     auto supportsJoin = (m_inst != nullptr) && m_inst->traits().contains("feature:is_quick_play_singleplayer");
     m_ui->actionJoin->setEnabled(enable && supportsJoin);
