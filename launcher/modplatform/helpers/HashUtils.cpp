@@ -126,7 +126,7 @@ QString hash(QIODevice* device, Algorithm type)
 
     QCryptographicHash hash(alg);
 
-    const bool isMainThread = QCoreApplication::instance() != nullptr && QThread::currentThread() == QCoreApplication::instance()->thread();
+    const bool isMainThread = QThread::isMainThread();
     constexpr auto chunkSize = 1024L * 1024;  // 1 MB
     while (!device->atEnd()) {
         const auto chunk = device->read(chunkSize);
