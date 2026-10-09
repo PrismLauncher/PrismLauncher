@@ -185,8 +185,7 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
 
 void ModFolderPage::downloadMods()
 {
-    auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (handleNoModLoader()) {
         return;
     }
 
@@ -231,8 +230,7 @@ void ModFolderPage::downloadDialogFinished(int result)
 
 void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::IndexedVersionType> releaseTypes)
 {
-    auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (handleNoModLoader()) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -261,7 +259,9 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), std::move(releaseTypes));
+    auto* profile = m_instance->getPackProfile();
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(),
+                                      std::move(releaseTypes));
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
@@ -342,8 +342,7 @@ void ModFolderPage::changeModVersion()
         }
     }
 
-    auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (handleNoModLoader()) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -424,13 +423,24 @@ bool NilModFolderPage::shouldDisplay() const
 // Helper function so this doesn't need to be duplicated 3 times
 inline bool ModFolderPage::handleNoModLoader()
 {
+    auto* profile = m_instance->getPackProfile();
+    if (profile->getModLoaders().has_value()) {
+        return false;
+    }
+    auto* settings = m_instance->settings();
+    const bool overrideLoaders = settings->get("OverrideModDownloadLoaders").toBool();
+    if (overrideLoaders) {
+        const QStringList loaders = Json::toStringList(settings->get("ModDownloadLoaders").toString());
+        if (!loaders.isEmpty()) {
+            return false;
+        }
+    }
     int resp = QMessageBox::question(
         this, ModFolderPage::tr("Missing Mod Loader"),
         ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     if (resp == QMessageBox::Yes) {
         // Should be safe
-        auto* profile = this->m_instance->getPackProfile();
         InstallLoaderDialog dialog(profile, QString(), this);
         // true if the user went through the install loader dialog
         // false if the dialog got canceled/closed
