@@ -3,6 +3,8 @@
 #include <meta/Index.h>
 #include <meta/VersionList.h>
 
+#include "TestHelpers.h"
+
 class IndexTest : public QObject {
     Q_OBJECT
    private slots:
@@ -35,6 +37,6 @@ class IndexTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(IndexTest)
+REGISTER_TEST(IndexTest)
 
 #include "Index_test.moc"

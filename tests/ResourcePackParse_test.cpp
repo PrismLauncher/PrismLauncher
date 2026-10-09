@@ -24,6 +24,8 @@
 
 #include <minecraft/mod/ResourcePack.h>
 
+#include "TestHelpers.h"
+
 class ResourcePackParseTest : public QObject {
     Q_OBJECT
 
@@ -73,6 +75,6 @@ class ResourcePackParseTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(ResourcePackParseTest)
+REGISTER_TEST(ResourcePackParseTest)
 
 #include "ResourcePackParse_test.moc"

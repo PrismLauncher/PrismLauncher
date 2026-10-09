@@ -43,6 +43,8 @@
 #include <minecraft/OneSixVersionFormat.h>
 #include <net/HttpMetaCache.h>
 
+#include "TestHelpers.h"
+
 class LibraryTest : public QObject {
     Q_OBJECT
    private:
@@ -332,6 +334,6 @@ class LibraryTest : public QObject {
     QString dataDir;
 };
 
-QTEST_GUILESS_MAIN(LibraryTest)
+REGISTER_TEST(LibraryTest)
 
 #include "Library_test.moc"

@@ -4,6 +4,8 @@
 
 #include <minecraft/MojangVersionFormat.h>
 
+#include "TestHelpers.h"
+
 class MojangVersionFormatTest : public QObject {
     Q_OBJECT
 
@@ -39,6 +41,6 @@ class MojangVersionFormatTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(MojangVersionFormatTest)
+REGISTER_TEST(MojangVersionFormatTest)
 
 #include "MojangVersionFormat_test.moc"

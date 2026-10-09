@@ -27,6 +27,8 @@
 #include <minecraft/mod/DataPack.h>
 #include <minecraft/mod/tasks/LocalDataPackParseTask.h>
 
+#include "TestHelpers.h"
+
 class DataPackParseTest : public QObject {
     Q_OBJECT
 
@@ -74,6 +76,6 @@ class DataPackParseTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(DataPackParseTest)
+REGISTER_TEST(DataPackParseTest)
 
 #include "DataPackParse_test.moc"

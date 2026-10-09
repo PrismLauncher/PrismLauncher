@@ -9,6 +9,8 @@
 
 #include <QVariantUtils.h>
 
+#include "TestHelpers.h"
+
 class IniFileTest : public QObject {
     Q_OBJECT
    private slots:
@@ -192,6 +194,6 @@ PreLaunchCommand=)";
     }
 };
 
-QTEST_GUILESS_MAIN(IniFileTest)
+REGISTER_TEST(IniFileTest)
 
 #include "INIFile_test.moc"
