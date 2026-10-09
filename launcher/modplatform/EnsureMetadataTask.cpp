@@ -291,6 +291,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
             auto resourceIter = m_resources.find(hash);
             if (resourceIter == m_resources.end()) {
                 qWarning() << "Invalid project id from the API response.";
+                return;
             }
 
             auto* resource = resourceIter.value();
@@ -439,6 +440,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
             auto resourceIter = m_resources.find(hash);
             if (resourceIter == m_resources.end()) {
                 qWarning() << "Invalid project id from the API response.";
+                return;
             }
 
             auto* resource = resourceIter.value();
@@ -491,6 +493,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
                 qDebug() << *entries;
 
                 emitFail(resource);
+                continue;
             }
             updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
         }

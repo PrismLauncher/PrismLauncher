@@ -224,8 +224,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         QObject::connect(job.get(), &NetJob::failed, job.get(),
                          [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
 
-        m_job = job;
-        m_job->start();
+        m_extraJob = job;
+        m_extraJob->start();
     }
 
     updateUi();
