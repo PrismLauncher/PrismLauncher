@@ -493,6 +493,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
                 qDebug() << *entries;
 
                 emitFail(resource);
+                continue;
             }
             updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
         }
