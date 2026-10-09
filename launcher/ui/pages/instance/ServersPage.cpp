@@ -644,7 +644,12 @@ void ServersPage::runningStateChanged(bool running)
 void ServersPage::selectionChanged()
 {
     const auto selected = ui->serversView->selectionModel()->selectedRows();
-    currentServer = selected.size() == 1 ? selected.first().row() : -1;
+    const auto index = ui->serversView->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        currentServer = index.row();
+    } else {
+        currentServer = -1;
+    }
     updateState();
 }
 
