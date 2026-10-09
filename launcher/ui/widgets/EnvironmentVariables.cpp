@@ -59,12 +59,18 @@ EnvironmentVariables::~EnvironmentVariables()
     delete ui;
 }
 
-void EnvironmentVariables::initialize(bool instance, bool override, const QMap<QString, QVariant>& value)
+void EnvironmentVariables::setCheckable(bool checkable)
 {
-    // update widgets to settings
-    ui->overrideCheckBox->setVisible(instance);
-    ui->overrideCheckBox->setChecked(override);
+    ui->overrideCheckBox->setVisible(checkable);
+}
 
+void EnvironmentVariables::setChecked(bool checked)
+{
+    ui->overrideCheckBox->setChecked(checked);
+}
+
+void EnvironmentVariables::setValue(const QMap<QString, QVariant>& value)
+{
     // populate
     ui->list->clear();
     for (auto iter = value.begin(); iter != value.end(); iter++) {
@@ -94,7 +100,7 @@ void EnvironmentVariables::retranslate()
     ui->retranslateUi(this);
 }
 
-bool EnvironmentVariables::override() const
+bool EnvironmentVariables::checked() const
 {
     return ui->overrideCheckBox->isChecked();
 }

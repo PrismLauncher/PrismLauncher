@@ -46,6 +46,7 @@
 #include <utility>
 
 #include "FileSystem.h"
+#include "config/GlobalConfig.h"
 #include "logs/AnonymizeLog.h"
 #include "net/NetJob.h"
 #include "net/PasteUpload.h"
@@ -54,7 +55,6 @@
 
 #include <BuildConfig.h>
 #include <DesktopServices.h>
-#include <settings/SettingsObject.h>
 #include "Application.h"
 
 constexpr int g_MaxMclogsLines = 25000;
@@ -92,8 +92,8 @@ Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const Q
 Result<std::optional<QString>> GuiUtil::uploadPaste(const QString& name, const QString& data, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);
-    auto pasteType = static_cast<PasteUpload::Type>(APPLICATION->settings()->get("PastebinType").toInt());
-    auto baseURL = APPLICATION->settings()->get("PastebinCustomAPIBase").toString();
+    auto pasteType = static_cast<PasteUpload::Type>(APPLICATION->config()->pastebinType);
+    auto baseURL = APPLICATION->config()->pastebinCustomApiBase.toString();
     bool shouldTruncate = false;
 
     if (baseURL.isEmpty()) {

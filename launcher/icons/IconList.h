@@ -42,7 +42,6 @@
 #include <memory>
 
 #include "MMCIcon.h"
-#include "settings/Setting.h"
 
 #include "QObjectPtr.h"
 
