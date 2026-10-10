@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2025 Yihe Li <winmikedows@hotmail.com>
+ *  Copyright (C) 2026 utophii <pos18411@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,9 +62,16 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath);
 bool createInstanceShortcutOnDesktop(const Shortcut& shortcut);
 
 /// Create an instance shortcut in the Applications directory
+/// This will try to use the DynamicLauncher portal first (if available),
+/// falling back to directly writing the .desktop file
 bool createInstanceShortcutInApplications(const Shortcut& shortcut);
 
 /// Create an instance shortcut in other directories
 bool createInstanceShortcutInOther(const Shortcut& shortcut);
+
+/// Create an instance shortcut via the DynamicLauncher portal.
+/// This shows a confirmation dialog to the user through the portal.
+/// Returns true if the shortcut was successfully installed via the portal
+bool createInstanceShortcutViaPortal(const Shortcut& shortcut);
 
 }  // namespace ShortcutUtils

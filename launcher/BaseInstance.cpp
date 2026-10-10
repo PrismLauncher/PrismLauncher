@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 utophii <pos18411@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -436,7 +437,10 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
     // FIXME: if no change, do not set. setting involves saving a file.
     QJsonArray array;
     for (const auto& elem : shortcuts) {
-        array.append(QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } });
+        array.append(QJsonObject{ { "name", elem.name },
+                                  { "filePath", elem.filePath },
+                                  { "target", static_cast<int>(elem.target) },
+                                  { "isPortal", elem.isPortal } });
     }
 
     QJsonDocument document;
@@ -468,11 +472,12 @@ QList<ShortcutData> BaseInstance::shortcuts() const
 
         QString shortcutName = dict["name"].toString();
         QString filePath = dict["filePath"].toString();
-        if (!QFileInfo::exists(filePath)) {
+        bool isPortal = dict.value("isPortal").toBool();
+        if (!isPortal && !QFileInfo::exists(filePath)) {
             qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
             continue;
         }
-        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value) });
+        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value), .isPortal = isPortal });
     }
     return results;
 }
