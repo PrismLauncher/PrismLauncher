@@ -70,7 +70,7 @@ public abstract class AbstractLauncher implements Launcher {
     // secondary parameters
     protected final int width, height;
     protected final boolean maximize;
-    protected final String serverAddress, serverPort, worldName;
+    protected final String serverAddress, serverPort, worldName, realmId;
 
     protected final String mainClassName;
 
@@ -81,6 +81,7 @@ public abstract class AbstractLauncher implements Launcher {
         serverAddress = params.getString("serverAddress", null);
         serverPort = params.getString("serverPort", null);
         worldName = params.getString("worldName", null);
+        realmId = params.getString("realmId", null);
 
         String windowParams = params.getString("windowParams", null);
 

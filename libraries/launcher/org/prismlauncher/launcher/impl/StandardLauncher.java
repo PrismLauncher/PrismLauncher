@@ -95,6 +95,9 @@ public final class StandardLauncher extends AbstractLauncher {
         } else if (worldName != null && quickPlaySingleplayerSupported) {
             gameArgs.add("--quickPlaySingleplayer");
             gameArgs.add(worldName);
+        } else if (realmId != null && quickPlaySingleplayerSupported) {
+            gameArgs.add("--quickPlayRealms");
+            gameArgs.add(realmId);
         }
 
         StringBuilder joinedGameArgs = new StringBuilder();
