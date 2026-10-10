@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <cstdint>
 
 #include "BaseEntity.h"
 #include "Result.h"
@@ -33,7 +34,7 @@ class Index : public QAbstractListModel, public BaseEntity {
     explicit Index(const QList<VersionList::Ptr>& lists, QObject* parent = nullptr);
     virtual ~Index() = default;
 
-    enum { UidRole = Qt::UserRole, NameRole, ListPtrRole };
+    enum Columns : std::uint16_t { UidRole = Qt::UserRole, NameRole, ListPtrRole };
 
     QVariant data(const QModelIndex& index, int role) const override;
     int rowCount(const QModelIndex& parent) const override;

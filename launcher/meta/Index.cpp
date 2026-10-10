@@ -35,7 +35,7 @@ Index::Index(const QList<VersionList::Ptr>& lists, QObject* parent) : QAbstractL
 QVariant Index::data(const QModelIndex& index, int role) const
 {
     if (index.parent().isValid() || index.row() < 0 || index.row() >= m_lists.size()) {
-        return QVariant();
+        return {};
     }
 
     VersionList::Ptr list = m_lists.at(index.row());
@@ -43,17 +43,19 @@ QVariant Index::data(const QModelIndex& index, int role) const
         case Qt::DisplayRole:
             if (index.column() == 0) {
                 return list->humanReadable();
-            } else {
-                break;
             }
-        case UidRole:
+            break;
+
+        case Columns::UidRole:
             return list->uid();
-        case NameRole:
+        case Columns::NameRole:
             return list->name();
-        case ListPtrRole:
+        case Columns::ListPtrRole:
             return QVariant::fromValue(list);
+        default:
+            break;
     }
-    return QVariant();
+    return {};
 }
 
 int Index::rowCount(const QModelIndex& parent) const
@@ -70,9 +72,8 @@ QVariant Index::headerData(int section, Qt::Orientation orientation, int role) c
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
         return tr("Name");
-    } else {
-        return QVariant();
     }
+    return {};
 }
 
 bool Index::hasUid(const QString& uid) const
@@ -85,7 +86,7 @@ VersionList::Ptr Index::get(const QString& uid)
     VersionList::Ptr out = m_uids.value(uid, nullptr);
     if (!out) {
         out = std::make_shared<VersionList>(uid);
-        m_uids[uid] = out;
+        m_uids.insert(uid, out);
         m_lists.append(out);
     }
     return out;
@@ -116,8 +117,9 @@ void Index::merge(const std::shared_ptr<Index>& other)
         endResetModel();
     } else {
         for (const VersionList::Ptr& list : lists) {
-            if (m_uids.contains(list->uid())) {
-                m_uids[list->uid()]->mergeFromIndex(list);
+            auto it = m_uids.find(list->uid());
+            if (it != m_uids.end()) {
+                it.value()->mergeFromIndex(list);
             } else {
                 beginInsertRows(QModelIndex(), m_lists.size(), m_lists.size());
                 connectVersionList(m_lists.size(), list);
