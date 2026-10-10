@@ -90,9 +90,6 @@
    <property name="windowTitle">
     <string>Instance Toolbar</string>
    </property>
-   <property name="allowedAreas">
-    <set>Qt::ToolBarArea::LeftToolBarArea|Qt::ToolBarArea::RightToolBarArea</set>
-   </property>
    <property name="iconSize">
     <size>
      <width>16</width>
@@ -114,6 +111,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionRenameInstance"/>
+   <addaction name="separator"/>
    <addaction name="actionLaunchInstance"/>
    <addaction name="actionKillInstance"/>
    <addaction name="separator"/>
@@ -131,7 +130,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
