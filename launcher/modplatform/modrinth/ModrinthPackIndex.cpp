@@ -177,11 +177,10 @@ QString resourceTypeParameter(ModPlatform::ResourceType type)
     qWarning() << "Invalid resource type for Modrinth API!" << static_cast<std::uint8_t>(type);
     return "";
 }
-}  // namespace Modrinth::Parse
 
-Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJsonObject& obj,
-                                                                     const QString& preferredHashType,
-                                                                     const QString& preferredFileName)
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj,
+                                                           const QString& preferredHashType,
+                                                           const QString& preferredFileName)
 {
     ModPlatform::IndexedVersion file;
 
@@ -279,24 +278,27 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     if (parent.contains("url")) {
         TRY_INTO(file.downloadUrl, Json::requireString(parent, "url"))
         TRY_INTO(file.fileName, Json::requireString(parent, "filename"))
+        file.size = parent["size"].toInt();
         file.fileName = FS::RemoveInvalidPathChars(file.fileName);
         TRY_INTO(const auto& primary, Json::requireBoolean(parent, "primary"))
         file.isPreferred = primary || (files.count() == 1);
-        auto hashList = Json::requireObject(parent, "hashes");
-        TRY(hashList)
+        TRY_INTO(auto hashList, Json::requireObject(parent, "hashes"))
 
-        if (hashList->contains(preferredHashType)) {
-            TRY_INTO(file.hash, Json::requireString(hashList.value(), preferredHashType))
+        if (hashList.contains(preferredHashType)) {
+            TRY_INTO(file.hash, Json::requireString(hashList, preferredHashType))
             file.hashType = preferredHashType;
         } else {
             auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hashType : hashTypes) {
-                if (hashList->contains(hashType)) {
-                    TRY_INTO(file.hash, Json::requireString(hashList.value(), hashType))
+                if (hashList.contains(hashType)) {
+                    TRY_INTO(file.hash, Json::requireString(hashList, hashType))
                     file.hashType = hashType;
                     break;
                 }
             }
+        }
+        if (hashList.contains("sha1")) {
+            file.sha1 = hashList.value("sha1").toString("");
         }
 
         return file;
@@ -304,3 +306,30 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
 
     return {};
 }
+
+Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonArray& arr, const QString& addonId)
+{
+    QList<ModPlatform::IndexedVersion> unsortedVersions;
+
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+
+        TRY_INTO(auto file, Modrinth::Parse::loadIndexedPackVersion(obj))
+        if (!file.addonId.isValid()) {
+            file.addonId = addonId;
+        }
+
+        if (file.fileId.isValid() && !file.downloadUrl.isEmpty()) {  // Heuristic to check if the returned value is valid
+            unsortedVersions.append(file);
+        }
+    }
+
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::ranges::sort(unsortedVersions, orderSortPredicate);
+    return unsortedVersions;
+}
+
+}  // namespace Modrinth::Parse

@@ -37,7 +37,6 @@
 
 #include <QWidget>
 
-#include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {

@@ -50,6 +50,7 @@
 
 class LaunchController;
 class NewsChecker;
+class UrlHandler;
 class QToolButton;
 class InstanceProxyModel;
 class LabeledToolButton;
@@ -246,6 +247,7 @@ class MainWindow : public QMainWindow {
     KonamiCode* secretEventFilter = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
+    std::unique_ptr<UrlHandler> m_urlImportHandler;
 
     MinecraftInstance* m_selectedInstance = nullptr;
     QString m_currentInstIcon;
