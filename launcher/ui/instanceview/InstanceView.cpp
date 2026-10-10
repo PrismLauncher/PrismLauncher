@@ -641,9 +641,50 @@ void InstanceView::dropEvent(QDropEvent* event)
                 viewport()->update();
                 return;
             }
+
             auto instanceId = QString::fromUtf8(mimedata->data("application/x-instanceid"));
             auto instanceList = APPLICATION->instances();
-            instanceList->setInstanceGroup(instanceId, group->text);
+            auto sortMode = APPLICATION->settings()->get("InstSortMode").toString();
+
+            if (sortMode == "Manual") {
+                QList<InstanceId> order;
+                int insertPosition = -1;
+
+                for (const auto& item : group->items()) {
+                    const auto itemId = item.data(InstanceList::InstanceIDRole).toString();
+
+                    if (itemId == instanceId) {
+                        insertPosition = order.size();
+                    } else {
+                        order.append(itemId);
+                    }
+                }
+
+                if (insertPosition < 0) {
+                    insertPosition = order.size();
+                }
+
+                const auto target = indexAt(event->position().toPoint());
+                const bool targetIsInDropGroup = target.data(InstanceViewRoles::GroupRole).toString() == group->text;
+
+                if (target.isValid() && targetIsInDropGroup) {
+                    const auto targetId = target.data(InstanceList::InstanceIDRole).toString();
+
+                    if (targetId != instanceId) {
+                        insertPosition = order.indexOf(targetId);
+
+                        if ((event->position().x()) > (visualRect(target).center().x())) {
+                            ++insertPosition;
+                        }
+                    }
+                }
+
+                order.insert(insertPosition, instanceId);
+                instanceList->setInstanceManualOrder(instanceId, group->text, order);
+            } else {
+                instanceList->setInstanceGroup(instanceId, group->text);
+            }
+
             event->setDropAction(Qt::MoveAction);
             event->accept();
 
