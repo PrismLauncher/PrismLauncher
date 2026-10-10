@@ -32,4 +32,6 @@ namespace Modrinth::Parse {
 
 Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj);
 
+QString resourceTypeParameter(ModPlatform::ResourceType type);
+
 }  // namespace Modrinth::Parse
