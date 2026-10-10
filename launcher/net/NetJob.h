@@ -43,7 +43,9 @@
 #include "tasks/ConcurrentTask.h"
 
 // Those are included so that they are also included by anyone using NetJob
+#if defined(LAUNCHER_APPLICATION)
 #include "net/HttpMetaCache.h"
+#endif
 
 class NetJob : public ConcurrentTask {
     Q_OBJECT

@@ -1049,7 +1049,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_metacache->addBase("meta", QDir("meta").absolutePath());
         m_metacache->addBase("java", QDir("cache/java").absolutePath());
         m_metacache->addBase("feed", QDir("cache/feed").absolutePath());
-        m_metacache->Load();
+        m_metacache->load();
         qInfo() << "<> Cache initialized.";
     }
 

@@ -139,6 +139,11 @@ void Request::executeTask()
 
     QNetworkRequest request(m_url);
     auto result = m_sink->init(request);
+    // the sink init can take a bit of time for cache(hashing is done in the sink init), so check for abort again after it
+    if (getState() == Task::State::AbortedByUser) {
+        m_sink->abort();
+        return;
+    }
     if (!result) {
         emitFailed(result.error());
         return;

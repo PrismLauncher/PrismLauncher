@@ -52,11 +52,14 @@
 
 #include "EnumWrapper.h"
 #include "HeaderProxy.h"
-#include "HttpMetaCache.h"
 #include "QObjectPtr.h"
 #include "Sink.h"
 #include "Validator.h"
 #include "tasks/Task.h"
+
+#if defined(LAUNCHER_APPLICATION)
+#include "HttpMetaCache.h"
+#endif
 
 class QIODevice;
 class QHttpMultiPart;
