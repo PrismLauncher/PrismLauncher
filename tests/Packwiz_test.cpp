@@ -23,6 +23,8 @@
 
 #include <modplatform/packwiz/Packwiz.h>
 
+#include "TestHelpers.h"
+
 class PackwizTest : public QObject {
     Q_OBJECT
 
@@ -85,6 +87,6 @@ class PackwizTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(PackwizTest)
+REGISTER_TEST(PackwizTest)
 
 #include "Packwiz_test.moc"

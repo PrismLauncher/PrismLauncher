@@ -3,6 +3,8 @@
 #include <GZip.h>
 #include <random>
 
+#include "TestHelpers.h"
+
 void fib(int& prev, int& cur)
 {
     auto ret = prev + cur;
@@ -47,6 +49,6 @@ class GZipTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(GZipTest)
+REGISTER_TEST(GZipTest)
 
 #include "GZip_test.moc"

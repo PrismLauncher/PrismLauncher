@@ -44,6 +44,8 @@
 
 #include <minecraft/mod/tasks/LocalDataPackParseTask.h>
 
+#include "TestHelpers.h"
+
 class MetaComponentParseTest : public QObject {
     Q_OBJECT
 
@@ -79,6 +81,6 @@ class MetaComponentParseTest : public QObject {
     void test_parseComponentWithMixed() { doTest("component_with_mixed.json"); }
 };
 
-QTEST_GUILESS_MAIN(MetaComponentParseTest)
+REGISTER_TEST(MetaComponentParseTest)
 
 #include "MetaComponentParse_test.moc"

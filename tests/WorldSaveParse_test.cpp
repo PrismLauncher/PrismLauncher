@@ -28,6 +28,8 @@
 #include <minecraft/mod/WorldSave.h>
 #include <minecraft/mod/tasks/LocalWorldSaveParseTask.h>
 
+#include "TestHelpers.h"
+
 class WorldSaveParseTest : public QObject {
     Q_OBJECT
 
@@ -89,6 +91,6 @@ class WorldSaveParseTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(WorldSaveParseTest)
+REGISTER_TEST(WorldSaveParseTest)
 
 #include "WorldSaveParse_test.moc"

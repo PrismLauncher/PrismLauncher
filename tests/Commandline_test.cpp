@@ -2,6 +2,8 @@
 
 #include <Commandline.h>
 
+#include "TestHelpers.h"
+
 class CommandlineTest : public QObject {
     Q_OBJECT
    private slots:
@@ -35,5 +37,5 @@ class CommandlineTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(CommandlineTest)
+REGISTER_TEST(CommandlineTest)
 #include "Commandline_test.moc"

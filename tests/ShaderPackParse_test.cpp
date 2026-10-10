@@ -28,6 +28,8 @@
 #include <minecraft/mod/ShaderPack.h>
 #include <minecraft/mod/tasks/LocalShaderPackParseTask.h>
 
+#include "TestHelpers.h"
+
 class ShaderPackParseTest : public QObject {
     Q_OBJECT
 
@@ -72,6 +74,6 @@ class ShaderPackParseTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(ShaderPackParseTest)
+REGISTER_TEST(ShaderPackParseTest)
 
 #include "ShaderPackParse_test.moc"
