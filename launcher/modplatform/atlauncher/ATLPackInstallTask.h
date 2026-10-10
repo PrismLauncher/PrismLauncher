@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <meta/VersionList.h>
 #include "ATLPackManifest.h"
 
@@ -94,7 +96,7 @@ class PackInstallTask : public InstanceTask {
     void executeTask() override;
 
    private slots:
-    void onDownloadSucceeded(QByteArray* responsePtr);
+    void onDownloadSucceeded(ATLauncher::PackVersion* responsePtr);
     void onDownloadFailed(QString reason);
     void onDownloadAborted();
 
@@ -103,7 +105,6 @@ class PackInstallTask : public InstanceTask {
 
    private:
     QString getDirForModType(ModType type, const QString& raw);
-    QString getVersionForLoader(const QString& uid);
     static QString detectLibrary(const VersionLibrary& library);
 
     bool createLibrariesComponent(const QString& instanceRoot, PackProfile* profile);
@@ -118,12 +119,24 @@ class PackInstallTask : public InstanceTask {
                      const QMap<QString, QString>& toCopy);
     void install();
 
+    Result<QString> pickLoaderVersion(const Meta::VersionList::Ptr& vlist);
+
+    void prepareMetaTask();
+    void loadOptionalMeta();
+    void runMetaStep(const Task::Ptr& task, bool required, const std::function<void()>& next);
+
    private:
     UserInteractionSupport* m_support;
 
     bool m_abortable = false;
 
     NetJob::Ptr m_jobPtr;
+    Task::Ptr m_metaPtr;
+
+    QString m_loaderUid;
+    QString m_liteLoaderVersion;
+    bool m_liteLoaderChecked = false;
+    QString m_forgeModVersion;
 
     InstallMode m_installMode;
     QString m_packName;
