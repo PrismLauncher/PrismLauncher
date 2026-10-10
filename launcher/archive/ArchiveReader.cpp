@@ -19,6 +19,7 @@
  *  under LicenseRef-PublicDomain.
  */
 #include "ArchiveReader.h"
+
 #include <archive.h>
 #include <archive_entry.h>
 #include <QDir>
@@ -27,6 +28,8 @@
 #include <functional>
 #include <memory>
 #include <optional>
+
+#include "Handle.h"
 
 namespace MMCZip {
 QStringList ArchiveReader::getFiles()
@@ -71,7 +74,7 @@ Result<QByteArray> ArchiveReader::File::readAll()
         data.append(static_cast<const char*>(buff), static_cast<qsizetype>(size));
     }
     if (status != ARCHIVE_EOF && status != ARCHIVE_OK) {
-        return std::unexpected{QString("Could not read data block: %1").arg(error())};
+        return std::unexpected{ QString("Could not read data block: %1").arg(error()) };
     }
     return data;
 }
@@ -97,7 +100,7 @@ auto ArchiveReader::goToFile(const QString& filename) -> Result<std::unique_ptr<
     archive_read_support_filter_all(a);
     auto fileName = m_archivePath.toStdWString();
     if (archive_read_open_filename_w(a, fileName.data(), m_blockSize) != ARCHIVE_OK) {
-        return std::unexpected{QString("Failed to open archive file %1: %2").arg(m_archivePath, archive_error_string(a))};
+        return std::unexpected{ QString("Failed to open archive file %1: %2").arg(m_archivePath, archive_error_string(a)) };
     }
 
     while (f->readNextHeader() == ARCHIVE_OK) {
@@ -108,14 +111,12 @@ auto ArchiveReader::goToFile(const QString& filename) -> Result<std::unique_ptr<
     }
 
     archive_read_close(a);
-    return std::unexpected{"File not found"};
+    return std::unexpected{ "File not found" };
 }
 
 Result<QByteArray> ArchiveReader::readFile(const QString& fileName)
 {
-    return goToFile(fileName).and_then([](const auto& v) -> Result<QByteArray> {
-        return v->readAll();
-    });
+    return goToFile(fileName).and_then([](const auto& v) -> Result<QByteArray> { return v->readAll(); });
 }
 
 static int copy_data(struct archive* ar, struct archive* aw, bool notBlock = false)
@@ -183,10 +184,10 @@ Result<> ArchiveReader::File::writeFile(archive* out, const QString& targetFileN
 Result<> ArchiveReader::File::writeFile(archive* out, const QString& targetFileName, std::optional<QDir> root, bool notBlock)
 {
     auto* entry = m_entry;
-    std::unique_ptr<archive_entry, decltype(&archive_entry_free)> entryClone(nullptr, &archive_entry_free);
+    Handle<archive_entry, archive_entry_free> entryClone;
     if (!targetFileName.isEmpty()) {
         entryClone.reset(archive_entry_clone(m_entry));
-        entry = entryClone.get();
+        entry = entryClone;
         auto nameUtf8 = targetFileName.toUtf8();
         archive_entry_set_pathname_utf8(entry, nameUtf8.constData());
 
@@ -199,10 +200,10 @@ Result<> ArchiveReader::File::writeFile(archive* out, const QString& targetFileN
         }
     }
     if (root.has_value() && willEscapeRoot(root.value(), entry)) {
-        return std::unexpected{"File is outside root"};
+        return std::unexpected{ "File is outside root" };
     }
     if (archive_write_header(out, entry) < ARCHIVE_OK) {
-        return std::unexpected{QString("Failed to write header: %1").arg(archive_error_string(out))};
+        return std::unexpected{ QString("Failed to write header: %1").arg(archive_error_string(out)) };
     }
     if (archive_entry_size(m_entry) > 0) {
         auto r = copy_data(m_archive.get(), out, notBlock);
@@ -210,7 +211,7 @@ Result<> ArchiveReader::File::writeFile(archive* out, const QString& targetFileN
             qCritical() << "Failed reading data block:" << archive_error_string(out);
         }
         if (r < ARCHIVE_WARN) {
-            return std::unexpected{QString("Failed reading data block: %1").arg(archive_error_string(out))};
+            return std::unexpected{ QString("Failed reading data block: %1").arg(archive_error_string(out)) };
         }
     }
     auto r = archive_write_finish_entry(out);
@@ -218,7 +219,7 @@ Result<> ArchiveReader::File::writeFile(archive* out, const QString& targetFileN
         qCritical() << "Failed to finish writing entry:" << archive_error_string(out);
     }
     if (r < ARCHIVE_WARN) {
-        return std::unexpected{QString("Failed to finish writing entry: %1").arg(archive_error_string(out))};
+        return std::unexpected{ QString("Failed to finish writing entry: %1").arg(archive_error_string(out)) };
     }
     return {};
 }
@@ -231,7 +232,7 @@ Result<> ArchiveReader::parse(const std::function<Result<bool>(File*)>& doStuff)
     archive_read_support_filter_all(a);
     auto fileName = m_archivePath.toStdWString();
     if (archive_read_open_filename_w(a, fileName.data(), m_blockSize) != ARCHIVE_OK) {
-        return std::unexpected{QString("Failed to open archive file %1: %2").arg(m_archivePath, f->error())};
+        return std::unexpected{ QString("Failed to open archive file %1: %2").arg(m_archivePath, f->error()) };
     }
 
     while (f->readNextHeader() == ARCHIVE_OK) {
@@ -260,7 +261,7 @@ bool ArchiveReader::File::isFile()
 Result<> ArchiveReader::File::skip()
 {
     if (archive_read_data_skip(m_archive.get()) < ARCHIVE_OK) {
-        return std::unexpected{QString("Could not skip entry: %1").arg(error())};
+        return std::unexpected{ QString("Could not skip entry: %1").arg(error()) };
     }
     return {};
 }
@@ -306,5 +307,5 @@ bool ArchiveReader::exists(const QString& filePath) const
     return false;
 }
 
-ArchiveReader::File::File() : m_archive(ArchivePtr(archive_read_new(), archive_read_free)) {}
+ArchiveReader::File::File() : m_archive(archive_read_new()) {}
 }  // namespace MMCZip

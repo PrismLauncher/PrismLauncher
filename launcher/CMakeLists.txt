@@ -70,6 +70,7 @@ set(CORE_SOURCES
     FileSystem.cpp
 
     Result.h
+    Handle.h
 
     # RW lock protected map
     RWStorage.h

@@ -25,14 +25,19 @@
 #include <optional>
 #include <utility>
 
+#include "Handle.h"
 #include "Result.h"
 
 struct archive;
 struct archive_entry;
+
+extern "C" {
+int archive_read_free(archive*);
+}
+
 namespace MMCZip {
 class ArchiveReader {
    public:
-    using ArchivePtr = std::unique_ptr<struct archive, int (*)(struct archive*)>;
     explicit ArchiveReader(QString fileName) : m_archivePath(std::move(fileName)) {}
     virtual ~ArchiveReader() = default;
 
@@ -61,7 +66,7 @@ class ArchiveReader {
 
        private:
         friend ArchiveReader;
-        ArchivePtr m_archive;
+        Handle<struct archive, archive_read_free> m_archive;
         archive_entry* m_entry;
     };
 
