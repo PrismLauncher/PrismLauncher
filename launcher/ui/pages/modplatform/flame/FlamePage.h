@@ -101,4 +101,5 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     Task::Ptr m_categoriesTask;
     Task::Ptr m_job;
     Task::Ptr m_extraJob;
+    Task::Ptr m_versionsTask;
 };
