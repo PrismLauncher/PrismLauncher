@@ -141,7 +141,8 @@ QString findMangoHud()
 QString find(QString libName)
 {
 #ifdef __GLIBC__
-    const char* library = libName.toLocal8Bit().constData();
+    auto libBytes = libName.toLocal8Bit();
+    const char* library = libBytes.constData();
 
     void* handle = dlopen(library, RTLD_NOW);
     if (!handle) {
