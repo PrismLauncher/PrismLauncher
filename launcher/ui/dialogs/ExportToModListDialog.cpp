@@ -31,14 +31,19 @@
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QPushButton>
+#include <utility>
 
-const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLines = {
-    { ExportToModList::HTML, "<li><a href=\"{url}\">{name}</a> [{version}] by {authors}</li>" },
-    { ExportToModList::MARKDOWN, "[{name}]({url}) [{version}] by {authors}" },
-    { ExportToModList::PLAINTXT, "{name} ({url}) [{version}] by {authors}" },
-    { ExportToModList::JSON, R"({"name":"{name}","url":"{url}","version":"{version}","authors":"{authors}"},)" },
-    { ExportToModList::CSV, "{name},{url},{version},\"{authors}\"" },
-};
+const QHash<ExportToModList::Formats, QString>& ExportToModListDialog::exampleLines()
+{
+    static const QHash<ExportToModList::Formats, QString> lines = {
+        { ExportToModList::HTML, "<li><a href=\"{url}\">{name}</a> [{version}] by {authors}</li>" },
+        { ExportToModList::MARKDOWN, "[{name}]({url}) [{version}] by {authors}" },
+        { ExportToModList::PLAINTXT, "{name} ({url}) [{version}] by {authors}" },
+        { ExportToModList::JSON, R"({"name":"{name}","url":"{url}","version":"{version}","authors":"{authors}"},)" },
+        { ExportToModList::CSV, "{name},{url},{version},\"{authors}\"" },
+    };
+    return lines;
+}
 
 ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWidget* parent)
     : QDialog(parent), m_mods(std::move(mods)), m_templateChanged(false), m_name(std::move(name)), m_ui(new Ui::ExportToModListDialog)
@@ -51,12 +56,12 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     connect(m_ui->versionCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
     connect(m_ui->urlCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
     connect(m_ui->filenameCheckBox, &QCheckBox::checkStateChanged, this, &ExportToModListDialog::trigger);
-    connect(m_ui->authorsButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Authors); });
-    connect(m_ui->versionButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Version); });
-    connect(m_ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });
-    connect(m_ui->filenameButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::FileName); });
+    connect(m_ui->authorsButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::Authors); });
+    connect(m_ui->versionButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::Version); });
+    connect(m_ui->urlButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::Url); });
+    connect(m_ui->filenameButton, &QPushButton::clicked, this, [this] { addExtra(ExportToModList::FileName); });
     connect(m_ui->templateText, &QTextEdit::textChanged, this, [this] {
-        if (m_ui->templateText->toPlainText() != exampleLines[m_format]) {
+        if (m_ui->templateText->toPlainText() != exampleLines().value(m_format)) {
             m_ui->formatComboBox->setCurrentIndex(5);
         }
         triggerImp();
@@ -152,12 +157,10 @@ void ExportToModListDialog::triggerImp()
         case ExportToModList::MARKDOWN:
             m_ui->resultText->setHtml(StringUtils::htmlListPatch(markdownToHTML(txt)));
             break;
-        case ExportToModList::PLAINTXT:
-        case ExportToModList::JSON:
-        case ExportToModList::CSV:
+        default:
             break;
     }
-    auto exampleLine = exampleLines[m_format];
+    auto exampleLine = exampleLines().value(m_format);
     if (!m_templateChanged && m_ui->templateText->toPlainText() != exampleLine) {
         m_ui->templateText->setPlainText(exampleLine);
     }
@@ -220,7 +223,6 @@ void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
         case ExportToModList::FileName:
             m_ui->templateText->insertPlainText("{filename}");
             break;
-        case ExportToModList::None:
         default:
             break;
     }
