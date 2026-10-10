@@ -20,15 +20,11 @@ Setting::Setting(QStringList synonyms, QVariant defVal) : QObject(), m_synonyms(
 
 QVariant Setting::get() const
 {
-    SettingsObject* sbase = m_storage;
-    if (!sbase) {
+    const auto result = retrieve();
+    if (!result.isValid()) {
         return defValue();
-    } else {
-        QVariant test = sbase->retrieveValue(*this);
-        if (!test.isValid())
-            return defValue();
-        return test;
     }
+    return result;
 }
 
 QVariant Setting::defValue() const
@@ -38,7 +34,7 @@ QVariant Setting::defValue() const
 
 void Setting::set(QVariant value)
 {
-    if (const auto currentValue = get(); value != currentValue) {
+    if (const auto currentValue = retrieve(); value != currentValue) {
         emit SettingChanged(*this, value);
     }
 }
@@ -46,4 +42,14 @@ void Setting::set(QVariant value)
 void Setting::reset()
 {
     emit settingReset(*this);
+}
+
+QVariant Setting::retrieve() const
+{
+    SettingsObject* sbase = m_storage;
+    if (!sbase) {
+        return {};
+    }
+
+    return sbase->retrieveValue(*this);
 }
