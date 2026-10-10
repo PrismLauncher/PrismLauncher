@@ -38,6 +38,7 @@
 #include <QWidget>
 
 #include "BaseVersion.h"
+#include "meta/VersionList.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -61,30 +62,22 @@ class CustomPage : public QWidget, public BasePage {
 
     void openedImpl() override;
 
-    BaseVersion::Ptr selectedVersion() const;
-    BaseVersion::Ptr selectedLoaderVersion() const;
-    QString selectedLoader() const;
-    QString selectedLoaderName() const;
-
-   public slots:
     void setSelectedVersion(BaseVersion::Ptr version);
-    void setSelectedLoaderVersion(BaseVersion::Ptr version);
-
-   private slots:
-    void filterChanged();
-    void loaderFilterChanged();
 
    private:
+    void filterChanged();
+    void loaderChanged();
+    void chooseLoader();
+    void clearLoader();
+    void syncLoader(const QString& gameVersion);
     void refresh();
-    void loaderRefresh();
     void suggestCurrent();
 
-   private:
     bool m_initialized = false;
     NewInstanceDialog* m_dialog = nullptr;
     Ui::CustomPage* m_ui = nullptr;
     bool m_versionSetByUser = false;
     BaseVersion::Ptr m_selectedVersion;
-    BaseVersion::Ptr m_selectedLoaderVersion;
-    QString m_selectedLoader;
+    Meta::VersionList::Ptr m_selectedLoader;
+    Meta::Version::Ptr m_selectedLoaderVersion;
 };

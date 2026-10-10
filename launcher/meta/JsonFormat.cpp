@@ -41,6 +41,7 @@ Result<std::shared_ptr<Meta::Index>> parseIndexInternal(const QJsonObject& obj)
 
         auto list = std::make_shared<Meta::VersionList>(uid);
         list->setName(entry["name"].toString());
+        list->setInstallableLoader(entry["installableLoader"].toBool());
         list->setSha256(entry["sha256"].toString());
 
         lists.push_back(list);
@@ -172,7 +173,13 @@ Result<> parseRequires(const QJsonObject& obj, RequireSet* ptr, const char* keyN
             TRY_INTO(const auto& uid, requireString(reqObject, "uid"))
             auto equals = reqObject["equals"].toString();
             auto suggests = reqObject["suggests"].toString();
-            ptr->insert({ .uid = uid, .equalsVersion = equals, .suggests = suggests });
+            const auto matchGameVersion = reqObject["matchGameVersion"].toBool();
+            ptr->insert({
+                .uid = uid,
+                .equalsVersion = equals,
+                .suggests = suggests,
+                .matchGameVersion = matchGameVersion,
+            });
         }
     }
     return {};

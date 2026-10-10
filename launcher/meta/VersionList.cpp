@@ -169,6 +169,10 @@ void VersionList::setName(const QString& name)
     emit nameChanged(name);
 }
 
+void VersionList::setInstallableLoader(bool installable) {
+    m_installableLoader = installable;
+}
+
 void VersionList::setVersions(const QList<Version::Ptr>& versions)
 {
     beginResetModel();
@@ -222,6 +226,7 @@ void VersionList::mergeFromIndex(const VersionList::Ptr& other)
     if (m_name != other->m_name) {
         setName(other->m_name);
     }
+    m_installableLoader = other->m_installableLoader;
     if (!other->m_sha256.isEmpty()) {
         m_sha256 = other->m_sha256;
     }
