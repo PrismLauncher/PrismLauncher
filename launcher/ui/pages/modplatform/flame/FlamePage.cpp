@@ -35,7 +35,6 @@
 
 #include "FlamePage.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui_FlamePage.h"
@@ -143,16 +142,16 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion> > callbacks{};
-
         auto addonId = m_current->addonId;
-        // Use default if no callbacks are set
-        callbacks.onSucceed = [this, curr, addonId](auto& doc) {
+
+        auto [netJob, response] = FlameAPI::get().getVersionsTask(
+            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack });
+        connect(netJob.get(), &NetJob::succeeded, this, [this, addonId, response, curr] {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
 
-            m_current->versions = doc;
+            m_current->versions = *response;
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
                 if (auto filter = m_filterWidget->getFilter()) {
@@ -177,19 +176,15 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                 m_ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
             }
             suggestCurrent();
-        };
-        callbacks.onFail = [this](const QString& reason, int) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
-        };
+        });
+        connect(netJob.get(), &NetJob::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
-        auto netJob = FlameAPI::get().getProjectVersions(
-            { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
-
-        m_job = netJob;
+        m_versionsTask = netJob;
         netJob->start();
     } else {
         for (const auto& version : m_current->versions) {
-            m_ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+            m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
         }
 
         suggestCurrent();
@@ -207,7 +202,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
         auto [job, response] = FlameAPI::get().getProjectTask(addonId.toString(), true);
 
-        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [this, addonId, response] {
+        connect(job.get(), &NetJob::succeeded, this, [this, addonId, response] {
             if (addonId != m_current->addonId) {
                 return;  // wrong request
             }
@@ -221,8 +216,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
             updateUi();
         });
-        QObject::connect(job.get(), &NetJob::failed, job.get(),
-                         [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
+        connect(job.get(), &NetJob::failed, this,
+                [](const QString& reason) { qWarning() << "Failed to load extra info for the current pack:" << reason; });
 
         m_extraJob = job;
         m_extraJob->start();
@@ -343,11 +338,8 @@ void FlamePage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
-    auto [task, response] = FlameAPI::getCategories(ModPlatform::ResourceType::Modpack);
+    auto [task, response] = FlameAPI::get().getCategoriesTask(ModPlatform::ResourceType::Modpack);
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = FlameAPI::get().loadModCategories(*response);
-        m_filterWidget->setCategories(categories);
-    });
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() { m_filterWidget->setCategories(*response); });
     m_categoriesTask->start();
 }
