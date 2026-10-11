@@ -289,19 +289,20 @@ void World::readFromZip(const QFileInfo& file)
 
     m_isValid = false;
     if (const auto result = r.parse([this](MMCZip::ArchiveReader::File* file) -> Result<bool> {
-        const QString levelDat = "level.dat";
-        auto filePath = file->filename();
-        QFileInfo fi(filePath);
-        if (fi.fileName().compare(levelDat, Qt::CaseInsensitive) == 0) {
-            m_containerOffsetPath = filePath.chopped(levelDat.length());
-            m_levelDatTime = file->dateTime();
-            TRY_INTO(const auto& data, file->readAll())
-            loadFromLevelDat(data);
-            m_isValid = true;
-            return true;
-        }
-        return false;
-    }); !result) {
+            const QString levelDat = "level.dat";
+            auto filePath = file->filename();
+            QFileInfo fi(filePath);
+            if (fi.fileName().compare(levelDat, Qt::CaseInsensitive) == 0) {
+                m_containerOffsetPath = filePath.chopped(levelDat.length());
+                m_levelDatTime = file->dateTime();
+                TRY_INTO(const auto& data, file->readAll())
+                loadFromLevelDat(data);
+                m_isValid = true;
+                return true;
+            }
+            return false;
+        });
+        !result) {
         qWarning() << "Failed to read world from zip:" << result.error();
     }
 }
@@ -515,18 +516,6 @@ void World::loadFromLevelDat(QByteArray data)
     }
     qDebug() << "Size:" << m_size;
     qDebug() << "GameType:" << m_gameType.toLogString();
-}
-
-bool World::replace(World& with)
-{
-    if (!destroy())
-        return false;
-    bool success = FS::copy(with.m_containerFile.filePath(), m_containerFile.path())();
-    if (success) {
-        m_folderName = with.m_folderName;
-        m_containerFile.refresh();
-    }
-    return success;
 }
 
 bool World::destroy()

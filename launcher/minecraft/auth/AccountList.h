@@ -81,7 +81,6 @@ class AccountList : public QAbstractListModel {
     void moveAccount(QModelIndex index, int delta);
     int findAccountByProfileId(const QString& profileId) const;
     MinecraftAccountPtr getAccountByProfileName(const QString& profileName) const;
-    QStringList profileNames() const;
 
     // requesting a refresh pushes it to the front of the queue
     void requestRefresh(QString accountId);

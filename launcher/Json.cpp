@@ -325,11 +325,6 @@ QStringList toStringList(const QString& jsonString)
 
 QString fromStringList(const QStringList& list)
 {
-    QJsonArray array;
-    for (const QString& str : list) {
-        array.append(str);
-    }
-
     QJsonDocument doc(toJsonArray(list));
     return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
 }

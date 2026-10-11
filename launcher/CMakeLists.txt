@@ -6,8 +6,6 @@ project(application)
 
 set(CORE_SOURCES
     # LOGIC - Base classes and infrastructure
-    BaseInstaller.h
-    BaseInstaller.cpp
     BaseVersionList.h
     BaseVersionList.cpp
     InstanceList.h
@@ -36,7 +34,6 @@ set(CORE_SOURCES
     archive/ExtractZipTask.h
     StringUtils.h
     StringUtils.cpp
-    QVariantUtils.h
     RuntimeContext.h
     PSaveFile.h
     EnumWrapper.h

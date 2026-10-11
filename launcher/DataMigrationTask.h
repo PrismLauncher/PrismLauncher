@@ -31,8 +31,8 @@ class DataMigrationTask : public Task {
     void copyAborted();
 
    private:
-    const QString& m_sourcePath;
-    const QString& m_targetPath;
+    const QString m_sourcePath;
+    const QString m_targetPath;
     const Filter m_pathMatcher;
 
     FS::copy m_copy;

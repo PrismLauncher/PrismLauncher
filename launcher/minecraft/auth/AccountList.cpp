@@ -95,19 +95,6 @@ const MinecraftAccountPtr AccountList::at(int i) const
     return MinecraftAccountPtr(m_accounts.at(i));
 }
 
-QStringList AccountList::profileNames() const
-{
-    QStringList out;
-    for (auto& account : m_accounts) {
-        auto profileName = account->profileName();
-        if (profileName.isEmpty()) {
-            continue;
-        }
-        out.append(profileName);
-    }
-    return out;
-}
-
 void AccountList::addAccount(const MinecraftAccountPtr account)
 {
     // NOTE: Do not allow adding something that's already there. We shouldn't let it continue

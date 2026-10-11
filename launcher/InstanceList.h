@@ -53,10 +53,6 @@ using InstanceId = QString;
 using GroupId = QString;
 using InstanceLocator = std::pair<MinecraftInstance*, int>;
 
-enum class InstCreateError : std::uint8_t { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
-
-enum class GroupsState : std::uint8_t { NotLoaded, Steady, Dirty };
-
 struct TrashShortcutItem {
     ShortcutData data;
     QString trashPath;
@@ -156,7 +152,6 @@ class InstanceList : public QAbstractListModel {
     const QStringList& instanceDirs() const { return m_instDirs; }
 
    signals:
-    void dataIsInvalid();
     void instancesChanged();
     void instanceSelectRequest(QString instanceId);
     void groupsChanged(QSet<QString> groups);
@@ -167,14 +162,11 @@ class InstanceList : public QAbstractListModel {
 
    private slots:
     void propertiesChanged(MinecraftInstance* inst);
-    void providerUpdated();
     void instanceDirContentsChanged(const QString& path);
 
    private:
     int getInstIndex(MinecraftInstance* inst) const;
     void migrateTotalPlayTime();
-    void suspendWatch();
-    void resumeWatch();
     void add(std::vector<std::unique_ptr<MinecraftInstance>>& list);
     void loadGroupList();
     void saveGroupList();
@@ -185,8 +177,6 @@ class InstanceList : public QAbstractListModel {
     void decreaseGroupCount(const QString& group);
 
    private:
-    int m_watchLevel = 0;
-    bool m_dirty = false;
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
