@@ -192,9 +192,8 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
         auto [job, response] = FlameAPI::get().getProjectTask(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
         connect(job.get(), &Task::aborted, this, install);
-        connect(job.get(), &Task::succeeded, this, [response, this, &vers, install, &pack] {
-            pack = *response;
-            LocalResourceUpdateTask updateMetadata(indexDir(), pack, vers);
+        connect(job.get(), &Task::succeeded, this, [response, this, vers, install, pack] {
+            LocalResourceUpdateTask updateMetadata(indexDir(), *response, vers);
             connect(&updateMetadata, &Task::finished, this, install);
             updateMetadata.start();
         });

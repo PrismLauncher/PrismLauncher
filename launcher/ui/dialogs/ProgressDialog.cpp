@@ -47,12 +47,16 @@
 
 // map a value in a numeric range of an arbitrary type to between 0 and INT_MAX
 // for getting the best precision out of the qt progress bar
-template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+template <typename T>
 std::tuple<int, int> map_int_zero_max(T current, T range_max, T range_min)
+    requires(std::is_arithmetic_v<T>)
 {
     int int_max = std::numeric_limits<int>::max();
 
     auto type_range = range_max - range_min;
+    if (type_range == 0) {
+        return { 0, int_max };
+    }
     double percentage = static_cast<double>(current - range_min) / static_cast<double>(type_range);
     int mapped_current = percentage * int_max;
 
@@ -70,7 +74,8 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
     hideSkipButton();
 }
 
-void ProgressDialog::hideSkipButton() {
+void ProgressDialog::hideSkipButton()
+{
     ui->skipButton->setEnabled(false);
     ui->skipButton->setVisible(false);
     updateSize();
@@ -229,14 +234,14 @@ void ProgressDialog::changeStatus([[maybe_unused]] const QString& status)
     updateSize();
 }
 
-void ProgressDialog::addTaskProgress(TaskStepProgress const& progress)
+void ProgressDialog::addTaskProgress(const TaskStepProgress& progress)
 {
     SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
     taskProgress.insert(progress.uid, task_bar);
     ui->taskProgressLayout->addWidget(task_bar);
 }
 
-void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
+void ProgressDialog::changeStepProgress(const TaskStepProgress& task_progress)
 {
     m_is_multi_step = true;
     if (ui->taskProgressScrollArea->isHidden()) {
@@ -248,7 +253,7 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
         addTaskProgress(task_progress);
     auto task_bar = taskProgress.value(task_progress.uid);
 
-    auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
+    const auto [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
     if (task_progress.total <= 0) {
         task_bar->setRange(0, 0);
     } else {
