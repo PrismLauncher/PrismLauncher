@@ -273,6 +273,10 @@ void PackInstallTask::deleteExistingFiles()
         auto targetPath = convertToSystemPath(item.target);
         auto fullPath = FS::PathCombine(basePath, targetPath);
 
+        if (isPathTraversal(basePath, targetPath)) {
+            qWarning() << "Blocked path traversal in" << targetPath;
+            continue;
+        }
         if (shouldKeep(fullPath)) {
             continue;
         }
@@ -284,6 +288,11 @@ void PackInstallTask::deleteExistingFiles()
         auto basePath = getPathForBase(item.base);
         auto targetPath = convertToSystemPath(item.target);
         auto fullPath = FS::PathCombine(basePath, targetPath);
+
+        if (isPathTraversal(basePath, targetPath)) {
+            qWarning() << "Blocked path traversal in" << targetPath;
+            continue;
+        }
 
         for (const auto& entry : QDirListing(fullPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
             if (shouldKeep(entry.absoluteFilePath())) {
