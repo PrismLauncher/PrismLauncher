@@ -626,6 +626,12 @@ void FlameCreationTask::setupDownloadJob()
         }
 
         relpath = FS::PathCombine(m_rootPath, relpath);
+        if (FS::isPathTraversal(m_stagingPath, relpath)) {
+            emitFailed(tr("The modpack is trying to download a file outside of the instance folder (%1). This is a security risk and isn't "
+                          "allowed.")
+                           .arg(relpath));
+            return;
+        }
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
         if (!result.version.downloadUrl.isEmpty()) {
