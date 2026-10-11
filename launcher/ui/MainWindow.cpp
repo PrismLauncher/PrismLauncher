@@ -175,9 +175,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         changeIconButton->setIconSize({ 80, 80 });
         changeIconButton->setAutoRaise(true);
         updateInstanceToolIcon("default");
-        changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         connect(changeIconButton, &QToolButton::clicked, this, &MainWindow::on_actionChangeInstIcon_triggered);
-        infoLayout->addWidget(changeIconButton, 0, Qt::AlignCenter);
+        infoLayout->addWidget(changeIconButton);
 
         nameLabel = new QLabel(infoWidget);
         nameLabel->setObjectName(QStringLiteral("nameLabel"));
