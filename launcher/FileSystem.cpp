@@ -1883,6 +1883,14 @@ QString getUniqueResourceName(const QString& filePath)
 
     return newFileName;
 }
+bool isPathTraversal(const QString& basePath, const QString& entryName)
+{
+    auto safeName = FS::RemoveInvalidPathChars(entryName);
+    auto fullPath = FS::PathCombine(basePath, safeName);
+    auto baseUrl = QUrl::fromLocalFile(basePath);
+    auto fullUrl = QUrl::fromLocalFile(fullPath);
+    return !(baseUrl == fullUrl || baseUrl.isParentOf(fullUrl));
+}
 
 bool removeFiles(const QStringList& listFile)
 {

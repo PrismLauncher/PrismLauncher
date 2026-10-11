@@ -62,15 +62,6 @@
 #include "ui/dialogs/BlockedModsDialog.h"
 
 namespace {
-bool isPathTraversal(const QString& basePath, const QString& entryName)
-{
-    auto safeName = FS::RemoveInvalidPathChars(entryName);
-    auto fullPath = FS::PathCombine(basePath, safeName);
-    auto baseUrl = QUrl::fromLocalFile(basePath);
-    auto fullUrl = QUrl::fromLocalFile(fullPath);
-    return !(baseUrl == fullUrl || baseUrl.isParentOf(fullUrl));
-}
-
 Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
     return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
@@ -273,7 +264,7 @@ void PackInstallTask::deleteExistingFiles()
         auto targetPath = convertToSystemPath(item.target);
         auto fullPath = FS::PathCombine(basePath, targetPath);
 
-        if (isPathTraversal(basePath, targetPath)) {
+        if (FS::isPathTraversal(basePath, targetPath)) {
             qWarning() << "Blocked path traversal in" << targetPath;
             continue;
         }
@@ -289,7 +280,7 @@ void PackInstallTask::deleteExistingFiles()
         auto targetPath = convertToSystemPath(item.target);
         auto fullPath = FS::PathCombine(basePath, targetPath);
 
-        if (isPathTraversal(basePath, targetPath)) {
+        if (FS::isPathTraversal(basePath, targetPath)) {
             qWarning() << "Blocked path traversal in" << targetPath;
             continue;
         }
@@ -796,7 +787,7 @@ void PackInstallTask::downloadMods()
             }
 
             auto modDir = FS::PathCombine(m_stagingPath, "minecraft", relpath);
-            if (isPathTraversal(modDir, mod.file)) {
+            if (FS::isPathTraversal(modDir, mod.file)) {
                 qWarning() << "Blocked path traversal in" << mod.file;
                 emitFailed(tr("Blocked path traversal in %1").arg(mod.file));
                 return;
@@ -880,7 +871,7 @@ void PackInstallTask::downloadMods()
                     }
 
                     auto modDir = FS::PathCombine(m_stagingPath, "minecraft", relpath);
-                    if (isPathTraversal(modDir, mod.file)) {
+                    if (FS::isPathTraversal(modDir, mod.file)) {
                         qWarning() << "Blocked path traversal in" << mod.file;
                         emitFailed(tr("Blocked path traversal in %1").arg(mod.file));
                         return;
@@ -982,7 +973,7 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
             folderToExtract = mod.extractFolder;
             static const QRegularExpression s_regex("^/");
             folderToExtract.remove(s_regex);
-            if (isPathTraversal(extractToPath, folderToExtract)) {
+            if (FS::isPathTraversal(extractToPath, folderToExtract)) {
                 qWarning() << "Blocked path traversal in" << mod.extractFolder;
                 return false;
             }
@@ -1003,7 +994,7 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         QDir extractDir(m_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
-        if (isPathTraversal(extractToPath, mod.decompFile)) {
+        if (FS::isPathTraversal(extractToPath, mod.decompFile)) {
             qWarning() << "Blocked path traversal in decompFile" << mod.decompFile;
             return false;
         }
