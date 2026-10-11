@@ -219,6 +219,16 @@ Result<> INIFile::loadFile(const QString& fileName)
             return std::unexpected("Access error occurred while loading INI file from " + fileName);
         }
         if (status == QSettings::Status::FormatError) {
+            QFile file(fileName);
+            // HACK: Qt won't read the file again unless the modification time changes, but for some reason the status is reset even if the
+            // existing contents is cached
+            // This means if loadFile is called again on the same file without said file being modified we'll just return an empty file
+            // without reporting any errors, causing data loss
+            // Qt's QSettings caching behaviour doesn't really work in our favour
+            if (!file.open(QFile::WriteOnly | QFile::Append) ||
+                !file.setFileTime(QDateTime::currentDateTime(), QFileDevice::FileModificationTime)) {
+                qWarning() << "Failed to update modification date for" << fileName;
+            }
             return std::unexpected("Format error occurred while loading INI file from " + fileName);
         }
         return std::unexpected("Unknown error occurred while loading INI file from " + fileName);
