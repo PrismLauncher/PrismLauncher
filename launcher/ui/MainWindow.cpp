@@ -185,6 +185,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         nameLabel->setAlignment(Qt::AlignCenter);
         // QSizePolicy::Ignored allows the button to shrink or expand as necessary (ignoring the size hint)
         nameLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+        nameLabel->setTextFormat(Qt::PlainText);
         infoLayout->addWidget(nameLabel);
 
         instanceInfoWidget = ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, infoWidget);
