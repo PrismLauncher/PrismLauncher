@@ -137,6 +137,8 @@
 
 #include "MMCTime.h"
 
+using namespace Qt::Literals;
+
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
 {
@@ -382,6 +384,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
     statusBar()->addPermanentWidget(m_statusLeft, 1);
     statusBar()->addPermanentWidget(m_statusCenter, 0);
+    m_statusBroken = new QLabel(this);
+    statusBar()->addPermanentWidget(m_statusBroken, 0);
+    updateBrokenStatus(APPLICATION->instances()->problems());
+    connect(APPLICATION->instances(), &InstanceList::problemsChanged, this, &MainWindow::updateBrokenStatus);
+    connect(m_statusBroken, &QLabel::linkActivated, this, &MainWindow::showBrokenStatus);
 
     // Add "manage accounts" button, right align
     QWidget* spacer = new QWidget();
@@ -476,6 +483,8 @@ void MainWindow::retranslateUi()
         if (action->toolTip().contains("%1"))
             action->setToolTip(action->toolTip().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
     }
+
+    updateBrokenStatus(APPLICATION->instances()->problems());
 }
 
 MainWindow::~MainWindow() {}
@@ -1840,4 +1849,40 @@ void MainWindow::updateInstanceToolBarOrientation(Qt::Orientation orientation)
     }
     // HACK: sync size (no, I don't know why this works)
     ui->instanceToolBar->resize(0, 0);
+}
+
+void MainWindow::updateBrokenStatus(const QStringList& problems)
+{
+    if (problems.isEmpty()) {
+        m_statusBroken->hide();
+        return;
+    }
+
+    // NOTE: href is needed for it to show as a link
+    m_statusBroken->setText(u"⚠ <a href='about:blank'>%1</a>"_s.arg(tr("%n broken instance(s)!", "", static_cast<int>(problems.size()))));
+}
+
+void MainWindow::showBrokenStatus()
+{
+    const auto* instances = APPLICATION->instances();
+
+    while (!instances->problems().isEmpty()) {
+        const auto msg =
+            tr("Some instances in your instance folder(s) could not be loaded. You may need to fix this by manually editing them.");
+        auto* dialog = CustomMessageBox::selectable(this, tr("Problems Loading Instance List"), msg, QMessageBox::Warning,
+                                                    QMessageBox::Ok | QMessageBox::Retry);
+        dialog->setDetailedText(instances->problems().join("\n"));
+        dialog->setEscapeButton(QMessageBox::Ok);
+        const int result = dialog->exec();
+        if (result == QMessageBox::Ok) {
+            return;
+        }
+        if (result == QMessageBox::Retry) {
+            APPLICATION->instances()->loadList();
+            continue;
+        }
+    }
+
+    const auto msg = tr("All instances have been loaded properly now. No further action is needed.");
+    CustomMessageBox::selectable(this, tr("All Good!"), msg, QMessageBox::Information)->open();
 }
