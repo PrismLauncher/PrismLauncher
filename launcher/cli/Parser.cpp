@@ -82,7 +82,7 @@ void LegacyCli::addLegacyArgs(CLI::App& app, Args& args)
                               // default construct when group encountered
                               processingLaunch.emplace();
                           })
-                          ->parse_complete_callback([&args, this]() {
+                          ->parse_complete_callback([&args, this] {
                               if (processingLaunch) {
                                   // push the launch command
                                   args.commands.emplace_back(std::move(processingLaunch.value()));
@@ -215,7 +215,7 @@ void Cli::attach(CLI::App& app, Args& args)
     std::string dPathSource;
     switch (args.dataPath.source) {
         case Startup::DataPathSource::SystemEnvironment: {
-            dPathSource = QString(" (From `%1`)").arg(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper())).toStdString();
+            dPathSource = QString(" (From `%1_DATA_DIR`)").arg(BuildConfig.LAUNCHER_NAME.toUpper()).toStdString();
             break;
         }
         case Startup::DataPathSource::PortableData:

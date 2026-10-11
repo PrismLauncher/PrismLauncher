@@ -74,6 +74,7 @@ class ThemeManager;
 class IconTheme;
 class BaseInstance;
 class MinecraftInstance;
+class InstanceTask;
 
 class LogModel;
 
@@ -204,7 +205,13 @@ class Application : public QApplication {
 
     static QUrl normalizeImportUrl(const QString& url);
 
-    void processCommand(const Cli::Command& cmd);
+    void processCommands(const std::vector<Cli::Command>& cmds);
+    void processURIs(QList<QUrl> uris);
+
+    void addInstance(const QString& url, const QString& groupName = "", const QMap<QString, QString>& extraInfo = {});
+
+    void runModalTask(Task* task);
+    void instanceFromInstanceTask(InstanceTask* rawTask);
 
    signals:
     void updateAllowedChanged(bool status);
@@ -235,7 +242,7 @@ class Application : public QApplication {
    private:
     static bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile);
     bool createSetupWizard();
-    void performMainStartupAction();
+    void performMainStartupAction(const std::vector<Cli::Command>& cmds);
 
     // sets the fatal error message and m_status to Failed.
     void showFatalErrorMessage(const QString& title, const QString& content);
@@ -250,8 +257,6 @@ class Application : public QApplication {
     mutable QMutex m_qsaveResourcesMutex;
 
    private:
-    std::vector<Cli::Command> m_commands;
-
     QDateTime m_startTime;
 
     std::unique_ptr<QNetworkAccessManager> m_network;
@@ -313,7 +318,6 @@ class Application : public QApplication {
     QString m_detectedOpenALPath;
     QString m_detectedSDLPath;
 
-    bool m_showMainWindow = false;
     std::unique_ptr<QFile> logFile;
     std::unique_ptr<LogModel> logModel;
 

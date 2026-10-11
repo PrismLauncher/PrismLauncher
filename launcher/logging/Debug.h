@@ -25,4 +25,4 @@ namespace Logging {
 
 void setupQtLogFunction();
 
-}
+}  // namespace Logging

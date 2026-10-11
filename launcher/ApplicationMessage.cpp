@@ -70,9 +70,9 @@ QByteArray ApplicationMessage::serialize() const
 
 Result<Cli::Command> ApplicationMessage::toCliCommand() const
 {
-    const QString notFoundMsg = "missing `%1` for Launch command";
     // Launch
     if (command == "launch") {
+        const QString notFoundMsg = "missing `%1` for Launch command";
         TRY_INTO(auto targetType, Try::findByMapKey(args, "targetType", notFoundMsg));
         TRY_INTO(auto target, Try::findByMapKey(args, "target", notFoundMsg));
         TRY_INTO(auto accountType, Try::findByMapKey(args, "accountType", notFoundMsg));
@@ -117,6 +117,7 @@ Result<Cli::Command> ApplicationMessage::toCliCommand() const
 
     // ProcessUri
     if (command == "processUri") {
+        const QString notFoundMsg = "missing `%1` for processUri command";
         TRY_INTO(auto uri, Try::findByMapKey(args, "uri", notFoundMsg));
 
         return Cli::Cmd::ProcessURI{ .uri = uri.toStdString() };
@@ -129,6 +130,7 @@ Result<Cli::Command> ApplicationMessage::toCliCommand() const
 
     // ShowInstanceWindow
     if (command == "showInstanceWindow") {
+        const QString notFoundMsg = "missing `%1` for showInstanceWindow command";
         TRY_INTO(auto id, Try::findByMapKey(args, "id", notFoundMsg));
 
         return Cli::Cmd::ShowInstanceWindow{ .id = id.toStdString() };
@@ -136,6 +138,7 @@ Result<Cli::Command> ApplicationMessage::toCliCommand() const
 
     // Alive
     if (command == "alive") {
+        const QString notFoundMsg = "missing `%1` for alive command";
         TRY_INTO(auto path, Try::findByMapKey(args, "path", notFoundMsg));
         return Cli::Cmd::Alive{ .path = path.toStdU16String() };
     }

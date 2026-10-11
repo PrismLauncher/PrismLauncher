@@ -76,7 +76,6 @@ class MainWindow : public QMainWindow {
 
     void updatesAllowedChanged(bool allowed);
 
-    void processURLs(QList<QUrl> urls);
    signals:
     void isClosing();
 
@@ -221,16 +220,13 @@ class MainWindow : public QMainWindow {
 
     void updateInstanceToolBarOrientation(Qt::Orientation orientation);
 
-    void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
+    void addInstance(const QString& url = QString(), const QMap<QString, QString>& extraInfo = {});
     void setCatBackground(bool enabled);
     void updateCatState();
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString& id);
     void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
-
-    void runModalTask(Task* task);
-    void instanceFromInstanceTask(InstanceTask* task);
 
    private:
     Ui::MainWindow* ui;

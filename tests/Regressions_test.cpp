@@ -1,3 +1,23 @@
+// SPDX-FileCopyrightText: 2026 Rachel Powers <508861+Ryex@users.noreply.github.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2026 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include <QDir>
 #include <QStandardPaths>
@@ -76,7 +96,7 @@ static char* toString(const Args& args)
         cmds.append(std::visit(cmdVisitor, cmd));
     }
     auto repr = QStringLiteral("Args{ commands: [%1]}").arg(cmds.join(", ")).toStdString();
-    // QTest::toString requires us to output an alocated char*
+    // QTest::toString requires us to output an allocated char*
     return qstrdup(repr.data());
 }
 
@@ -85,7 +105,7 @@ static char* toString(const Args& args)
 class RegressionTests : public QObject {
     Q_OBJECT
 
-    enum class CLIErrorType : std::uint16_t {
+    enum class CLIErrorType : std::uint8_t {
         Error,
         ParseError,
         OptionAlreadyAdded,
@@ -173,20 +193,20 @@ class RegressionTests : public QObject {
                                                     .target = Launch::NoTarget{},
                                                     .account = Launch::AccountOffline{ .name = "offline_name" }, }, }, }
                 << std::optional<CLIErrorType>{};
-            QTest::newRow("cant launch offline with an account")
+            QTest::newRow("can't launch offline with an account")
                 << std::vector<std::string>{ "--launch", "an_instance", "-o", "offline_name", "-a", "profile_name" } << Cli::Args{}
                 << std::optional<CLIErrorType>{ CLIErrorType::ExcludesError };
-            QTest::newRow("cant launch with a world and server target")
+            QTest::newRow("can't launch with a world and server target")
                 << std::vector<std::string>{ "--launch", "an_instance", "-w", "world_name", "-s", "mc.serveraddress.net:1234" }
                 << Cli::Args{} << std::optional<CLIErrorType>{ CLIErrorType::ExcludesError };
-            QTest::newRow("cant launch without --launch (world)") << std::vector<std::string>{ "-w", "world_name" } << Cli::Args{}
+            QTest::newRow("can't launch without --launch (world)") << std::vector<std::string>{ "-w", "world_name" } << Cli::Args{}
                                                                   << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
-            QTest::newRow("cant launch without --launch (server)")
+            QTest::newRow("can't launch without --launch (server)")
                 << std::vector<std::string>{ "-s", "mc.serveraddress.net:1234" } << Cli::Args{}
                 << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
-            QTest::newRow("cant launch without --launch (account)") << std::vector<std::string>{ "-a", "profile_name" } << Cli::Args{}
+            QTest::newRow("can't launch without --launch (account)") << std::vector<std::string>{ "-a", "profile_name" } << Cli::Args{}
                                                                     << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
-            QTest::newRow("cant launch without --launch (ofline)") << std::vector<std::string>{ "-o", "offline_name" } << Cli::Args{}
+            QTest::newRow("can't launch without --launch (ofline)") << std::vector<std::string>{ "-o", "offline_name" } << Cli::Args{}
                                                                    << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
 
             QTest::newRow("show main window") << std::vector<std::string>{ "--show-window" }
@@ -312,7 +332,7 @@ class RegressionTests : public QObject {
                     break;
                 }
                 case CLIErrorType::ParseError: {
-                    QVERIFY_THROWS_EXCEPTION(CLI::OptionNotFound, parser.parse(argv));
+                    QVERIFY_THROWS_EXCEPTION(CLI::ParseError, parser.parse(argv));
                     break;
                 }
                 case CLIErrorType::Error:
