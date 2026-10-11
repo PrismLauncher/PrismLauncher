@@ -131,7 +131,7 @@ bool attachWindowsConsole()
         bindStdErr = true;
     }
 
-    if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
+    if (AttachConsole(ATTACH_PARENT_PROCESS) != FALSE) {
         bindCrtHandlesToStdHandles(bindStdIn, bindStdOut, bindStdErr);
         return true;
     }

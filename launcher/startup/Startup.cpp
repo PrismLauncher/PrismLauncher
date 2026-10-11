@@ -33,8 +33,41 @@
 #include <QtEnvironmentVariables>
 
 #include "BuildConfig.h"
-#include "FileSystem.h"
 #include "DesktopServices.h"
+
+namespace {
+
+QString fromStdPath(const std::filesystem::path& path)
+{
+    return [&path](const auto& s) -> QString {
+        if constexpr (std::is_same_v<decltype(s), std::string>) {
+            return QString::fromStdString(s);
+        } else if constexpr (std::is_same_v<decltype(s), std::wstring>) {
+            return QString::fromStdWString(s);
+        } else if constexpr (std::is_same_v<decltype(s), std::u16string>) {
+            return QString::fromStdU16String(s);
+        } else if constexpr (std::is_same_v<decltype(s), std::u32string>) {
+            return QString::fromStdU32String(s);
+        } else {
+            return QString::fromStdString(path.string());
+        }
+    }(path.native());
+}
+
+std::filesystem::path toStdPath(const QString& path)
+{
+    if constexpr (std::is_same_v<std::filesystem::path::string_type, std::wstring>) {
+        return path.toStdWString();
+    } else if constexpr (std::is_same_v<std::filesystem::path::string_type, std::u16string>) {
+        return path.toStdU16String();
+    } else if constexpr (std::is_same_v<std::filesystem::path::string_type, std::u32string>) {
+        return path.toStdU32String();
+    } else {
+        return path.toStdString();
+    }
+}
+
+}  // namespace
 
 namespace Startup {
 
@@ -42,7 +75,7 @@ namespace Startup {
 /// during startup
 std::filesystem::path resolveApplicationFilePath(const char* argv0)
 {
-    // this is a bit of cheating but this is actually *reallly* complicated
+    // this is a bit of cheating but this is actually *really* complicated
     // I don't feel like manually implementing all the ways to fetch the correct path
     // and then fall back to using argv0 just to avoid instating a QApp here
     // Qt has done the hard work
@@ -53,25 +86,22 @@ std::filesystem::path resolveApplicationFilePath(const char* argv0)
     int qAppArgsC = 1;
     QCoreApplication app(qAppArgsC, qAppArgs.data());
 
-    auto path = QCoreApplication::applicationFilePath().toStdU16String();
-    return { path };
+    return toStdPath(QCoreApplication::applicationFilePath());
 }
 
 DataPathResult resolveDataPath(const std::filesystem::path& rootPath)
 {
     // use qt impl
-    // qt uses utf16 behind the scenes and converting between std::u16string and QString is a reinterpret_cast of the data
     auto origcwdPath = std::filesystem::current_path();
     DataPathSource source = DataPathSource::CurrentWorkingDir;
     std::filesystem::path dataPath = origcwdPath;
-    if (auto dataDirEnv =
-                   QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
-               !dataDirEnv.isEmpty()) {
-        dataPath = dataDirEnv.toStdU16String();
+    if (auto dataDirEnv = QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
+        !dataDirEnv.isEmpty()) {
+        dataPath = toStdPath(dataDirEnv);
         source = DataPathSource::SystemEnvironment;
     } else if (DesktopServices::isSnap()) {
         if (auto snapPath = qEnvironmentVariable("SNAP_USER_COMMON"); !snapPath.isEmpty()) {
-            dataPath = snapPath.toStdU16String();
+            dataPath = toStdPath(snapPath);
             source = DataPathSource::PersistentDataPath;
         }
     } else if (auto standardLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation); !standardLoc.isEmpty()) {
@@ -87,12 +117,13 @@ DataPathResult resolveDataPath(const std::filesystem::path& rootPath)
         while (endsWithLauncherOrOrg(dataPath)) {
             dataPath = dataPath.parent_path();
         }
+
         dataPath = dataPath / BuildConfig.LAUNCHER_NAME.toStdU16String();
         source = DataPathSource::PersistentDataPath;
     }
 
 #ifndef Q_OS_MACOS
-    auto root = QString::fromStdU16String(rootPath.u16string());
+    auto root = QString::fromStdWString(rootPath.wstring());
     if (auto portableUserData = FS::PathCombine(root, "UserData"); QDir(portableUserData).exists()) {
         dataPath = portableUserData.toStdU16String();
         source = DataPathSource::PortableUserData;

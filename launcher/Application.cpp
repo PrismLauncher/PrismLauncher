@@ -48,12 +48,18 @@
 #include "net/PasteUpload.h"
 #include "tasks/Task.h"
 #include "tools/GenericProfiler.h"
+
+#include "ApplicationMessage.h"
+
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/ToolTipFilter.h"
 #include "ui/ViewLogWindow.h"
 
+#include "ui/dialogs/ImportResourceDialog.h"
+#include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
+
 #include "ui/instanceview/AccessibleInstanceView.h"
 
 #include "ui/pages/BasePageProvider.h"
@@ -81,7 +87,20 @@
 
 #include "ui/themes/ThemeManager.h"
 
-#include "ApplicationMessage.h"
+#include "minecraft/WorldList.h"
+
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
+#include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
+
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
+
+#include "net/ApiRequest.h"
 
 #include <algorithm>
 #include <array>
@@ -278,7 +297,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     }
 
     m_dataPath = dataPath;
-    // store if this is a portable datapast
+    // store if this is a portable data path
     m_portable = args.dataPath.isPortable();
 
     /*
@@ -316,9 +335,6 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
             return;
         }
     }
-
-    // store commands to process later
-    m_commands = args.commands;
 
     // init the logger
     {
@@ -364,7 +380,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
         foundLoggingRules = QFile::exists(logRulesPath);
 
         // search the dataPath()
-        // seach app data standard path
+        // search app data standard path
         if (!foundLoggingRules && !args.dataPath.isPortable() && args.dataPath.source != Startup::DataPathSource::Commandline &&
             args.dataPath.source != Startup::DataPathSource::SystemEnvironment) {
             qInfo() << "Testing standard app data paths for" << logRulesFile << "...";
@@ -374,7 +390,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
                 foundLoggingRules = true;
             }
         }
-        // seach root path
+        // search root path
         if (!foundLoggingRules) {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
             logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile);
@@ -732,7 +748,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
 
-        // Custom Technic Client ID
+        // Custom Technique Client ID
         m_settings->registerSetting("TechnicClientID", "");
 
         // Init page provider
@@ -1057,7 +1073,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     if (!createSetupWizard()) {
         m_themeManager->applyCurrentlySelectedTheme(true);
     }
-    performMainStartupAction();
+    performMainStartupAction(args.commands);
 }
 
 bool Application::createSetupWizard()
@@ -1175,37 +1191,44 @@ bool Application::event(QEvent* event)
             showMainWindow(false);
         }
         auto* ev = static_cast<QFileOpenEvent*>(event);
-        m_mainWindow->processURLs({ ev->url() });
+        processURIs({ ev->url() });
     }
 
     return QApplication::event(event);
 }
 
-void Application::performMainStartupAction()
+void Application::performMainStartupAction(const std::vector<Cli::Command>& cmds)
 {
     m_status = Application::Initialized;
 
-    for (const auto& cmd : m_commands) {
-        processCommand(cmd);
-    }
+    auto isHideMainWindowCmd = [this](const Cli::Command& cmd) -> bool {
+        // per legacy CLI: when launching as the primary launcher process
+        // a command to launch an instance implies that the main window should not be shown.
+        // this is so that when the instance exits the launcher will exit.
+        if (std::holds_alternative<Cli::Cmd::Launch>(cmd)) {
+            auto id = QString::fromStdString(std::get<Cli::Cmd::Launch>(cmd).id);
+            // if the instance exists then this command should implicitly hide the main window
+            return instances()->getInstanceById(id) != nullptr;
+        }
+        return false;
+    };
 
-    auto isNotHideMainWindowCmd = [](const Cli::Command& cmd) -> bool { return !std::holds_alternative<Cli::Cmd::Launch>(cmd); };
+    // FIXME: the main window being created should not be critical to the proper functioning
+    // of the launcher
+    bool minimize = !cmds.empty() || std::ranges::any_of(cmds, isHideMainWindowCmd);
 
-    if (m_commands.empty() || std::ranges::all_of(m_commands, isNotHideMainWindowCmd)) {
-        // normal main window
-        showMainWindow(false);
-        qDebug() << "<> Main window shown.";
-    }
+    showMainWindow(minimize);
+    qDebug() << "<> Main window shown.";
 
     // initialize the updater
     if (updaterEnabled()) {
         qDebug() << "Initializing updater";
 #ifdef Q_OS_MAC
 #if defined(SPARKLE_ENABLED)
-        m_updater.reset(new MacSparkleUpdater());
+        m_updater = std::make_unique<MacSparkleUpdater>();
 #endif
 #else
-        m_updater.reset(new PrismExternalUpdater(m_mainWindow, m_rootPath, m_dataPath));
+        m_updater = std::make_unique<PrismExternalUpdater>(m_mainWindow, m_rootPath, m_dataPath);
 #endif
         qDebug() << "<> Updater started.";
     }
@@ -1216,24 +1239,19 @@ void Application::performMainStartupAction()
         FS::deletePath(tempRoot);
     }
 
-    QList<QUrl> toProcess{};
-    for (const auto& uri :
-         std::views::all(m_commands) |
-             std::views::filter([](const Cli::Command& cmd) -> bool { return std::holds_alternative<Cli::Cmd::ProcessURI>(cmd); }) |
-             std::views::transform([](const Cli::Command& cmd) -> const std::string& { return std::get<Cli::Cmd::ProcessURI>(cmd).uri; })) {
-        toProcess.append(QUrl::fromUserInput(QString::fromStdString(uri)));
-    }
-
-    if (!toProcess.isEmpty()) {
-        qDebug() << "<> Processing urls:" << toProcess;
-        m_mainWindow->processURLs(toProcess);
-    }
+    // fire as soon as the event loop starts
+    QTimer::singleShot(0, this, [this, cmds] { processCommands(cmds); });
 }
 
-void Application::processCommand(const Cli::Command& cmd)
+void Application::processCommands(const std::vector<Cli::Command>& cmds)
 {
-    struct {
+    QList<QUrl> toProcessURIs{};
+
+    struct CommandVisitor {
         Application* app;
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-const-or-ref-data-members)
+        QList<QUrl>& toProcessURIs;
+
         void operator()(const Cli::Cmd::Launch& launch)
         {
             auto instanceIdToLaunch = QString::fromStdString(launch.id);
@@ -1241,10 +1259,7 @@ void Application::processCommand(const Cli::Command& cmd)
             if (inst) {
                 qDebug() << "<> Instance" << instanceIdToLaunch << "launching";
 
-                MinecraftTarget::Ptr targetToJoin = nullptr;
-                MinecraftAccountPtr accountToUse = nullptr;
-
-                struct {
+                struct TargetVisitor {
                     MinecraftTarget::Ptr operator()(const Cli::Cmd::Launch::ServerTarget& server)
                     {
                         // FIXME: validate the server string
@@ -1263,7 +1278,7 @@ void Application::processCommand(const Cli::Command& cmd)
 
                 auto target = std::visit(targetVisitor, launch.target);
 
-                struct {
+                struct AccountVisitor {
                     Application* app;
                     std::tuple<LaunchMode, MinecraftAccountPtr, QString> operator()(
                         const Cli::Cmd::Launch::AccountDefault& /*unused*/) const
@@ -1275,7 +1290,7 @@ void Application::processCommand(const Cli::Command& cmd)
                         auto name = QString::fromStdString(profile.name);
                         auto account = app->accounts()->getAccountByProfileName(name);
                         if (!account) {
-                            qDebug() << "   Can't find account " << name << ", using default account";
+                            qDebug().nospace() << "   Can't find account " << name << ", using default account";
                         }
                         qDebug() << "   Launching with account " << name;
                         return { LaunchMode::Normal, account, {} };
@@ -1292,7 +1307,7 @@ void Application::processCommand(const Cli::Command& cmd)
                 app->launch(inst, mode, target, account, offlineName);
             }
         }
-        void operator()(const Cli::Cmd::ShowMainWindow& /*unused*/) const { app->showMainWindow(true); }
+        void operator()(const Cli::Cmd::ShowMainWindow& /*unused*/) const { app->showMainWindow(false); }
         void operator()(const Cli::Cmd::ShowInstanceWindow& instance) const
         {
             auto instanceId = QString::fromStdString(instance.id);
@@ -1304,10 +1319,7 @@ void Application::processCommand(const Cli::Command& cmd)
                 return;
             }
         }
-        void operator()(const Cli::Cmd::ProcessURI& uri)
-        {
-            // handled separately
-        }
+        void operator()(const Cli::Cmd::ProcessURI& uri) { toProcessURIs.append(normalizeImportUrl(QString::fromStdString(uri.uri))); }
         void operator()(const Cli::Cmd::Alive& alive) const
         {
             auto path = alive.path / Cli::g_liveCheckFile;
@@ -1324,9 +1336,15 @@ void Application::processCommand(const Cli::Command& cmd)
                 qWarning() << "Could not open" << path << "for writing:" << check.errorString();
             }
         }
-    } visitor{ .app = this };
+    } visitor{ .app = this, .toProcessURIs = toProcessURIs };
 
-    std::visit(visitor, cmd);
+    for (const auto& cmd : cmds) {
+        std::visit(visitor, cmd);
+    }
+    if (!toProcessURIs.isEmpty()) {
+        qDebug() << "<> Processing urls:" << toProcessURIs;
+        processURIs(toProcessURIs);
+    }
 }
 
 void Application::showFatalErrorMessage(const QString& title, const QString& content)
@@ -1370,7 +1388,7 @@ void Application::messageReceived(const QByteArray& message)
         }
     }
 
-    processCommand(command);
+    processCommands({ command });
 }
 
 TranslationsModel* Application::translations()
@@ -1761,9 +1779,9 @@ QString Application::getJarPath(const QString& jarFile)
 #endif
         FS::PathCombine(m_rootPath, "jars"), FS::PathCombine(applicationDirPath(), "jars"),
 #if defined(Q_OS_MACOS)
-        FS::PathCombine(applicationDirPath(), "../../../..", "jars")  // from inside build dir, for debuging
+        FS::PathCombine(applicationDirPath(), "../../../..", "jars")  // from inside build dir, for debugging
 #else
-        FS::PathCombine(applicationDirPath(), "..", "jars")  // from inside build dir, for debuging
+        FS::PathCombine(applicationDirPath(), "..", "jars")  // from inside build dir, for debugging
 #endif
     };
     for (const auto& p : potentialPaths) {
@@ -1949,4 +1967,317 @@ bool Application::checkQSavePath(const QString& path)
     return std::ranges::any_of(m_qsaveResources.keys(), [&path, this](const auto& partialPath) {
         return path.startsWith(partialPath) && m_qsaveResources.value(partialPath, 0) > 0;
     });
+}
+
+void Application::processURIs(QList<QUrl> uris)
+{
+    // NOTE: This loop only processes one dropped file!
+    for (auto& uri : uris) {
+        if (uri.isEmpty() || uri.toString().trimmed().isEmpty())
+            continue;
+
+        qDebug() << "Processing" << uri;
+
+        // The isLocalFile() check below doesn't work as intended without an explicit scheme.
+        if (uri.scheme().isEmpty()) {
+            uri.setScheme("file");
+        }
+
+        ModPlatform::IndexedVersion version;
+        QMap<QString, QString> extraInfo;
+        QUrl localUrl;
+        if (!uri.isLocalFile()) {  // download the remote resource and identify
+            if (uri.scheme().compare("modrinth", Qt::CaseInsensitive) == 0) {
+                const auto packId = ModrinthAPI::getModpackIdFromUrl(uri);
+                if (!packId.isEmpty()) {
+                    extraInfo.insert("pack_id", packId);
+                    addInstance(uri.toString(), "", extraInfo);
+                } else {
+                    CustomMessageBox::selectable(
+                        m_mainWindow, tr("Error"),
+                        tr("Unsupported Modrinth link.\n\nPrism Launcher currently only supports modpack links such as "
+                           "modrinth://modpack/fabulously-optimized."),
+                        QMessageBox::Critical)
+                        ->show();
+                }
+                continue;
+            }
+
+            const bool isExternalURLImport = (uri.host().toLower() == "import") || (uri.path().startsWith("/import", Qt::CaseInsensitive));
+
+            QUrl dlUrl;
+            if (uri.scheme() == "curseforge" || (uri.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && uri.host() == "install")) {
+                // need to find the download link for the modpack / resource
+                // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+                // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
+                QUrlQuery query(uri);
+
+                // check if this is a binaryname:// url
+                if (uri.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
+                    // check this is an curseforge platform request
+                    if (query.queryItemValue("platform").toLower() != "curseforge") {
+                        qDebug() << "Invalid mod distribution platform:" << query.queryItemValue("platform");
+                        continue;
+                    }
+                }
+
+                if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                    qDebug() << "Invalid curseforge link:" << uri;
+                    continue;
+                }
+
+                auto addonId = query.allQueryItemValues("addonId").first();
+                auto fileId = query.allQueryItemValues("fileId").first();
+
+                extraInfo.insert("pack_id", addonId);
+                extraInfo.insert("pack_version_id", fileId);
+
+                auto [job, array] = FlameAPI::getFile(addonId, fileId);
+
+                connect(job.get(), &Task::failed, this, [this](const QString& reason) {
+                    CustomMessageBox::selectable(m_mainWindow, tr("Error"), reason, QMessageBox::Critical)->show();
+                });
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dlUrl, &version] {
+                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
+                    auto doc = Json::requireDocument(*array);
+                    if (!doc) {
+                        CustomMessageBox::selectable(m_mainWindow, tr("Error"), doc.error(), QMessageBox::Critical)->show();
+                        return;
+                    }
+                    auto data = doc->object().value("data").toObject();
+                    // No way to find out if it's a mod or a modpack before here
+                    // And also we need to check if it ends with .zip, instead of any better way
+                    auto versionRes = FlameMod::loadIndexedPackVersion(data);
+                    if (!versionRes) {
+                        CustomMessageBox::selectable(m_mainWindow, tr("Error"), versionRes.error(), QMessageBox::Critical)->show();
+                        return;
+                    }
+                    version = versionRes.value();
+                    auto fileName = version.fileName;
+
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    dlUrl = QUrl(version.downloadUrl);
+                    if (!dlUrl.isValid()) {
+                        CustomMessageBox::selectable(
+                            m_mainWindow, tr("Error"),
+                            tr("The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            QMessageBox::Critical)
+                            ->show();
+                        return;
+                    }
+                });
+
+                {  // drop stack
+                    ProgressDialog dlUrlDialod(m_mainWindow);
+                    dlUrlDialod.showSkipButton();
+                    dlUrlDialod.execWithTask(job.get());
+                }
+
+            } else if (uri.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && !isExternalURLImport) {
+                QVariantMap receivedData;
+                const QUrlQuery query(uri.query());
+                const auto items = query.queryItems();
+                for (auto it = items.begin(), end = items.end(); it != end; ++it) {
+                    receivedData.insert(it->first, it->second);
+                }
+                emit APPLICATION->oauthReplyRecieved(receivedData);
+                continue;
+            } else if ((uri.scheme() == "prismlauncher" || uri.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) && isExternalURLImport) {
+                // PrismLauncher URL protocol modpack import
+                // works for any prism fork
+                // preferred import format: prismlauncher://import?url=ENCODED
+                const auto host = uri.host().toLower();
+                const auto path = uri.path();
+
+                QString encodedTarget;
+
+                {
+                    QUrlQuery query(uri);
+                    const auto values = query.allQueryItemValues("url");
+                    if (!values.isEmpty()) {
+                        encodedTarget = values.first();
+                    }
+                }
+
+                // alternative import format: prismlauncher://import/ENCODED
+                if (encodedTarget.isEmpty()) {
+                    QString p = path;
+
+                    if (p.startsWith("/import/", Qt::CaseInsensitive)) {
+                        p = p.mid(QString("/import/").size());
+                    } else if (host == "import" && p.startsWith("/")) {
+                        p = p.mid(1);
+                    }
+
+                    if (!p.isEmpty() && p != "/import") {
+                        encodedTarget = p;
+                    }
+                }
+
+                if (encodedTarget.isEmpty()) {
+                    CustomMessageBox::selectable(m_mainWindow, tr("Error"), tr("Invalid import link: missing 'url' parameter."),
+                                                 QMessageBox::Critical)
+                        ->show();
+                    continue;
+                }
+
+                const QString decodedStr = QUrl::fromPercentEncoding(encodedTarget.toUtf8()).trimmed();
+
+                QUrl target = QUrl::fromUserInput(decodedStr);
+
+                // Validate: only allow http(s)
+                if (!target.isValid() || (target.scheme() != "https" && target.scheme() != "http")) {
+                    CustomMessageBox::selectable(m_mainWindow, tr("Error"), tr("Invalid import link: URL must be http(s)."),
+                                                 QMessageBox::Critical)
+                        ->show();
+                    continue;
+                }
+
+                const auto res = QMessageBox::question(
+                    m_mainWindow, tr("Install modpack"),
+                    tr("Do you want to download and import a modpack from:\n%1\n\nURL:\n%2").arg(target.host(), target.toString()),
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+                if (res != QMessageBox::Yes) {
+                    continue;
+                }
+
+                dlUrl = target;
+            } else {
+                dlUrl = uri;
+            }
+
+            if (!dlUrl.isValid()) {
+                continue;  // no valid url to download this resource
+            }
+
+            const QString path = dlUrl.host() + '/' + dlUrl.path();
+            auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+            entry->setStale(true);
+            auto dlJob = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
+            dlJob->addNetAction(Net::ApiRequest::makeCached(dlUrl, entry));
+            auto archivePath = entry->getFullPath();
+
+            bool dlSuccess = false;
+            connect(dlJob.get(), &Task::failed, this, [this](const QString& reason) {
+                CustomMessageBox::selectable(m_mainWindow, tr("Error"), reason, QMessageBox::Critical)->show();
+            });
+            connect(dlJob.get(), &Task::succeeded, this, [&dlSuccess] { dlSuccess = true; });
+
+            {  // drop stack
+                ProgressDialog dlUrlDialod(m_mainWindow);
+                dlUrlDialod.showSkipButton();
+                dlUrlDialod.execWithTask(dlJob.get());
+            }
+
+            if (!dlSuccess) {
+                continue;  // no local file to identify
+            }
+            localUrl = QUrl::fromLocalFile(archivePath);
+
+        } else {
+            localUrl = uri;
+        }
+
+        auto localFileName = QDir::toNativeSeparators(localUrl.toLocalFile());
+        QFileInfo localFileInfo(localFileName);
+
+        if (localFileName.isEmpty() || !localFileInfo.exists()) {
+            qDebug() << "Ignoring invalid path" << localFileName;
+            continue;
+        }
+
+        auto type = ResourceUtils::identify(localFileInfo);
+
+        if (!ModPlatform::ResourceTypeUtils::g_VALID_RESOURCES.contains(type)) {  // probably instance/modpack
+            addInstance(localFileName, "", extraInfo);
+            continue;
+        }
+
+        if (APPLICATION->instances()->count() <= 0) {
+            CustomMessageBox::selectable(m_mainWindow, tr("No instance!"),
+                                         tr("No instance available to add the resource to.\nPlease create a new instance before "
+                                            "attempting to install this resource again."),
+                                         QMessageBox::Critical)
+                ->show();
+            continue;
+        }
+        ImportResourceDialog dlg(localFileName, type, m_mainWindow);
+
+        if (dlg.exec() != QDialog::Accepted) {
+            continue;
+        }
+
+        qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
+
+        auto* inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+        auto* minecraftInst = inst;
+
+        switch (type) {
+            case ModPlatform::ResourceType::ResourcePack:
+                minecraftInst->resourcePackList()->installResourceWithFlameMetadata(localFileName, version);
+                break;
+            case ModPlatform::ResourceType::TexturePack:
+                minecraftInst->texturePackList()->installResourceWithFlameMetadata(localFileName, version);
+                break;
+            case ModPlatform::ResourceType::DataPack:
+                qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
+                break;
+            case ModPlatform::ResourceType::Mod:
+                minecraftInst->loaderModList()->installResourceWithFlameMetadata(localFileName, version);
+                break;
+            case ModPlatform::ResourceType::ShaderPack:
+                minecraftInst->shaderPackList()->installResourceWithFlameMetadata(localFileName, version);
+                break;
+            case ModPlatform::ResourceType::World:
+                minecraftInst->worldList()->installWorld(localFileInfo);
+                break;
+            case ModPlatform::ResourceType::Unknown:
+            default:
+                qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
+                break;
+        }
+    }
+}
+
+void Application::addInstance(const QString& url, const QString& groupName, const QMap<QString, QString>& extraInfo)
+{
+    auto group = groupName;
+    if (group.isEmpty()) {
+        group = settings()->get("LastUsedGroupForNewInstance").toString();
+    }
+
+    NewInstanceDialog newInstDlg(groupName, url, extraInfo, m_mainWindow);
+    if (newInstDlg.exec() == 0) {
+        return;
+    }
+
+    APPLICATION->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+    APPLICATION->settings()->set("LastUsedInstDirForNewInstance", newInstDlg.instDir());
+
+    InstanceTask* creationTask = newInstDlg.extractTask();
+    if (creationTask) {
+        instanceFromInstanceTask(creationTask);
+    }
+}
+
+void Application::runModalTask(Task* task)
+{
+    connect(task, &Task::failed, this, [this](const QString& reason) {
+        CustomMessageBox::selectable(m_mainWindow, tr("Error"), reason, QMessageBox::Critical)->show();
+    });
+    connect(task, &Task::succeeded, this, [this, task]() {
+        QStringList warnings = task->warnings();
+        if (warnings.count()) {
+            CustomMessageBox::selectable(m_mainWindow, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+        }
+    });
+    ProgressDialog loadDialog(m_mainWindow);
+    loadDialog.showSkipButton();
+    loadDialog.execWithTask(task);
+}
+
+void Application::instanceFromInstanceTask(InstanceTask* rawTask)
+{
+    unique_qobject_ptr<Task> task(instances()->wrapInstanceTask(rawTask));
+    runModalTask(task.get());
 }

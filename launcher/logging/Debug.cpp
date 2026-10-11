@@ -38,9 +38,8 @@ namespace {
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 constinit std::atomic_bool isANSIColorConsole{ false };
-// constexpr data for log formats (no bad uncatchable exceptions)
 
-// NOLINTNEXTLINE(bugprone-throwing-static-initialization
+// NOLINTNEXTLINE(bugprone-throwing-static-initialization)
 const QString g_defaultLogFormat = QStringLiteral(
     "%{time process}"
     " "
@@ -85,7 +84,6 @@ const QString g_ansiLogFormat = QStringLiteral(
     " "
     reset faint "(%{function}:%{line})" reset
 );
-
 // clang-format on
 #undef reset
 #undef bold

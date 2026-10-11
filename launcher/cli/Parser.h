@@ -47,7 +47,6 @@ struct LegacyCli {
 struct Cli {
     LegacyCli legacyCli{};
 
-
     void attach(CLI::App& app, Args& args);
 };
 
