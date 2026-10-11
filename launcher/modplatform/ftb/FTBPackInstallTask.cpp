@@ -303,7 +303,17 @@ void PackInstallTask::downloadPack()
             continue;
         }
 
-        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
+        auto basePath = FS::PathCombine(m_stagingPath, ".minecraft");
+        auto targetPath = FS::PathCombine(file.path, file.name);
+
+        if (FS::isPathTraversal(basePath, targetPath)) {
+            qWarning() << "Blocked path traversal in" << targetPath;
+            emitFailed(tr("Blocked path traversal in %1").arg(targetPath));
+            return;
+        }
+
+        auto path = FS::PathCombine(basePath, targetPath);
+
         qDebug() << "Will try to download" << file.url << "to" << path;
 
         const QFileInfo fileInfo(file.name);
@@ -332,7 +342,9 @@ void PackInstallTask::onModDownloadSucceeded()
 {
     m_net_job.reset();
     if (!m_blockedMods.isEmpty()) {
-        copyBlockedMods();
+        if (!copyBlockedMods()) {
+            return;
+        }
     }
     downloadFiles(m_instance.get());
 }
@@ -358,7 +370,7 @@ void PackInstallTask::onModDownloadFailed(QString reason)
 }
 
 /// @brief copy the matched blocked mods to the instance staging area
-void PackInstallTask::copyBlockedMods()
+bool PackInstallTask::copyBlockedMods()
 {
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
@@ -371,7 +383,15 @@ void PackInstallTask::copyBlockedMods()
             continue;
         }
 
-        auto destPath = FS::PathCombine(m_stagingPath, ".minecraft", mod.targetFolder, mod.name);
+        auto basePath = FS::PathCombine(m_stagingPath, ".minecraft");
+        auto targetPath = FS::PathCombine(mod.targetFolder, mod.name);
+
+        if (FS::isPathTraversal(basePath, targetPath)) {
+            qWarning() << "Blocked path traversal in" << targetPath;
+            emitFailed(tr("Blocked path traversal in %1").arg(targetPath));
+            return false;
+        }
+        auto destPath = FS::PathCombine(basePath, targetPath);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
@@ -386,6 +406,7 @@ void PackInstallTask::copyBlockedMods()
     }
 
     setAbortable(true);
+    return true;
 }
 
 }  // namespace FTB
