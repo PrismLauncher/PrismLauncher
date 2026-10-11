@@ -421,7 +421,9 @@ class ServersModel : public QAbstractListModel {
             }
             m_servers.swap(servers);
             m_loaded = true;
-        } catch (...) {
+        } catch (const std::bad_cast&) {
+            m_loaded = false;
+        } catch (const std::out_of_range&) {
             m_loaded = false;
         }
         endResetModel();
