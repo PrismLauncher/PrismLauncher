@@ -795,6 +795,13 @@ void PackInstallTask::downloadMods()
                 continue;
             }
 
+            auto modDir = FS::PathCombine(m_stagingPath, "minecraft", relpath);
+            if (isPathTraversal(modDir, mod.file)) {
+                qWarning() << "Blocked path traversal in" << mod.file;
+                emitFailed(tr("Blocked path traversal in %1").arg(mod.file));
+                return;
+            }
+
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
@@ -803,8 +810,7 @@ void PackInstallTask::downloadMods()
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             m_jobPtr->addNetAction(dl);
-
-            auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+            auto path = FS::PathCombine(modDir, mod.file);
 
             if (mod.type == ModType::Forge) {
                 auto ver = getComponentVersion("net.minecraftforge", mod.version);
@@ -873,7 +879,14 @@ void PackInstallTask::downloadMods()
                         continue;
                     }
 
-                    auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+                    auto modDir = FS::PathCombine(m_stagingPath, "minecraft", relpath);
+                    if (isPathTraversal(modDir, mod.file)) {
+                        qWarning() << "Blocked path traversal in" << mod.file;
+                        emitFailed(tr("Blocked path traversal in %1").arg(mod.file));
+                        return;
+                    }
+
+                    auto path = FS::PathCombine(modDir, mod.file);
 
                     if (mod.type == ModType::Forge) {
                         auto ver = getComponentVersion("net.minecraftforge", mod.version);
