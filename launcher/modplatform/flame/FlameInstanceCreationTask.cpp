@@ -195,7 +195,9 @@ void FlameCreationTask::executeTask()
                 }
             }
 
-            filesIterator++;
+            if (filesIterator != files.end()) {
+                filesIterator++;
+            }
         }
 
         const QDir oldMinecraftDir(inst->gameRoot());

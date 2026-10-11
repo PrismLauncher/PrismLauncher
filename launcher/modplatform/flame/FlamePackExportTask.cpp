@@ -391,19 +391,21 @@ QByteArray FlamePackExportTask::generateIndex()
     const ComponentPtr neoforge = profile->getComponent("net.neoforged");
 
     // convert all available components to mrpack dependencies
-    if (minecraft != nullptr)
+    if (minecraft != nullptr) {
         version["version"] = minecraft->m_version;
+    }
     QString id;
-    if (quilt != nullptr)
+    if (quilt != nullptr) {
         id = "quilt-" + quilt->m_version;
-    else if (fabric != nullptr)
+    } else if (fabric != nullptr) {
         id = "fabric-" + fabric->m_version;
-    else if (forge != nullptr)
+    } else if (forge != nullptr) {
         id = "forge-" + forge->m_version;
-    else if (neoforge != nullptr) {
+    } else if (neoforge != nullptr) {
         id = "neoforge-";
-        if (minecraft->m_version == "1.20.1")
+        if (minecraft != nullptr && minecraft->m_version == "1.20.1") {
             id += "1.20.1-";
+        }
         id += neoforge->m_version;
     }
     version["modLoaders"] = QJsonArray();

@@ -345,10 +345,10 @@ void VersionPage::on_actionChange_version_triggered()
     auto patch = m_profile->getComponent(versionRow);
     auto name = patch->getName();
     auto list = patch->getVersionList();
-    list->clearExternalRecommends();
     if (!list) {
         return;
     }
+    list->clearExternalRecommends();
     auto uid = list->uid();
 
     // recommend the correct lwjgl version for the current minecraft version

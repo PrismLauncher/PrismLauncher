@@ -408,18 +408,24 @@ class ServersModel : public QAbstractListModel {
     {
         cancelSave();
         beginResetModel();
-        QList<Server> servers;
-        auto serversDat = parseServersDat(serversPath());
-        if (serversDat) {
-            auto& serversList = serversDat->at("servers").as<nbt::tag_list>();
-            for (auto iter = serversList.begin(); iter != serversList.end(); iter++) {
-                auto& serverTag = (*iter).as<nbt::tag_compound>();
-                Server s(serverTag);
-                servers.append(s);
+        try {
+            QList<Server> servers;
+            auto serversDat = parseServersDat(serversPath());
+            if (serversDat) {
+                auto& serversList = serversDat->at("servers").as<nbt::tag_list>();
+                for (auto& iter : serversList) {
+                    auto& serverTag = iter.as<nbt::tag_compound>();
+                    Server s(serverTag);
+                    servers.append(s);
+                }
             }
+            m_servers.swap(servers);
+            m_loaded = true;
+        } catch (const std::bad_cast&) {
+            m_loaded = false;
+        } catch (const std::out_of_range&) {
+            m_loaded = false;
         }
-        m_servers.swap(servers);
-        m_loaded = true;
         endResetModel();
     }
 
@@ -453,8 +459,9 @@ class ServersModel : public QAbstractListModel {
 
             // Update the model when the task is done
             connect(task, &Task::finished, this, [this, task, row]() {
-                if (m_servers.size() < row)
+                if (row >= m_servers.size()) {
                     return;
+                }
                 m_servers[row].m_currentPlayers = task->m_outputOnlinePlayers;
                 emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
             });
