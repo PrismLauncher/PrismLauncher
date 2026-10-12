@@ -724,6 +724,19 @@ void ComponentUpdateTask::finalizeComponents()
                 }
             }
         }
+        for (const auto& conflict : component->m_cachedConflicts) {
+            auto found = componentIndex.find(conflict.uid);
+            if (found == componentIndex.cend()) {
+                continue;
+            }
+            auto foundComp = *found;
+            if (foundComp->isCustom()) {
+                continue;
+            }
+            component->addComponentProblem(ProblemSeverity::Warning,
+                                           QObject::tr("%1 and %2 are known to not work together. It is recommended to remove one of them.")
+                                               .arg(component->getName(), foundComp->getName()));
+        }
     }
 }
 

@@ -51,6 +51,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     QDateTime time() const;
     qint64 rawTime() const { return m_time; }
     const Meta::RequireSet& requiredSet() const { return m_requires; }
+    const Meta::RequireSet& conflictsSet() const { return m_conflicts; }
     VersionFilePtr data() const { return m_data; }
     bool isRecommended() const { return m_recommended; }
     bool isLoaded() const override { return m_data != nullptr && BaseEntity::isLoaded(); }
