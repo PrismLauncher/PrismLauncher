@@ -62,15 +62,6 @@
 #include "ui/dialogs/BlockedModsDialog.h"
 
 namespace {
-bool isPathTraversal(const QString& basePath, const QString& entryName)
-{
-    auto safeName = FS::RemoveInvalidPathChars(entryName);
-    auto fullPath = FS::PathCombine(basePath, safeName);
-    auto baseUrl = QUrl::fromLocalFile(basePath);
-    auto fullUrl = QUrl::fromLocalFile(fullPath);
-    return !(baseUrl == fullUrl || baseUrl.isParentOf(fullUrl));
-}
-
 Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
     return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
@@ -271,21 +262,31 @@ void PackInstallTask::deleteExistingFiles()
     for (const auto& item : deletes.files) {
         auto basePath = getPathForBase(item.base);
         auto targetPath = convertToSystemPath(item.target);
-        auto fullPath = FS::PathCombine(basePath, targetPath);
 
-        if (shouldKeep(fullPath)) {
+        auto fullPath = FS::getSafePathInRoot(basePath, targetPath);
+        if (!fullPath) {
+            qWarning() << fullPath.error() << targetPath;
+            continue;
+        }
+        if (shouldKeep(*fullPath)) {
             continue;
         }
 
-        filesToDelete.insert(fullPath);
+        filesToDelete.insert(*fullPath);
     }
 
     for (const auto& item : deletes.folders) {
         auto basePath = getPathForBase(item.base);
         auto targetPath = convertToSystemPath(item.target);
-        auto fullPath = FS::PathCombine(basePath, targetPath);
 
-        for (const auto& entry : QDirListing(fullPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+        auto fullPath = FS::getSafePathInRoot(basePath, targetPath);
+        if (!fullPath) {
+            qWarning() << fullPath.error() << targetPath;
+            continue;
+        }
+
+        for (const auto& entry :
+             QDirListing(*fullPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
             if (shouldKeep(entry.absoluteFilePath())) {
                 continue;
             }
@@ -786,6 +787,14 @@ void PackInstallTask::downloadMods()
                 continue;
             }
 
+            auto modDir = FS::PathCombine(m_stagingPath, "minecraft", relpath);
+            auto fullPath = FS::getSafePathInRoot(modDir, mod.file);
+            if (!fullPath) {
+                qWarning() << fullPath.error() << mod.file;
+                emitFailed(tr("Blocked path traversal in %1").arg(mod.file));
+                return;
+            }
+
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
@@ -794,8 +803,7 @@ void PackInstallTask::downloadMods()
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             m_jobPtr->addNetAction(dl);
-
-            auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+            const auto& path = *fullPath;
 
             if (mod.type == ModType::Forge) {
                 auto ver = getComponentVersion("net.minecraftforge", mod.version);
@@ -864,7 +872,15 @@ void PackInstallTask::downloadMods()
                         continue;
                     }
 
-                    auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+                    auto modDir = FS::PathCombine(m_stagingPath, "minecraft", relpath);
+                    auto fullPath = FS::getSafePathInRoot(modDir, mod.file);
+                    if (!fullPath) {
+                        qWarning() << fullPath.error() << mod.file;
+                        emitFailed(tr("Blocked path traversal in %1").arg(mod.file));
+                        return;
+                    }
+
+                    const auto& path = *fullPath;
 
                     if (mod.type == ModType::Forge) {
                         auto ver = getComponentVersion("net.minecraftforge", mod.version);
@@ -960,8 +976,9 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
             folderToExtract = mod.extractFolder;
             static const QRegularExpression s_regex("^/");
             folderToExtract.remove(s_regex);
-            if (isPathTraversal(extractToPath, folderToExtract)) {
-                qWarning() << "Blocked path traversal in" << mod.extractFolder;
+            auto fullPath = FS::getSafePathInRoot(extractToPath, folderToExtract);
+            if (!fullPath) {
+                qWarning() << fullPath.error() << mod.extractFolder;
                 return false;
             }
         }
@@ -981,8 +998,9 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         QDir extractDir(m_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
-        if (isPathTraversal(extractToPath, mod.decompFile)) {
-            qWarning() << "Blocked path traversal in decompFile" << mod.decompFile;
+        auto fullPath = FS::getSafePathInRoot(extractToPath, mod.decompFile);
+        if (!fullPath) {
+            qWarning() << fullPath.error() << mod.decompFile;
             return false;
         }
 

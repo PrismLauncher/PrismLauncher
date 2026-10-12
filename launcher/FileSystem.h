@@ -589,4 +589,6 @@ QString getPathNameInLocal8bit(const QString& file);
 
 QString getUniqueResourceName(const QString& filePath);
 
+Result<QString> getSafePathInRoot(const QString& basePath, const QString& entryName);
+
 }  // namespace FS

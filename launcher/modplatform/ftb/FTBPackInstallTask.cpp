@@ -303,12 +303,21 @@ void PackInstallTask::downloadPack()
             continue;
         }
 
-        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
-        qDebug() << "Will try to download" << file.url << "to" << path;
+        auto basePath = FS::PathCombine(m_stagingPath, ".minecraft");
+        auto targetPath = FS::PathCombine(file.path, file.name);
+
+        auto path = FS::getSafePathInRoot(basePath, targetPath);
+        if (!path) {
+            qWarning() << path.error() << targetPath;
+            emitFailed(tr("Blocked path traversal in %1").arg(targetPath));
+            return;
+        }
+
+        qDebug() << "Will try to download" << file.url << "to" << *path;
 
         const QFileInfo fileInfo(file.name);
 
-        auto dl = Net::Request::makeFile(file.url, path);
+        auto dl = Net::Request::makeFile(file.url, *path);
         if (!file.sha1.isEmpty()) {
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, file.sha1));
         }
@@ -332,7 +341,9 @@ void PackInstallTask::onModDownloadSucceeded()
 {
     m_net_job.reset();
     if (!m_blockedMods.isEmpty()) {
-        copyBlockedMods();
+        if (!copyBlockedMods()) {
+            return;
+        }
     }
     downloadFiles(m_instance.get());
 }
@@ -358,7 +369,7 @@ void PackInstallTask::onModDownloadFailed(QString reason)
 }
 
 /// @brief copy the matched blocked mods to the instance staging area
-void PackInstallTask::copyBlockedMods()
+bool PackInstallTask::copyBlockedMods()
 {
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
@@ -371,14 +382,22 @@ void PackInstallTask::copyBlockedMods()
             continue;
         }
 
-        auto destPath = FS::PathCombine(m_stagingPath, ".minecraft", mod.targetFolder, mod.name);
+        auto basePath = FS::PathCombine(m_stagingPath, ".minecraft");
+        auto targetPath = FS::PathCombine(mod.targetFolder, mod.name);
+
+        auto destPath = FS::getSafePathInRoot(basePath, targetPath);
+        if (!destPath) {
+            qWarning() << destPath.error() << targetPath;
+            emitFailed(tr("Blocked path traversal in %1").arg(targetPath));
+            return false;
+        }
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
-        qDebug() << "Will try to copy" << mod.localPath << "to" << destPath;
+        qDebug() << "Will try to copy" << mod.localPath << "to" << *destPath;
 
-        if (!FS::copy(mod.localPath, destPath)()) {
-            qDebug() << "Copy of" << mod.localPath << "to" << destPath << "Failed";
+        if (!FS::copy(mod.localPath, *destPath)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << *destPath << "Failed";
         }
 
         i++;
@@ -386,6 +405,7 @@ void PackInstallTask::copyBlockedMods()
     }
 
     setAbortable(true);
+    return true;
 }
 
 }  // namespace FTB

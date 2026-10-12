@@ -77,7 +77,7 @@ class PackInstallTask final : public InstanceTask {
     void resolveMods();
     void createInstance();
     void downloadPack();
-    void copyBlockedMods();
+    bool copyBlockedMods();
 
    private:
     NetJob::Ptr m_net_job = nullptr;

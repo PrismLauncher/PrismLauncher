@@ -1884,6 +1884,18 @@ QString getUniqueResourceName(const QString& filePath)
     return newFileName;
 }
 
+Result<QString> getSafePathInRoot(const QString& basePath, const QString& entryName)
+{
+    auto safeName = FS::RemoveInvalidPathChars(entryName);
+    auto fullPath = FS::PathCombine(basePath, safeName);
+    auto baseUrl = QUrl::fromLocalFile(basePath);
+    auto fullUrl = QUrl::fromLocalFile(fullPath);
+    if (baseUrl != fullUrl && !baseUrl.isParentOf(fullUrl)) {
+        return std::unexpected("Path is outside root");
+    }
+    return fullPath;
+}
+
 bool removeFiles(const QStringList& listFile)
 {
     bool ret = true;

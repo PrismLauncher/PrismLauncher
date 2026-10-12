@@ -53,7 +53,7 @@ auto ExtractZipTask::extractZip() -> Result<>
     auto fileName = m_input.getZipName();
     if (const auto result = m_input.parse([this, &target, &target_top_dir, ext, &extracted](ArchiveReader::File* f) -> Result<> {
             if (m_zipFuture.isCanceled())
-                return std::unexpected{"Cancelled"};
+                return std::unexpected{ "Cancelled" };
             setProgress(m_progress + 1, m_progressTotal);
             QString file_name = f->filename();
             if (!file_name.startsWith(m_subdirectory)) {
@@ -72,7 +72,6 @@ auto ExtractZipTask::extractZip() -> Result<>
             QString sub_path;
             if (relative_file_name.contains('/') && !relative_file_name.endsWith('/')) {
                 sub_path = relative_file_name.section('/', 0, -2) + '/';
-                FS::ensureFolderPathExists(FS::PathCombine(target, sub_path));
 
                 relative_file_name = relative_file_name.split('/').last();
             }
@@ -88,8 +87,10 @@ auto ExtractZipTask::extractZip() -> Result<>
 
             if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
                 return std::unexpected(tr("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
-                                       .arg(relative_file_name, target));
+                                           .arg(relative_file_name, target));
             }
+            // only create the folder if is not outside
+            FS::ensureFilePathExists(target_file_path);
 
             if (const auto writeResult = f->writeFile(ext, target_file_path, target); !writeResult) {
                 return std::unexpected(tr("Failed to extract file %1 to %2: %3").arg(original_name, target_file_path, writeResult.error()));
@@ -98,9 +99,10 @@ auto ExtractZipTask::extractZip() -> Result<>
 
             qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
             return {};
-        }); !result) {
+        });
+        !result) {
         FS::removeFiles(extracted);
-        return std::unexpected{result.error()};
+        return std::unexpected{ result.error() };
     }
     return {};
 }
