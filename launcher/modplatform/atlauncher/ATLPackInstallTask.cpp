@@ -38,11 +38,14 @@
 
 #include <QtConcurrent>
 #include <algorithm>
+#include <expected>
+#include <functional>
 #include <utility>
 
 #include "FileSystem.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "QObjectPtr.h"
 #include "Version.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
@@ -53,12 +56,14 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/ChecksumValidator.h"
+#include "net/RPCSink.h"
 #include "settings/INISettingsObject.h"
 
 #include "net/ApiRequest.h"
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "tasks/SequentialTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 
 namespace {
@@ -71,10 +76,28 @@ bool isPathTraversal(const QString& basePath, const QString& entryName)
     return !(baseUrl == fullUrl || baseUrl.isParentOf(fullUrl));
 }
 
-Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
+const QMap<QString, QString>& liteLoaderMap()
 {
-    return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
+    static const QMap<QString, QString> s_liteLoaderMap = {
+        { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },   { "1420785ecbfed5aff4a586c5c9dd97eb", "1.12.2-SNAPSHOT" },
+        { "073f68e2fcb518b91fd0d99462441714", "1.6.2_03" },        { "10a15b52fc59b1bfb9c05b56de1097d6", "1.6.2_02" },
+        { "b52f90f08303edd3d4c374e268a5acf1", "1.6.2_04" },        { "ea747e24e03e24b7cad5bc8a246e0319", "1.6.2_01" },
+        { "55785ccc82c07ff0ba038fe24be63ea2", "1.7.10_01" },       { "63ada46e033d0cb6782bada09ad5ca4e", "1.7.10_04" },
+        { "7983e4b28217c9ae8569074388409c86", "1.7.10_03" },       { "c09882458d74fe0697c7681b8993097e", "1.7.10_02" },
+        { "db7235aefd407ac1fde09a7baba50839", "1.7.10_00" },       { "6e9028816027f53957bd8fcdfabae064", "1.8" },
+        { "5e732dc446f9fe2abe5f9decaec40cde", "1.10-SNAPSHOT" },   { "3a98b5ed95810bf164e71c1a53be568d", "1.11.2-SNAPSHOT" },
+        { "ba8e6285966d7d988a96496f48cbddaa", "1.8.9-SNAPSHOT" },  { "8524af3ac3325a82444cc75ae6e9112f", "1.11-SNAPSHOT" },
+        { "53639d52340479ccf206a04f5e16606f", "1.5.2_01" },        { "1fcdcf66ce0a0806b7ad8686afdce3f7", "1.6.4_00" },
+        { "531c116f71ae2b11033f9a11a0f8e668", "1.6.4_01" },        { "4009eeb99c9068f608d3483a6439af88", "1.7.2_03" },
+        { "66f343354b8417abce1a10d557d2c6e9", "1.7.2_04" },        { "ab554c21f28fbc4ae9b098bcb5f4cceb", "1.7.2_05" },
+        { "e1d76a05a3723920e2f80a5e66c45f16", "1.7.2_02" },        { "00318cb0c787934d523f63cdfe8ddde4", "1.9-SNAPSHOT" },
+        { "986fd1ee9525cb0dcab7609401cef754", "1.9.4-SNAPSHOT" },  { "571ad5e6edd5ff40259570c9be588bb5", "1.9.4" },
+        { "1cdd72f7232e45551f16cc8ffd27ccf3", "1.10.2-SNAPSHOT" }, { "8a7c21f32d77ee08b393dd3921ced8eb", "1.10.2" },
+        { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" },
+    };
+    return s_liteLoaderMap;
 }
+
 }  // namespace
 
 namespace ATLauncher {
@@ -101,7 +124,10 @@ void PackInstallTask::executeTask()
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_packSafeName).arg(m_versionName);
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
+    auto [action, response] = Net::RPC::make<ATLauncher::PackVersion>(
+        { { .url = searchUrl }, [](const auto& v) -> Result<ATLauncher::PackVersion> {
+             return Json::requireObject(v, "ATLauncher pack manifest").and_then([](const auto& v) { return ATLauncher::loadVersion(v); });
+         } });
     netJob->addNetAction(action);
 
     connect(netJob.get(), &NetJob::succeeded, this, [this, response] { onDownloadSucceeded(response); });
@@ -112,27 +138,13 @@ void PackInstallTask::executeTask()
     m_jobPtr->start();
 }
 
-void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
+void PackInstallTask::onDownloadSucceeded(ATLauncher::PackVersion* responsePtr)
 {
     qDebug() << "PackInstallTask::onDownloadSucceeded:" << QThread::currentThreadId();
 
     // NOTE(TheKodeToad): moving the response out to avoid it from being destroyed by jobPtr.reset()
-    QByteArray response = std::move(*responsePtr);
+    m_version = std::move(*responsePtr);
     m_jobPtr.reset();
-
-    ATLauncher::PackVersion version;
-    auto doc = Json::requireDocument(response, "ATLauncher pack manifest").and_then([&version](const auto& v) {
-        auto obj = v.object();
-        return ATLauncher::loadVersion(version, obj);
-    });
-    if (!doc) {
-        qWarning() << "Error while parsing JSON response from ATLauncher:" << doc.error();
-        qWarning() << response;
-        emitFailed(tr("Could not understand pack manifest:\n") + doc.error());
-        return;
-    }
-
-    m_version = version;
 
     // Derived from the installation mode
     QString message;
@@ -147,7 +159,6 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
 
         case InstallMode::Install:
             message = m_version.messages.install;
-            resetDirectory = false;
             break;
 
         default:
@@ -160,22 +171,11 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
         m_support->displayMessage(message);
     }
 
-    auto ver = getComponentVersion("net.minecraft", m_version.minecraft);
-    if (!ver) {
-        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft", m_version.minecraft));
-        return;
-    }
-    m_minecraftVersion = ver;
-
     if (resetDirectory) {
         deleteExistingFiles();
     }
 
-    if (m_version.noConfigs) {
-        downloadMods();
-    } else {
-        installConfigs();
-    }
+    prepareMetaTask();
 }
 
 void PackInstallTask::onDownloadFailed(QString reason)
@@ -348,64 +348,187 @@ QString PackInstallTask::getDirForModType(ModType type, const QString& raw)
     return nullptr;
 }
 
-QString PackInstallTask::getVersionForLoader(const QString& uid)
+Result<QString> PackInstallTask::pickLoaderVersion(const Meta::VersionList::Ptr& vlist)
 {
-    if (m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
-        auto vlist = APPLICATION->metadataIndex()->get(uid);
-        if (!vlist) {
-            emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
-            return nullptr;
-        }
+    if (m_version.loader.recommended || m_version.loader.latest) {
+        for (int i = 0; i < vlist->versions().size(); i++) {
+            auto version = vlist->versions().at(i);
+            auto reqs = version->requiredSet();
 
-        vlist->waitToLoad();
-
-        if (m_version.loader.recommended || m_version.loader.latest) {
-            for (int i = 0; i < vlist->versions().size(); i++) {
-                auto version = vlist->versions().at(i);
-                auto reqs = version->requiredSet();
-
-                // filter by minecraft version, if the loader depends on a certain version.
-                // not all mod loaders depend on a given Minecraft version, so we won't do this
-                // filtering for those loaders.
-                if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
-                    auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
-                    if (iter == reqs.end()) {
-                        continue;
-                    }
-                    if (iter->equalsVersion != m_version.minecraft) {
-                        continue;
-                    }
+            // filter by minecraft version, if the loader depends on a certain version.
+            // not all mod loaders depend on a given Minecraft version, so we won't do this
+            // filtering for those loaders.
+            if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
+                auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
+                if (iter == reqs.end()) {
+                    continue;
                 }
-
-                if (m_version.loader.recommended) {
-                    // first recommended build we find, we use.
-                    if (!version->isRecommended()) {
-                        continue;
-                    }
+                if (iter->equalsVersion != m_version.minecraft) {
+                    continue;
                 }
-
-                return version->descriptor();
             }
 
-            emitFailed(tr("Failed to find version for %1 loader").arg(ModPlatform::getModLoaderAsString(m_version.loader.type)));
-            return nullptr;
-        }
-        if (m_version.loader.choose) {
-            // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
-                return m_support->chooseVersion(vlist, nullptr);
+            if (m_version.loader.recommended) {
+                // first recommended build we find, we use.
+                if (!version->isRecommended()) {
+                    continue;
+                }
             }
 
-            return m_support->chooseVersion(vlist, m_version.minecraft);
+            return version->descriptor();
         }
+
+        return std::unexpected(tr("No matching version was found."));
+    }
+    if (m_version.loader.choose) {
+        // Fabric Loader doesn't depend on a given Minecraft version.
+        if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
+            auto chosenVersion = m_support->chooseVersion(vlist, nullptr);
+            if (chosenVersion.isEmpty()) {
+                return std::unexpected(tr("No version was chosen."));
+            }
+            return chosenVersion;
+        }
+
+        auto chosenVersion = m_support->chooseVersion(vlist, m_version.minecraft);
+        if (chosenVersion.isEmpty()) {
+            return std::unexpected(tr("No version was chosen."));
+        }
+        return chosenVersion;
     }
 
-    if (m_version.loader.version == nullptr || m_version.loader.version.isEmpty()) {
-        emitFailed(tr("No loader version set for modpack!"));
-        return nullptr;
+    if (m_version.loader.version.isEmpty()) {
+        return std::unexpected(tr("No loader version set for modpack!"));
     }
 
     return m_version.loader.version;
+}
+
+void PackInstallTask::runMetaStep(const Task::Ptr& task, bool required, const std::function<void()>& next)
+{
+    auto* rawTask = task.get();
+    connect(
+        rawTask, &Task::finished, this,
+        [this, rawTask, required, next] {
+            if (!isRunning() || m_metaPtr.get() != rawTask) {
+                return;
+            }
+            if (required && !rawTask->wasSuccessful()) {
+                emitFailed(rawTask->failReason());
+                return;
+            }
+            next();
+        },
+        Qt::QueuedConnection);
+    propagateFromOther(rawTask);
+    m_metaPtr = task;
+    if (!rawTask->isRunning()) {
+        rawTask->start();
+    }
+}
+
+void PackInstallTask::prepareMetaTask()
+{
+    switch (m_version.loader.type) {
+        case ModPlatform::ModLoaderType::NeoForge:
+            m_loaderUid = "net.neoforged";
+            break;
+        case ModPlatform::ModLoaderType::Forge:
+            m_loaderUid = "net.minecraftforge";
+            break;
+        case ModPlatform::ModLoaderType::Fabric:
+            m_loaderUid = "net.fabricmc.fabric-loader";
+            break;
+        case ModPlatform::ModLoaderType::None: {
+            m_loaderUid.clear();
+            for (const auto& mod : m_version.mods) {  // if no modloader take the first forge mod if any
+                if (mod.type == ModType::Forge && !mod.version.isEmpty()) {
+                    m_forgeModVersion = mod.version;
+                    break;
+                }
+            }
+            break;
+        }
+        default: {
+            emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
+            return;
+        }
+    }
+
+    for (const auto& lib : m_version.libraries) {
+        if (liteLoaderMap().contains(lib.md5)) {
+            m_liteLoaderVersion = liteLoaderMap().value(lib.md5);
+            break;
+        }
+    }
+
+    auto seq = makeShared<SequentialTask>(tr("Load meta"));
+    seq->addTask(APPLICATION->metadataIndex()->loadVersion("net.minecraft", m_version.minecraft));
+
+    const bool pickLoader = m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose;
+    if (!m_loaderUid.isEmpty()) {
+        if (pickLoader) {
+            seq->addTask(APPLICATION->metadataIndex()->get(m_loaderUid)->getLoadTask());
+        } else if (m_version.loader.version.isEmpty()) {
+            emitFailed(tr("No loader version set for modpack!"));
+            return;
+        } else {
+            seq->addTask(APPLICATION->metadataIndex()->loadVersion(m_loaderUid, m_version.loader.version));
+        }
+    }
+
+    setStatus(tr("Loading metadata..."));
+    runMetaStep(seq, true, [this, pickLoader] {
+        if (m_loaderUid.isEmpty() || !pickLoader) {
+            loadOptionalMeta();
+            return;
+        }
+        auto version = pickLoaderVersion(APPLICATION->metadataIndex()->get(m_loaderUid));
+        if (!version) {
+            emitFailed(tr("Failed to find version for %1 loader: %2")
+                           .arg(ModPlatform::getModLoaderAsString(m_version.loader.type), version.error()));
+            return;
+        }
+        m_version.loader.version = *version;
+        runMetaStep(APPLICATION->metadataIndex()->loadVersion(m_loaderUid, *version), true, [this] { loadOptionalMeta(); });
+    });
+}
+
+void PackInstallTask::loadOptionalMeta()
+{
+    if (!m_forgeModVersion.isEmpty()) {
+        auto version = m_forgeModVersion;
+        m_forgeModVersion.clear();
+        runMetaStep(APPLICATION->metadataIndex()->loadVersion("net.minecraftforge", version), false, [this, version] {
+            if (APPLICATION->metadataIndex()->get("net.minecraftforge", version)->isLoaded()) {
+                m_loaderUid = "net.minecraftforge";
+                m_version.loader.version = version;
+            }
+            loadOptionalMeta();
+        });
+        return;
+    }
+    if (!m_liteLoaderVersion.isEmpty() && !m_liteLoaderChecked) {
+        m_liteLoaderChecked = true;
+        runMetaStep(APPLICATION->metadataIndex()->loadVersion("com.mumfrey.liteloader", m_liteLoaderVersion), false, [this] {
+            if (!APPLICATION->metadataIndex()->get("com.mumfrey.liteloader", m_liteLoaderVersion)->isLoaded()) {
+                m_liteLoaderVersion.clear();
+            }
+            loadOptionalMeta();
+        });
+        return;
+    }
+
+    m_minecraftVersion = APPLICATION->metadataIndex()->get("net.minecraft", m_version.minecraft);
+    if (!m_minecraftVersion || !m_minecraftVersion->isLoaded()) {
+        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft", m_version.minecraft));
+        return;
+    }
+    if (m_version.noConfigs) {
+        downloadMods();
+    } else {
+        installConfigs();
+    }
 }
 
 QString PackInstallTask::detectLibrary(const VersionLibrary& library)
@@ -466,6 +589,10 @@ bool PackInstallTask::createLibrariesComponent(const QString& instanceRoot, Pack
             exempt.append(lib);
         }
     }
+    if (!m_liteLoaderVersion.isEmpty()) {
+        auto version = APPLICATION->metadataIndex()->get("com.mumfrey.liteloader", m_liteLoaderVersion);
+        m_componentsToInstall.insert("com.mumfrey.liteloader", version);
+    }
 
     auto id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     auto targetId = "org.multimc.atlauncher." + id;
@@ -479,32 +606,10 @@ bool PackInstallTask::createLibrariesComponent(const QString& instanceRoot, Pack
     auto f = std::make_shared<VersionFile>();
     f->name = m_packName + " " + m_versionName + " (libraries)";
 
-    const static QMap<QString, QString> s_liteLoaderMap = {
-        { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },   { "1420785ecbfed5aff4a586c5c9dd97eb", "1.12.2-SNAPSHOT" },
-        { "073f68e2fcb518b91fd0d99462441714", "1.6.2_03" },        { "10a15b52fc59b1bfb9c05b56de1097d6", "1.6.2_02" },
-        { "b52f90f08303edd3d4c374e268a5acf1", "1.6.2_04" },        { "ea747e24e03e24b7cad5bc8a246e0319", "1.6.2_01" },
-        { "55785ccc82c07ff0ba038fe24be63ea2", "1.7.10_01" },       { "63ada46e033d0cb6782bada09ad5ca4e", "1.7.10_04" },
-        { "7983e4b28217c9ae8569074388409c86", "1.7.10_03" },       { "c09882458d74fe0697c7681b8993097e", "1.7.10_02" },
-        { "db7235aefd407ac1fde09a7baba50839", "1.7.10_00" },       { "6e9028816027f53957bd8fcdfabae064", "1.8" },
-        { "5e732dc446f9fe2abe5f9decaec40cde", "1.10-SNAPSHOT" },   { "3a98b5ed95810bf164e71c1a53be568d", "1.11.2-SNAPSHOT" },
-        { "ba8e6285966d7d988a96496f48cbddaa", "1.8.9-SNAPSHOT" },  { "8524af3ac3325a82444cc75ae6e9112f", "1.11-SNAPSHOT" },
-        { "53639d52340479ccf206a04f5e16606f", "1.5.2_01" },        { "1fcdcf66ce0a0806b7ad8686afdce3f7", "1.6.4_00" },
-        { "531c116f71ae2b11033f9a11a0f8e668", "1.6.4_01" },        { "4009eeb99c9068f608d3483a6439af88", "1.7.2_03" },
-        { "66f343354b8417abce1a10d557d2c6e9", "1.7.2_04" },        { "ab554c21f28fbc4ae9b098bcb5f4cceb", "1.7.2_05" },
-        { "e1d76a05a3723920e2f80a5e66c45f16", "1.7.2_02" },        { "00318cb0c787934d523f63cdfe8ddde4", "1.9-SNAPSHOT" },
-        { "986fd1ee9525cb0dcab7609401cef754", "1.9.4-SNAPSHOT" },  { "571ad5e6edd5ff40259570c9be588bb5", "1.9.4" },
-        { "1cdd72f7232e45551f16cc8ffd27ccf3", "1.10.2-SNAPSHOT" }, { "8a7c21f32d77ee08b393dd3921ced8eb", "1.10.2" },
-        { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" }
-    };
-
     for (const auto& lib : m_version.libraries) {
         // If the library is LiteLoader, we need to ignore it and handle it separately.
-        if (s_liteLoaderMap.contains(lib.md5)) {
-            auto ver = getComponentVersion("com.mumfrey.liteloader", s_liteLoaderMap.value(lib.md5));
-            if (ver) {
-                m_componentsToInstall.insert("com.mumfrey.liteloader", ver);
-                continue;
-            }
+        if (!m_liteLoaderVersion.isEmpty() && liteLoaderMap().contains(lib.md5)) {
+            continue;
         }
 
         auto libName = detectLibrary(lib);
@@ -798,12 +903,9 @@ void PackInstallTask::downloadMods()
             auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
             if (mod.type == ModType::Forge) {
-                auto ver = getComponentVersion("net.minecraftforge", mod.version);
-                if (ver) {
-                    m_componentsToInstall.insert("net.minecraftforge", ver);
-                    continue;
+                if (m_loaderUid == "net.minecraftforge") {
+                    continue;  // installed as the Forge component
                 }
-
                 qDebug() << "Jarmod: " + path;
                 m_jarmods.push_back(path);
             }
@@ -867,12 +969,9 @@ void PackInstallTask::downloadMods()
                     auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
                     if (mod.type == ModType::Forge) {
-                        auto ver = getComponentVersion("net.minecraftforge", mod.version);
-                        if (ver) {
-                            m_componentsToInstall.insert("net.minecraftforge", ver);
-                            continue;
+                        if (m_loaderUid == "net.minecraftforge") {
+                            continue;  // installed as the Forge component
                         }
-
                         qDebug() << "Jarmod: " + path;
                         m_jarmods.push_back(path);
                     }
@@ -1037,43 +1136,15 @@ void PackInstallTask::install()
 
         // Minecraft
         components->setComponentVersion("net.minecraft", m_version.minecraft, true);
+    }
+
+    {
+        SettingsObject::Lock lock(m_instance->settings());
+        auto* components = m_instance->getPackProfile();
 
         // Loader
-        switch (m_version.loader.type) {
-            case ModPlatform::ModLoaderType::NeoForge: {
-                auto version = getVersionForLoader("net.neoforged");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.neoforged", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::Forge: {
-                auto version = getVersionForLoader("net.minecraftforge");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.minecraftforge", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::Fabric: {
-                auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.fabricmc.fabric-loader", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::None: {
-                break;
-            }
-            default: {
-                emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
-                return;
-            }
+        if (!m_loaderUid.isEmpty() && !m_version.loader.version.isEmpty()) {
+            components->setComponentVersion(m_loaderUid, m_version.loader.version);
         }
 
         for (const auto& componentUid : m_componentsToInstall.keys()) {
