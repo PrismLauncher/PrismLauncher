@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     }
 
     // initialize Qt
-    Application app(argc, argv, args);
+    const Application app(argc, argv, args);
     switch (app.status()) {
         case Application::StartingUp:
         case Application::Initialized: {

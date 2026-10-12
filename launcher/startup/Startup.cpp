@@ -35,6 +35,8 @@
 #include "BuildConfig.h"
 #include "DesktopServices.h"
 
+#include "FileSystem.h"
+
 namespace {
 
 QString fromStdPath(const std::filesystem::path& path)
@@ -84,7 +86,7 @@ std::filesystem::path resolveApplicationFilePath(const char* argv0)
     std::string arg0{ argv0 };
     std::array<char*, 2> qAppArgs = { arg0.data(), nullptr };
     int qAppArgsC = 1;
-    QCoreApplication app(qAppArgsC, qAppArgs.data());
+    const QCoreApplication app(qAppArgsC, qAppArgs.data());
 
     return toStdPath(QCoreApplication::applicationFilePath());
 }

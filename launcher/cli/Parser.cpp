@@ -272,7 +272,7 @@ void parseArgs(int argc, char** argv, Args& args)
 
     /// ensured that argv is utf8
     /// (only does something on windows, returns argv unchanged everywhere else)
-    char** utf8Argv = app.ensure_utf8(argv);
+    char** const utf8Argv = app.ensure_utf8(argv);
 
     Cli cli{};
     cli.attach(app, args);
