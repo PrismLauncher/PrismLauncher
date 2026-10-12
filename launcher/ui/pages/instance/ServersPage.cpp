@@ -650,7 +650,12 @@ void ServersPage::runningStateChanged(bool running)
 void ServersPage::selectionChanged()
 {
     const auto selected = ui->serversView->selectionModel()->selectedRows();
-    currentServer = selected.size() == 1 ? selected.first().row() : -1;
+    const auto index = ui->serversView->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        currentServer = index.row();
+    } else {
+        currentServer = -1;
+    }
     updateState();
 }
 
@@ -724,12 +729,8 @@ void ServersPage::on_actionAdd_triggered()
 void ServersPage::on_actionRemove_triggered()
 {
     QList<int> rows;
-    QStringList names;
     for (const auto& index : ui->serversView->selectionModel()->selectedRows()) {
-        if (auto* server = m_model->at(index.row())) {
-            rows.append(index.row());
-            names.append(server->m_name);
-        }
+        rows.append(index.row());
     }
     if (rows.isEmpty()) {
         return;
@@ -740,13 +741,12 @@ void ServersPage::on_actionRemove_triggered()
         text = tr("You are about to remove \"%1\".\n"
                   "This is permanent and the server will be gone from your list forever (A LONG TIME).\n\n"
                   "Are you sure?")
-                   .arg(names.first());
+                   .arg(m_model->at(rows.first())->m_name);
     } else {
-        text = tr("You are about to remove %1 servers:\n%2\n\n"
+        text = tr("You are about to remove the %1 selected servers."
                   "This is permanent and the servers will be gone from your list forever (A LONG TIME).\n\n"
                   "Are you sure?")
-                   .arg(rows.size())
-                   .arg(names.join("\n"));
+                   .arg(rows.size());
     }
 
     auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"), text, QMessageBox::Warning,
