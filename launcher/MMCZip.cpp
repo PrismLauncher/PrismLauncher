@@ -45,6 +45,7 @@
 #include <QFileInfo>
 #include <QUrl>
 #include <memory>
+#include <ranges>
 
 namespace MMCZip {
 // ours
@@ -84,7 +85,7 @@ Result<> compressDirFiles(ArchiveWriter& zip, QString dir, QFileInfoList files)
 }
 
 // ours
-Result<> createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
+Result<> createModdedJar(const QString& sourceJarPath, const QString& targetJarPath, const std::vector<std::unique_ptr<Mod>>& mods)
 {
     ArchiveWriter zipOut(targetJarPath);
     if (const auto result = zipOut.open(); !result) {
@@ -97,11 +98,11 @@ Result<> createModdedJar(QString sourceJarPath, QString targetJarPath, const QLi
 
     // Modify the jar
     // This needs to be done in reverse-order to ensure we respect the loading order of components
-    for (auto i = mods.crbegin(); i != mods.crend(); i++) {
-        const auto* mod = *i;
+    for (const auto& mod : std::views::reverse(mods)) {
         // do not merge disabled mods.
-        if (!mod->enabled())
+        if (!mod->enabled()) {
             continue;
+        }
         if (mod->type() == ResourceType::ZIPFILE) {
             if (const auto result = mergeZipFiles(zipOut, mod->fileinfo(), addedFiles); !result) {
                 TRY_OR_LOG(zipOut.close());
@@ -121,19 +122,16 @@ Result<> createModdedJar(QString sourceJarPath, QString targetJarPath, const QLi
             // untested, but seems to be unused / not possible to reach
             // FIXME: buggy - does not work with addedFiles
             auto filename = mod->fileinfo();
-            QString what_to_zip = filename.absoluteFilePath();
-            QDir dir(what_to_zip);
+            QString whatToZip = filename.absoluteFilePath();
+            QDir dir(whatToZip);
             dir.cdUp();
-            QString parent_dir = dir.absolutePath();
+            QString parentDir = dir.absolutePath();
             auto files = QFileInfoList();
-            collectFileListRecursively(what_to_zip, nullptr, &files, nullptr);
+            collectFileListRecursively(whatToZip, nullptr, &files, nullptr);
 
-            for (auto e : files) {
-                if (addedFiles.contains(e.filePath()))
-                    files.removeAll(e);
-            }
+            files.removeIf([&](const QFileInfo& e) { return addedFiles.contains(e.filePath()); });
 
-            if (const auto result = compressDirFiles(zipOut, parent_dir, files); !result) {
+            if (const auto result = compressDirFiles(zipOut, parentDir, files); !result) {
                 TRY_OR_LOG(zipOut.close());
                 FS::deletePath(targetJarPath);
                 return std::unexpected{ QString("Failed to add %1 to the jar: %2").arg(mod->fileinfo().fileName(), result.error()) };
