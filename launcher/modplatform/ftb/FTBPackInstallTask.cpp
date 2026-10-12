@@ -306,19 +306,18 @@ void PackInstallTask::downloadPack()
         auto basePath = FS::PathCombine(m_stagingPath, ".minecraft");
         auto targetPath = FS::PathCombine(file.path, file.name);
 
-        if (FS::isPathTraversal(basePath, targetPath)) {
-            qWarning() << "Blocked path traversal in" << targetPath;
+        auto path = FS::getSafePathInRoot(basePath, targetPath);
+        if (!path) {
+            qWarning() << path.error() << targetPath;
             emitFailed(tr("Blocked path traversal in %1").arg(targetPath));
             return;
         }
 
-        auto path = FS::PathCombine(basePath, targetPath);
-
-        qDebug() << "Will try to download" << file.url << "to" << path;
+        qDebug() << "Will try to download" << file.url << "to" << *path;
 
         const QFileInfo fileInfo(file.name);
 
-        auto dl = Net::Request::makeFile(file.url, path);
+        auto dl = Net::Request::makeFile(file.url, *path);
         if (!file.sha1.isEmpty()) {
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, file.sha1));
         }
@@ -386,19 +385,19 @@ bool PackInstallTask::copyBlockedMods()
         auto basePath = FS::PathCombine(m_stagingPath, ".minecraft");
         auto targetPath = FS::PathCombine(mod.targetFolder, mod.name);
 
-        if (FS::isPathTraversal(basePath, targetPath)) {
-            qWarning() << "Blocked path traversal in" << targetPath;
+        auto destPath = FS::getSafePathInRoot(basePath, targetPath);
+        if (!destPath) {
+            qWarning() << destPath.error() << targetPath;
             emitFailed(tr("Blocked path traversal in %1").arg(targetPath));
             return false;
         }
-        auto destPath = FS::PathCombine(basePath, targetPath);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
-        qDebug() << "Will try to copy" << mod.localPath << "to" << destPath;
+        qDebug() << "Will try to copy" << mod.localPath << "to" << *destPath;
 
-        if (!FS::copy(mod.localPath, destPath)()) {
-            qDebug() << "Copy of" << mod.localPath << "to" << destPath << "Failed";
+        if (!FS::copy(mod.localPath, *destPath)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << *destPath << "Failed";
         }
 
         i++;

@@ -589,6 +589,6 @@ QString getPathNameInLocal8bit(const QString& file);
 
 QString getUniqueResourceName(const QString& filePath);
 
-bool isPathTraversal(const QString& basePath, const QString& entryName);
+Result<QString> getSafePathInRoot(const QString& basePath, const QString& entryName);
 
 }  // namespace FS
