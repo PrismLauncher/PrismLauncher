@@ -5,8 +5,6 @@
 #include <QMenu>
 #include <QToolBar>
 
-#include <memory>
-
 class WideBar : public QToolBar {
     Q_OBJECT
     // Why: so we can enable / disable alt shortcuts in toolbuttons
@@ -25,7 +23,7 @@ class WideBar : public QToolBar {
     void insertSeparator(QAction* before);
     void insertActionBefore(QAction* before, QAction* action);
     void insertActionAfter(QAction* after, QAction* action);
-    void insertWidgetBefore(QAction* before, QWidget* widget);
+    QAction* insertWidgetBefore(QAction* before, QWidget* widget);
 
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
 

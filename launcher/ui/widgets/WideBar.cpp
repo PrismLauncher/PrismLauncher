@@ -12,7 +12,7 @@ class ActionButton : public QToolButton {
     ActionButton(QAction* action, QWidget* parent = nullptr, bool use_default_action = false)
         : QToolButton(parent), m_action(action), m_use_default_action(use_default_action)
     {
-        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         // workaround for breeze and breeze forks
         setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
@@ -126,13 +126,13 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     m_entries.insert(iter, entry);
 }
 
-void WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
+QAction* WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
 {
     auto iter = getMatching(before);
     if (iter == m_entries.end())
-        return;
+        return nullptr;
 
-    insertWidget(iter->bar_action, widget);
+    return insertWidget(iter->bar_action, widget);
 }
 
 void WideBar::insertSpacer(QAction* action)
