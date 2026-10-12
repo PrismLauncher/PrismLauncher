@@ -212,8 +212,10 @@ auto Mod::loaders() const -> QString
     if (metadata()) {
         QStringList loaders;
         auto modLoaders = metadata()->loaders;
-        for (auto loader : ModPlatform::modLoaderTypesToList(modLoaders)) {
-            loaders << getModLoaderAsString(loader);
+        for (const auto loader : ModLoaderType::all()) {
+            if (modLoaders.contains(loader)) {
+                loaders << loader.toString();
+            }
         }
         return loaders.join(", ");
     }
@@ -293,20 +295,10 @@ void Mod::loadIcon()
 
 QIcon Mod::fallbackIcon() const
 {
-    switch (details().loader) {
-        default:
-            return QIcon::fromTheme("loadermods");
-        case ModPlatform::ModLoaderType::NeoForge:
-            return QIcon::fromTheme("neoforged");
-        case ModPlatform::ModLoaderType::Forge:
-            return QIcon::fromTheme("forge");
-        case ModPlatform::ModLoaderType::LiteLoader:
-            return QIcon::fromTheme("liteloader");
-        case ModPlatform::ModLoaderType::Fabric:
-            return QIcon::fromTheme("fabricmc");
-        case ModPlatform::ModLoaderType::Quilt:
-            return QIcon::fromTheme("quiltmc");
+    if (const auto loader = details().loader; loader.isValid() && loader.icon().has_value()) {
+        return QIcon::fromTheme(loader.icon().value());
     }
+    return QIcon::fromTheme("loadermods");
 }
 
 bool Mod::valid() const

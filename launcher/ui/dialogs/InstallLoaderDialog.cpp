@@ -34,14 +34,18 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
-    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
+    InstallLoaderPage(const QString& id,
+                      const QString& iconName,
+                      const QString& name,
+                      const std::optional<Version>& oldestVersion,
+                      PackProfile* profile)
         : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
         setExactIfPresentFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
 
-        if (oldestVersion != Version() && Version(minecraftVersion) < oldestVersion)
+        if (oldestVersion.has_value() && Version(minecraftVersion) < oldestVersion.value())
             setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
 
         if (const QString currentVersion = profile->getComponentVersion(id); !currentVersion.isNull())
@@ -135,17 +139,19 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
 
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
-    return { // NeoForge
-             new InstallLoaderPage("net.neoforged", "neoforged", tr("NeoForge"), {}, profile),
-             // Forge
-             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), {}, profile),
-             // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), Version("1.14"), profile),
-             // Quilt
-             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), Version("1.14"), profile),
-             // LiteLoader
-             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), {}, profile)
-    };
+    QList<BasePage*> result;
+    for (const auto loader : ModLoaderType::all()) {
+        const auto componentId = loader.componentId();
+        if (!componentId.has_value()) {
+            continue;
+        }
+
+        auto* page = new InstallLoaderPage(componentId.value(), loader.icon().value_or("loadermods"), loader.displayName(),
+                                           loader.minGameVersion(), profile);
+        result.append(page);
+    }
+
+    return result;
 }
 
 QString InstallLoaderDialog::dialogTitle()
@@ -158,70 +164,11 @@ void InstallLoaderDialog::validate(BasePage* page)
     buttons->button(QDialogButtonBox::Ok)->setEnabled(pageCast(page)->selectedVersion() != nullptr);
 }
 
-bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
-{
-    QList<ComponentPtr> conflicts;
-    auto knownLoader = Component::KNOWN_MODLOADERS.find(page->id());
-    if (knownLoader != Component::KNOWN_MODLOADERS.cend()) {
-        for (const QString& conflictId : knownLoader->knownConflictingComponents) {
-            const ComponentPtr conflictComponent = profile->getComponent(conflictId);
-            if (conflictComponent && conflictComponent->isEnabled() && !conflictComponent->isCustom())
-                conflicts.append(conflictComponent);
-        }
-    }
-
-    const QString targetVersion = QString("%1 %2").arg(page->displayName(), page->selectedVersion()->descriptor());
-
-    for (const ComponentPtr& conflict : conflicts) {
-        const QString conflictVersion = QString("%1 %2").arg(conflict->getName(), conflict->getVersion());
-        auto msgBtns = QMessageBox::Yes | QMessageBox::Cancel;
-        if (conflict->canBeDisabled()) {
-            msgBtns |= QMessageBox::No;
-        }
-        if (conflict->isRemovable()) {
-            msgBtns |= QMessageBox::Discard;
-        }
-        auto* msgBox = CustomMessageBox::selectable(
-            this, tr("Installing a second loader"),
-            tr("%1 is known to conflict with %2, which is enabled on this instance. Having both enabled at the same time will "
-               "likely break the instance.\n\nWhat would you like to do with %2?")
-                .arg(targetVersion, conflictVersion),
-            QMessageBox::Warning, msgBtns);
-        msgBox->button(QMessageBox::Yes)->setText(tr("Keep it"));
-        if (conflict->canBeDisabled()) {
-            msgBox->button(QMessageBox::No)->setText(tr("Disable it"));
-        }
-        if (conflict->isRemovable()) {
-            msgBox->button(QMessageBox::Discard)->setText(tr("Uninstall it"));
-        }
-        auto button = msgBox->exec();
-        switch (button) {
-            case QMessageBox::Yes:
-                continue;
-            case QMessageBox::No:
-                conflict->setEnabled(false);
-                profile->resolve(Net::Mode::Online);
-                continue;
-            case QMessageBox::Discard:
-                profile->remove(conflict->getID());
-                profile->resolve(Net::Mode::Online);
-                continue;
-            default:
-                break;
-        }
-        return false;
-    }
-    return true;
-}
-
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
         auto* page = pageCast(container->selectedPage());
         if (page->selectedVersion()) {
-            if (!resolveLoaderConflicts(page))
-                return;
-
             if (const ComponentPtr component = profile->getComponent(page->id()); component && !component->isEnabled())
                 component->setEnabled(true);
 
