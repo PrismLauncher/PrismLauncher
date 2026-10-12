@@ -724,19 +724,6 @@ void ComponentUpdateTask::finalizeComponents()
                 }
             }
         }
-        for (auto conflict : component->knownConflictingComponents()) {
-            auto found = componentIndex.find(conflict);
-            if (found != componentIndex.cend()) {
-                auto foundComp = *found;
-                if (foundComp->isCustom()) {
-                    continue;
-                }
-                component->addComponentProblem(
-                    ProblemSeverity::Warning,
-                    QObject::tr("%1 and %2 are known to not work together. It is recommended to remove one of them.")
-                        .arg(component->getName(), foundComp->getName()));
-            }
-        }
     }
 }
 

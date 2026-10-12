@@ -247,27 +247,40 @@ QByteArray ModrinthPackExportTask::generateIndex()
         auto* profile = instance->getPackProfile();
         // collect all supported components
         const ComponentPtr minecraft = profile->getComponent("net.minecraft");
-        const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
-        const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
-        const ComponentPtr forge = profile->getComponent("net.minecraftforge");
-        const ComponentPtr neoForge = profile->getComponent("net.neoforged");
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;
         if (minecraft != nullptr) {
             dependencies["minecraft"] = minecraft->m_version;
         }
-        if (quilt != nullptr) {
-            dependencies["quilt-loader"] = quilt->m_version;
-        }
-        if (fabric != nullptr) {
-            dependencies["fabric-loader"] = fabric->m_version;
-        }
-        if (forge != nullptr) {
-            dependencies["forge"] = forge->m_version;
-        }
-        if (neoForge != nullptr) {
-            dependencies["neoforge"] = neoForge->m_version;
+
+        const auto modLoaders = profile->getModLoaders();
+        for (const auto loader : ModLoaderType::all()) {
+            if (!modLoaders.contains(loader)) {
+                continue;
+            }
+
+            QString id;
+            switch (loader.value()) {
+                case ModLoaderType::Quilt:
+                    id = "quilt-loader";
+                    break;
+                case ModLoaderType::Fabric:
+                    id = "fabric-loader";
+                    break;
+                case ModLoaderType::Forge:
+                    id = "forge";
+                    break;
+                case ModLoaderType::NeoForge:
+                    id = "neoforge";
+                    break;
+                default:
+                    logWarning(tr("Modrinth packs do not support %1").arg(loader.displayName()));
+                    continue;
+            }
+
+            const auto loaderVersion = profile->getComponentVersion(loader.componentId().value());
+            dependencies[id] = loaderVersion;
         }
 
         out["dependencies"] = dependencies;

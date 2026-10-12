@@ -34,6 +34,7 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
@@ -383,38 +384,49 @@ QByteArray FlamePackExportTask::generateIndex()
     QJsonObject version;
 
     auto profile = m_options.instance->getPackProfile();
-    // collect all supported components
     const ComponentPtr minecraft = profile->getComponent("net.minecraft");
-    const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
-    const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
-    const ComponentPtr forge = profile->getComponent("net.minecraftforge");
-    const ComponentPtr neoforge = profile->getComponent("net.neoforged");
-
-    // convert all available components to mrpack dependencies
     if (minecraft != nullptr) {
         version["version"] = minecraft->m_version;
     }
-    QString id;
-    if (quilt != nullptr) {
-        id = "quilt-" + quilt->m_version;
-    } else if (fabric != nullptr) {
-        id = "fabric-" + fabric->m_version;
-    } else if (forge != nullptr) {
-        id = "forge-" + forge->m_version;
-    } else if (neoforge != nullptr) {
-        id = "neoforge-";
-        if (minecraft != nullptr && minecraft->m_version == "1.20.1") {
-            id += "1.20.1-";
+
+    QJsonArray loadersArray;
+    const auto modLoaders = profile->getModLoaders();
+    bool chosePrimary = false;
+    for (const auto loader : ModLoaderType::all()) {
+        if (!modLoaders.contains(loader)) {
+            continue;
         }
-        id += neoforge->m_version;
+
+        QString prefix;
+        switch (loader.value()) {
+            case ModLoaderType::Quilt:
+                prefix = "quilt";
+                break;
+            case ModLoaderType::Fabric:
+                prefix = "fabric";
+                break;
+            case ModLoaderType::Forge:
+                prefix = "forge";
+                break;
+            case ModLoaderType::NeoForge:
+                prefix = "neoforge";
+                if (minecraft != nullptr && minecraft->m_version == "1.20.1") {
+                    prefix += "-1.20.1";
+                }
+                break;
+            default:
+                logWarning(tr("CurseForge packs do not support %1").arg(loader.displayName()));
+                continue;
+        }
+
+        const auto loaderVersion = profile->getComponentVersion(loader.componentId().value());
+        loadersArray.append(QJsonObject{
+            { "id", prefix + "-" + loaderVersion },
+            { "primary", !chosePrimary },
+        });
+        chosePrimary = true;
     }
-    version["modLoaders"] = QJsonArray();
-    if (!id.isEmpty()) {
-        QJsonObject loader;
-        loader["id"] = id;
-        loader["primary"] = true;
-        version["modLoaders"] = QJsonArray({ loader });
-    }
+    version["modLoaders"] = loadersArray;
 
     if (m_options.recommendedRAM > 0)
         version["recommendedRam"] = m_options.recommendedRAM;

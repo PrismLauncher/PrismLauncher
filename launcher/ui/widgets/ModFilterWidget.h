@@ -47,7 +47,9 @@
 #include "meta/VersionList.h"
 
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 
 class MinecraftInstance;
 
@@ -61,7 +63,7 @@ class ModFilterWidget : public QTabWidget {
     struct Filter {
         std::vector<Version> versions;
         std::vector<ModPlatform::IndexedVersionType> releases;
-        ModPlatform::ModLoaderTypes loaders;
+        QSet<ModLoaderType> loaders;
         ModPlatform::SideType side;
         bool hideInstalled;
         QStringList categoryIds;
@@ -89,14 +91,15 @@ class ModFilterWidget : public QTabWidget {
 
         bool checkModpackFilters(const ModPlatform::IndexedVersion& v)
         {
-            return ((!loaders || !v.loaders || loaders.testAnyFlags(v.loaders)) &&  // loaders
-                    (releases.empty() ||                                            // releases
+            return ((loaders.isEmpty() || v.loaders.isEmpty() ||
+                     std::ranges::any_of(loaders, [&v](const ModLoaderType loader) { return v.loaders.contains(loader); })) &&  // loaders
+                    (releases.empty() ||                                                                                        // releases
                      std::ranges::contains(releases, v.versionType)) &&
                     checkMcVersions({ v.mcVersion }));  // gameVersion}
         }
     };
 
-    static ModFilterWidget* create(MinecraftInstance* instance, bool extended);
+    static ModFilterWidget* create(MinecraftInstance* instance, bool extended, const ResourceAPI* api);
     ~ModFilterWidget() override;
 
     auto getFilter() -> std::shared_ptr<Filter>;
@@ -112,21 +115,18 @@ class ModFilterWidget : public QTabWidget {
     void setCategories(const QList<ModPlatform::Category>&);
 
    private:
-    ModFilterWidget(MinecraftInstance* instance, bool extendedSupport);
+    ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, const ResourceAPI* api);
 
     void loadVersionList();
-    void prepareBasicFilter();
 
    private slots:
     void onVersionFilterChanged(int);
     void onVersionFilterTextChanged(const QString& version);
-    void onLoadersFilterChanged();
     void onSideFilterChanged();
     void onHideInstalledFilterChanged();
     void onShowAllVersionsChanged();
     void onOpenSourceFilterChanged();
     void onReleaseFilterChanged();
-    void onShowMoreClicked();
     void onDisclosureFilterChanged();
 
    private:

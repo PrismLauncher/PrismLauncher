@@ -19,11 +19,13 @@
 
 #pragma once
 
-#include "modplatform/ModIndex.h"
-
+#include <QSet>
 #include <QString>
 #include <QUrl>
 #include <QVariant>
+
+#include "minecraft/ModLoaderType.h"
+#include "modplatform/ModIndex.h"
 
 class QDir;
 
@@ -37,7 +39,7 @@ class V1 {
         QString name{};
         QString filename{};
         ModPlatform::SideType side{ ModPlatform::SideType::UniversalSide };
-        ModPlatform::ModLoaderTypes loaders;
+        QSet<ModLoaderType> loaders;
         QStringList mcVersions;
         ModPlatform::IndexedVersionType releaseType;
 
