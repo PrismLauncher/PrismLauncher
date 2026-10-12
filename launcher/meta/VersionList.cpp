@@ -40,7 +40,7 @@ Task::Ptr VersionList::getLoadTask(bool forceReload)
     return loadTask;
 }
 
-bool VersionList::isLoaded()
+bool VersionList::isLoaded() const
 {
     return BaseEntity::isLoaded();
 }
@@ -57,14 +57,14 @@ int VersionList::count() const
 void VersionList::sortVersions()
 {
     beginResetModel();
-    std::sort(m_versions.begin(), m_versions.end(), [](const Version::Ptr& a, const Version::Ptr& b) { return *a.get() < *b.get(); });
+    std::ranges::sort(m_versions, [](const Version::Ptr& a, const Version::Ptr& b) { return *a.get() < *b.get(); });
     endResetModel();
 }
 
 QVariant VersionList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= m_versions.size() || index.parent().isValid()) {
-        return QVariant();
+        return {};
     }
 
     Version::Ptr version = m_versions.at(index.row());
@@ -78,12 +78,12 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         case ParentVersionRole: {
             // FIXME: HACK: this should be generic and be replaced by something else. Anything that is a hard 'equals' dep is a 'parent
             // uid'.
-            auto& reqs = version->requiredSet();
-            auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Require& req) { return req.uid == "net.minecraft"; });
+            const auto& reqs = version->requiredSet();
+            auto iter = std::ranges::find_if(reqs, [](const Require& req) { return req.uid == "net.minecraft"; });
             if (iter != reqs.end()) {
                 return (*iter).equalsVersion;
             }
-            return QVariant();
+            return {};
         }
         case TypeRole:
             return version->type();
@@ -110,7 +110,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         // FIXME: this should be determined in whatever view/proxy is used...
         // case LatestRole: return version == getLatestStable();
         default:
-            return QVariant();
+            return {};
     }
 }
 
@@ -149,7 +149,7 @@ Version::Ptr VersionList::getVersion(const QString& version)
     Version::Ptr out = m_lookup.value(version, nullptr);
     if (!out) {
         out = std::make_shared<Version>(m_uid, version);
-        m_lookup[version] = out;
+        m_lookup.insert(version, out);
         setupAddedVersion(m_versions.size(), out);
         m_versions.append(out);
     }
@@ -158,9 +158,8 @@ Version::Ptr VersionList::getVersion(const QString& version)
 
 bool VersionList::hasVersion(QString version) const
 {
-    auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
-                            [version](const Meta::Version::Ptr& a) { return a->version() == version; });
-    return (ver != m_versions.constEnd());
+    auto ver = std::ranges::find_if(m_versions, [version](const Meta::Version::Ptr& a) { return a->version() == version; });
+    return (ver != m_versions.end());
 }
 
 void VersionList::setName(const QString& name)
@@ -173,17 +172,15 @@ void VersionList::setVersions(const QList<Version::Ptr>& versions)
 {
     beginResetModel();
     m_versions = versions;
-    std::sort(m_versions.begin(), m_versions.end(),
-              [](const Version::Ptr& a, const Version::Ptr& b) { return a->rawTime() > b->rawTime(); });
+    std::ranges::sort(m_versions, [](const Version::Ptr& a, const Version::Ptr& b) { return a->rawTime() > b->rawTime(); });
     for (int i = 0; i < m_versions.size(); ++i) {
         m_lookup.insert(m_versions.at(i)->version(), m_versions.at(i));
         setupAddedVersion(i, m_versions.at(i));
     }
 
     // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
-    auto recommendedIt =
-        std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const Version::Ptr& ptr) { return ptr->type() == "release"; });
-    m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
+    auto recommendedIt = std::ranges::find_if(m_versions, [](const Version::Ptr& ptr) { return ptr->type() == "release"; });
+    m_recommended = recommendedIt == m_versions.end() ? nullptr : *recommendedIt;
     endResetModel();
 }
 
@@ -205,10 +202,12 @@ void VersionList::clearExternalRecommends()
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
 static const Meta::Version::Ptr& getBetterVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
 {
-    if (!a)
+    if (!a) {
         return b;
-    if (!b)
+    }
+    if (!b) {
         return a;
+    }
     if (a->type() == b->type()) {
         // newer of same type wins
         return (a->rawTime() > b->rawTime() ? a : b);
@@ -278,8 +277,9 @@ BaseVersion::Ptr VersionList::getRecommended() const
 
 void VersionList::waitToLoad()
 {
-    if (isLoaded())
+    if (isLoaded()) {
         return;
+    }
     QEventLoop ev;
     auto task = getLoadTask();
     connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
@@ -289,11 +289,10 @@ void VersionList::waitToLoad()
 
 Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QString& version)
 {
-    auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](Version::Ptr ver) -> bool {
-        auto& reqs = ver->requiredSet();
-        auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
-            return req.uid == uid && req.equalsVersion == version;
-        });
+    auto foundExplicit = std::ranges::find_if(m_versions, [uid, version](const Version::Ptr& ver) -> bool {
+        const auto& reqs = ver->requiredSet();
+        auto parentReq = std::ranges::find_if(
+            reqs, [uid, version](const Require& req) -> bool { return req.uid == uid && req.equalsVersion == version; });
         return parentReq != reqs.end() && ver->isRecommended();
     });
     if (foundExplicit != m_versions.end()) {
@@ -305,11 +304,10 @@ Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QStr
 Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& version)
 {
     Version::Ptr latestCompat = nullptr;
-    for (auto ver : m_versions) {
-        auto& reqs = ver->requiredSet();
-        auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
-            return req.uid == uid && req.equalsVersion == version;
-        });
+    for (const auto& ver : m_versions) {
+        const auto& reqs = ver->requiredSet();
+        auto parentReq = std::ranges::find_if(
+            reqs, [uid, version](const Require& req) -> bool { return req.uid == uid && req.equalsVersion == version; });
         if (parentReq != reqs.end()) {
             latestCompat = getBetterVersion(latestCompat, ver);
         }
@@ -319,19 +317,22 @@ Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& 
 
 static const Meta::Version::Ptr& getLatestVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
 {
-    if (!a)
+    if (!a) {
         return b;
-    if (!b)
+    }
+    if (!b) {
         return a;
+    }
     return (a->rawTime() > b->rawTime() ? a : b);
 }
 
 Version::Ptr VersionList::getLatest(bool onlyRelease)
 {
     Version::Ptr latestCompat = nullptr;
-    for (auto ver : m_versions) {
-        if (!onlyRelease || ver->type() == "release")
+    for (const auto& ver : m_versions) {
+        if (!onlyRelease || ver->type() == "release") {
             latestCompat = getLatestVersion(latestCompat, ver);
+        }
     }
     return latestCompat;
 }

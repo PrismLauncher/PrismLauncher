@@ -36,7 +36,7 @@ class JavaInstallList : public BaseVersionList {
     explicit JavaInstallList(QObject* parent = 0, bool onlyManagedVersions = false);
 
     Task::Ptr getLoadTask(bool forceReload = false) override;
-    bool isLoaded() override;
+    bool isLoaded() const override;
     const BaseVersion::Ptr at(int i) const override;
     int count() const override;
     void sortVersions() override;

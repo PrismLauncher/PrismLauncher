@@ -45,7 +45,7 @@ const BaseVersion::Ptr VersionList::at(int i) const
     return m_vlist.at(i);
 }
 
-bool VersionList::isLoaded()
+bool VersionList::isLoaded() const
 {
     return m_version->isLoaded();
 }

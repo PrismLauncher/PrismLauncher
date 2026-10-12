@@ -27,8 +27,9 @@ QString Meta::Version::descriptor() const
 }
 QString Meta::Version::name() const
 {
-    if (m_data)
+    if (m_data) {
         return m_data->name;
+    }
     return m_uid;
 }
 QString Meta::Version::typeString() const
