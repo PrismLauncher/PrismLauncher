@@ -51,32 +51,27 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJson
     TRY_INTO(const auto& versionArray, Json::requireArray(obj, "gameVersions"))
 
     ModPlatform::IndexedVersion file;
-    file.side = ModPlatform::SideType::NoSide;
     for (auto mcVer : versionArray) {
         auto str = mcVer.toString();
 
         if (str.contains('.')) {
             file.mcVersion.append(str);
+            continue;
         }
 
-        if (auto loader = str.toLower(); loader == "neoforge") {
-            file.loaders |= ModPlatform::NeoForge;
-        } else if (loader == "forge") {
-            file.loaders |= ModPlatform::Forge;
-        } else if (loader == "cauldron") {
-            file.loaders |= ModPlatform::Cauldron;
-        } else if (loader == "liteloader") {
-            file.loaders |= ModPlatform::LiteLoader;
-        } else if (loader == "fabric") {
-            file.loaders |= ModPlatform::Fabric;
-        } else if (loader == "quilt") {
-            file.loaders |= ModPlatform::Quilt;
-        } else if (loader == "server" || loader == "client") {
-            if (!file.side.isValid()) {
-                file.side = ModPlatform::SideType::fromString(loader);
-            } else if (file.side != ModPlatform::SideType::fromString(loader)) {
-                file.side = ModPlatform::SideType::UniversalSide;
-            }
+        if (str == "Client") {
+            file.side = ModPlatform::SideType::ClientSide;
+            continue;
+        }
+        if (str == "Server") {
+            file.side = ModPlatform::SideType::ServerSide;
+            continue;
+        }
+
+        const auto loader = ModLoaderType::fromString(str.toLower());
+        if (loader != ModLoaderType::Invalid) {
+            file.loaders.insert(loader);
+            continue;
         }
     }
 

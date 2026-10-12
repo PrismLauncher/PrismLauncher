@@ -81,6 +81,6 @@ TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDi
 ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new ModPage(dialog, instance, prepareFlame(), &FlameAPI::get(),
-                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false));
+                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false, &FlameAPI::get()));
 }
 }  // namespace ResourceDownload

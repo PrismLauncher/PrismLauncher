@@ -28,6 +28,7 @@
 #include "Json.h"
 #include "Result.h"
 #include "StringUtils.h"
+#include "Version.h"
 #include "modplatform/import_ftb/PackHelpers.h"
 #include "settings/SettingsObject.h"
 #include "ui/widgets/ProjectItem.h"

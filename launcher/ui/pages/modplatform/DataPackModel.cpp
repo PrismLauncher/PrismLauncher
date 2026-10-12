@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <utility>
 
+#include "minecraft/ModLoaderType.h"
+
 namespace ResourceDownload {
 
 DataPackResourceModel::DataPackResourceModel(ResourceFolderModel* resourceList,
@@ -26,13 +28,13 @@ ResourceAPI::SearchArgs DataPackResourceModel::createSearchArguments()
              .offset = m_nextSearchOffset,
              .search = m_searchTerm,
              .sorting = sort,
-             .loaders = ModPlatform::ModLoaderType::DataPack };
+             .loaders = { ModLoaderType::DataPack } };
 }
 
 ResourceAPI::VersionSearchArgs DataPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack, .mcVersions = {}, .loaders = ModPlatform::ModLoaderType::DataPack };
+    return { .pack = pack, .mcVersions = {}, .loaders = { ModLoaderType::DataPack } };
 }
 
 void DataPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)
