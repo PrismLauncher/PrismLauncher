@@ -678,14 +678,16 @@ void ServersPage::resourceIndexChanged(int index)
 void ServersPage::updateState()
 {
     auto* server = m_model->at(currentServer);
+    const auto selectedRows = ui->serversView->selectionModel()->selectedRows();
+    const bool multipleSelection = selectedRows.size() > 1;
 
-    bool serverEditEnabled = (server != nullptr) && !m_locked;
+    bool serverEditEnabled = (server != nullptr) && !m_locked && !multipleSelection;
     ui->addressLine->setEnabled(serverEditEnabled);
     ui->nameLine->setEnabled(serverEditEnabled);
     ui->resourceComboBox->setEnabled(serverEditEnabled);
     ui->actionMove_Down->setEnabled(serverEditEnabled);
     ui->actionMove_Up->setEnabled(serverEditEnabled);
-    ui->actionRemove->setEnabled(ui->serversView->selectionModel()->hasSelection() && !m_locked);
+    ui->actionRemove->setEnabled(!m_locked && !selectedRows.isEmpty());
     ui->actionJoin->setEnabled(serverEditEnabled);
 
     if (server) {
