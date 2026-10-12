@@ -1213,12 +1213,11 @@ void Application::performMainStartupAction(const std::vector<Cli::Command>& cmds
         return false;
     };
 
-    // FIXME: the main window being created should not be critical to the proper functioning
-    // of the launcher
-    bool minimize = !cmds.empty() || std::ranges::any_of(cmds, isHideMainWindowCmd);
-
-    showMainWindow(minimize);
-    qDebug() << "<> Main window shown.";
+    // if there are no commands or none of the commands implicitly hide the window
+    if (cmds.empty() || std::ranges::none_of(cmds, isHideMainWindowCmd)) {
+        showMainWindow(false);
+        qDebug() << "<> Main window shown.";
+    }
 
     // initialize the updater
     if (updaterEnabled()) {
@@ -1271,7 +1270,7 @@ void Application::processCommands(const std::vector<Cli::Command>& cmds)
                     {
                         auto worldName = QString::fromStdString(world.target);
                         qDebug() << "   Launching with world" << worldName;
-                        return std::make_shared<MinecraftTarget>(MinecraftTarget{ .world = worldName });
+                        return std::make_shared<MinecraftTarget>(MinecraftTarget::fromWorldName(worldName));
                     }
                     MinecraftTarget::Ptr operator()(const Cli::Cmd::Launch::NoTarget& /*unused*/) { return nullptr; }
                 } targetVisitor{};
