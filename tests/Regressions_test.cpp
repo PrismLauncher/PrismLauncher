@@ -200,14 +200,14 @@ class RegressionTests : public QObject {
                 << std::vector<std::string>{ "--launch", "an_instance", "-w", "world_name", "-s", "mc.serveraddress.net:1234" }
                 << Cli::Args{} << std::optional<CLIErrorType>{ CLIErrorType::ExcludesError };
             QTest::newRow("can't launch without --launch (world)") << std::vector<std::string>{ "-w", "world_name" } << Cli::Args{}
-                                                                  << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
+                                                                   << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
             QTest::newRow("can't launch without --launch (server)")
                 << std::vector<std::string>{ "-s", "mc.serveraddress.net:1234" } << Cli::Args{}
                 << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
             QTest::newRow("can't launch without --launch (account)") << std::vector<std::string>{ "-a", "profile_name" } << Cli::Args{}
-                                                                    << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
+                                                                     << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
             QTest::newRow("can't launch without --launch (ofline)") << std::vector<std::string>{ "-o", "offline_name" } << Cli::Args{}
-                                                                   << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
+                                                                    << std::optional<CLIErrorType>{ CLIErrorType::RequiresError };
 
             QTest::newRow("show main window") << std::vector<std::string>{ "--show-window" }
                                               << Cli::Args{ .commands = { ShowMainWindow{} } } << std::optional<CLIErrorType>{};

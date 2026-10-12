@@ -152,6 +152,8 @@
 #include <variant>
 #include "SysInfo.h"
 
+#include "Json.h"
+
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
 #include "LibraryUtils.h"
@@ -483,7 +485,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     // Initialize application settings
     {
         // Provide a fallback for migration from PolyMC
-        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
+        m_settings = std::make_unique<INISettingsObject>(QStringList{ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this);
 
         // Theming
         m_settings->registerSetting("IconTheme", QString());
@@ -505,7 +507,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 #ifdef Q_OS_WIN32
         defaultMonospace = "Courier";
         defaultSize = 10;
-#elif defined(Q_OS_MAC)
+#elifdef Q_OS_MAC
         defaultMonospace = "Menlo";
 #else
         defaultMonospace = "Monospace";
@@ -773,7 +775,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     // Initialize playtime settings, stored separately so this data can be synced
     // independently of machine-specific configuration
     {
-        m_playtimeSettings.reset(new INISettingsObject(QString("playtime.cfg"), this));
+        m_playtimeSettings = std::make_unique<INISettingsObject>(QString("playtime.cfg"), this);
         m_playtimeSettings->registerSetting("TotalPlayTime", 0);
         m_playtimeSettings->registerSetting("TotalPlayTimeMigrated", false);
     }
@@ -784,7 +786,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 
     // initialize network access and proxy setup
     {
-        m_network.reset(new QNetworkAccessManager());
+        m_network = std::make_unique<QNetworkAccessManager>();
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();
@@ -797,9 +799,13 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     // Instance icons
     {
         auto setting = APPLICATION->settings()->getSetting("IconsDir");
-        QStringList instFolders = { ":/icons/multimc/32x32/instances/", ":/icons/multimc/50x50/instances/",
-                                    ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
-        m_icons.reset(new IconList(instFolders, setting->get().toString()));
+        const QStringList instFolders = {
+            ":/icons/multimc/32x32/instances/",
+            ":/icons/multimc/50x50/instances/",
+            ":/icons/multimc/128x128/instances/",
+            ":/icons/multimc/scalable/instances/",
+        };
+        m_icons = std::make_unique<IconList>(instFolders, setting->get().toString());
         connect(setting.get(), &Setting::SettingChanged, this,
                 [this](const Setting&, const QVariant& value) { m_icons->directoryChanged(value.toString()); });
         qInfo() << "<> Instance icons initialized.";
@@ -843,7 +849,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
             }
         }
 
-        m_instances.reset(new InstanceList(m_settings.get(), allInstDirs, this));
+        m_instances = std::make_unique<InstanceList>(m_settings.get(), allInstDirs, this);
         connect(instDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         connect(additionalInstanceDirsSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
@@ -853,7 +859,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 
     // and accounts
     {
-        m_accounts.reset(new AccountList(this));
+        m_accounts = std::make_unique<AccountList>(this);
         qInfo() << "Loading accounts...";
         m_accounts->setListFilePath("accounts.json", true);
         m_accounts->loadList();
@@ -863,7 +869,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 
     // init the http meta cache
     {
-        m_metacache.reset(new HttpMetaCache("metacache"));
+        m_metacache = std::make_unique<HttpMetaCache>("metacache");
         m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
         m_metacache->addBase("libraries", QDir("libraries").absolutePath());
         m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
@@ -885,7 +891,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 
     // load translations
     {
-        m_translations.reset(new TranslationsModel("translations"));
+        m_translations = std::make_unique<TranslationsModel>("translations");
         m_translations->downloadIndex();
         qInfo() << "Your language is" << m_translations->selectedLanguage();
         qInfo() << "<> Translations loaded.";
@@ -1034,7 +1040,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
     if (jvmArgs.indexOf("java.io.tmpdir") == -1) { /* java.io.tmpdir is a valid workaround, so don't annoy */
         bool isTmpNoexec = false;
 
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 
         struct statvfs tmpStat{};
         statvfs("/tmp", &tmpStat);
@@ -1102,7 +1108,7 @@ bool Application::createSetupWizard()
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
-    bool login = !m_accounts->anyAccountIsValid() && (capabilities().testAnyFlags(Application::SupportsMSA));
+    const bool login = !m_accounts->anyAccountIsValid() && capabilities().testAnyFlags(Application::SupportsMSA);
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
@@ -1155,7 +1161,7 @@ bool Application::createSetupWizard()
 
 bool Application::updaterEnabled()
 {
-#if defined(Q_OS_MAC)
+#ifdef Q_OS_MAC
     return BuildConfig.UPDATER_ENABLED;
 #else
     return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(m_rootPath, updaterBinaryName())).isFile();
@@ -1165,7 +1171,7 @@ bool Application::updaterEnabled()
 QString Application::updaterBinaryName()
 {
     auto exeName = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     exeName.append(".exe");
 #else
     exeName.prepend("bin/");
@@ -1398,7 +1404,7 @@ TranslationsModel* Application::translations()
 JavaInstallList* Application::javalist()
 {
     if (!m_javalist) {
-        m_javalist.reset(new JavaInstallList());
+        m_javalist = std::make_unique<JavaInstallList>();
     }
     return m_javalist.get();
 }
@@ -1618,7 +1624,7 @@ InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, con
         if (window->isMinimized()) {
             window->setWindowState(window->windowState() & ~Qt::WindowMinimized);
         }
-#elif defined(Q_OS_WIN)
+#elifdef Q_OS_WIN
         if (window->isMinimized()) {
             window->showNormal();
         }
@@ -1732,7 +1738,7 @@ QNetworkAccessManager* Application::network()
 Meta::Index* Application::metadataIndex()
 {
     if (!m_metadataIndex) {
-        m_metadataIndex.reset(new Meta::Index());
+        m_metadataIndex = std::make_unique<Meta::Index>();
     }
     return m_metadataIndex.get();
 }
@@ -1777,7 +1783,7 @@ QString Application::getJarPath(const QString& jarFile)
         FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"), FS::PathCombine(applicationDirPath(), "jars"),
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
         FS::PathCombine(applicationDirPath(), "../../../..", "jars")  // from inside build dir, for debugging
 #else
         FS::PathCombine(applicationDirPath(), "..", "jars")  // from inside build dir, for debugging
@@ -1972,8 +1978,9 @@ void Application::processURIs(QList<QUrl> uris)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& uri : uris) {
-        if (uri.isEmpty() || uri.toString().trimmed().isEmpty())
+        if (uri.isEmpty() || uri.toString().trimmed().isEmpty()) {
             continue;
+        }
 
         qDebug() << "Processing" << uri;
 
@@ -2002,14 +2009,14 @@ void Application::processURIs(QList<QUrl> uris)
                 continue;
             }
 
-            const bool isExternalURLImport = (uri.host().toLower() == "import") || (uri.path().startsWith("/import", Qt::CaseInsensitive));
+            const bool isExternalURLImport = (uri.host().toLower() == "import") || uri.path().startsWith("/import", Qt::CaseInsensitive);
 
             QUrl dlUrl;
             if (uri.scheme() == "curseforge" || (uri.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME && uri.host() == "install")) {
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
                 // format of url binaryname://install?platform=curseforge&addonId=IDHERE&fileId=IDHERE
-                QUrlQuery query(uri);
+                const QUrlQuery query(uri);
 
                 // check if this is a binaryname:// url
                 if (uri.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
@@ -2122,7 +2129,7 @@ void Application::processURIs(QList<QUrl> uris)
 
                 const QString decodedStr = QUrl::fromPercentEncoding(encodedTarget.toUtf8()).trimmed();
 
-                QUrl target = QUrl::fromUserInput(decodedStr);
+                const QUrl target = QUrl::fromUserInput(decodedStr);
 
                 // Validate: only allow http(s)
                 if (!target.isValid() || (target.scheme() != "https" && target.scheme() != "http")) {
@@ -2178,7 +2185,7 @@ void Application::processURIs(QList<QUrl> uris)
         }
 
         auto localFileName = QDir::toNativeSeparators(localUrl.toLocalFile());
-        QFileInfo localFileInfo(localFileName);
+        const QFileInfo localFileInfo(localFileName);
 
         if (localFileName.isEmpty() || !localFileInfo.exists()) {
             qDebug() << "Ignoring invalid path" << localFileName;
@@ -2265,7 +2272,7 @@ void Application::runModalTask(Task* task)
         CustomMessageBox::selectable(m_mainWindow, tr("Error"), reason, QMessageBox::Critical)->show();
     });
     connect(task, &Task::succeeded, this, [this, task]() {
-        QStringList warnings = task->warnings();
+        const QStringList warnings = task->warnings();
         if (warnings.count()) {
             CustomMessageBox::selectable(m_mainWindow, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
         }
@@ -2277,6 +2284,6 @@ void Application::runModalTask(Task* task)
 
 void Application::instanceFromInstanceTask(InstanceTask* rawTask)
 {
-    unique_qobject_ptr<Task> task(instances()->wrapInstanceTask(rawTask));
+    const unique_qobject_ptr<Task> task(instances()->wrapInstanceTask(rawTask));
     runModalTask(task.get());
 }
