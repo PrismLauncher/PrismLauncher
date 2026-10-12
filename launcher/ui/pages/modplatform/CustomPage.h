@@ -38,6 +38,7 @@
 #include <QWidget>
 
 #include "BaseVersion.h"
+#include "minecraft/ModLoaderType.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -61,20 +62,14 @@ class CustomPage : public QWidget, public BasePage {
 
     void openedImpl() override;
 
-    BaseVersion::Ptr selectedVersion() const;
-    BaseVersion::Ptr selectedLoaderVersion() const;
-    QString selectedLoader() const;
-    QString selectedLoaderName() const;
-
    public slots:
     void setSelectedVersion(BaseVersion::Ptr version);
     void setSelectedLoaderVersion(BaseVersion::Ptr version);
 
-   private slots:
-    void filterChanged();
-    void loaderFilterChanged();
-
    private:
+    void filterChanged();
+    void updateLoaderList();
+
     void refresh();
     void loaderRefresh();
     void suggestCurrent();
@@ -86,5 +81,5 @@ class CustomPage : public QWidget, public BasePage {
     bool m_versionSetByUser = false;
     BaseVersion::Ptr m_selectedVersion;
     BaseVersion::Ptr m_selectedLoaderVersion;
-    QString m_selectedLoader;
+    ModLoaderType m_selectedLoader{};
 };

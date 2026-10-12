@@ -42,11 +42,11 @@ Net::ModrinthDownloadMeta createModrinthMeta(MinecraftInstance* instance, QStrin
         return {};
     }
 
-    auto loaders = profile->getModLoadersList();
+    auto loaders = profile->getModLoaders();
 
     return { .reason = std::move(reason),
              .gameVersion = profile->getComponentVersion("net.minecraft"),
-             .loader = !loaders.isEmpty() ? ModPlatform::getModLoaderAsString(loaders.first()) : "",
+             .loader = !loaders.isEmpty() ? std::ranges::min_element(loaders)->toString() : "",
              .dependentOn = std::move(dependentOn) };
 }
 }  // namespace
