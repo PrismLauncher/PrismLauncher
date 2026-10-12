@@ -9,10 +9,10 @@
 #include <QJsonObject>
 #include <QList>
 #include "Version.h"
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
-#include "modplatform/flame/FlamePackIndex.h"
 
 class FlameAPI final : public ResourceAPI {
    public:
@@ -25,8 +25,8 @@ class FlameAPI final : public ResourceAPI {
     static QString getModFileChangelog(int modId, int fileId);
 
     static std::optional<ModPlatform::IndexedVersion> getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
-                                                                       const QList<ModPlatform::ModLoaderType>& instanceLoaders,
-                                                                       ModPlatform::ModLoaderTypes fallback,
+                                                                       const QSet<ModLoaderType>& instanceLoaders,
+                                                                       const QSet<ModLoaderType>& fallback,
                                                                        bool checkLoaders,
                                                                        std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
 
@@ -41,9 +41,10 @@ class FlameAPI final : public ResourceAPI {
 
     QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
+    bool supportsModLoader(ModLoaderType type) const override;
+
     static ModPlatform::ResourceType getResourceType(int classId);
 
-   public:
     std::optional<QString> getVersionsURL(const VersionSearchArgs& args) const override;
 
     Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
@@ -61,9 +62,6 @@ class FlameAPI final : public ResourceAPI {
         }
         return ModPlatform::IndexedVersion{};
     };
-
-   public:
-    static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;

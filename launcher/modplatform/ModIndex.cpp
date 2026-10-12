@@ -24,26 +24,6 @@
 #include <QIODevice>
 
 namespace ModPlatform {
-
-ModLoaderType operator|(ModLoaderType lhs, ModLoaderType rhs)
-{
-    return static_cast<ModLoaderType>(static_cast<std::uint16_t>(lhs) | static_cast<std::uint16_t>(rhs));
-}
-
-static const QList<ModLoaderType> loaderList = { NeoForge, Forge, Cauldron,     LiteLoader, Quilt, Fabric,
-                                                 Babric,   BTA,   LegacyFabric, Ornithe,    Rift };
-
-QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags)
-{
-    QList<ModLoaderType> flagList;
-    for (auto flag : loaderList) {
-        if (flags.testFlag(flag)) {
-            flagList.append(flag);
-        }
-    }
-    return flagList;
-}
-
 const char* ProviderCapabilities::name(ResourceProvider p)
 {
     switch (p) {
@@ -83,65 +63,4 @@ QString getMetaURL(ResourceProvider provider, QVariant projectID)
     return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
            projectID.toString();
 }
-
-auto getModLoaderAsString(ModLoaderType type) -> const QString
-{
-    switch (type) {
-        case NeoForge:
-            return "neoforge";
-        case Forge:
-            return "forge";
-        case Cauldron:
-            return "cauldron";
-        case LiteLoader:
-            return "liteloader";
-        case Fabric:
-            return "fabric";
-        case Quilt:
-            return "quilt";
-        case DataPack:
-            return "datapack";
-        case Babric:
-            return "babric";
-        case BTA:
-            return "bta-babric";
-        case LegacyFabric:
-            return "legacy-fabric";
-        case Ornithe:
-            return "ornithe";
-        case Rift:
-            return "rift";
-        default:
-            break;
-    }
-    return "";
-}
-
-auto getModLoaderFromString(QString type) -> ModLoaderType
-{
-    if (type == "neoforge")
-        return NeoForge;
-    if (type == "forge")
-        return Forge;
-    if (type == "cauldron")
-        return Cauldron;
-    if (type == "liteloader")
-        return LiteLoader;
-    if (type == "fabric")
-        return Fabric;
-    if (type == "quilt")
-        return Quilt;
-    if (type == "babric")
-        return Babric;
-    if (type == "bta-babric")
-        return BTA;
-    if (type == "legacy-fabric")
-        return LegacyFabric;
-    if (type == "ornithe")
-        return Ornithe;
-    if (type == "rift")
-        return Rift;
-    return {};
-}
-
 }  // namespace ModPlatform

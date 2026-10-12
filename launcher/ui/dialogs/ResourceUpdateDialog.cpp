@@ -54,7 +54,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
                                            ResourceFolderModel* resourceModel,
                                            QList<Resource*>& searchFor,
                                            bool includeDeps,
-                                           QList<ModPlatform::ModLoaderType> loadersList,
+                                           QSet<ModLoaderType> loadersList,
                                            std::vector<ModPlatform::IndexedVersionType> releaseTypes)
     : ReviewMessageBox(parent, tr("Confirm resources to update"), "")
     , m_parent(parent)

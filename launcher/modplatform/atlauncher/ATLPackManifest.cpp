@@ -111,20 +111,19 @@ Result<> loadVersionLoader(ATLauncher::VersionLoader& p, const QJsonObject& obj)
     if (loaderType.isEmpty()) {  // no loader
         return {};
     }
-    p.type = ModPlatform::getModLoaderFromString(loaderType);
-    switch (p.type) {
-        case ModPlatform::ModLoaderType::NeoForge:
-        case ModPlatform::ModLoaderType::Forge: {
+    p.type = ModLoaderType::fromString(loaderType);
+    switch (p.type.value()) {
+        case ModLoaderType::NeoForge:
+        case ModLoaderType::Forge: {
             p.version = metadata.value("version").toString("");
             break;
         }
-        case ModPlatform::ModLoaderType::Fabric: {
+        case ModLoaderType::Fabric: {
             p.version = metadata.value("loader").toString("");
             break;
         }
-        default: {
-            return std::unexpected("unknown launcher: " + loaderType);
-        }
+        default:
+            return std::unexpected("Unknown loader: " + loaderType);
     }
     return {};
 }
