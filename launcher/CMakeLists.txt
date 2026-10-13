@@ -525,8 +525,6 @@ set(FTB_SOURCES
 
 set(FLAME_SOURCES
     # Flame
-    modplatform/flame/FlameModIndex.cpp
-    modplatform/flame/FlameModIndex.h
     modplatform/flame/PackManifest.h
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
