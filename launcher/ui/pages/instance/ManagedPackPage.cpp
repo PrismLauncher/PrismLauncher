@@ -415,9 +415,15 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+    if (m_changelogJob && m_changelogJob->isRunning()) {
+        m_changelogJob->abort();
+    }
 
+    auto [changelogJob, changelogResponse] = FlameAPI::getChangelogTask(m_inst->getManagedPackID(), version.fileId.toString());
+    m_changelogJob = changelogJob;
+    connect(changelogJob.get(), &Task::succeeded, this,
+            [this, changelogResponse] { ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(*changelogResponse)); });
+    m_changelogJob->start();
     ManagedPackPage::suggestVersion();
 }
 
