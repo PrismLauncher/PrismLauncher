@@ -340,8 +340,12 @@ void IconList::installIcon(const QString& file, const QString& name)
     if (!IconUtils::isIconSuffix(fileinfo.suffix()))
         return;
 
-    QString target = FS::PathCombine(getDirectory(), name.isEmpty() ? fileinfo.fileName() : name);
-    QFile::copy(file, target);
+    const auto target = FS::getSafePathInRoot(getDirectory(), name.isEmpty() ? fileinfo.fileName() : name);
+    if (!target.has_value()) {
+        qWarning() << "Installing icon to list -" << target.error();
+        return;
+    }
+    QFile::copy(file, target.value());
 }
 
 bool IconList::iconFileExists(const QString& key) const
