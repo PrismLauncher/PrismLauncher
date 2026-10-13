@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QMenu>
 #include <QToolBar>
+#include <QToolButton>
 
 class WideBar : public QToolBar {
     Q_OBJECT
@@ -41,6 +42,7 @@ class WideBar : public QToolBar {
     bool eventFilter(QObject* watched, QEvent* event) override;
 
    private:
+    QToolButton* createButton(QAction* action);
     bool isOnLeftSide() const;
     void updateResizeGrip();
 

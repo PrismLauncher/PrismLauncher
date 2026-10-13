@@ -14,6 +14,8 @@ class ActionButton : public QToolButton {
     ActionButton(QAction* action, QWidget* parent = nullptr, bool use_default_action = false)
         : QToolButton(parent), m_action(action), m_use_default_action(use_default_action)
     {
+        // lets stylesheets target a specific button, e.g. QToolButton#actionLaunchInstance
+        setObjectName(action->objectName());
         setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         // workaround for breeze and breeze forks
@@ -65,10 +67,18 @@ WideBar::WideBar(QWidget* parent) : QToolBar(parent)
     setMovable(false);
 }
 
+QToolButton* WideBar::createButton(QAction* action)
+{
+    auto* button = new ActionButton(action, this, m_use_default_action);
+    // only follow changes: existing bars keep their buttons' default icon size
+    connect(this, &QToolBar::iconSizeChanged, button, &QToolButton::setIconSize);
+    return button;
+}
+
 void WideBar::addAction(QAction* action)
 {
     BarEntry entry;
-    entry.bar_action = addWidget(new ActionButton(action, this, m_use_default_action));
+    entry.bar_action = addWidget(createButton(action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
@@ -98,7 +108,7 @@ void WideBar::insertActionBefore(QAction* before, QAction* action)
         return;
 
     BarEntry entry;
-    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this, m_use_default_action));
+    entry.bar_action = insertWidget(iter->bar_action, createButton(action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
@@ -121,7 +131,7 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     }
 
     BarEntry entry;
-    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this, m_use_default_action));
+    entry.bar_action = insertWidget(iter->bar_action, createButton(action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
