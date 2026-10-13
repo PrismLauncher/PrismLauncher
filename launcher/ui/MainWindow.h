@@ -41,6 +41,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QPixmap>
 #include <QProcess>
 #include <QTimer>
 
@@ -229,6 +230,10 @@ class MainWindow : public QMainWindow {
     void setSelectedInstanceById(const QString& id);
     void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
+    // Fresh: animates the instance sidebar from fromWidth to the width updateInstanceToolBar() set up
+    void animateInstanceToolBarWidth(int fromWidth);
+    // Fresh: fades a snapshot of the instance bar (taken before a change) out over its new content
+    void crossFadeInstanceToolBar(const QPixmap& before);
 
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
@@ -243,6 +248,7 @@ class MainWindow : public QMainWindow {
     QLabel* m_statusCenter = nullptr;
     QToolButton* changeIconButton = nullptr;
     QToolButton* m_collapseButton = nullptr;
+    QAction* m_instanceBarSpacer = nullptr;
     QAction* instanceInfoWidget = nullptr;
     QLabel* nameLabel = nullptr;
     QToolButton* helpMenuButton = nullptr;

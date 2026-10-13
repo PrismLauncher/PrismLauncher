@@ -47,9 +47,12 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 #include <QUrl>
 #include <QUrlQuery>
 #include <QVariant>
+#include <QVariantAnimation>
 
 #include <QAction>
 #include <QActionGroup>
@@ -109,6 +112,7 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceView.h"
+#include "ui/themes/FreshTheme.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 
@@ -169,7 +173,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(m_collapseButton, &QToolButton::clicked, this, [this] {
             auto settings = APPLICATION->settings();
             settings->set("InstanceToolbarCollapsed", !settings->get("InstanceToolbarCollapsed").toBool());
+            auto* bar = ui->instanceToolBar;
+            const bool animate = FreshTheme::isActive();
+            const int fromWidth = bar->width();
+            // horizontal bars keep their size and only change content, so cross-fade from a snapshot instead
+            const QPixmap before = animate && bar->orientation() == Qt::Horizontal ? bar->grab() : QPixmap();
             updateInstanceToolBar();
+            if (!animate)
+                return;
+            if (before.isNull())
+                animateInstanceToolBarWidth(fromWidth);
+            else
+                crossFadeInstanceToolBar(before);
         });
         ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, m_collapseButton);
 
@@ -200,6 +215,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         instanceInfoWidget = ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, infoWidget);
         Q_ASSERT(instanceInfoWidget != nullptr);
+
+        // Fresh, horizontal bar: pushes the actions to the right of the instance chip
+        auto* spacer = new QWidget(this);
+        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        m_instanceBarSpacer = ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, spacer);
 
         updateInstanceToolBar();
     }
@@ -1845,28 +1865,97 @@ void MainWindow::updateNameLabel()
     }
 }
 
+void MainWindow::animateInstanceToolBarWidth(int fromWidth)
+{
+    auto* bar = ui->instanceToolBar;
+    if (bar->orientation() != Qt::Vertical)
+        return;
+
+    // the width updateInstanceToolBar() settled on: a fixed one, or what the content asks for
+    const QSize minimumSize = bar->minimumSize();
+    const QSize maximumSize = bar->maximumSize();
+    const int toWidth =
+        minimumSize.width() == maximumSize.width() ? minimumSize.width() : qMax(minimumSize.width(), bar->sizeHint().width());
+    if (fromWidth == toWidth)
+        return;
+
+    auto* animation = new QVariantAnimation(bar);
+    animation->setDuration(220);
+    animation->setStartValue(fromWidth);
+    animation->setEndValue(toWidth);
+    animation->setEasingCurve(QEasingCurve::OutCubic);
+    connect(animation, &QVariantAnimation::valueChanged, bar, [bar](const QVariant& width) { bar->setFixedWidth(width.toInt()); });
+    connect(animation, &QVariantAnimation::finished, bar, [bar, minimumSize, maximumSize] {
+        bar->setMinimumSize(minimumSize);
+        bar->setMaximumSize(maximumSize);
+    });
+    bar->setFixedWidth(fromWidth);
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void MainWindow::crossFadeInstanceToolBar(const QPixmap& before)
+{
+    // the old look on top of the new content, fading out
+    auto* overlay = new QLabel(ui->instanceToolBar);
+    overlay->setAttribute(Qt::WA_TransparentForMouseEvents);
+    overlay->setPixmap(before);
+    overlay->setGeometry(QRect(QPoint(0, 0), before.deviceIndependentSize().toSize()));
+    overlay->show();
+    overlay->raise();
+
+    auto* opacity = new QGraphicsOpacityEffect(overlay);
+    overlay->setGraphicsEffect(opacity);
+    auto* animation = new QPropertyAnimation(opacity, "opacity", overlay);
+    animation->setDuration(200);
+    animation->setStartValue(1.0);
+    animation->setEndValue(0.0);
+    animation->setEasingCurve(QEasingCurve::OutCubic);
+    connect(animation, &QPropertyAnimation::finished, overlay, &QObject::deleteLater);
+    animation->start();
+}
+
 void MainWindow::updateInstanceToolBar()
 {
     auto* bar = ui->instanceToolBar;
     const bool vertical = bar->orientation() == Qt::Vertical;
     const bool collapsed = APPLICATION->settings()->get("InstanceToolbarCollapsed").toBool();
     const bool expandedSidebar = vertical && !collapsed;
+    // Fresh lays a horizontal bar out as a dock: instance chip (icon + name) on the left, actions on the right
+    const bool instanceChip = !vertical && !collapsed && FreshTheme::isActive();
+    const bool showInfo = expandedSidebar || instanceChip;
 
-    // the big icon is only shown in the expanded sidebar, otherwise it becomes a regular button
+    // the instance icon is shown in the expanded sidebar (or the chip), otherwise it becomes a regular button
     bar->removeAction(ui->actionChangeInstIcon);
-    instanceInfoWidget->setVisible(expandedSidebar);
-    if (!expandedSidebar)
+    instanceInfoWidget->setVisible(showInfo);
+    m_instanceBarSpacer->setVisible(instanceChip);
+    if (!showInfo)
         bar->insertActionAfter(ui->actionRenameInstance, ui->actionChangeInstIcon);
+
+    // big icon above the name in the sidebar, small icon beside it in the chip
+    if (auto* infoLayout = qobject_cast<QBoxLayout*>(bar->widgetForAction(instanceInfoWidget)->layout()))
+        infoLayout->setDirection(instanceChip ? QBoxLayout::LeftToRight : QBoxLayout::TopToBottom);
+    changeIconButton->setIconSize(instanceChip ? QSize(32, 32) : QSize(80, 80));
+    changeIconButton->setSizePolicy(instanceChip ? QSizePolicy::Fixed : QSizePolicy::Expanding, QSizePolicy::Fixed);
+    nameLabel->setAlignment(instanceChip ? Qt::AlignLeft | Qt::AlignVCenter : Qt::AlignCenter);
+    // the name is elided to the label width: give it room in the chip, let the sidebar width decide otherwise
+    nameLabel->setSizePolicy(instanceChip ? QSizePolicy::Preferred : QSizePolicy::Ignored, QSizePolicy::Fixed);
+    nameLabel->setMinimumWidth(instanceChip ? 120 : 0);
+    nameLabel->setMaximumWidth(instanceChip ? 280 : QWIDGETSIZE_MAX);
+    m_collapseButton->setSizePolicy(vertical ? QSizePolicy::Expanding : QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     // WideBar buttons are plain widgets, so they don't follow the toolbar's button style on their own
     const auto style = collapsed ? Qt::ToolButtonIconOnly : Qt::ToolButtonTextBesideIcon;
     bar->setToolButtonStyle(style);
-    for (auto* button : bar->findChildren<QToolButton*>(Qt::FindDirectChildrenOnly)) {
+    for (auto* button : bar->findChildren<QToolButton*>(Qt::FindDirectChildrenOnly))
         button->setToolButtonStyle(style);
-        // stylesheets may match on toolButtonStyle; property selectors are only evaluated when polishing
-        button->style()->unpolish(button);
-        button->style()->polish(button);
+    // stylesheets match on toolButtonStyle and the bar's orientation; property selectors are only evaluated when polishing
+    bar->style()->unpolish(bar);
+    bar->style()->polish(bar);
+    for (auto* widget : bar->findChildren<QWidget*>()) {
+        widget->style()->unpolish(widget);
+        widget->style()->polish(widget);
     }
+    updateNameLabel();
 
     // ponytail: refreshed on toggle, orientation change and startup only; dragging the bar to the other side live leaves the arrow stale
     const bool onLeft = toolBarArea(bar) == Qt::LeftToolBarArea;
