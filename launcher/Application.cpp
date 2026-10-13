@@ -821,6 +821,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("StatusBarVisible", true);
 
         m_settings->registerSetting("ToolbarsLocked", false);
+        m_settings->registerSetting("InstanceToolbarCollapsed", false);
+        m_settings->registerSetting("InstanceToolbarWidth", 0);
 
         // Instance
         m_settings->registerSetting("InstSortMode", "Name");

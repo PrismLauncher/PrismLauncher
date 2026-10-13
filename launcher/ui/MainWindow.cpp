@@ -158,10 +158,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // instance toolbar stuff
     {
-        connect(ui->instanceToolBar, &QToolBar::orientationChanged, this, &MainWindow::updateInstanceToolBarOrientation);
+        connect(ui->instanceToolBar, &QToolBar::orientationChanged, this, &MainWindow::updateInstanceToolBar);
+        connect(ui->instanceToolBar, &WideBar::resizedByUser, this,
+                [](int width) { APPLICATION->settings()->set("InstanceToolbarWidth", width); });
 
-        // FIXME: why doesn't this work when done in the UI file?
-        ui->instanceToolBar->setMinimumWidth(140);
+        m_collapseButton = new QToolButton(this);
+        m_collapseButton->setObjectName(QStringLiteral("collapseButton"));
+        m_collapseButton->setAutoRaise(true);
+        m_collapseButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        connect(m_collapseButton, &QToolButton::clicked, this, [this] {
+            auto settings = APPLICATION->settings();
+            settings->set("InstanceToolbarCollapsed", !settings->get("InstanceToolbarCollapsed").toBool());
+            updateInstanceToolBar();
+        });
+        ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, m_collapseButton);
 
         // if you try to add a widget to a toolbar in a .ui file
         // qt designer will delete it when you save the file >:(
@@ -190,6 +200,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         instanceInfoWidget = ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, infoWidget);
         Q_ASSERT(instanceInfoWidget != nullptr);
+
+        updateInstanceToolBar();
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -228,7 +240,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 #endif
 
         // disabled until we have an instance selected
-        ui->instanceToolBar->setEnabled(false);
         setInstanceActionsEnabled(false);
 
         // add a close button at the end of the main toolbar when running on gamescope / steam deck
@@ -1697,7 +1708,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
     if (m_selectedInstance) {
-        ui->instanceToolBar->setEnabled(true);
         setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
 
@@ -1743,7 +1753,6 @@ void MainWindow::selectionBad()
     m_statusLeft->setText(tr("No instance selected"));
 
     statusBar()->clearMessage();
-    ui->instanceToolBar->setEnabled(false);
     setInstanceActionsEnabled(false);
     updateLaunchButton();
     updateNameLabel();
@@ -1801,6 +1810,12 @@ void MainWindow::updateStatusCenter()
 // Actions that also require other conditions (e.g. a running instance) won't be changed.
 void MainWindow::setInstanceActionsEnabled(bool enabled)
 {
+    // the instance toolbar stays enabled (collapse button, resize grip), so disable its contents instead
+    ui->instanceToolBar->widgetForAction(instanceInfoWidget)->setEnabled(enabled);
+    ui->actionRenameInstance->setEnabled(enabled);
+    ui->actionChangeInstIcon->setEnabled(enabled);
+    ui->actionLaunchInstance->setEnabled(enabled);
+    ui->actionKillInstance->setEnabled(enabled);
     ui->actionEditInstance->setEnabled(enabled);
     ui->actionChangeInstGroup->setEnabled(enabled);
     ui->actionViewSelectedInstFolder->setEnabled(enabled);
@@ -1826,16 +1841,39 @@ void MainWindow::updateNameLabel()
     }
 }
 
-void MainWindow::updateInstanceToolBarOrientation(Qt::Orientation orientation)
+void MainWindow::updateInstanceToolBar()
 {
-    ui->instanceToolBar->removeAction(ui->actionChangeInstIcon);
+    auto* bar = ui->instanceToolBar;
+    const bool vertical = bar->orientation() == Qt::Vertical;
+    const bool collapsed = APPLICATION->settings()->get("InstanceToolbarCollapsed").toBool();
+    const bool expandedSidebar = vertical && !collapsed;
 
-    if (orientation == Qt::Vertical) {
-        instanceInfoWidget->setVisible(true);
+    // the big icon is only shown in the expanded sidebar, otherwise it becomes a regular button
+    bar->removeAction(ui->actionChangeInstIcon);
+    instanceInfoWidget->setVisible(expandedSidebar);
+    if (!expandedSidebar)
+        bar->insertActionAfter(ui->actionRenameInstance, ui->actionChangeInstIcon);
+
+    // WideBar buttons are plain widgets, so they don't follow the toolbar's button style on their own
+    const auto style = collapsed ? Qt::ToolButtonIconOnly : Qt::ToolButtonTextBesideIcon;
+    bar->setToolButtonStyle(style);
+    for (auto* button : bar->findChildren<QToolButton*>(Qt::FindDirectChildrenOnly))
+        button->setToolButtonStyle(style);
+
+    // ponytail: arrow direction is only refreshed here, so it stays stale if the toolbar is dragged to the other side until toggled
+    const bool onLeft = toolBarArea(bar) == Qt::LeftToolBarArea;
+    m_collapseButton->setArrowType(onLeft == collapsed ? Qt::RightArrow : Qt::LeftArrow);
+    m_collapseButton->setToolTip(collapsed ? tr("Expand") : tr("Collapse"));
+
+    bar->setResizable(expandedSidebar);
+    const int width = APPLICATION->settings()->get("InstanceToolbarWidth").toInt();
+    if (expandedSidebar && width > 0) {
+        bar->setFixedWidth(width);
     } else {
-        instanceInfoWidget->setVisible(false);
-        ui->instanceToolBar->insertActionAfter(ui->actionRenameInstance, ui->actionChangeInstIcon);
+        bar->setMinimumWidth(collapsed ? 0 : 140);
+        bar->setMaximumWidth(QWIDGETSIZE_MAX);
     }
+
     // HACK: sync size (no, I don't know why this works)
-    ui->instanceToolBar->resize(0, 0);
+    bar->resize(0, 0);
 }

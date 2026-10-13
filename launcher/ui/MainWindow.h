@@ -219,7 +219,7 @@ class MainWindow : public QMainWindow {
 
     void updateNameLabel();
 
-    void updateInstanceToolBarOrientation(Qt::Orientation orientation);
+    void updateInstanceToolBar();
 
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void setCatBackground(bool enabled);
@@ -241,6 +241,7 @@ class MainWindow : public QMainWindow {
     QLabel* m_statusLeft = nullptr;
     QLabel* m_statusCenter = nullptr;
     QToolButton* changeIconButton = nullptr;
+    QToolButton* m_collapseButton = nullptr;
     QAction* instanceInfoWidget = nullptr;
     QLabel* nameLabel = nullptr;
     QToolButton* helpMenuButton = nullptr;
