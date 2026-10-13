@@ -1,9 +1,21 @@
 <RCC>
     <qresource prefix="/themes/fresh">
         <file>fresh.qss</file>
-        <file>check.svg</file>
-        <file>chevron-down.svg</file>
-        <file>chevron-down-dark.svg</file>
-        <file>chevron-up.svg</file>
+        <file>check-terra.svg</file>
+        <file>check-stone.svg</file>
+        <file>chevron-down-terra.svg</file>
+        <file>chevron-down-stone.svg</file>
+        <file>chevron-down-dark-terra.svg</file>
+        <file>chevron-down-dark-stone.svg</file>
+        <file>chevron-up-terra.svg</file>
+        <file>chevron-up-stone.svg</file>
+        <file>grip-horizontal-terra.svg</file>
+        <file>grip-horizontal-stone.svg</file>
+        <file>grip-horizontal-hover-terra.svg</file>
+        <file>grip-horizontal-hover-stone.svg</file>
+        <file>grip-vertical-terra.svg</file>
+        <file>grip-vertical-stone.svg</file>
+        <file>grip-vertical-hover-terra.svg</file>
+        <file>grip-vertical-hover-stone.svg</file>
     </qresource>
 </RCC>

@@ -53,6 +53,7 @@
 
 #include "settings/SettingsObject.h"
 
+#include "ui/themes/FreshTheme.h"
 #include "ui/widgets/IconLabel.h"
 
 #include "Application.h"
@@ -231,6 +232,7 @@ void PageContainer::showPage(int row)
         m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
         m_header->setText(m_currentPage->displayName());
         m_currentPage->opened();
+        FreshTheme::fadeIn(m_pageStack->currentWidget());
     } else {
         m_pageStack->setCurrentIndex(0);
         m_header->setText(QString());

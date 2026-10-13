@@ -4,7 +4,8 @@
  * @name values are design tokens, replaced from the TOKENS table in launcher/ui/themes/FreshTheme.cpp.
  * Look: Material You over warm darks. Tonal containers, pill-shaped controls, large rounded cards,
  * translucent state layers for hover/pressed, green (primary) for the main action of each area.
- * SVGs hardcode token colors: check.svg and chevron-down-dark.svg use @on-accent, chevron-down.svg and chevron-up.svg use @text-muted.
+ * SVGs come in one file per palette (name-terra.svg / name-stone.svg, picked with @icons) because their colors are
+ * hardcoded: check and chevron-down-dark use @on-accent, chevrons @text-muted, grips @text-disabled (hover: @text-muted).
  * FreshStyle (FreshTheme.cpp) shifts the text of icon+text tool buttons 8px right; their right padding
  * includes those extra 8px so the text stays centered in its padding.
  */
@@ -23,11 +24,33 @@ QToolBar {
     padding: @pad-tight;
 }
 
-/* drag handles are invisible but still draggable */
-QToolBar::handle {
+/* drag handles: a small pill, like a Material drag handle (grip SVGs: @text-disabled / @text-muted) */
+QToolBar::handle:horizontal {
+    width: 12px;
+    image: url(:/themes/fresh/grip-vertical-@icons.svg);
+}
+
+QToolBar::handle:horizontal:hover {
+    image: url(:/themes/fresh/grip-vertical-hover-@icons.svg);
+}
+
+QToolBar::handle:vertical {
+    height: 12px;
+    image: url(:/themes/fresh/grip-horizontal-@icons.svg);
+}
+
+QToolBar::handle:vertical:hover {
+    image: url(:/themes/fresh/grip-horizontal-hover-@icons.svg);
+}
+
+/* resize edge of the instance sidebar (WideBar): invisible until hovered */
+QWidget#wideBarResizeGrip {
     background: transparent;
-    width: 8px;
-    height: 8px;
+}
+
+QWidget#wideBarResizeGrip:hover {
+    background-color: @accent-soft-strong;
+    border-radius: 3px;
 }
 
 QMenuBar {
@@ -197,7 +220,7 @@ QToolButton::menu-button:hover {
 }
 
 QToolButton::menu-arrow {
-    image: url(:/themes/fresh/chevron-down.svg);
+    image: url(:/themes/fresh/chevron-down-@icons.svg);
     width: 12px;
     height: 12px;
 }
@@ -314,14 +337,14 @@ QDoubleSpinBox::down-button:hover {
 
 QSpinBox::up-arrow,
 QDoubleSpinBox::up-arrow {
-    image: url(:/themes/fresh/chevron-up.svg);
+    image: url(:/themes/fresh/chevron-up-@icons.svg);
     width: 10px;
     height: 10px;
 }
 
 QSpinBox::down-arrow,
 QDoubleSpinBox::down-arrow {
-    image: url(:/themes/fresh/chevron-down.svg);
+    image: url(:/themes/fresh/chevron-down-@icons.svg);
     width: 10px;
     height: 10px;
 }
@@ -334,14 +357,22 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    image: url(:/themes/fresh/chevron-down.svg);
+    image: url(:/themes/fresh/chevron-down-@icons.svg);
     width: 12px;
     height: 12px;
+}
+
+/* the combo popup window is translucent under Fresh (WindowEffects in FreshTheme.cpp): the list draws the rounded box */
+QComboBoxPrivateContainer {
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 QComboBox QAbstractItemView {
     background-color: @surface;
     border: 1px solid @border;
+    border-radius: @radius;
     padding: @pad-tight;
     outline: 0;
     selection-background-color: @secondary-container;
@@ -392,7 +423,7 @@ QGroupBox::indicator:checked,
 QAbstractItemView::indicator:checked {
     background-color: @accent;
     border-color: @accent;
-    image: url(:/themes/fresh/check.svg);
+    image: url(:/themes/fresh/check-@icons.svg);
 }
 
 QRadioButton::indicator:checked {
@@ -611,12 +642,14 @@ QToolTip {
 
 /* ---------- Header (main toolbar) ---------- */
 
+/* Toolbars must keep padding 4px (uniform) and spacing 4px, like the generic QToolBar rule: a toolbar computes
+   its layout margins (left border + left padding, used on every side) and spacing when it is created, before it
+   has its object name, so at startup only the generic rule counts; other values here would only kick in after a
+   theme switch and make everything jump. */
 QToolBar#mainToolBar {
     qproperty-iconSize: 20px 20px;
-    /* right: 20px lines the account chip up with the content panel's right edge
-       (on the left, the invisible 8px drag handle + 12px padding do the same) */
-    padding: 10px 20px 10px @pad-lg;
-    spacing: 6px;
+    padding: @pad-tight;
+    spacing: @spacing;
 }
 
 QToolBar#mainToolBar QToolButton {
@@ -650,13 +683,13 @@ QToolBar#mainToolBar QToolButton#actionAccountsButton {
 
 QToolBar#mainToolBar QToolButton#actionAccountsButton:hover {
     background-color: @surface;
-    border-color: @earth;
+    border-color: @tint;
 }
 
 QToolBar#mainToolBar QToolButton#actionAccountsButton:pressed,
 QToolBar#mainToolBar QToolButton#actionAccountsButton:open {
     background-color: @surface-hover;
-    border-color: @earth;
+    border-color: @tint;
 }
 
 /* buttons that open a menu (Folders, Help, Accounts) */
@@ -665,7 +698,7 @@ QToolButton[popupMode="2"] {
 }
 
 QToolButton::menu-indicator {
-    image: url(:/themes/fresh/chevron-down.svg);
+    image: url(:/themes/fresh/chevron-down-@icons.svg);
     subcontrol-origin: padding;
     subcontrol-position: center right;
     width: 12px;
@@ -688,8 +721,8 @@ InstanceView {
 QToolBar#instanceToolBar {
     qproperty-iconSize: 20px 20px;
     background-color: @window;
-    padding: 14px @pad-lg;
-    spacing: 4px;
+    padding: @pad-tight;
+    spacing: @spacing;
 }
 
 QToolBar#instanceToolBar QToolButton {
@@ -706,7 +739,7 @@ QToolBar#instanceToolBar::separator {
 
 /* hero: big instance icon on a card, bold name below */
 QToolButton#changeIconButton {
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 @earth-soft, stop: 1 @card);
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 @tint-soft, stop: 1 @card);
     border: 1px solid @border;
     border-radius: @radius-xl;
     padding: 16px;
@@ -714,7 +747,7 @@ QToolButton#changeIconButton {
 }
 
 QToolButton#changeIconButton:hover {
-    border-color: @earth;
+    border-color: @tint;
 }
 
 QLabel#nameLabel {
@@ -752,14 +785,65 @@ QToolBar#instanceToolBar QToolButton#actionLaunchInstance {
 }
 
 QToolButton#actionLaunchInstance::menu-arrow {
-    image: url(:/themes/fresh/chevron-down-dark.svg);
+    image: url(:/themes/fresh/chevron-down-dark-@icons.svg);
+}
+
+/* ---------- Instance bar, docked at the top or bottom (orientation 1 = horizontal) ----------
+   A floating dock: the instance chip (icon + name) on the left, actions pushed to the right.
+   MainWindow::updateInstanceToolBar() re-polishes the bar and its children when the orientation changes. */
+
+/* no margin: QToolBar's layout ignores it and the card ends up shorter than its buttons */
+QToolBar#instanceToolBar[orientation="1"] {
+    background-color: @surface;
+    border: 1px solid @border;
+    border-radius: @radius-lg;
+    /* 1px border + 3px padding = the 4px every toolbar uses (see the note on QToolBar#mainToolBar) */
+    padding: 3px;
+    spacing: @spacing;
+}
+
+QToolBar#instanceToolBar[orientation="1"] QToolButton {
+    padding: 8px 20px 8px @pad-lg;
+}
+
+QToolBar#instanceToolBar[orientation="1"] QToolButton#actionLaunchInstance {
+    padding: 8px 22px 8px 14px;
+    margin: 0 6px;
+}
+
+QToolBar#instanceToolBar[orientation="1"] QToolButton#changeIconButton {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 @tint-soft, stop: 1 @surface);
+    border: 1px solid @border;
+    border-radius: @radius;
+    padding: 4px;
+    margin: 0;
+}
+
+QToolBar#instanceToolBar[orientation="1"] QLabel#nameLabel {
+    font-size: 14px;
+    padding: 0 6px 0 10px;
+}
+
+QToolBar#instanceToolBar[orientation="1"] QToolButton#collapseButton {
+    padding: 8px;
+    margin: 0 4px 0 0;
+}
+
+/* collapsed bar: icon-only buttons stay symmetric (same specificity as the rule above, so it has to come after it) */
+QToolBar#instanceToolBar[orientation="1"] QToolButton[toolButtonStyle="0"],
+QToolBar#instanceToolBar[orientation="1"] QToolButton#actionLaunchInstance[toolButtonStyle="0"] {
+    padding: 8px;
+}
+
+QToolBar#instanceToolBar[orientation="1"]::separator {
+    margin: 10px 6px;
 }
 
 /* ---------- News bar ---------- */
 
 QToolBar#newsToolBar {
     border-top: 1px solid @border-subtle;
-    padding: @pad-tight @pad-lg;
+    padding: @pad-tight;
 }
 
 QToolBar#newsToolBar QToolButton {
