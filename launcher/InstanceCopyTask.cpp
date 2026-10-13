@@ -4,8 +4,8 @@
 #include <memory>
 #include "FileSystem.h"
 #include "Filter.h"
-#include "NullInstance.h"
-#include "settings/INISettingsObject.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "tasks/Task.h"
 
 InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCopyPrefs& prefs)
@@ -38,6 +38,13 @@ InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCop
 void InstanceCopyTask::executeTask()
 {
     setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
+
+    if (m_origInstance->config().savePending()) {
+        if (const auto saveResult = m_origInstance->config().save(); !saveResult) {
+            emitFailed(tr("Failed to save original instance config - %1").arg(saveResult.error()));
+            return;
+        }
+    }
 
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this] {
         if (m_useClone) {
@@ -128,19 +135,23 @@ void InstanceCopyTask::copyFinished()
         return;
     }
 
-    // FIXME: shouldn't this be able to report errors?
-    auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
+    QString confPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    auto conf = InstanceConfig::load(confPath);
+    if (!conf.has_value()) {
+        emitFailed(tr("Could not read copied instance config: %1").arg(conf.error()));
+        return;
+    }
 
-    BaseInstance* inst(new NullInstance(m_globalSettings, std::move(instanceSettings), m_stagingPath));
-    inst->setName(name());
-    inst->setIconKey(m_instIcon);
-    inst->regenerateUuid();
+    conf->name = name();
+    conf->iconKey = m_instIcon;
+    conf->regenerateUuid();
     if (!m_keepPlaytime) {
-        inst->resetTimePlayed();
+        conf->totalTimePlayed = 0;
+        conf->lastTimePlayed = 0;
     }
     if (m_useLinks) {
-        inst->addLinkedInstanceId(m_origInstance->id());
-        auto allowedSymlinksFile = QFileInfo(FS::PathCombine(inst->gameRoot(), "allowed_symlinks.txt"));
+        conf->linkedInstances.append(m_origInstance->id());
+        auto allowedSymlinksFile = QFileInfo(FS::PathCombine(m_stagingPath, "allowed_symlinks.txt"));
 
         QByteArray allowedSymlinks;
         if (allowedSymlinksFile.exists()) {
@@ -166,6 +177,11 @@ void InstanceCopyTask::copyFinished()
         if (!res) {
             qCritical() << "Failed to write symlink :" << res.error();
         }
+    }
+
+    if (const auto result = conf->save(confPath); !result) {
+        emitFailed(tr("Could not write modified instance config: %1").arg(result.error()));
+        return;
     }
 
     emitSucceeded();

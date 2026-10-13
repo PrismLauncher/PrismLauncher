@@ -25,7 +25,6 @@
 #include <QTextCursor>
 
 class QTextCharFormat;
-class SettingsObject;
 
 namespace Ui {
 class AppearanceWidget;
