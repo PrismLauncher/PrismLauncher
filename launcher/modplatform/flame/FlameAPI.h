@@ -29,7 +29,6 @@ class FlameAPI final : public ResourceAPI {
 
     static std::pair<Task::Ptr, QByteArray*> matchFingerprints(const QList<uint>& fingerprints);
     static std::pair<Task::Ptr, QByteArray*> getFiles(const QStringList& fileIds);
-    static std::pair<Task::Ptr, QByteArray*> getFile(const QString& addonId, const QString& fileId);
 
     static ModPlatform::ResourceType getResourceType(int classId);
 
@@ -45,6 +44,7 @@ class FlameAPI final : public ResourceAPI {
     Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const override;
     Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const override;
     Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const override;
+    Net::RPC::Spec<ModPlatform::IndexedVersion> getVersion(const QString& id, const QString& versionId) const override;
 
    private:
     static QUrl searchProjectsURL(const SearchArgs& args);
