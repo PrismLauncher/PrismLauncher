@@ -536,11 +536,11 @@ static QString replaceTokensIn(const QString& text, const QMap<QString, QString>
 QStringList MinecraftInstance::extraArguments()
 {
     auto list = BaseInstance::extraArguments();
-    auto version = getPackProfile();
-    if (!version)
+    auto* version = getPackProfile();
+    if (!version) {
         return list;
-    auto jarMods = getJarMods();
-    if (!jarMods.isEmpty()) {
+    }
+    if (hasJarMods()) {
         list.append({ "-Dfml.ignoreInvalidMinecraftCertificates=true", "-Dfml.ignorePatchDiscrepancies=true" });
     }
     auto addn = m_components->getProfile()->getAddnJvmArguments();
@@ -1366,17 +1366,26 @@ WorldList* MinecraftInstance::worldList()
     return m_world_list.get();
 }
 
-QList<Mod*> MinecraftInstance::getJarMods() const
+std::vector<std::unique_ptr<Mod>> MinecraftInstance::getJarMods() const
 {
     auto profile = m_components->getProfile();
-    QList<Mod*> mods;
-    for (auto jarmod : profile->getJarMods()) {
-        QStringList jar, temp1, temp2, temp3;
+    std::vector<std::unique_ptr<Mod>> mods;
+    for (const auto& jarmod : profile->getJarMods()) {
+        QStringList jar;
+        QStringList temp1;
+        QStringList temp2;
+        QStringList temp3;
         jarmod->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, jarmodsPath().absolutePath());
         // QString filePath = jarmodsPath().absoluteFilePath(jarmod->filename(currentSystem));
-        mods.push_back(new Mod(QFileInfo(jar[0])));
+        mods.push_back(std::make_unique<Mod>(QFileInfo(jar[0])));
     }
     return mods;
+}
+
+bool MinecraftInstance::hasJarMods() const
+{
+    auto profile = m_components->getProfile();
+    return !profile->getJarMods().isEmpty();
 }
 
 #include "MinecraftInstance.moc"
