@@ -18,7 +18,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
    protected slots:
     void executeTask() override;
     void getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader = {}, bool forceModLoaderCheck = false);
-    void checkVersionsResponse(QHash<QString, ModPlatform::IndexedVersion>* response, std::optional<ModPlatform::ModLoaderTypes> loader);
+    void checkVersionsResponse(QHash<QString, ModPlatform::IndexedVersion>* response);
     void checkNextLoader();
 
    private:

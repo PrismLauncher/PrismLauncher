@@ -227,45 +227,19 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
     auto hashType = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto [verTask, response] = ModrinthAPI::currentVersions(m_resources.keys(), hashType);
-
-    // Prevents unfortunate timings when aborting the task
-    if (!verTask) {
-        return Task::Ptr{ nullptr };
-    }
+    auto [verTask, response] = ModrinthAPI::currentVersionsTask(m_resources.keys(), hashType);
 
     connect(verTask.get(), &Task::succeeded, this, [this, response] {
-        auto obj = Json::requireObject(*response);
-        if (!obj) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions:" << obj.error();
-            qWarning() << *response;
-
-            failed(obj.error());
-            return;
-        }
-
-        const auto& entries = obj.value();
         for (auto& hash : m_resources.keys()) {
-            auto* resource = m_resources.find(hash).value();
+            auto* resource = m_resources.value(hash);
+            setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
+            qDebug() << "Getting version for" << resource->name() << "from Modrinth";
 
-            auto parse = [this, &hash, &entries, resource]() -> Result<> {
-                setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
-                qDebug() << "Getting version for" << resource->name() << "from Modrinth";
-
-                TRY_INTO(const auto& version, Json::requireObject(entries, hash).and_then([](const auto& v) {
-                    return Modrinth::Parse::loadIndexedPackVersion(v);
-                }))
-
-                m_tempVersions.insert(hash, version);
-                return {};
-            };
-            if (auto res = parse(); !res) {
-                qDebug() << res.error();
-                qDebug() << entries;
-
+            if (!response->contains(hash)) {
                 emitFail(resource);
                 continue;
             }
+            m_tempVersions.insert(hash, response->value(hash));
         }
     });
 
