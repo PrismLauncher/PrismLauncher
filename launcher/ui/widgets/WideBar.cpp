@@ -210,6 +210,10 @@ void WideBar::setResizable(bool resizable)
 {
     if (m_resizeGrip == nullptr) {
         m_resizeGrip = new QWidget(this);
+        // stylesheets can target it (e.g. highlight on hover); without a rule it stays invisible
+        m_resizeGrip->setObjectName(QStringLiteral("wideBarResizeGrip"));
+        m_resizeGrip->setAttribute(Qt::WA_StyledBackground);
+        m_resizeGrip->setAttribute(Qt::WA_Hover);
         m_resizeGrip->setCursor(Qt::SizeHorCursor);
         m_resizeGrip->installEventFilter(this);
     }
