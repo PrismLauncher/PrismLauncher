@@ -166,7 +166,8 @@ void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 
 void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QColor fg)
 {
-    const auto* qr = QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8, 1);
+    auto* qr = QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8, 1);
+    auto freeQr = qScopeGuard([qr] { QRcode_free(qr); });
     if (!qr) {
         qWarning() << "Unable to encode" << data << "as QR code";
         return;
