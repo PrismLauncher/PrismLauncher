@@ -528,7 +528,14 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 {
     QList<QAction*> actions;
 
-    QAction* actionSep = new QAction("", this);
+    auto deleteOldAction = [this](const QString& actionName) {
+        if (auto* action = findChild<QAction*>(actionName); action != nullptr) {
+            action->deleteLater();
+        }
+    };
+    deleteOldAction("sicm_actionSep");
+    auto* actionSep = new QAction("", this);
+    actionSep->setObjectName("sicm_actionSep");
     actionSep->setSeparator(true);
 
     bool onInstance = view->indexAt(pos).isValid();
@@ -546,21 +553,25 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 
         // add header
         actions.prepend(actionSep);
-        QAction* actionVoid = new QAction(m_selectedInstance->name(), this);
+        deleteOldAction("sicm_actionVoid");
+        auto* actionVoid = new QAction(m_selectedInstance->name(), this);
+        actionVoid->setObjectName("sicm_actionVoid");
         actionVoid->setEnabled(false);
         actions.prepend(actionVoid);
     } else {
         auto group = view->groupNameAt(pos);
 
-        QAction* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
+        deleteOldAction("sicm_actionVoid");
+        auto* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
+        actionVoid->setObjectName("sicm_actionVoid");
         actionVoid->setEnabled(false);
 
-        QAction* actionCreateInstance = new QAction(tr("&Create instance"), this);
+        auto* actionCreateInstance = new QAction(tr("&Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
-            QVariantMap instance_action_data;
-            instance_action_data["group"] = group;
-            actionCreateInstance->setData(instance_action_data);
+            QVariantMap instanceActionData;
+            instanceActionData["group"] = group;
+            actionCreateInstance->setData(instanceActionData);
         }
 
         connect(actionCreateInstance, &QAction::triggered, this, &MainWindow::on_actionAddInstance_triggered);
@@ -569,11 +580,15 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.prepend(actionVoid);
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
-            QAction* actionDeleteGroup = new QAction(tr("&Delete group"), this);
+            deleteOldAction("sicm_actionDeleteGroup");
+            auto* actionDeleteGroup = new QAction(tr("&Delete group"), this);
+            actionDeleteGroup->setObjectName("sicm_actionDeleteGroup");
             connect(actionDeleteGroup, &QAction::triggered, this, [this, group] { deleteGroup(group); });
             actions.append(actionDeleteGroup);
 
-            QAction* actionRenameGroup = new QAction(tr("&Rename group"), this);
+            deleteOldAction("sicm_actionRenameGroup");
+            auto* actionRenameGroup = new QAction(tr("&Rename group"), this);
+            actionRenameGroup->setObjectName("sicm_actionRenameGroup");
             connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
             actions.append(actionRenameGroup);
         }
