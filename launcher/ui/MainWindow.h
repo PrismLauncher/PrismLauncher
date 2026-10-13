@@ -77,6 +77,9 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
+
+    // syncs the instance sidebar with its area, orientation and collapsed/width settings
+    void updateInstanceToolBar();
    signals:
     void isClosing();
 
@@ -218,8 +221,6 @@ class MainWindow : public QMainWindow {
     void retranslateUi();
 
     void updateNameLabel();
-
-    void updateInstanceToolBar();
 
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void setCatBackground(bool enabled);

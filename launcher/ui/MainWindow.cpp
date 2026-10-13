@@ -224,6 +224,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
+
+        // lets stylesheets target specific header buttons, e.g. QToolButton#actionAddInstance
+        for (auto* action : ui->mainToolBar->actions()) {
+            if (auto* button = ui->mainToolBar->widgetForAction(action); button != nullptr && !action->objectName().isEmpty())
+                button->setObjectName(action->objectName());
+        }
     }
 
     // hide, disable and show stuff
@@ -639,10 +645,8 @@ void MainWindow::updateThemeMenu()
         }
         themeAction->setActionGroup(themesGroup);
 
-        connect(themeAction, &QAction::triggered, APPLICATION, [id = theme->id()]() {
-            APPLICATION->themeManager()->setApplicationTheme(id);
-            APPLICATION->settings()->set("ApplicationTheme", id);
-        });
+        connect(themeAction, &QAction::triggered, APPLICATION,
+                [id = theme->id()]() { APPLICATION->themeManager()->selectApplicationTheme(id); });
     }
 
     ui->actionChangeTheme->setMenu(themeMenu);
@@ -1857,10 +1861,14 @@ void MainWindow::updateInstanceToolBar()
     // WideBar buttons are plain widgets, so they don't follow the toolbar's button style on their own
     const auto style = collapsed ? Qt::ToolButtonIconOnly : Qt::ToolButtonTextBesideIcon;
     bar->setToolButtonStyle(style);
-    for (auto* button : bar->findChildren<QToolButton*>(Qt::FindDirectChildrenOnly))
+    for (auto* button : bar->findChildren<QToolButton*>(Qt::FindDirectChildrenOnly)) {
         button->setToolButtonStyle(style);
+        // stylesheets may match on toolButtonStyle; property selectors are only evaluated when polishing
+        button->style()->unpolish(button);
+        button->style()->polish(button);
+    }
 
-    // ponytail: arrow direction is only refreshed here, so it stays stale if the toolbar is dragged to the other side until toggled
+    // ponytail: refreshed on toggle, orientation change and startup only; dragging the bar to the other side live leaves the arrow stale
     const bool onLeft = toolBarArea(bar) == Qt::LeftToolBarArea;
     m_collapseButton->setArrowType(onLeft == collapsed ? Qt::RightArrow : Qt::LeftArrow);
     m_collapseButton->setToolTip(collapsed ? tr("Expand") : tr("Collapse"));
