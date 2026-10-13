@@ -81,6 +81,18 @@ std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> ResourceAPI::getVers
     return { netJob, response };
 }
 
+std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> ResourceAPI::getVersionsTask(const QStringList& versionIds) const
+{
+    auto spec = getVersions(versionIds);
+
+    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(debugName()), APPLICATION->network());
+
+    auto [action, response] = Net::RPC::make<QList<ModPlatform::IndexedVersion>>(spec);
+    netJob->addNetAction(action);
+
+    return { netJob, response };
+}
+
 std::pair<NetJob::Ptr, ModPlatform::IndexedVersion*> ResourceAPI::getVersionTask(const QString& id, const QString& versionId) const
 {
     auto spec = getVersion(id, versionId);
