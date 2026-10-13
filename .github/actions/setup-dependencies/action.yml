@@ -70,6 +70,8 @@ runs:
       run: |
         echo "CMAKE_C_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
         echo "CMAKE_CXX_COMPILER_LAUNCHER=$CCACHE_VARIANT" >> "$GITHUB_ENV"
+        # For macOS' universal binaries
+        echo "SCCACHE_CACHE_MULTIARCH=1" >> "$GITHUB_ENV"
 
     - name: Determine vcpkg triplet
       shell: bash
