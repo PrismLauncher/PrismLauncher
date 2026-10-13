@@ -219,22 +219,16 @@ void ModrinthCreationTask::createInstance()
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_minecraftVersion, true);
 
-    QString loader;
-    if (!m_fabricVersion.isEmpty()) {
-        components->setComponentVersion("net.fabricmc.fabric-loader", m_fabricVersion);
-        loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::Fabric);
-    }
-    if (!m_quiltVersion.isEmpty()) {
-        components->setComponentVersion("org.quiltmc.quilt-loader", m_quiltVersion);
-        loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::Quilt);
-    }
-    if (!m_forgeVersion.isEmpty()) {
-        components->setComponentVersion("net.minecraftforge", m_forgeVersion);
-        loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::Forge);
-    }
-    if (!m_neoForgeVersion.isEmpty()) {
-        components->setComponentVersion("net.neoforged", m_neoForgeVersion);
-        loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::NeoForge);
+    QString preferredLoader;
+    for (const auto& [loader, version] : m_loaderVersions) {
+        const auto componentId = loader.componentId();
+        if (!componentId.has_value()) {
+            logWarning(tr("Cannot install loader: %1").arg(loader.displayName()));
+            continue;
+        }
+
+        components->setComponentVersion(componentId.value(), version);
+        preferredLoader = loader.toString();
     }
 
     if (m_instIcon != "default") {
@@ -279,7 +273,7 @@ void ModrinthCreationTask::createInstance()
 
         Net::ModrinthDownloadMeta meta{ .reason = m_oldInstance.has_value() ? "update" : "modpack",
                                         .gameVersion = m_minecraftVersion,
-                                        .loader = loader,
+                                        .loader = preferredLoader,
                                         .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
@@ -388,19 +382,26 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
             TRY_INTO(const auto& dependencies, Json::requireObject(obj, "dependencies", "modrinth.index.json"))
             for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
                 QString name = it.key();
+
                 if (name == "minecraft") {
                     TRY_INTO(m_minecraftVersion, Json::requireString(*it, "Minecraft version"))
-                } else if (name == "fabric-loader") {
-                    TRY_INTO(m_fabricVersion, Json::requireString(*it, "Fabric Loader version"))
-                } else if (name == "quilt-loader") {
-                    TRY_INTO(m_quiltVersion, Json::requireString(*it, "Quilt Loader version"))
-                } else if (name == "forge") {
-                    TRY_INTO(m_forgeVersion, Json::requireString(*it, "Forge version"))
-                } else if (name == "neoforge") {
-                    TRY_INTO(m_neoForgeVersion, Json::requireString(*it, "NeoForge version"))
-                } else {
-                    return std::unexpected("Unknown dependency type: " + name);
+                    continue;
                 }
+
+                // NOTE: for some reason Modrinth sometimes uses a loader suffix unlike with filters
+                // hell yeah let's just indiscriminately remove this prefix
+                const QString optionalSuffix = "-loader";
+                if (name.endsWith(optionalSuffix)) {
+                    name.chop(optionalSuffix.size());
+                }
+                const auto modLoader = ModLoaderType::fromString(name);
+                if (!modLoader.isValid()) {
+                    logWarning(tr("Dependency '%1' is not recognized").arg(it.key()));
+                    continue;
+                }
+
+                TRY_INTO(const auto& loaderVersion, Json::requireString(*it, modLoader.displayName() + " version"));
+                m_loaderVersions.append({ modLoader, loaderVersion });
             }
         }
         return {};

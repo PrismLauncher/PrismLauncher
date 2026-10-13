@@ -134,7 +134,7 @@ void DataPackPage::updateDataPacks()
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, false, { ModPlatform::ModLoaderType::DataPack });
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, false, { ModLoaderType::DataPack });
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {

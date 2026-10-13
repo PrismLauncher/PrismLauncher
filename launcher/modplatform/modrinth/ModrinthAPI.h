@@ -6,6 +6,7 @@
 
 #include "BuildConfig.h"
 #include "Result.h"
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -33,14 +34,14 @@ class ModrinthAPI final : public ResourceAPI {
         const QString& hash,
         const QString& hashFormat,
         std::optional<std::vector<Version>> mcVersions,
-        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        const QSet<ModLoaderType>& loaders,
         std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
     std::pair<Task::Ptr, QByteArray*> latestVersions(
         const QStringList& hashes,
         const QString& hashFormat,
         std::optional<std::vector<Version>> mcVersions,
-        std::optional<ModPlatform::ModLoaderTypes> loaders,
+        const QSet<ModLoaderType>& loaders,
         std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes = std::nullopt) const;
 
     std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const override;
@@ -53,6 +54,8 @@ class ModrinthAPI final : public ResourceAPI {
 
    public:
     auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
+
+    bool supportsModLoader(ModLoaderType loader) const override;
 
    private:
     static auto getMultipleModInfoURL(const QStringList& ids) -> QString
@@ -68,9 +71,6 @@ class ModrinthAPI final : public ResourceAPI {
     {
         return Modrinth::loadIndexedPackVersion(obj);
     };
-
-   public:
-    static bool validateModLoaders(ModPlatform::ModLoaderTypes loaders);
 
    public slots:
     Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const override;

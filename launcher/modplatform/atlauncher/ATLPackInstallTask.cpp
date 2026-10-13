@@ -368,7 +368,7 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this
                 // filtering for those loaders.
-                if (m_version.loader.type != ModPlatform::ModLoaderType::Fabric) {
+                if (m_version.loader.type != ModLoaderType::Fabric) {
                     auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
                     if (iter == reqs.end()) {
                         continue;
@@ -388,12 +388,12 @@ QString PackInstallTask::getVersionForLoader(const QString& uid)
                 return version->descriptor();
             }
 
-            emitFailed(tr("Failed to find version for %1 loader").arg(ModPlatform::getModLoaderAsString(m_version.loader.type)));
+            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type.toString()));
             return nullptr;
         }
         if (m_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == ModPlatform::ModLoaderType::Fabric) {
+            if (m_version.loader.type == ModLoaderType::Fabric) {
                 return m_support->chooseVersion(vlist, nullptr);
             }
 
@@ -1057,46 +1057,24 @@ void PackInstallTask::install()
         components->setComponentVersion("net.minecraft", m_version.minecraft, true);
 
         // Loader
-        switch (m_version.loader.type) {
-            case ModPlatform::ModLoaderType::NeoForge: {
-                auto version = getVersionForLoader("net.neoforged");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.neoforged", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::Forge: {
-                auto version = getVersionForLoader("net.minecraftforge");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.minecraftforge", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::Fabric: {
-                auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-                if (version == nullptr) {
-                    return;
-                }
-
-                components->setComponentVersion("net.fabricmc.fabric-loader", version);
-                break;
-            }
-            case ModPlatform::ModLoaderType::None: {
-                break;
-            }
-            default: {
-                emitFailed(tr("Unknown loader type: ") + ModPlatform::getModLoaderAsString(m_version.loader.type));
+        if (m_version.loader.type.isValid()) {
+            const auto component = m_version.loader.type.componentId();
+            if (!component.has_value()) {
+                emitFailed(tr("Cannot install loader: %1").arg(m_version.loader.type.displayName()));
                 return;
             }
+
+            const auto version = getVersionForLoader(component.value());
+            if (version == nullptr) {
+                // FIXME: really? shouldn't we emitFailed?
+                return;
+            }
+            components->setComponentVersion(component.value(), version);
         }
 
         for (const auto& componentUid : m_componentsToInstall.keys()) {
-            auto version = m_componentsToInstall.value(componentUid);
-            components->setComponentVersion(componentUid, version->version());
+            auto versionToInstall = m_componentsToInstall.value(componentUid);
+            components->setComponentVersion(componentUid, versionToInstall->version());
         }
 
         components->installJarMods(m_jarmods);

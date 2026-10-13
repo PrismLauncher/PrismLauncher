@@ -284,7 +284,7 @@ void FlameCreationTask::executeTask()
 }
 
 QString FlameCreationTask::getVersionForLoader(const QString& uid,
-                                               const QString& loaderType,
+                                               ModLoaderType loaderType,
                                                const QString& loaderVersion,
                                                const QString& mcVersion)
 {
@@ -316,7 +316,7 @@ QString FlameCreationTask::getVersionForLoader(const QString& uid,
             // filter by minecraft version, if the loader depends on a certain version.
             // not all mod loaders depend on a given Minecraft version, so we won't do this
             // filtering for those loaders.
-            if (loaderType == "forge" || loaderType == "neoforge") {
+            if (loaderType == ModLoaderType::Forge || loaderType == ModLoaderType::NeoForge) {
                 auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
                     return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
                 });
@@ -327,7 +327,7 @@ QString FlameCreationTask::getVersionForLoader(const QString& uid,
             return version->descriptor();
         }
 
-        emitFailed(tr("Failed to find version for %1 loader").arg(loaderType));
+        emitFailed(tr("Failed to find version for %1").arg(loaderType.displayName()));
         return {};
     }
 
@@ -421,36 +421,35 @@ void FlameCreationTask::createInstance()
         return;
     }
 
-    QString loaderType;
-    QString loaderUid;
+    ModLoaderType selectedLoader{};
     QString loaderVersion;
 
     for (auto& loader : m_pack.minecraft.modLoaders) {
         auto id = loader.id;
-        if (id.startsWith("neoforge-")) {
-            id.remove("neoforge-");
-            if (id.startsWith("1.20.1-")) {
-                id.remove("1.20.1-");  // this is a mess for curseforge
-            }
-            loaderType = "neoforge";
-            loaderUid = "net.neoforged";
-        } else if (id.startsWith("forge-")) {
-            id.remove("forge-");
-            loaderType = "forge";
-            loaderUid = "net.minecraftforge";
-        } else if (id.startsWith("fabric-")) {
-            id.remove("fabric-");
-            loaderType = "fabric";
-            loaderUid = "net.fabricmc.fabric-loader";
-        } else if (id.startsWith("quilt-")) {
-            id.remove("quilt-");
-            loaderType = "quilt";
-            loaderUid = "org.quiltmc.quilt-loader";
-        } else {
-            logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
+        int sep = id.indexOf('-');
+
+        const char* unknownMsg = QT_TR_NOOP("Unknown mod loader in manifest: %1");
+
+        if (sep == -1) {
+            logWarning(tr(unknownMsg).arg(id));
             continue;
         }
-        loaderVersion = id;
+
+        const auto loaderTypeStr = loader.id.left(sep);
+        const auto loaderType = ModLoaderType::fromString(loaderTypeStr);
+        if (!loaderType.isValid()) {
+            logWarning(tr(unknownMsg).arg(id));
+            continue;
+        }
+
+        selectedLoader = loaderType;
+        loaderVersion = loader.id.mid(sep + 1);
+        if (selectedLoader == ModLoaderType::NeoForge) {
+            const QString optionalPrefix = "1.20.1-";
+            if (loaderVersion.startsWith(optionalPrefix)) {
+                loaderVersion.remove(0, optionalPrefix.length());
+            }
+        }
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -468,12 +467,17 @@ void FlameCreationTask::createInstance()
     auto* components = m_newInstance->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
-    if (!loaderType.isEmpty()) {
-        auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
-        if (version.isEmpty()) {  // because there are more info in getVersionForLoader the emitFailed is trigered inside it
-            return;
+    if (selectedLoader.isValid()) {
+        const auto componentId = selectedLoader.componentId();
+        if (componentId.has_value()) {
+            auto version = getVersionForLoader(componentId.value(), selectedLoader, loaderVersion, mcVersion);
+            if (version.isEmpty()) {  // because there are more info in getVersionForLoader the emitFailed is trigered inside it
+                return;
+            }
+            components->setComponentVersion(componentId.value(), version);
+        } else {
+            logWarning(tr("Cannot install loader: %1").arg(selectedLoader.displayName()));
         }
-        components->setComponentVersion(loaderUid, version);
     }
 
     if (m_instIcon != "default") {

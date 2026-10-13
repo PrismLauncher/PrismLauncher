@@ -191,26 +191,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
     return {};
 }
 
-namespace {
-QIcon fallbackIcon(ModPlatform::ModLoaderType type)
-{
-    switch (type) {
-        default:
-            return QIcon::fromTheme("loadermods");
-        case ModPlatform::ModLoaderType::NeoForge:
-            return QIcon::fromTheme("neoforged");
-        case ModPlatform::ModLoaderType::Forge:
-            return QIcon::fromTheme("forge");
-        case ModPlatform::ModLoaderType::LiteLoader:
-            return QIcon::fromTheme("liteloader");
-        case ModPlatform::ModLoaderType::Fabric:
-            return QIcon::fromTheme("fabricmc");
-        case ModPlatform::ModLoaderType::Quilt:
-            return QIcon::fromTheme("quiltmc");
-    }
-}
-};  // namespace
-
 QList<MultiDecorationItemDelegate::Icon> ModFolderModel::icons(int row) const
 {
     auto result = ResourceFolderModel::icons(row);
@@ -221,7 +201,11 @@ QList<MultiDecorationItemDelegate::Icon> ModFolderModel::icons(int row) const
 
         QIcon icon;
         if (const auto pixmap = mod.icon(s_iconSize, Qt::KeepAspectRatio); pixmap.isNull()) {
-            icon = fallbackIcon(mod.details().loader);
+            QString iconName = "loadermods";
+            if (const auto loader = mod.details().loader; loader.isValid() && loader.icon().has_value()) {
+                iconName = loader.icon().value();
+            }
+            icon = QIcon::fromTheme(iconName);
         } else {
             icon = pixmap;
         }
