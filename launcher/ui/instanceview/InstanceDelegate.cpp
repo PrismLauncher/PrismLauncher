@@ -45,6 +45,7 @@
 #include <QTextEdit>
 #include "BaseInstance.h"
 #include "InstanceList.h"
+#include "ui/themes/FreshTheme.h"
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
@@ -68,6 +69,21 @@ static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& he
 }
 
 ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
+
+namespace {
+// Fresh card metrics
+constexpr int CARD_PADDING = 14;
+constexpr int CARD_ICON_SIZE = 64;
+constexpr int CARD_TEXT_GAP = 10;
+constexpr qreal CARD_RADIUS = 18;
+
+QFont cardFont(const QFont& base)
+{
+    QFont font = base;
+    font.setBold(true);
+    return font;
+}
+}  // namespace
 
 void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
@@ -130,8 +146,65 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
     return QSize(size.width() + 2 * textMargin, size.height());
 }
 
+void ListViewDelegate::paintCard(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QStyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    const bool selected = opt.state & QStyle::State_Selected;
+    const bool hovered = opt.state & QStyle::State_MouseOver;
+
+    // card: filled, tonal container + primary outline when selected (Material You)
+    const QRectF card = QRectF(opt.rect).adjusted(1, 1, -1, -1);
+    if (selected) {
+        painter->setBrush(FreshTheme::color(hovered ? "secondary-container-hover" : "secondary-container"));
+        painter->setPen(QPen(FreshTheme::color("accent"), 2));
+        painter->drawRoundedRect(card.adjusted(0.5, 0.5, -0.5, -0.5), CARD_RADIUS, CARD_RADIUS);
+    } else {
+        painter->setBrush(FreshTheme::color(hovered ? "surface" : "card"));
+        painter->setPen(QPen(FreshTheme::color("border-subtle"), 1));
+        painter->drawRoundedRect(card, CARD_RADIUS, CARD_RADIUS);
+    }
+
+    // icon, never tinted by selection
+    const QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
+    const QIcon::State state = opt.state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+    const QRect iconRect(opt.rect.left() + (opt.rect.width() - CARD_ICON_SIZE) / 2, opt.rect.top() + CARD_PADDING, CARD_ICON_SIZE,
+                         CARD_ICON_SIZE);
+    opt.icon.paint(painter, iconRect, Qt::AlignCenter, mode, state);
+
+    // name, one line
+    const QFont font = cardFont(opt.font);
+    const QFontMetrics metrics(font);
+    const QRect textRect(opt.rect.left() + CARD_PADDING / 2, iconRect.bottom() + 1 + CARD_TEXT_GAP, opt.rect.width() - CARD_PADDING,
+                         metrics.height());
+    painter->setFont(font);
+    painter->setPen(FreshTheme::color(!(opt.state & QStyle::State_Enabled) ? "text-disabled"
+                                      : selected                           ? "on-secondary-container"
+                                                                           : "text"));
+    painter->drawText(textRect, Qt::AlignHCenter | Qt::AlignVCenter,
+                      metrics.elidedText(index.data().toString(), Qt::ElideRight, textRect.width()));
+
+    // status badges in the card's top-right corner
+    auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
+    if (instance) {
+        QStyleOptionViewItem badgeOption = opt;
+        badgeOption.rect = opt.rect.adjusted(CARD_PADDING / 2, CARD_PADDING / 2, -CARD_PADDING / 2, 0);
+        drawBadges(painter, badgeOption, instance, mode, state);
+    }
+
+    painter->restore();
+}
+
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    if (FreshTheme::isActive()) {
+        paintCard(painter, option, index);
+        return;
+    }
+
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     painter->save();
@@ -213,6 +286,10 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
 QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    if (FreshTheme::isActive()) {
+        // width must match InstanceView::itemWidth()
+        return QSize(132, CARD_PADDING * 2 + CARD_ICON_SIZE + CARD_TEXT_GAP + QFontMetrics(cardFont(option.font)).height());
+    }
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     opt.features |= QStyleOptionViewItem::WrapText;

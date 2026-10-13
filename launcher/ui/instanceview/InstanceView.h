@@ -77,7 +77,7 @@ class InstanceView : public QAbstractItemView {
 
     virtual QRegion visualRegionForSelection(const QItemSelection& selection) const override;
 
-    int spacing() const { return m_spacing; };
+    int spacing() const;
     void setPaintCat(bool visible);
 
    public slots:
@@ -103,6 +103,8 @@ class InstanceView : public QAbstractItemView {
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
+    void leaveEvent(QEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
@@ -134,6 +136,7 @@ class InstanceView : public QAbstractItemView {
     // point where the currently active mouse action started in geometry coordinates
     QPoint m_pressedPosition;
     QPersistentModelIndex m_pressedIndex;
+    QPersistentModelIndex m_hoverIndex;
     bool m_pressedAlreadySelected;
     VisualGroup* m_pressedCategory;
     QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
@@ -158,4 +161,5 @@ class InstanceView : public QAbstractItemView {
     std::pair<VisualGroup*, VisualGroup::HitResults> rowDropPos(const QPoint& pos);
 
     QPoint offset() const;
+    void setHoverIndex(const QModelIndex& index);
 };

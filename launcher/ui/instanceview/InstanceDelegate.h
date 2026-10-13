@@ -36,6 +36,10 @@ class ListViewDelegate : public QStyledItemDelegate {
    signals:
     void textChanged(QString before, QString after) const;
 
+   private:
+    // Fresh theme: rounded card with a large icon and the name below
+    void paintCard(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+
    private slots:
     void editingDone();
 };

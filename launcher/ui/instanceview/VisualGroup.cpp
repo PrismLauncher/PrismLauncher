@@ -35,6 +35,7 @@
  */
 
 #include "VisualGroup.h"
+#include "ui/themes/FreshTheme.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -69,7 +70,7 @@ void VisualGroup::update()
             if (currentRow >= rows.size()) {
                 currentRow = rows.size() - 1;
             }
-            offsetFromTop += maxRowHeight + 5;
+            offsetFromTop += maxRowHeight + view->spacing();
             positionInRow = 0;
             maxRowHeight = 0;
         }
@@ -139,12 +140,20 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
     return results;
 }
 
+static QFont headerFont()
+{
+    QFont font(QApplication::font());
+    font.setBold(true);
+    if (FreshTheme::isActive())
+        font.setPointSizeF(font.pointSizeF() * 1.3);
+    return font;
+}
+
 void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option) const
 {
     QRect optRect = option.rect;
     optRect.setTop(optRect.top() + 7);
-    QFont font(QApplication::font());
-    font.setBold(true);
+    const QFont font = headerFont();
     const QFontMetrics fontMetrics = QFontMetrics(font);
     painter->setFont(font);
 
@@ -217,9 +226,7 @@ int VisualGroup::totalHeight() const
 
 int VisualGroup::headerHeight()
 {
-    QFont font(QApplication::font());
-    font.setBold(true);
-    QFontMetrics fontMetrics(font);
+    QFontMetrics fontMetrics(headerFont());
 
     const int height = fontMetrics.height() + 1 /* 1 pixel-width gradient */
                        + 11 /* top and bottom separation */;

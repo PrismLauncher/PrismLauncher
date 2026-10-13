@@ -50,6 +50,7 @@
 
 #include "VisualGroup.h"
 #include "ui/themes/CatPainter.h"
+#include "ui/themes/FreshTheme.h"
 #include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
@@ -72,6 +73,8 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
+    // needed for hover feedback on the instance cards
+    setMouseTracking(true);
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
@@ -258,7 +261,7 @@ QString InstanceView::groupNameAt(const QPoint& point)
 
 int InstanceView::calculateItemsPerRow() const
 {
-    return qFloor((qreal)(contentWidth()) / (qreal)(itemWidth() + m_spacing));
+    return qFloor((qreal)(contentWidth()) / (qreal)(itemWidth() + spacing()));
 }
 
 int InstanceView::contentWidth() const
@@ -268,7 +271,41 @@ int InstanceView::contentWidth() const
 
 int InstanceView::itemWidth() const
 {
-    return m_itemWidth;
+    // Fresh draws instances as wider cards (see ListViewDelegate::paintCard)
+    return FreshTheme::isActive() ? 132 : m_itemWidth;
+}
+
+int InstanceView::spacing() const
+{
+    return FreshTheme::isActive() ? 14 : m_spacing;
+}
+
+void InstanceView::setHoverIndex(const QModelIndex& index)
+{
+    if (index == m_hoverIndex)
+        return;
+    const QModelIndex previous = m_hoverIndex;
+    m_hoverIndex = index;
+    if (previous.isValid())
+        viewport()->update(visualRect(previous));
+    if (index.isValid())
+        viewport()->update(visualRect(index));
+}
+
+void InstanceView::changeEvent(QEvent* event)
+{
+    // item metrics depend on the theme (see itemWidth()), so recompute them on theme changes
+    if (event->type() == QEvent::StyleChange && model() != nullptr) {
+        m_currentItemsPerRow = calculateItemsPerRow();
+        updateGeometries();
+    }
+    QAbstractItemView::changeEvent(event);
+}
+
+void InstanceView::leaveEvent(QEvent* event)
+{
+    setHoverIndex(QModelIndex());
+    QAbstractItemView::leaveEvent(event);
 }
 
 void InstanceView::mousePressEvent(QMouseEvent* event)
@@ -320,6 +357,7 @@ void InstanceView::mousePressEvent(QMouseEvent* event)
 void InstanceView::mouseMoveEvent(QMouseEvent* event)
 {
     executeDelayedItemsLayout();
+    setHoverIndex(event->buttons() == Qt::NoButton ? indexAt(event->pos()) : QModelIndex());
 
     QPoint topLeft;
     QPoint visualPos = event->pos();
@@ -538,6 +576,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
             option.state &= ~QStyle::State_Selected;
         }
         option.state |= (index == currentIndex()) ? QStyle::State_HasFocus : QStyle::State_None;
+        option.state.setFlag(QStyle::State_MouseOver, index == m_hoverIndex);
         if (!(flags & Qt::ItemIsEnabled)) {
             option.state &= ~QStyle::State_Enabled;
         }
@@ -722,7 +761,7 @@ QRect InstanceView::geometryRect(const QModelIndex& index) const
 
     QRect out;
     out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + cat->rowTopOf(index));
-    out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
+    out.setLeft(spacing() + x * (itemWidth() + spacing()));
     out.setSize(itemDelegate()->sizeHint(option, index));
     m_geometryCache.insert(row, new QRect(out));
     return out;
