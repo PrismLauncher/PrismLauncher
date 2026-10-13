@@ -253,6 +253,7 @@ void MinecraftInstance::loadSpecificSettings()
     // Join server on launch, this does not have a global override
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
+    m_settings->registerSetting("JoinServerOnLaunchPreResolveSrv", false);
     m_settings->registerSetting("JoinWorldOnLaunch", "");
 
     // Use account for instance, this does not have a global override
@@ -786,7 +787,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
     if (targetToJoin) {
         if (!targetToJoin->address.isEmpty()) {
             if (profile->hasTrait("feature:is_quick_play_multiplayer")) {
-                args << "--quickPlayMultiplayer" << targetToJoin->address + ':' + QString::number(targetToJoin->port);
+                args << "--quickPlayMultiplayer" << targetToJoin->originalAddress;
             } else {
                 args << "--server" << targetToJoin->address;
                 args << "--port" << QString::number(targetToJoin->port);
@@ -842,6 +843,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
         if (!targetToJoin->address.isEmpty()) {
             launchScript += "serverAddress " + targetToJoin->address + "\n";
             launchScript += "serverPort " + QString::number(targetToJoin->port) + "\n";
+            launchScript += "serverOriginalAddress " + targetToJoin->originalAddress + "\n";
         } else if (!targetToJoin->world.isEmpty()) {
             launchScript += "worldName " + targetToJoin->world + "\n";
         }
@@ -1183,7 +1185,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         }
     }
 
-    if (targetToJoin && targetToJoin->port == 25565) {
+    if (targetToJoin && !targetToJoin->address.isEmpty() && targetToJoin->port == 25565 &&
+        settings()->get("JoinServerOnLaunchPreResolveSrv").toBool()) {
         // Resolve server address to join on launch
         auto step = makeShared<LookupServerAddress>(pptr);
         step->setLookupAddress(targetToJoin->address);
