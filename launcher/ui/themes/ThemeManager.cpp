@@ -30,10 +30,17 @@
 #include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
 #include "ui/themes/DarkTheme.h"
+#include "ui/themes/FreshTheme.h"
 #include "ui/themes/SystemTheme.h"
 
 #include "Application.h"
 #include "settings/SettingsObject.h"
+
+#ifdef Q_OS_WINDOWS
+#include <windows.h>
+// after windows.h
+#include <dwmapi.h>
+#endif
 
 ThemeManager::ThemeManager()
 {
@@ -146,6 +153,7 @@ void ThemeManager::initializeWidgets()
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<FreshTheme>());
 
     themeDebugLog() << "<> Initializing System Widget Themes";
     QStringList styles = QStyleFactory::keys();
@@ -189,6 +197,70 @@ void ThemeManager::initializeWidgets()
 
     themeDebugLog() << "<> Widget themes initialized.";
 }
+
+#ifdef Q_OS_WINDOWS
+namespace {
+std::optional<QColor> s_titlebarColor;
+bool s_titlebarColorChanged = false;
+
+COLORREF toColorRef(const QColor& color)
+{
+    return RGB(color.red(), color.green(), color.blue());
+}
+
+void paintTitlebar(QWidget* window)
+{
+    // only real windows and dialogs have a title bar (not menus, tooltips, ...)
+    const auto type = window->windowType();
+    if (type != Qt::Window && type != Qt::Dialog)
+        return;
+
+    const auto hwnd = reinterpret_cast<HWND>(window->winId());
+    const COLORREF caption = s_titlebarColor ? toColorRef(*s_titlebarColor) : DWMWA_COLOR_DEFAULT;
+    const COLORREF text = s_titlebarColor ? toColorRef(qApp->palette().windowText().color()) : DWMWA_COLOR_DEFAULT;
+    // these attributes need Windows 11; older versions reject them and keep the default look
+    DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &caption, sizeof(caption));
+    DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &caption, sizeof(caption));
+    DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR, &text, sizeof(text));
+}
+
+// new windows get the current title bar color when first shown
+class TitlebarPainter : public QObject {
+   protected:
+    bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        if (event->type() == QEvent::Show && s_titlebarColorChanged) {
+            if (auto* widget = qobject_cast<QWidget*>(watched); widget != nullptr && widget->isWindow())
+                paintTitlebar(widget);
+        }
+        return false;
+    }
+};
+}  // namespace
+
+void ThemeManager::setTitlebarColorOnWindows(const std::optional<QColor>& color)
+{
+    // nothing to do until a theme first asks for a tinted title bar
+    if (!color && !s_titlebarColorChanged)
+        return;
+
+    static auto* painter = [] {
+        auto* filter = new TitlebarPainter;
+        qApp->installEventFilter(filter);
+        return filter;
+    }();
+    Q_UNUSED(painter);
+
+    s_titlebarColor = color;
+    s_titlebarColorChanged = true;
+    for (auto* window : QApplication::topLevelWidgets()) {
+        if (window->isVisible())
+            paintTitlebar(window);
+    }
+}
+#else
+void ThemeManager::setTitlebarColorOnWindows(const std::optional<QColor>&) {}
+#endif
 
 #ifndef Q_OS_MACOS
 void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color) {}
@@ -270,11 +342,24 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
         setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
+        setTitlebarColorOnWindows(theme->tintsTitlebar() ? std::optional(qApp->palette().window().color()) : std::nullopt);
 
         m_logColors = theme->logColorScheme();
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }
+}
+
+void ThemeManager::selectApplicationTheme(const QString& id)
+{
+    auto* settings = APPLICATION->settings();
+    settings->set("ApplicationTheme", id);
+    if (auto themeIter = m_themes.find(id); themeIter != m_themes.end()) {
+        // a theme can come with an icon set; the user may still pick another one afterwards
+        if (const QString icons = themeIter->second->preferredIconTheme(); !icons.isEmpty())
+            settings->set("IconTheme", icons);
+    }
+    applyCurrentlySelectedTheme();
 }
 
 void ThemeManager::applyCurrentlySelectedTheme(bool initial)

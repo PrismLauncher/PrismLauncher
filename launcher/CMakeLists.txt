@@ -858,6 +858,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/CustomTheme.h
     ui/themes/DarkTheme.cpp
     ui/themes/DarkTheme.h
+    ui/themes/FreshTheme.cpp
+    ui/themes/FreshTheme.h
     ui/themes/ITheme.cpp
     ui/themes/ITheme.h
     ui/themes/HintOverrideProxyStyle.cpp
@@ -1207,6 +1209,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
     resources/shaders/shaders.qrc
+    resources/fresh/fresh.qrc
     "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
 )
 
@@ -1287,6 +1290,10 @@ target_link_libraries(Launcher_logic
     LocalPeer
     Launcher_rainbow
 )
+if(WIN32)
+    # native title bar colors (ThemeManager::setTitlebarColorOnWindows)
+    target_link_libraries(Launcher_logic dwmapi)
+endif()
 if (TARGET ${Launcher_QT_DBUS})
     target_compile_definitions(Launcher_logic PUBLIC WITH_QTDBUS)
 endif()

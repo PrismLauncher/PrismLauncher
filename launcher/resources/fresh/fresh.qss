@@ -1,0 +1,772 @@
+/*
+ * Fresh theme stylesheet.
+ * Applied on top of the Fusion style and FreshTheme::colorScheme().
+ * @name values are design tokens, replaced from the TOKENS table in launcher/ui/themes/FreshTheme.cpp.
+ * Look: Material You over warm darks. Tonal containers, pill-shaped controls, large rounded cards,
+ * translucent state layers for hover/pressed, green (primary) for the main action of each area.
+ * SVGs hardcode token colors: check.svg and chevron-down-dark.svg use @on-accent, chevron-down.svg and chevron-up.svg use @text-muted.
+ * FreshStyle (FreshTheme.cpp) shifts the text of icon+text tool buttons 8px right; their right padding
+ * includes those extra 8px so the text stays centered in its padding.
+ */
+
+/* ---------- Window structure ---------- */
+
+QMainWindow,
+QDialog {
+    background-color: @window;
+}
+
+QToolBar {
+    background-color: @window;
+    border: none;
+    spacing: @spacing;
+    padding: @pad-tight;
+}
+
+/* drag handles are invisible but still draggable */
+QToolBar::handle {
+    background: transparent;
+    width: 8px;
+    height: 8px;
+}
+
+QMenuBar {
+    background-color: @window;
+}
+
+QStatusBar {
+    background-color: @window;
+    color: @text-muted;
+    padding: @pad-tight @pad-lg;
+}
+
+QStatusBar::item {
+    border: none;
+}
+
+QStatusBar QLabel {
+    color: @text-muted;
+    padding: 0 @pad-lg;
+}
+
+/* filled card */
+QGroupBox {
+    background-color: @card;
+    border: 1px solid @border-subtle;
+    border-radius: @radius-lg;
+    /* room above the card for the title (and its checkbox), plus a gap from whatever is above */
+    margin-top: 38px;
+    padding: @pad-lg;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: @pad-tight;
+    top: 12px;
+    padding: 0 @pad-tight;
+    color: @text;
+    font-weight: bold;
+}
+
+/* Material tabs: label + rounded indicator line under the selected one */
+QTabWidget::pane {
+    border: 1px solid @border-subtle;
+    border-radius: @radius-lg;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background-color: transparent;
+    color: @text-muted;
+    padding: @pad-y @pad-x;
+    margin: @margin;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-top-left-radius: @radius-sm;
+    border-top-right-radius: @radius-sm;
+}
+
+QTabBar::tab:hover {
+    background-color: @state-hover;
+    color: @text;
+}
+
+QTabBar::tab:selected {
+    color: @accent;
+    border-bottom-color: @accent;
+    font-weight: bold;
+}
+
+/* ---------- Buttons ---------- */
+
+/* filled tonal button */
+QPushButton {
+    color: @on-secondary-container;
+    background-color: @secondary-container;
+    border: 1px solid transparent;
+    border-radius: @radius-pill;
+    padding: @pad-y 20px;
+    margin: @margin;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: @secondary-container-hover;
+}
+
+QPushButton:pressed {
+    background-color: @secondary-container-pressed;
+}
+
+QPushButton:checked {
+    background-color: @primary-container;
+    color: @on-primary-container;
+}
+
+QPushButton:focus {
+    border-color: @border;
+}
+
+/* the dialog's default action is the primary (filled green) button */
+QPushButton:default {
+    background-color: @accent;
+    color: @on-accent;
+}
+
+QPushButton:default:hover {
+    background-color: @accent-hover;
+}
+
+QPushButton:default:pressed {
+    background-color: @accent-pressed;
+}
+
+QPushButton:disabled {
+    background-color: @surface;
+    color: @text-disabled;
+}
+
+QPushButton::menu-indicator {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    right: @pad-tight;
+}
+
+/* icon / text buttons: transparent with a state layer */
+QToolButton {
+    color: @text;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: @radius-pill;
+    padding: @pad-tight;
+    margin: @margin;
+}
+
+QToolButton:hover {
+    background-color: @state-hover;
+}
+
+QToolButton:pressed {
+    background-color: @state-pressed;
+}
+
+QToolButton:checked {
+    background-color: @secondary-container;
+    color: @on-secondary-container;
+}
+
+QToolButton:disabled {
+    color: @text-disabled;
+}
+
+/* tool buttons with a separate dropdown arrow (MenuButtonPopup) */
+QToolButton[popupMode="1"] {
+    padding-right: 20px;
+}
+
+QToolButton::menu-button {
+    border: none;
+    border-top-right-radius: @radius-pill;
+    border-bottom-right-radius: @radius-pill;
+    width: 18px;
+}
+
+QToolButton::menu-button:hover {
+    background-color: @state-pressed;
+}
+
+QToolButton::menu-arrow {
+    image: url(:/themes/fresh/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+/* primary action of the instance sidebar: an extended FAB */
+QToolButton#actionLaunchInstance {
+    background-color: @accent;
+    color: @on-accent;
+    font-weight: bold;
+    border-radius: @radius-pill;
+    padding: @pad-y @item-pad-x;
+}
+
+QToolButton#actionLaunchInstance:hover {
+    background-color: @accent-hover;
+}
+
+QToolButton#actionLaunchInstance:pressed {
+    background-color: @accent-pressed;
+}
+
+QToolButton#actionLaunchInstance::menu-button:hover {
+    background-color: @accent-pressed;
+}
+
+QToolButton#actionLaunchInstance:disabled {
+    background-color: @surface;
+    color: @text-disabled;
+}
+
+/* ---------- Inputs ---------- */
+
+/* filled text fields */
+QLineEdit,
+QSpinBox,
+QDoubleSpinBox,
+QPlainTextEdit,
+QTextEdit,
+QComboBox {
+    color: @text;
+    background-color: @surface;
+    border: 1px solid transparent;
+    border-radius: @radius;
+    padding: @pad-y @item-pad-x;
+    margin: @margin;
+    selection-background-color: @accent;
+    selection-color: @on-accent;
+}
+
+QLineEdit:hover,
+QSpinBox:hover,
+QDoubleSpinBox:hover,
+QComboBox:hover {
+    background-color: @surface-hover;
+}
+
+QLineEdit:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus,
+QPlainTextEdit:focus,
+QTextEdit:focus,
+QComboBox:focus,
+QComboBox:on {
+    border: 2px solid @accent;
+}
+
+QLineEdit:disabled,
+QSpinBox:disabled,
+QDoubleSpinBox:disabled,
+QPlainTextEdit:disabled,
+QTextEdit:disabled,
+QComboBox:disabled {
+    background-color: @surface;
+    color: @text-disabled;
+}
+
+QComboBox {
+    padding-right: 28px;
+}
+
+QSpinBox,
+QDoubleSpinBox {
+    padding-right: 28px;
+}
+
+QSpinBox::up-button,
+QDoubleSpinBox::up-button,
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    width: 24px;
+    border: none;
+    background-color: transparent;
+}
+
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    subcontrol-position: top right;
+    border-top-right-radius: @radius;
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    subcontrol-position: bottom right;
+    border-bottom-right-radius: @radius;
+}
+
+QSpinBox::up-button:hover,
+QDoubleSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::down-button:hover {
+    background-color: @state-hover;
+}
+
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow {
+    image: url(:/themes/fresh/chevron-up.svg);
+    width: 10px;
+    height: 10px;
+}
+
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow {
+    image: url(:/themes/fresh/chevron-down.svg);
+    width: 10px;
+    height: 10px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 24px;
+    border: none;
+}
+
+QComboBox::down-arrow {
+    image: url(:/themes/fresh/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: @surface;
+    border: 1px solid @border;
+    padding: @pad-tight;
+    outline: 0;
+    selection-background-color: @secondary-container;
+    selection-color: @on-secondary-container;
+}
+
+QCheckBox,
+QRadioButton {
+    spacing: @item-pad-x;
+}
+
+QCheckBox::indicator,
+QGroupBox::indicator,
+QAbstractItemView::indicator {
+    /* 12px + 2px border = 16px, fits a text line; bigger boxes overflow short rows and get clipped */
+    width: 12px;
+    height: 12px;
+    border: 2px solid @text-muted;
+    border-radius: 4px;
+    background-color: transparent;
+}
+
+QRadioButton::indicator {
+    width: 12px;
+    height: 12px;
+    border: 2px solid @text-muted;
+    border-radius: 8px;
+    background-color: transparent;
+}
+
+/* rows only reserve ~13px for the check, so item views get a smaller box */
+QAbstractItemView::indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+
+QCheckBox::indicator:hover,
+QGroupBox::indicator:hover,
+QRadioButton::indicator:hover,
+QAbstractItemView::indicator:hover {
+    border-color: @accent;
+    background-color: @state-hover;
+}
+
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked,
+QAbstractItemView::indicator:checked {
+    background-color: @accent;
+    border-color: @accent;
+    image: url(:/themes/fresh/check.svg);
+}
+
+QRadioButton::indicator:checked {
+    border-color: @accent;
+    background-color: qradialgradient(cx: 0.5, cy: 0.5, radius: 0.5, fx: 0.5, fy: 0.5, stop: 0 @accent, stop: 0.55 @accent, stop: 0.6 transparent, stop: 1 transparent);
+}
+
+QCheckBox::indicator:disabled,
+QGroupBox::indicator:disabled,
+QRadioButton::indicator:disabled,
+QAbstractItemView::indicator:disabled {
+    background-color: transparent;
+    border-color: @text-disabled;
+}
+
+/* tall enough for the handle, which would otherwise be clipped */
+QSlider:horizontal {
+    min-height: 28px;
+}
+
+/* MemorySlider (JavaSettingsWidget) sizes and paints itself; an explicit min-height would let layouts squeeze it */
+QSlider#memorySlider {
+    min-height: 0px;
+}
+
+/* second column of the Java memory settings, behind the min/max sliders (JavaSettingsWidget) */
+QFrame#memorySliderPanel {
+    background-color: @base;
+    border: 1px solid @border-subtle;
+    border-radius: @radius-lg;
+}
+
+/* Material slider: thick track, tonal inactive part, narrow bar handle */
+QSlider::groove:horizontal {
+    height: 12px;
+    background-color: @secondary-container;
+    border-radius: 6px;
+}
+
+QSlider::sub-page:horizontal {
+    background-color: @accent;
+    border-radius: 6px;
+}
+
+QSlider::handle:horizontal {
+    width: 4px;
+    margin: -8px 2px;
+    border-radius: 2px;
+    background-color: @accent;
+}
+
+QSlider::handle:horizontal:hover {
+    background-color: @accent-hover;
+}
+
+QSlider::sub-page:horizontal:disabled,
+QSlider::handle:horizontal:disabled {
+    background-color: @text-disabled;
+}
+
+/* ---------- Items ---------- */
+
+QAbstractItemView {
+    outline: 0;
+}
+
+QListView,
+QTreeView,
+QTableView {
+    background-color: @base;
+    border: 1px solid @border-subtle;
+    border-radius: @radius;
+}
+
+/* list items are pills; the selected one gets the tonal container (like a navigation drawer) */
+QListView::item {
+    padding: @item-pad-y @item-pad-x;
+    margin: @margin;
+    border-radius: @radius;
+}
+
+QListView::item:hover {
+    background-color: @state-hover;
+}
+
+QListView::item:selected {
+    background-color: @secondary-container;
+    color: @on-secondary-container;
+}
+
+/* tree/table rows have several columns, so no radius: each cell would round on its own */
+QTreeView::item,
+QTableView::item {
+    padding: @item-pad-y @item-pad-x;
+}
+
+QTreeView::item:hover,
+QTableView::item:hover {
+    background-color: @state-hover;
+}
+
+QTreeView::item:selected,
+QTableView::item:selected {
+    background-color: @secondary-container;
+    color: @on-secondary-container;
+}
+
+QHeaderView::section {
+    background-color: @window;
+    color: @text-muted;
+    border: none;
+    border-bottom: 1px solid @border-subtle;
+    padding: @item-pad-y @item-pad-x;
+    font-weight: bold;
+}
+
+/* menus get a translucent window under Fresh (RoundedPopups in FreshTheme.cpp), so the radius shows */
+QMenu {
+    background-color: @surface;
+    border: 1px solid @border;
+    border-radius: @radius-lg;
+    padding: 6px;
+}
+
+QMenu::item {
+    padding: @item-pad-y @pad-x @item-pad-y @pad-lg;
+    margin: @margin;
+    border-radius: @radius;
+}
+
+QMenu::icon {
+    padding-left: @item-pad-x;
+}
+
+QMenu::item:selected {
+    background-color: @state-pressed;
+    color: @text;
+}
+
+QMenu::item:disabled {
+    color: @text-disabled;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: @border;
+    margin: @pad-tight @item-pad-x;
+}
+
+QMenuBar::item {
+    padding: @pad-tight @item-pad-x;
+    border-radius: @radius-sm;
+    background-color: transparent;
+}
+
+QMenuBar::item:selected {
+    background-color: @state-hover;
+}
+
+/* ---------- Scrollbars ---------- */
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 2px;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: @surface-hover;
+    border-radius: 3px;
+    min-height: 32px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: @surface-hover;
+    border-radius: 3px;
+    min-width: 32px;
+}
+
+QScrollBar::handle:hover {
+    background-color: @text-disabled;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line {
+    width: 0;
+    height: 0;
+}
+
+QScrollBar::add-page,
+QScrollBar::sub-page {
+    background: none;
+}
+
+/* ---------- Misc ---------- */
+
+/* Material plain tooltip: inverse surface */
+QToolTip {
+    color: @inverse-on-surface;
+    background-color: @inverse-surface;
+    border: none;
+    padding: 6px 8px;
+}
+
+/* ======================================================================
+ * Main window
+ * Built like a modern launcher: roomy header, content in a rounded panel,
+ * instance sidebar as a padded side panel with a hero header.
+ * ====================================================================== */
+
+/* ---------- Header (main toolbar) ---------- */
+
+QToolBar#mainToolBar {
+    qproperty-iconSize: 20px 20px;
+    /* right: 20px lines the account chip up with the content panel's right edge
+       (on the left, the invisible 8px drag handle + 12px padding do the same) */
+    padding: 10px 20px 10px @pad-lg;
+    spacing: 6px;
+}
+
+QToolBar#mainToolBar QToolButton {
+    padding: 8px 22px 8px 14px;
+    margin: 0;
+    font-weight: bold;
+}
+
+QToolBar#mainToolBar QToolButton[popupMode="2"] {
+    padding-right: 36px;
+}
+
+/* main call to action of the header: tonal primary pill */
+QToolBar#mainToolBar QToolButton#actionAddInstance {
+    background-color: @primary-container;
+    color: @on-primary-container;
+}
+
+QToolBar#mainToolBar QToolButton#actionAddInstance:hover {
+    background-color: @accent-soft-strong;
+}
+
+/* account chip: avatar + name on an outlined pill */
+QToolBar#mainToolBar QToolButton#actionAccountsButton {
+    qproperty-iconSize: 24px 24px;
+    background-color: @card;
+    border: 1px solid @border;
+    border-radius: @radius-pill;
+    padding: 5px 38px 5px 8px;
+}
+
+QToolBar#mainToolBar QToolButton#actionAccountsButton:hover {
+    background-color: @surface;
+    border-color: @earth;
+}
+
+QToolBar#mainToolBar QToolButton#actionAccountsButton:pressed,
+QToolBar#mainToolBar QToolButton#actionAccountsButton:open {
+    background-color: @surface-hover;
+    border-color: @earth;
+}
+
+/* buttons that open a menu (Folders, Help, Accounts) */
+QToolButton[popupMode="2"] {
+    padding-right: 28px;
+}
+
+QToolButton::menu-indicator {
+    image: url(:/themes/fresh/chevron-down.svg);
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 12px;
+    height: 12px;
+    right: 8px;
+}
+
+/* ---------- Content panel (instance grid) ---------- */
+
+InstanceView {
+    background-color: @base;
+    border: 1px solid @border-subtle;
+    border-radius: @radius-xl;
+    margin: @pad-lg;
+    padding: 10px;
+}
+
+/* ---------- Instance sidebar ---------- */
+
+QToolBar#instanceToolBar {
+    qproperty-iconSize: 20px 20px;
+    background-color: @window;
+    padding: 14px @pad-lg;
+    spacing: 4px;
+}
+
+QToolBar#instanceToolBar QToolButton {
+    padding: 9px 20px 9px @pad-lg;
+    margin: 0;
+}
+
+QToolBar#instanceToolBar::separator {
+    background-color: @border-subtle;
+    height: 1px;
+    width: 1px;
+    margin: 8px 4px;
+}
+
+/* hero: big instance icon on a card, bold name below */
+QToolButton#changeIconButton {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 @earth-soft, stop: 1 @card);
+    border: 1px solid @border;
+    border-radius: @radius-xl;
+    padding: 16px;
+    margin: 4px 0 0 0;
+}
+
+QToolButton#changeIconButton:hover {
+    border-color: @earth;
+}
+
+QLabel#nameLabel {
+    color: @text;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 0 12px 0;
+}
+
+QToolButton#collapseButton {
+    padding: 6px;
+    margin: 0 0 4px 0;
+}
+
+/* collapsed sidebar (icon only, toolButtonStyle 0): round icon buttons with the icon centered.
+   Symmetric padding (the expanded layout's extra right padding only makes sense next to text),
+   and no dropdown area, which would push the icon off center; expand the sidebar for those menus. */
+QToolBar#instanceToolBar QToolButton[toolButtonStyle="0"],
+QToolBar#instanceToolBar QToolButton#actionLaunchInstance[toolButtonStyle="0"] {
+    padding: 10px;
+}
+
+QToolBar#instanceToolBar QToolButton[toolButtonStyle="0"]::menu-button {
+    width: 0px;
+    border: none;
+}
+
+QToolBar#instanceToolBar QToolButton[toolButtonStyle="0"]::menu-arrow {
+    image: none;
+}
+
+QToolBar#instanceToolBar QToolButton#actionLaunchInstance {
+    padding: 11px 22px 11px 14px;
+    margin: 4px 0;
+}
+
+QToolButton#actionLaunchInstance::menu-arrow {
+    image: url(:/themes/fresh/chevron-down-dark.svg);
+}
+
+/* ---------- News bar ---------- */
+
+QToolBar#newsToolBar {
+    border-top: 1px solid @border-subtle;
+    padding: @pad-tight @pad-lg;
+}
+
+QToolBar#newsToolBar QToolButton {
+    color: @text-muted;
+    padding: 6px 10px;
+}
+
+QToolBar#newsToolBar QToolButton:hover {
+    color: @text;
+}

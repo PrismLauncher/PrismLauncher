@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/themes/fresh">
+        <file>fresh.qss</file>
+        <file>check.svg</file>
+        <file>chevron-down.svg</file>
+        <file>chevron-down-dark.svg</file>
+        <file>chevron-up.svg</file>
+    </qresource>
+</RCC>

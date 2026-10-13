@@ -39,6 +39,7 @@
 
 #include <DesktopServices.h>
 #include <QGraphicsOpacityEffect>
+#include <QSignalBlocker>
 #include "BuildConfig.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -154,8 +155,11 @@ void AppearanceWidget::applyWidgetTheme(int index)
     auto originalAppTheme = settings->get("ApplicationTheme").toString();
     auto newAppTheme = m_ui->widgetStyleComboBox->itemData(index).toString();
     if (originalAppTheme != newAppTheme) {
-        settings->set("ApplicationTheme", newAppTheme);
-        APPLICATION->themeManager()->applyCurrentlySelectedTheme();
+        APPLICATION->themeManager()->selectApplicationTheme(newAppTheme);
+
+        // the theme may have selected its own icon set
+        const QSignalBlocker blocker(m_ui->iconsComboBox);
+        m_ui->iconsComboBox->setCurrentIndex(m_ui->iconsComboBox->findData(settings->get("IconTheme")));
     }
 
     updateConsolePreview();

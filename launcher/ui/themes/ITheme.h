@@ -63,6 +63,12 @@ class ITheme {
     virtual double fadeAmount() = 0;
     virtual LogColors logColorScheme() { return defaultLogColors(colorScheme()); }
     virtual QStringList searchPaths() { return {}; }
+    // the QStyle installed by apply()
+    virtual QStyle* createStyle();
+    // icon theme selected along with this theme when the user picks it; empty keeps the current one
+    virtual QString preferredIconTheme() { return {}; }
+    // paint the native window title bar with the window color (Windows 11), so it blends with the app
+    virtual bool tintsTitlebar() { return false; }
 
     static QPalette fadeInactive(QPalette in, qreal bias, QColor color);
     static LogColors defaultLogColors(const QPalette& palette);

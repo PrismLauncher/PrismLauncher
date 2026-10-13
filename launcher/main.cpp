@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(flat_white);
 
             Q_INIT_RESOURCE(shaders);
+            Q_INIT_RESOURCE(fresh);
             return app.exec();
         }
         case Application::Failed:

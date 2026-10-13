@@ -22,6 +22,7 @@
 #include <QLoggingCategory>
 #include <QString>
 #include <memory>
+#include <optional>
 
 #include "IconTheme.h"
 #include "ui/themes/CatPack.h"
@@ -49,6 +50,8 @@ class ThemeManager {
     void applyCurrentlySelectedTheme(bool initial = false);
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
+    /// @brief Stores and applies a theme the user picked, along with its preferred icon set if it has one
+    void selectApplicationTheme(const QString& id);
 
     /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
     /// @param catName Optional, if you need a specific background.
@@ -87,6 +90,9 @@ class ThemeManager {
     void setTitlebarColorOfAllWindowsOnMac(const QColor& color);
     // On non-Mac systems, this is a no-op.
     void stopSettingNewWindowColorsOnMac();
+    // Windows 11: paints the native title bar of every window, current and future, with this color.
+    // std::nullopt restores the system default. On other systems, this is a no-op.
+    void setTitlebarColorOnWindows(const std::optional<QColor>& color);
 #ifdef Q_OS_MACOS
     NSObject* m_windowTitlebarObserver = nullptr;
 #endif
