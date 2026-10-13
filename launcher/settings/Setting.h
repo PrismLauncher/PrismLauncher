@@ -102,6 +102,8 @@ class Setting : public QObject {
     virtual void reset();
 
    protected:
+    QVariant retrieve() const;
+
     friend class SettingsObject;
     SettingsObject* m_storage;
     QStringList m_synonyms;
