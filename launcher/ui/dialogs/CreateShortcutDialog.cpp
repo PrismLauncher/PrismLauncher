@@ -51,6 +51,7 @@
 #include "icons/IconList.h"
 
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/Realms.h"
 #include "minecraft/ShortcutUtils.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
@@ -71,6 +72,10 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
         ui->worldTarget->hide();
         ui->worldSelectionBox->hide();
         ui->serverTarget->setChecked(true);
+    }
+    if (!m_QuickJoinSupported) {
+        ui->realmTarget->hide();
+        ui->realmSelectionBox->hide();
         ui->serverTarget->hide();
         ui->serverLabel->show();
     }
@@ -95,6 +100,19 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
             QString entry_name = tr("%1 [%2] - Last Played: %3")
                                      .arg(world.name(), world.gameType().toTranslatedString(), world.lastPlayed().toString(Qt::ISODate));
             ui->worldSelectionBox->addItem(entry_name, world.name());
+        }
+    }
+
+    // Populate realms
+    if (m_QuickJoinSupported) {
+        m_realmsJob = Realms::fetch(instance, this, [this](const QList<Realms::Realm>& realms) {
+            for (const auto& realm : realms) {
+                ui->realmSelectionBox->addItem(realm.name, realm.id);
+            }
+        });
+        if (!m_realmsJob) {
+            ui->realmTarget->setEnabled(false);
+            ui->realmTarget->setToolTip(tr("A Microsoft account that owns Minecraft is required to join Realms."));
         }
     }
 
@@ -145,6 +163,7 @@ void CreateShortcutDialog::on_targetCheckbox_stateChanged(int state)
     ui->targetOptionsGroup->setEnabled(state == Qt::Checked);
     ui->worldSelectionBox->setEnabled(ui->worldTarget->isChecked());
     ui->serverAddressBox->setEnabled(ui->serverTarget->isChecked());
+    ui->realmSelectionBox->setEnabled(ui->realmTarget->isChecked());
     stateChanged();
 }
 
@@ -170,6 +189,17 @@ void CreateShortcutDialog::on_serverAddressBox_textChanged(const QString& text)
     stateChanged();
 }
 
+void CreateShortcutDialog::on_realmTarget_toggled(bool checked)
+{
+    ui->realmSelectionBox->setEnabled(checked);
+    stateChanged();
+}
+
+void CreateShortcutDialog::on_realmSelectionBox_currentIndexChanged(int index)
+{
+    stateChanged();
+}
+
 void CreateShortcutDialog::stateChanged()
 {
     QString result = m_instance->name();
@@ -178,6 +208,8 @@ void CreateShortcutDialog::stateChanged()
             result = tr("%1 - %2").arg(result, ui->worldSelectionBox->currentData().toString());
         else if (ui->serverTarget->isChecked())
             result = tr("%1 - Server %2").arg(result, ui->serverAddressBox->text());
+        else if (ui->realmTarget->isChecked())
+            result = tr("%1 - Realm %2").arg(result, ui->realmSelectionBox->currentText());
     }
     ui->instNameTextBox->setPlaceholderText(result);
     if (!ui->targetCheckbox->isChecked())
@@ -185,7 +217,8 @@ void CreateShortcutDialog::stateChanged()
     else {
         ui->buttonBox->button(QDialogButtonBox::Ok)
             ->setEnabled((ui->worldTarget->isChecked() && ui->worldSelectionBox->currentIndex() != -1) ||
-                         (ui->serverTarget->isChecked() && !ui->serverAddressBox->text().isEmpty()));
+                         (ui->serverTarget->isChecked() && !ui->serverAddressBox->text().isEmpty()) ||
+                         (ui->realmTarget->isChecked() && ui->realmSelectionBox->currentIndex() != -1));
     }
 }
 
@@ -201,6 +234,9 @@ void CreateShortcutDialog::createShortcut()
         } else if (ui->serverTarget->isChecked()) {
             targetString = tr("server");
             extraArgs = { "--server", ui->serverAddressBox->text() };
+        } else if (ui->realmTarget->isChecked()) {
+            targetString = tr("realm");
+            extraArgs = { "--realm", ui->realmSelectionBox->currentData().toString() };
         }
     }
 
