@@ -62,8 +62,14 @@ SystemTheme::SystemTheme(const QString& styleName, const QPalette& defaultPalett
 void SystemTheme::apply(bool initial)
 {
     // See S_NATIVE_STYLES comment
-    if (initial && S_NATIVE_STYLES.contains(m_themeName)) {
-        QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
+    if (S_NATIVE_STYLES.contains(m_themeName)) {
+        if (initial) {
+            QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
+        } else {
+            ITheme::apply(initial);
+        }
+        QApplication::setPalette(QApplication::style()->standardPalette());
+        m_colorPalette = QApplication::palette();
         return;
     }
 
