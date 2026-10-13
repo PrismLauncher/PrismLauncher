@@ -242,6 +242,9 @@ void OtherLogsPage::reload()
         if (m_instance) {
             setControlsEnabled(false);
         } else {
+            if (m_model && m_model->parent() == this) {
+                m_model->deleteLater();
+            }
             m_model = APPLICATION->logModel.get();
             m_proxy->setSourceModel(m_model);
             ui->text->setModel(m_proxy);
@@ -303,6 +306,9 @@ void OtherLogsPage::reload()
         ui->text->clear();
         ui->text->setModel(nullptr);
         if (!m_instance) {
+            if (m_model && m_model->parent() == this) {
+                m_model->deleteLater();
+            }
             m_model = new LogModel(this);
             m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
             m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
