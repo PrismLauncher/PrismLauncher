@@ -131,16 +131,16 @@ void InstanceCopyTask::copyFinished()
     // FIXME: shouldn't this be able to report errors?
     auto instanceSettings = std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
 
-    BaseInstance* inst(new NullInstance(m_globalSettings, std::move(instanceSettings), m_stagingPath));
-    inst->setName(name());
-    inst->setIconKey(m_instIcon);
-    inst->regenerateUuid();
+    NullInstance inst(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    inst.setName(name());
+    inst.setIconKey(m_instIcon);
+    inst.regenerateUuid();
     if (!m_keepPlaytime) {
-        inst->resetTimePlayed();
+        inst.resetTimePlayed();
     }
     if (m_useLinks) {
-        inst->addLinkedInstanceId(m_origInstance->id());
-        auto allowedSymlinksFile = QFileInfo(FS::PathCombine(inst->gameRoot(), "allowed_symlinks.txt"));
+        inst.addLinkedInstanceId(m_origInstance->id());
+        auto allowedSymlinksFile = QFileInfo(FS::PathCombine(inst.gameRoot(), "allowed_symlinks.txt"));
 
         QByteArray allowedSymlinks;
         if (allowedSymlinksFile.exists()) {
