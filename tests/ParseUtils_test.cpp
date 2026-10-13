@@ -2,6 +2,8 @@
 
 #include <minecraft/ParseUtils.h>
 
+#include "TestHelpers.h"
+
 class ParseUtilsTest : public QObject {
     Q_OBJECT
    private slots:
@@ -26,6 +28,6 @@ class ParseUtilsTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(ParseUtilsTest)
+REGISTER_TEST(ParseUtilsTest)
 
 #include "ParseUtils_test.moc"

@@ -21,6 +21,7 @@
 #include <QTimer>
 
 #include "FileSystem.h"
+#include "TestHelpers.h"
 
 #include "minecraft/mod/TexturePack.h"
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
@@ -69,6 +70,6 @@ class TexturePackParseTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(TexturePackParseTest)
+REGISTER_TEST(TexturePackParseTest)
 
 #include "TexturePackParse_test.moc"

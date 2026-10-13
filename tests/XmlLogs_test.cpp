@@ -34,6 +34,8 @@
 #include <MessageLevel.h>
 #include <logs/LogParser.h>
 
+#include "TestHelpers.h"
+
 class XmlLogParseTest : public QObject {
     Q_OBJECT
 
@@ -276,6 +278,6 @@ class XmlLogParseTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(XmlLogParseTest)
+REGISTER_TEST(XmlLogParseTest)
 
 #include "XmlLogs_test.moc"

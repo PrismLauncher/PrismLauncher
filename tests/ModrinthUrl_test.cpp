@@ -2,6 +2,8 @@
 
 #include <modplatform/modrinth/ModrinthAPI.h>
 
+#include "TestHelpers.h"
+
 class ModrinthUrlTest : public QObject {
     Q_OBJECT
 
@@ -45,6 +47,6 @@ class ModrinthUrlTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(ModrinthUrlTest)
+REGISTER_TEST(ModrinthUrlTest)
 
 #include "ModrinthUrl_test.moc"

@@ -17,6 +17,8 @@
 
 #include <Version.h>
 
+#include "TestHelpers.h"
+
 class VersionTest : public QObject {
     Q_OBJECT
 
@@ -208,6 +210,6 @@ class VersionTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(VersionTest)
+REGISTER_TEST(VersionTest)
 
 #include "Version_test.moc"

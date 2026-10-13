@@ -7,6 +7,8 @@
 #include "FileSystem.h"
 #include "ui/themes/CatPack.h"
 
+#include "TestHelpers.h"
+
 class CatPackTest : public QObject {
     Q_OBJECT
    private slots:
@@ -34,6 +36,6 @@ class CatPackTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(CatPackTest)
+REGISTER_TEST(CatPackTest)
 
 #include "CatPack_test.moc"

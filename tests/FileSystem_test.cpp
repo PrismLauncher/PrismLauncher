@@ -10,6 +10,8 @@
 #include <StringUtils.h>
 
 #include <filesystem>
+
+#include "TestHelpers.h"
 namespace fs = std::filesystem;
 
 class LinkTask : public Task {
@@ -711,6 +713,6 @@ class FileSystemTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(FileSystemTest)
+REGISTER_TEST(FileSystemTest)
 
 #include "FileSystem_test.moc"

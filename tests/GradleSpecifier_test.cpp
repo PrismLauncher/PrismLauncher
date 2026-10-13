@@ -2,6 +2,8 @@
 
 #include <minecraft/GradleSpecifier.h>
 
+#include "TestHelpers.h"
+
 class GradleSpecifierTest : public QObject {
     Q_OBJECT
    private slots:
@@ -66,6 +68,6 @@ class GradleSpecifierTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(GradleSpecifierTest)
+REGISTER_TEST(GradleSpecifierTest)
 
 #include "GradleSpecifier_test.moc"

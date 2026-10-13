@@ -43,6 +43,8 @@
 #include <minecraft/mod/ModFolderModel.h>
 #include <minecraft/mod/ResourceFolderModel.h>
 
+#include "TestHelpers.h"
+
 #define EXEC_UPDATE_TASK(EXEC, VERIFY)                            \
     QSignalSpy spy(&model, &ResourceFolderModel::updateFinished); \
     VERIFY(EXEC);                                                 \
@@ -211,6 +213,6 @@ class ResourceFolderModelTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(ResourceFolderModelTest)
+REGISTER_TEST(ResourceFolderModelTest)
 
 #include "ResourceFolderModel_test.moc"

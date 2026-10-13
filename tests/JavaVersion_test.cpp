@@ -2,6 +2,8 @@
 
 #include <java/JavaVersion.h>
 
+#include "TestHelpers.h"
+
 class JavaVersionTest : public QObject {
     Q_OBJECT
    private slots:
@@ -129,6 +131,6 @@ class JavaVersionTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(JavaVersionTest)
+REGISTER_TEST(JavaVersionTest)
 
 #include "JavaVersion_test.moc"
