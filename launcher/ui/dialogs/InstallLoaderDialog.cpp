@@ -25,6 +25,7 @@
 #include "BuildConfig.h"
 #include "DesktopServices.h"
 #include "meta/Index.h"
+#include "minecraft/Component.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -34,15 +35,15 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
-    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
-        : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
+    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, PackProfile* profile)
+        : VersionSelectWidget(nullptr)
+        , uid(id)
+        , iconName(iconName)
+        , name(name)
+        , minecraftVersion(profile->getComponentVersion("net.minecraft"))
     {
-        const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
         setExactIfPresentFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
-
-        if (oldestVersion != Version() && Version(minecraftVersion) < oldestVersion)
-            setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
 
         if (const QString currentVersion = profile->getComponentVersion(id); !currentVersion.isNull())
             setCurrentVersion(currentVersion);
@@ -61,6 +62,10 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
         if (!versions)
             return;
 
+        if (!Component::loaderSupportsMinecraft(uid, minecraftVersion)) {
+            setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
+        }
+
         initialize(versions.get());
         loaded = true;
     }
@@ -75,6 +80,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     const QString uid;
     const QString iconName;
     const QString name;
+    const QString minecraftVersion;
     bool loaded = false;
 };
 
@@ -136,15 +142,17 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
     return { // NeoForge
-             new InstallLoaderPage("net.neoforged", "neoforged", tr("NeoForge"), {}, profile),
+             new InstallLoaderPage("net.neoforged", "neoforged", tr("NeoForge"), profile),
              // Forge
-             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), {}, profile),
+             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), profile),
              // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), Version("1.14"), profile),
+             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), profile),
              // Quilt
-             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), Version("1.14"), profile),
+             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), profile),
+             // Ornithe
+             new InstallLoaderPage("net.ornithemc.fabric-loader", "ornithe", tr("Ornithe (Fabric)"), profile),
              // LiteLoader
-             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), {}, profile)
+             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), profile)
     };
 }
 
