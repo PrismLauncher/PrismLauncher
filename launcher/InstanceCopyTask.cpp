@@ -22,7 +22,7 @@ InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCop
     if (m_useLinks || m_useHardLinks) {
         if (!filters.isEmpty())
             filters += "|";
-        filters += "instance.cfg";
+        filters += "instance.cfg|metadata.cfg";
     }
 
     qDebug() << "CopyFilters:" << filters;
