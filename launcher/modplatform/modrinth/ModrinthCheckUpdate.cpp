@@ -161,7 +161,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
         // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
         // Such is the pain of having arbitrary files for a given version .-.
 
-        auto projectVer = Modrinth::loadIndexedPackVersion(projectObj, m_hashType, loaderFilter);
+        auto projectVer = Modrinth::Parse::loadIndexedPackVersion(projectObj, m_hashType, loaderFilter);
         if (!projectVer) {
             emitFailed(projectVer.error());
             return;
