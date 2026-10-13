@@ -18,6 +18,7 @@
 
 #include "FlamePackIndex.h"
 
+#include "FileSystem.h"
 #include "Json.h"
 #include "Result.h"
 #include "modplatform/ModIndex.h"
@@ -127,7 +128,7 @@ Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonAr
     return unsortedVersions;
 }
 
-Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj, bool loadChangelog)
+Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj)
 {
     TRY_INTO(const auto& versionArray, Json::requireArray(obj, "gameVersions"))
 
@@ -229,10 +230,6 @@ Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& ob
                 break;
         }
         file.dependencies.append(dependency);
-    }
-
-    if (loadChangelog) {
-        file.changelog = FlameAPI::getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
     }
 
     return file;
