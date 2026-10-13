@@ -1174,8 +1174,10 @@ void MainWindow::processURLs(QList<QUrl> urls)
         }
         ImportResourceDialog dlg(localFileName, type, this);
 
-        if (dlg.exec() != QDialog::Accepted)
+        dlg.filterBy(version.mcVersion, version.loaders);
+        if (dlg.exec() != QDialog::Accepted) {
             continue;
+        }
 
         qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
