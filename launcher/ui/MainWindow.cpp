@@ -1456,7 +1456,7 @@ void MainWindow::on_actionClearMetadata_triggered()
             ->show();
     }
 
-    APPLICATION->metacache()->SaveNow();
+    APPLICATION->metacache()->saveNow();
 }
 
 #ifdef Q_OS_MAC

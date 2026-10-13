@@ -630,8 +630,6 @@ set(PRISMUPDATER_SOURCES
     net/ChecksumValidator.h
     net/FileSink.cpp
     net/FileSink.h
-    net/HttpMetaCache.cpp
-    net/HttpMetaCache.h
     net/Logging.h
     net/Logging.cpp
     net/Request.cpp
