@@ -17,27 +17,43 @@
  */
 
 #include <iostream>
-#include <ostream>
-#include <print>
 
 #include "TestHelpers.h"
 
-int main(int argc, char* argv[])
+int main(const int argc, char* argv[])
 {
-    size_t succeeded = 0;
-    size_t testsCount = g_tests.size();
+    if (argc < 2) {
+        std::cerr << "No tests specified, nothing to do" << '\n';
+        std::cout << "Available tests:" << '\n';
+        for (const auto& test : g_tests) {
+            std::cout << "  " << test.name << '\n';
+        }
+        return 1;
+    }
 
-    for (size_t i = 0; i < testsCount; ++i) {
-        const auto& [name, func] = g_tests.at(i);
-        std::println(std::cout, "Running {} ({}/{})", name, i + 1, testsCount);
-        if (int ret = func(argc, argv); ret != 0) {
-            std::println(std::cerr, "{} FAILED: application exited with code {}", name, ret);
+    const auto args = std::span{ argv, static_cast<size_t>(argc) };
+    bool success = true;
+
+    for (const std::string& arg : args.subspan(1)) {
+        if (const auto testIter = std::ranges::find_if(g_tests, [arg](const auto& v) { return v.name == arg; });
+            testIter != g_tests.end()) {
+            const auto& [name, func] = *testIter;
+            std::cout << "Running test " << name << '\n';
+
+            // shorten the args passed to the qt test runner (it tries to parse the test name as test functions list)
+            std::string arg0{ argv[0] };
+            std::array<char*, 2> qAppArgs = { arg0.data(), nullptr };
+            if (const int ret = func(1, qAppArgs.data()); ret != 0) {
+                std::cerr << name << " FAILED: application exited with code " << ret << '\n';
+                success = false;
+            }
+
             continue;
         }
 
-        succeeded++;
+        std::cerr << "Failed to find test " << arg << '\n';
+        return 1;
     }
 
-    std::println(std::cout, "{}/{} tests have passed", succeeded, testsCount);
-    return succeeded == testsCount ? 0 : 1;
+    return success ? 0 : 1;
 }
