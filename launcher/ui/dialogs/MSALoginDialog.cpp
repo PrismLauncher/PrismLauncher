@@ -50,6 +50,7 @@
 #include <QSize>
 #include <QUrl>
 #include <QtWidgets/QPushButton>
+#include <memory>
 
 #include "qrencode.h"
 
@@ -166,7 +167,7 @@ void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 
 void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QColor fg)
 {
-    const auto* qr = QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8, 1);
+    auto* qr = QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8, 1);
     if (!qr) {
         qWarning() << "Unable to encode" << data << "as QR code";
         return;
@@ -194,6 +195,7 @@ void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QCo
             }
         }
     }
+    QRcode_free(qr);
 }
 
 void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, [[maybe_unused]] int expiresIn)
