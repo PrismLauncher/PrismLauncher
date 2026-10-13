@@ -607,7 +607,7 @@ void MainWindow::updateLaunchButton()
 
 void MainWindow::updateThemeMenu()
 {
-    QMenu* themeMenu = ui->actionChangeTheme->menu();
+    auto* themeMenu = ui->actionChangeTheme->menu();
 
     if (themeMenu) {
         themeMenu->clear();
@@ -617,7 +617,12 @@ void MainWindow::updateThemeMenu()
 
     auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
-    QActionGroup* themesGroup = new QActionGroup(this);
+    if (auto* g = findChild<QActionGroup*>("themesGroup"); g != nullptr) {
+        g->deleteLater();
+    }
+
+    auto* themesGroup = new QActionGroup(this);
+    themesGroup->setObjectName("themesGroup");
 
     for (auto* theme : themes) {
         QAction* themeAction = themeMenu->addAction(theme->name());
@@ -650,13 +655,13 @@ void MainWindow::repopulateAccountsMenu()
         ui->actionAccountsButton->setMenu(accountsButtonMenu);
     }
 
-    auto accounts = APPLICATION->accounts();
+    auto* accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
 
     bool canChangeSkin = defaultAccount && (defaultAccount->accountType() == AccountType::MSA) && !defaultAccount->isActive();
     ui->actionManageSkins->setEnabled(canChangeSkin);
 
-    QString active_profileId = "";
+    QString activeProfileId = "";
     if (defaultAccount) {
         // this can be called before accountMenuButton exists
         if (ui->actionAccountsButton) {
@@ -665,7 +670,12 @@ void MainWindow::repopulateAccountsMenu()
         }
     }
 
-    QActionGroup* accountsGroup = new QActionGroup(this);
+    if (auto* g = findChild<QActionGroup*>("accountsGroup"); g != nullptr) {
+        g->deleteLater();
+    }
+
+    auto* accountsGroup = new QActionGroup(this);
+    accountsGroup->setObjectName("accountsGroup");
 
     if (accounts->count() <= 0) {
         ui->actionNoAccountsAdded->setEnabled(false);
@@ -673,9 +683,9 @@ void MainWindow::repopulateAccountsMenu()
     } else {
         // TODO: Nicer way to iterate?
         for (int i = 0; i < accounts->count(); i++) {
-            MinecraftAccountPtr account = accounts->at(i);
+            auto account = accounts->at(i);
             auto profileLabel = profileInUseFilter(account->displayName(), account->isInUse());
-            QAction* action = new QAction(profileLabel, this);
+            auto* action = new QAction(profileLabel, this);
             action->setData(i);
             action->setCheckable(true);
             action->setActionGroup(accountsGroup);
@@ -708,7 +718,7 @@ void MainWindow::repopulateAccountsMenu()
 
     ui->accountsMenu->addAction(ui->actionNoDefaultAccount);
 
-    connect(ui->actionNoDefaultAccount, &QAction::triggered, this, &MainWindow::changeActiveAccount);
+    connect(ui->actionNoDefaultAccount, &QAction::triggered, this, &MainWindow::changeActiveAccount, Qt::UniqueConnection);
 
     ui->accountsMenu->addSeparator();
     ui->accountsMenu->addAction(ui->actionManageSkins);
