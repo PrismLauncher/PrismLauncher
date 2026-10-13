@@ -8,6 +8,7 @@ Checks:
     -bugprone-easily-swappable-parameters,
     -cppcoreguidelines-owning-memory,
     -cppcoreguidelines-pro-type-static-cast-downcast,
+    -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
     -misc-no-recursion,
     -modernize-use-nodiscard,
     -modernize-use-trailing-return-type,
