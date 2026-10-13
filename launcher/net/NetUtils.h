@@ -47,6 +47,8 @@ inline bool isApplicationError(QNetworkReply::NetworkError x)
 inline bool isServerError(QNetworkReply::NetworkError x)
 {
     static QSet<QNetworkReply::NetworkError> errors = { QNetworkReply::InternalServerError,
+                                                        // The 403 (ContentAccessDenied) error shows up when xbox servers block our IP from fetching-This will allow us to fallback to offline mode during game start.
+                                                        QNetworkReply::ContentAccessDenied,
                                                         QNetworkReply::OperationNotImplementedError,
                                                         QNetworkReply::ServiceUnavailableError,     // 503 | seen in logs in 2026
                                                         //QNetworkReply::GatewayTimeoutError,       // 504 | seen in logs in 2024
