@@ -278,24 +278,27 @@ Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& ob
     if (parent.contains("url")) {
         TRY_INTO(file.downloadUrl, Json::requireString(parent, "url"))
         TRY_INTO(file.fileName, Json::requireString(parent, "filename"))
+        file.size = parent["size"].toInt();
         file.fileName = FS::RemoveInvalidPathChars(file.fileName);
         TRY_INTO(const auto& primary, Json::requireBoolean(parent, "primary"))
         file.isPreferred = primary || (files.count() == 1);
-        auto hashList = Json::requireObject(parent, "hashes");
-        TRY(hashList)
+        TRY_INTO(auto hashList, Json::requireObject(parent, "hashes"))
 
-        if (hashList->contains(preferredHashType)) {
-            TRY_INTO(file.hash, Json::requireString(hashList.value(), preferredHashType))
+        if (hashList.contains(preferredHashType)) {
+            TRY_INTO(file.hash, Json::requireString(hashList, preferredHashType))
             file.hashType = preferredHashType;
         } else {
             auto hashTypes = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hashType : hashTypes) {
-                if (hashList->contains(hashType)) {
-                    TRY_INTO(file.hash, Json::requireString(hashList.value(), hashType))
+                if (hashList.contains(hashType)) {
+                    TRY_INTO(file.hash, Json::requireString(hashList, hashType))
                     file.hashType = hashType;
                     break;
                 }
             }
+        }
+        if (hashList.contains("sha1")) {
+            file.sha1 = hashList.value("sha1").toString("");
         }
 
         return file;
