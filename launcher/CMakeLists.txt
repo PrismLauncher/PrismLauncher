@@ -101,6 +101,10 @@ set(CORE_SOURCES
 
     # Assertion helper
     AssertHelpers.h
+
+    # XDG Desktop Portal DynamicLauncher support for installing shortcuts on Linux
+    DynamicLauncherPortal.h
+    DynamicLauncherPortal.cpp
 )
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
     set(CORE_SOURCES
