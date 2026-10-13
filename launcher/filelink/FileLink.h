@@ -55,12 +55,10 @@ class FileLinkApp : public QCoreApplication {
 
     bool m_useHardLinks = false;
 
-    QDateTime m_startTime;
     QLocalSocket socket;
     QDataStream in;
     quint32 blockSize;
 
     QList<FS::LinkPair> m_links_to_make;
     QList<FS::LinkResult> m_path_results;
-
 };

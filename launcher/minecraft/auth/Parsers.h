@@ -8,7 +8,6 @@ bool getDateTime(QJsonValue value, QDateTime& out);
 bool getString(QJsonValue value, QString& out);
 bool getNumber(QJsonValue value, double& out);
 bool getNumber(QJsonValue value, int64_t& out);
-bool getBool(QJsonValue value, bool& out);
 
 bool parseXTokenResponse(const QByteArray& data, Token& output, QString name);
 bool parseMojangResponse(const QByteArray& data, Token& output);

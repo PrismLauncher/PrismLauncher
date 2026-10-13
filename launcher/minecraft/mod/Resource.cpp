@@ -351,15 +351,6 @@ bool Resource::isMoreThanOneHardLink() const
     return m_hardLinkCount > 1;
 }
 
-auto Resource::getOriginalFileName() const -> QString
-{
-    auto fileName = m_fileInfo.fileName();
-    if (!m_enabled) {
-        fileName.chop(9);
-    }
-    return fileName;
-}
-
 QDebug operator<<(QDebug debug, ResourceType type)
 {
     switch (type) {

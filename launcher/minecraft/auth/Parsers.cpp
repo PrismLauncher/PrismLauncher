@@ -46,15 +46,6 @@ bool getNumber(QJsonValue value, int64_t& out)
     return true;
 }
 
-bool getBool(QJsonValue value, bool& out)
-{
-    if (!value.isBool()) {
-        return false;
-    }
-    out = value.toBool();
-    return true;
-}
-
 /*
 {
    "IssueInstant":"2020-12-07T19:52:08.4463796Z",
