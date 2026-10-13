@@ -37,6 +37,7 @@
 #include "InstanceList.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QDirListing>
 #include <QFile>
 #include <QFileInfo>
@@ -978,7 +979,7 @@ class InstanceStaging : public Task {
         connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
         connect(child, &Task::stepProgress, this, &InstanceStaging::propagateStepProgress);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
+        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::commitWithRetry);
     }
 
     ~InstanceStaging() override = default;
@@ -1008,6 +1009,27 @@ class InstanceStaging : public Task {
 
    private slots:
     void childSucceeded()
+    {
+        if (m_child->shouldCopyTemplateDir()) {
+            QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
+            if (!templateDir.isEmpty() && QDir(templateDir).exists()) {
+                qDebug() << "trying to copy instance template directory";
+
+                FS::copy folderCopy(templateDir, FS::PathCombine(m_stagingPath, "minecraft"));
+                folderCopy.followSymlinks(false).copyDirectories(true).overwrite(true);
+
+                if (!folderCopy()) {
+                    logWarning(
+                        tr("Failed to copy instance template. The instance has still been created, but has only partial or no template "
+                           "files."));
+                }
+            }
+        } else {
+            qDebug() << "Skip template copy";
+        }
+        commitWithRetry();
+    }
+    void commitWithRetry()
     {
         const unsigned sleepTime = m_backoff();
         if (m_parent->commitStagedInstance(m_stagingPath, *m_child, m_child->group())) {
