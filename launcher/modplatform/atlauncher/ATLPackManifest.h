@@ -186,6 +186,6 @@ struct PackVersion {
     VersionDeletes deletes;
 };
 
-Result<> loadVersion(PackVersion& v, const QJsonObject& obj);
+Result<PackVersion> loadVersion(const QJsonObject& obj);
 
 }  // namespace ATLauncher
