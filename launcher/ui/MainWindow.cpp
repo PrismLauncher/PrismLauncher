@@ -386,6 +386,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->accountsMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
 
     repopulateAccountsMenu();
+    connect(ui->actionNoDefaultAccount, &QAction::triggered, this, &MainWindow::changeActiveAccount);
 
     // Update the menu when the active account changes.
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
@@ -611,31 +612,31 @@ void MainWindow::updateLaunchButton()
 
 void MainWindow::updateThemeMenu()
 {
-    QMenu* themeMenu = ui->actionChangeTheme->menu();
+    auto* themeMenu = ui->actionChangeTheme->menu();
 
     if (themeMenu) {
-        themeMenu->clear();
-    } else {
-        themeMenu = new QMenu(this);
+        themeMenu->deleteLater();
     }
+    themeMenu = new QMenu(this);
 
     auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
-    QActionGroup* themesGroup = new QActionGroup(this);
-
+    auto currentThemeID = APPLICATION->settings()->get("ApplicationTheme").toString();
     for (auto* theme : themes) {
-        QAction* themeAction = themeMenu->addAction(theme->name());
+        auto* themeAction = new QAction(theme->name(), themeMenu);
 
         themeAction->setCheckable(true);
-        if (APPLICATION->settings()->get("ApplicationTheme").toString() == theme->id()) {
-            themeAction->setChecked(true);
-        }
-        themeAction->setActionGroup(themesGroup);
+        themeAction->setChecked(currentThemeID == theme->id());
+        themeAction->setData(theme->id());
 
-        connect(themeAction, &QAction::triggered, APPLICATION, [id = theme->id()]() {
+        connect(themeAction, &QAction::triggered, APPLICATION, [id = theme->id(), themeMenu]() {
             APPLICATION->themeManager()->setApplicationTheme(id);
             APPLICATION->settings()->set("ApplicationTheme", id);
+            for (auto* a : themeMenu->actions()) {
+                a->setChecked(a->data().toString() == id);
+            }
         });
+        themeMenu->addAction(themeAction);
     }
 
     ui->actionChangeTheme->setMenu(themeMenu);
@@ -648,19 +649,18 @@ void MainWindow::repopulateAccountsMenu()
     // NOTE: this is done so the accounts button text is not set to the accounts menu title
     QMenu* accountsButtonMenu = ui->actionAccountsButton->menu();
     if (accountsButtonMenu) {
-        accountsButtonMenu->clear();
-    } else {
-        accountsButtonMenu = new QMenu(this);
-        ui->actionAccountsButton->setMenu(accountsButtonMenu);
+        accountsButtonMenu->deleteLater();
     }
+    accountsButtonMenu = new QMenu(this);
+    ui->actionAccountsButton->setMenu(accountsButtonMenu);
 
-    auto accounts = APPLICATION->accounts();
-    MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
+    auto* accounts = APPLICATION->accounts();
+    auto defaultAccount = accounts->defaultAccount();
 
     bool canChangeSkin = defaultAccount && (defaultAccount->accountType() == AccountType::MSA) && !defaultAccount->isActive();
     ui->actionManageSkins->setEnabled(canChangeSkin);
 
-    QString active_profileId = "";
+    QString activeProfileId = "";
     if (defaultAccount) {
         // this can be called before accountMenuButton exists
         if (ui->actionAccountsButton) {
@@ -669,7 +669,7 @@ void MainWindow::repopulateAccountsMenu()
         }
     }
 
-    QActionGroup* accountsGroup = new QActionGroup(this);
+    auto* accountsGroup = new QActionGroup(accountsButtonMenu);
 
     if (accounts->count() <= 0) {
         ui->actionNoAccountsAdded->setEnabled(false);
@@ -677,12 +677,11 @@ void MainWindow::repopulateAccountsMenu()
     } else {
         // TODO: Nicer way to iterate?
         for (int i = 0; i < accounts->count(); i++) {
-            MinecraftAccountPtr account = accounts->at(i);
+            auto account = accounts->at(i);
             auto profileLabel = profileInUseFilter(account->displayName(), account->isInUse());
-            QAction* action = new QAction(profileLabel, this);
+            auto* action = new QAction(profileLabel, accountsGroup);
             action->setData(i);
             action->setCheckable(true);
-            action->setActionGroup(accountsGroup);
             if (defaultAccount == account) {
                 action->setChecked(true);
             }
@@ -711,8 +710,6 @@ void MainWindow::repopulateAccountsMenu()
     ui->actionNoDefaultAccount->setActionGroup(accountsGroup);
 
     ui->accountsMenu->addAction(ui->actionNoDefaultAccount);
-
-    connect(ui->actionNoDefaultAccount, &QAction::triggered, this, &MainWindow::changeActiveAccount);
 
     ui->accountsMenu->addSeparator();
     ui->accountsMenu->addAction(ui->actionManageSkins);
