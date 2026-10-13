@@ -38,6 +38,7 @@
 #include "ui_AppearanceWidget.h"
 
 #include <DesktopServices.h>
+#include <QApplication>
 #include <QGraphicsOpacityEffect>
 #include <QSignalBlocker>
 #include "BuildConfig.h"
@@ -145,7 +146,10 @@ void AppearanceWidget::applyIconTheme(int index)
     auto newIconTheme = m_ui->iconsComboBox->itemData(index).toString();
     if (originalIconTheme != newIconTheme) {
         settings->set("IconTheme", newIconTheme);
-        APPLICATION->themeManager()->applyCurrentlySelectedTheme();
+        // only the icons change: re-applying the whole theme resets the stylesheet and leaves stale sizes behind
+        APPLICATION->themeManager()->setIconTheme(newIconTheme);
+        for (auto* widget : QApplication::topLevelWidgets())
+            widget->update();
     }
 }
 
