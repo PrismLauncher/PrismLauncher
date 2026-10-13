@@ -47,6 +47,8 @@ struct InstanceViewRoles {
     enum { GroupRole = Qt::UserRole };
 };
 
+class QVariantAnimation;
+
 class InstanceView : public QAbstractItemView {
     Q_OBJECT
 
@@ -78,6 +80,8 @@ class InstanceView : public QAbstractItemView {
     virtual QRegion visualRegionForSelection(const QItemSelection& selection) const override;
 
     int spacing() const;
+    // how hovered an item looks, 0..1: fades in for the hovered item and out for the previous one
+    qreal hoverAmount(const QModelIndex& index) const;
     void setPaintCat(bool visible);
 
    public slots:
@@ -137,6 +141,10 @@ class InstanceView : public QAbstractItemView {
     QPoint m_pressedPosition;
     QPersistentModelIndex m_pressedIndex;
     QPersistentModelIndex m_hoverIndex;
+    QPersistentModelIndex m_previousHoverIndex;
+    qreal m_hoverProgress = 1.0;
+    qreal m_previousHoverStart = 0.0;
+    QVariantAnimation* m_hoverAnimation = nullptr;
     bool m_pressedAlreadySelected;
     VisualGroup* m_pressedCategory;
     QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;

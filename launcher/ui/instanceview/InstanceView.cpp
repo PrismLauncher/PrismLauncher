@@ -46,6 +46,7 @@
 #include <QPainter>
 #include <QPersistentModelIndex>
 #include <QScrollBar>
+#include <QVariantAnimation>
 #include <QtMath>
 
 #include "VisualGroup.h"
@@ -280,14 +281,51 @@ int InstanceView::spacing() const
     return FreshTheme::isActive() ? 14 : m_spacing;
 }
 
+qreal InstanceView::hoverAmount(const QModelIndex& index) const
+{
+    if (index == m_hoverIndex)
+        return m_hoverProgress;
+    if (index == m_previousHoverIndex)
+        return m_previousHoverStart * (1.0 - m_hoverProgress);
+    return 0.0;
+}
+
 void InstanceView::setHoverIndex(const QModelIndex& index)
 {
     if (index == m_hoverIndex)
         return;
-    const QModelIndex previous = m_hoverIndex;
+
+    // the item losing hover fades out from wherever it was
+    if (m_previousHoverIndex.isValid())
+        viewport()->update(visualRect(m_previousHoverIndex));
+    m_previousHoverStart = hoverAmount(m_hoverIndex);
+    m_previousHoverIndex = m_hoverIndex;
     m_hoverIndex = index;
-    if (previous.isValid())
-        viewport()->update(visualRect(previous));
+
+    if (!FreshTheme::isActive()) {
+        m_hoverProgress = 1.0;
+    } else {
+        if (m_hoverAnimation == nullptr) {
+            m_hoverAnimation = new QVariantAnimation(this);
+            m_hoverAnimation->setDuration(140);
+            m_hoverAnimation->setStartValue(0.0);
+            m_hoverAnimation->setEndValue(1.0);
+            m_hoverAnimation->setEasingCurve(QEasingCurve::OutCubic);
+            connect(m_hoverAnimation, &QVariantAnimation::valueChanged, this, [this](const QVariant& progress) {
+                m_hoverProgress = progress.toReal();
+                if (m_hoverIndex.isValid())
+                    viewport()->update(visualRect(m_hoverIndex));
+                if (m_previousHoverIndex.isValid())
+                    viewport()->update(visualRect(m_previousHoverIndex));
+            });
+        }
+        m_hoverProgress = 0.0;
+        m_hoverAnimation->stop();
+        m_hoverAnimation->start();
+    }
+
+    if (m_previousHoverIndex.isValid())
+        viewport()->update(visualRect(m_previousHoverIndex));
     if (index.isValid())
         viewport()->update(visualRect(index));
 }

@@ -45,6 +45,7 @@
 #include <QTextEdit>
 #include "BaseInstance.h"
 #include "InstanceList.h"
+#include "InstanceView.h"
 #include "ui/themes/FreshTheme.h"
 
 // Origin: Qt
@@ -76,6 +77,12 @@ constexpr int CARD_PADDING = 14;
 constexpr int CARD_ICON_SIZE = 64;
 constexpr int CARD_TEXT_GAP = 10;
 constexpr qreal CARD_RADIUS = 18;
+
+QColor blend(const QColor& from, const QColor& to, qreal amount)
+{
+    return QColor::fromRgbF(from.redF() + (to.redF() - from.redF()) * amount, from.greenF() + (to.greenF() - from.greenF()) * amount,
+                            from.blueF() + (to.blueF() - from.blueF()) * amount);
+}
 
 QFont cardFont(const QFont& base)
 {
@@ -154,16 +161,18 @@ void ListViewDelegate::paintCard(QPainter* painter, const QStyleOptionViewItem& 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     const bool selected = opt.state & QStyle::State_Selected;
-    const bool hovered = opt.state & QStyle::State_MouseOver;
+    // hover fades in and out (see InstanceView::hoverAmount)
+    const auto* view = qobject_cast<const InstanceView*>(opt.widget);
+    const qreal hover = view != nullptr ? view->hoverAmount(index) : (opt.state & QStyle::State_MouseOver ? 1.0 : 0.0);
 
     // card: filled, tonal container + primary outline when selected (Material You)
     const QRectF card = QRectF(opt.rect).adjusted(1, 1, -1, -1);
     if (selected) {
-        painter->setBrush(FreshTheme::color(hovered ? "secondary-container-hover" : "secondary-container"));
+        painter->setBrush(blend(FreshTheme::color("secondary-container"), FreshTheme::color("secondary-container-hover"), hover));
         painter->setPen(QPen(FreshTheme::color("accent"), 2));
         painter->drawRoundedRect(card.adjusted(0.5, 0.5, -0.5, -0.5), CARD_RADIUS, CARD_RADIUS);
     } else {
-        painter->setBrush(FreshTheme::color(hovered ? "surface" : "card"));
+        painter->setBrush(blend(FreshTheme::color("card"), FreshTheme::color("surface"), hover));
         painter->setPen(QPen(FreshTheme::color("border-subtle"), 1));
         painter->drawRoundedRect(card, CARD_RADIUS, CARD_RADIUS);
     }
