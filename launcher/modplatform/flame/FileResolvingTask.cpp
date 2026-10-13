@@ -57,14 +57,14 @@ void Flame::FileResolvingTask::executeTask()
     for (const auto& file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    auto [task, response] = FlameAPI::getFiles(fileIds);
+    auto [task, response] = FlameAPI::get().getVersionsTask(fileIds);
     m_task = task;
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, response, stepProgress2]() {
         stepProgress2->state = TaskStepState::Succeeded;
         stepProgress(*stepProgress2);
-        netJobFinished(response);
+        netJobFinished(*response);
     });
     connect(m_task.get(), &Task::failed, this, [this, stepProgress2](QString reason) {
         stepProgress2->state = TaskStepState::Failed;
@@ -85,43 +85,20 @@ void Flame::FileResolvingTask::executeTask()
     m_task->start();
 }
 
-void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
+void Flame::FileResolvingTask::netJobFinished(const QList<ModPlatform::IndexedVersion>& response)
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
 
-    auto doc = Json::requireDocument(*response).and_then([](const auto& v) { return Json::requireArray(v.object()["data"]); });
-    if (!doc) {
-        qCritical() << "Failed to parse CurseForge files response";
-        qCritical() << "Parse error:" << doc.error();
-
-        emitFailed(tr("Invalid data returned from the API."));
-
-        return;
-    }
-
     QStringList hashes;
-    for (QJsonValueRef file : doc.value()) {
-        auto process = [this, &hashes](const QJsonValue& file) -> Result<> {
-            TRY_INTO(const auto& version,
-                     Json::requireObject(file).and_then([](const auto& v) { return Flame::Parse::loadIndexedPackVersion(v); }))
-            auto fileid = version.fileId.toInt();
-            Q_ASSERT(fileid != 0);
-            Q_ASSERT(m_manifest.files.contains(fileid));
-            m_manifest.files[fileid].version = version;
-            auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
-            if (!url.isValid() && "sha1" == version.hashType && !version.hash.isEmpty()) {
-                hashes.push_back(version.hash);
-            }
-            return {};
-        };
-        if (auto result = process(file); !result) {
-            qCritical() << "Failed to parse CurseForge file entry";
-            qCritical() << "Parse error:" << result.error();
-
-            emitFailed(tr("Invalid data returned from the API."));
-
-            return;
+    for (const auto& version : response) {
+        auto fileid = version.fileId.toInt();
+        Q_ASSERT(fileid != 0);
+        Q_ASSERT(m_manifest.files.contains(fileid));
+        m_manifest.files[fileid].version = version;
+        auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
+        if (!url.isValid() && "sha1" == version.hashType && !version.hash.isEmpty()) {
+            hashes.push_back(version.hash);
         }
     }
     if (hashes.isEmpty()) {

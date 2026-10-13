@@ -19,7 +19,9 @@
 #include "FlamePackIndex.h"
 
 #include "Json.h"
+#include "Result.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 #include "modplatform/flame/FlameAPI.h"
 
 namespace {
@@ -90,14 +92,16 @@ Result<> loadIndexedPack(ModPlatform::IndexedPack& pack, const QJsonObject& obj)
     return {};
 }
 
-Result<> loadIndexedPackVersions(ModPlatform::IndexedPack& pack, const QJsonArray& arr)
+Result<QList<ModPlatform::IndexedVersion>> loadIndexedPackVersions(const QJsonArray& arr,
+                                                                   const QString& addonId,
+                                                                   ModPlatform::ResourceType resourceType)
 {
     QList<ModPlatform::IndexedVersion> unsortedVersions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
         TRY_INTO(auto file, loadIndexedPackVersion(obj))
-        if (pack.resourceType == ModPlatform::ResourceType::TexturePack) {
+        if (resourceType == ModPlatform::ResourceType::TexturePack) {
             // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.
             const auto& mcVersions = file.mcVersion;
 
@@ -107,7 +111,7 @@ Result<> loadIndexedPackVersions(ModPlatform::IndexedPack& pack, const QJsonArra
             }
         }
         if (!file.addonId.isValid()) {
-            file.addonId = pack.addonId;
+            file.addonId = addonId;
         }
 
         if (file.fileId.isValid()) {  // Heuristic to check if the returned value is valid
@@ -120,9 +124,7 @@ Result<> loadIndexedPackVersions(ModPlatform::IndexedPack& pack, const QJsonArra
         return a.date > b.date;
     };
     std::ranges::sort(unsortedVersions, orderSortPredicate);
-    pack.versions = unsortedVersions;
-    pack.versionsLoaded = true;
-    return {};
+    return unsortedVersions;
 }
 
 Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(const QJsonObject& obj, bool loadChangelog)

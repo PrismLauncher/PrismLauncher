@@ -181,11 +181,11 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         connect(netJob.get(), &NetJob::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
-        m_job = netJob;
+        m_versionsTask = netJob;
         netJob->start();
     } else {
         for (const auto& version : m_current->versions) {
-            m_ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+            m_ui->versionSelectionBox->addItem(version.getVersionDisplayString(), QVariant(version.downloadUrl));
         }
 
         suggestCurrent();
