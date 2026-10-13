@@ -18,6 +18,8 @@
 #include <QDialog>
 
 class MinecraftInstance;
+class WorldList;
+class QSortFilterProxyModel;
 
 namespace Ui {
 class CreateShortcutDialog;
@@ -28,7 +30,7 @@ class CreateShortcutDialog : public QDialog {
 
    public:
     explicit CreateShortcutDialog(MinecraftInstance* instance, QWidget* parent = nullptr);
-    ~CreateShortcutDialog();
+    ~CreateShortcutDialog() override;
 
     void createShortcut();
 
@@ -51,8 +53,11 @@ class CreateShortcutDialog : public QDialog {
     Ui::CreateShortcutDialog* ui;
     QString InstIconKey;
     MinecraftInstance* m_instance;
-    bool m_QuickJoinSupported = false;
+    bool m_quickJoinSupported = false;
+    WorldList* m_worldList = nullptr;
+    QSortFilterProxyModel* m_worldProxyModel = nullptr;
 
     // Functions
     void stateChanged();
+    void updateWorldTargetVisibility();
 };
