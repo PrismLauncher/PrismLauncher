@@ -16,6 +16,7 @@
 #include "InstanceProxyModel.h"
 
 #include <BaseInstance.h>
+#include <InstanceList.h>
 #include <icons/IconList.h>
 #include "Application.h"
 #include "InstanceView.h"
@@ -67,7 +68,29 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIn
             return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
         }
         return pdataLeft->totalTimePlayed() > pdataRight->totalTimePlayed();
-    } else {
-        return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
+    } else if (sortMode == "Manual") {
+        // -1 when instance has no saved position (in group)
+        const int leftOrder = left.data(InstanceList::ManualOrderRole).toInt();
+        const int rightOrder = right.data(InstanceList::ManualOrderRole).toInt();
+
+        const bool sameOrder = (leftOrder == rightOrder);
+        const bool leftHasManualOrder = (leftOrder >= 0);
+        const bool rightHasManualOrder = (rightOrder >= 0);
+        const bool bothManualOrder = (leftHasManualOrder && rightHasManualOrder);
+
+        if (bothManualOrder && !sameOrder) {
+            return leftOrder < rightOrder;
+        }
+
+        if (leftHasManualOrder && !rightHasManualOrder) {
+            return true;
+        }
+
+        if (!leftHasManualOrder && rightHasManualOrder) {
+            return false;
+        }
     }
+
+    // fallback for manual, but i guess good practice if expanded
+    return (m_naturalSort.compare(pdataLeft->name(), pdataRight->name())) < 0;
 }

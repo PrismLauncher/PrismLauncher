@@ -172,6 +172,10 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
         case InstanceIDRole: {
             return pdata->id();
         }
+        case ManualOrderRole: {
+            const auto group = m_instanceGroupIndex.value(pdata->id());
+            return m_manualOrder.value(group).indexOf(pdata->id());
+        }
         case Qt::EditRole:
         case Qt::DisplayRole: {
             return pdata->name();
@@ -260,11 +264,57 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
     }
 
     if (changed) {
+        removeFromManualOrder(id);
+        if (m_manualOrder.contains(name)) {
+            m_manualOrder[name].append(id);
+        }
+
         increaseGroupCount(name);
-        auto idx = getInstIndex(inst);
-        emit dataChanged(index(idx), index(idx), { GroupRole });
+        emit dataChanged(index(0), index(count() - 1), { GroupRole, ManualOrderRole });
         saveGroupList();
     }
+}
+
+void InstanceList::setInstanceManualOrder(const InstanceId& id, GroupId group, const QList<InstanceId>& order)
+{
+    if (group.isEmpty() && !group.isNull()) {
+        group = QString();
+    }
+
+    auto* inst = getInstanceById(id);
+    if (!inst) {
+        qDebug() << "Attempt to reorder a null instance";
+        return;
+    }
+
+    const auto oldGroup = getInstanceGroup(id);
+    if (oldGroup != group) {
+        decreaseGroupCount(oldGroup);
+        m_instanceGroupIndex[id] = group;
+        increaseGroupCount(group);
+    }
+
+    removeFromManualOrder(id);
+
+    QList<InstanceId> normalizedOrder;
+    for (const auto& orderedId : order) {
+        if (normalizedOrder.contains(orderedId)) {
+            continue;
+        }
+
+        if (orderedId == id || getInstanceGroup(orderedId) == group) {
+            normalizedOrder.append(orderedId);
+        }
+    }
+
+    if (!normalizedOrder.contains(id)) {
+        normalizedOrder.append(id);
+    }
+
+    m_manualOrder[group] = normalizedOrder;
+
+    emit dataChanged(index(0), index(count() - 1), { GroupRole, ManualOrderRole });
+    saveGroupList();
 }
 
 QStringList InstanceList::getGroups()
@@ -277,6 +327,21 @@ void InstanceList::deleteGroup(const GroupId& name)
     m_groupNameCache.remove(name);
     m_collapsedGroups.remove(name);
 
+    auto ungroupedOrder = m_manualOrder.value(QString());
+    const auto deletedGroupOrder = m_manualOrder.take(name);
+
+    for (const auto& id : deletedGroupOrder) {
+        if (!ungroupedOrder.contains(id)) {
+            ungroupedOrder.append(id);
+        }
+    }
+
+    if (ungroupedOrder.isEmpty()) {
+        m_manualOrder.remove(QString());
+    } else {
+        m_manualOrder[QString()] = ungroupedOrder;
+    }
+
     bool removed = false;
     qDebug() << "Delete group" << name;
     for (auto& instance : m_instances) {
@@ -288,7 +353,7 @@ void InstanceList::deleteGroup(const GroupId& name)
             removed = true;
             auto idx = getInstIndex(instance.get());
             if (idx >= 0) {
-                emit dataChanged(index(idx), index(idx), { GroupRole });
+                emit dataChanged(index(idx), index(idx), { GroupRole, ManualOrderRole });
             }
         }
     }
@@ -304,6 +369,20 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
         m_collapsedGroups.insert(dst);
     }
 
+    auto destinationOrder = m_manualOrder.value(dst);
+    const auto sourceOrder = m_manualOrder.take(src);
+    for (const auto& id : sourceOrder) {
+        if (!destinationOrder.contains(id)) {
+            destinationOrder.append(id);
+        }
+    }
+
+    if (destinationOrder.isEmpty()) {
+        m_manualOrder.remove(dst);
+    } else {
+        m_manualOrder[dst] = destinationOrder;
+    }
+
     bool modified = false;
     qDebug() << "Rename group" << src << "to" << dst;
     for (auto& instance : m_instances) {
@@ -316,7 +395,7 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             modified = true;
             auto idx = getInstIndex(instance.get());
             if (idx >= 0) {
-                emit dataChanged(index(idx), index(idx), { GroupRole });
+                emit dataChanged(index(idx), index(idx), { GroupRole, ManualOrderRole });
             }
         }
     }
@@ -339,14 +418,16 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     QString cachedGroupId = m_instanceGroupIndex[id];
+    const int cachedManualOrder = m_manualOrder.value(cachedGroupId).indexOf(id);
 
     qDebug() << "Will trash instance" << id;
     QString trashedLoc;
 
+    removeFromManualOrder(id);
     if (m_instanceGroupIndex.remove(id) != 0) {
         decreaseGroupCount(cachedGroupId);
-        saveGroupList();
     }
+    saveGroupList();
 
     if (!FS::trash(inst->instanceRoot(), &trashedLoc)) {
         qWarning() << "Trash of instance" << id << "has not been completely successful...";
@@ -354,7 +435,7 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     qDebug() << "Instance" << id << "has been trashed by the launcher.";
-    m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
+    m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId, cachedManualOrder });
 
     // Also trash all of its shortcuts; we remove the shortcuts if trash fails since it is invalid anyway
     for (const auto& [name, filePath, target] : inst->shortcuts()) {
@@ -419,6 +500,12 @@ bool InstanceList::undoTrashInstance()
 
     m_instanceGroupIndex[top.id] = top.groupName;
     increaseGroupCount(top.groupName);
+    // -1 when instance has no saved position (in group)
+    if (top.manualOrder >= 0) {
+        auto& manualOrder = m_manualOrder[top.groupName];
+        const int minSize = qMin(top.manualOrder, static_cast<int>(manualOrder.size()));
+        manualOrder.insert(minSize, top.id);
+    }
 
     saveGroupList();
     emit instancesChanged();
@@ -435,10 +522,11 @@ void InstanceList::deleteInstance(const InstanceId& id)
 
     QString cachedGroupId = m_instanceGroupIndex[id];
 
+    removeFromManualOrder(id);
     if (m_instanceGroupIndex.remove(id) != 0) {
         decreaseGroupCount(cachedGroupId);
-        saveGroupList();
     }
+    saveGroupList();
 
     qDebug() << "Will delete instance" << id;
     if (!FS::deletePath(inst->instanceRoot())) {
@@ -745,6 +833,19 @@ void InstanceList::decreaseGroupCount(const QString& group)
     }
 }
 
+void InstanceList::removeFromManualOrder(const InstanceId& id)
+{
+    for (auto iter = m_manualOrder.begin(); iter != m_manualOrder.end();) {
+        iter.value().removeAll(id);
+
+        if (iter.value().isEmpty()) {
+            iter = m_manualOrder.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
 void InstanceList::saveGroupList()
 {
     qDebug() << "Will save group list now.";
@@ -773,18 +874,36 @@ void InstanceList::saveGroupList()
         const auto& name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
+        QJsonArray orderArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
+
         for (const auto& item : list) {
             instanceArr.append(QJsonValue(item));
         }
+
+        for (const auto& item : m_manualOrder.value(name)) {
+            if (list.contains(item)) {
+                orderArr.append(QJsonValue(item));
+            }
+        }
         groupObj.insert("instances", instanceArr);
+        groupObj.insert("order", orderArr);
         groupsArr.insert(name, groupObj);
     }
     toplevel.insert("groups", groupsArr);
     // empty string represents ungrouped "group"
-    if (m_collapsedGroups.contains("")) {
+    if (m_collapsedGroups.contains("") || m_manualOrder.contains(QString())) {
         QJsonObject ungrouped;
-        ungrouped.insert("hidden", QJsonValue(true));
+        ungrouped.insert("hidden", QJsonValue(m_collapsedGroups.contains("")));
+        QJsonArray orderArr;
+
+        for (const auto& item : m_manualOrder.value(QString())) {
+            if (getInstanceGroup(item).isEmpty()) {
+                orderArr.append(QJsonValue(item));
+            }
+        }
+
+        ungrouped.insert("order", orderArr);
         toplevel.insert("ungrouped", ungrouped);
     }
     QJsonDocument doc(toplevel);
@@ -805,6 +924,7 @@ void InstanceList::loadGroupList()
     m_instanceGroupIndex.clear();
     m_groupNameCache.clear();
     m_collapsedGroups.clear();
+    m_manualOrder.clear();
 
     bool migratingLegacyGroups = false;
 
@@ -878,11 +998,30 @@ void InstanceList::loadGroupList()
             m_instanceGroupIndex[value.toString()] = groupName;
             increaseGroupCount(groupName);
         }
+
+        const auto orderArray = groupObj.value("order").toArray();
+        for (const auto& value : orderArray) {
+            const bool containedInGroup = m_manualOrder[groupName].contains(value.toString());
+
+            if (value.isString() && !containedInGroup) {
+                m_manualOrder[groupName].append(value.toString());
+            }
+        }
     }
 
     bool ungroupedHidden = false;
     if (rootObj.value("ungrouped").isObject()) {
-        ungroupedHidden = rootObj.value("ungrouped").toObject().value("hidden").toBool(false);
+        const auto ungrouped = rootObj.value("ungrouped").toObject();
+        ungroupedHidden = ungrouped.value("hidden").toBool(false);
+        const auto orderArray = ungrouped.value("order").toArray();
+
+        for (const auto& value : orderArray) {
+            const bool containedInUngrouped = m_manualOrder[QString()].contains(value.toString());
+
+            if (value.isString() && !containedInUngrouped) {
+                m_manualOrder[QString()].append(value.toString());
+            }
+        }
     }
     if (ungroupedHidden) {
         // empty string represents ungrouped "group"
@@ -1134,6 +1273,9 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
 
             m_instanceGroupIndex[instID] = groupName;
             increaseGroupCount(groupName);
+            if (m_manualOrder.contains(groupName)) {
+                m_manualOrder[groupName].append(instID);
+            }
             m_instanceRootDirMap[instID] = targetDir;
         }
 
