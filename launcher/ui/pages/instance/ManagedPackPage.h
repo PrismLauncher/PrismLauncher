@@ -153,6 +153,7 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
    private:
     Task::Ptr m_fetchJob = nullptr;
+    Task::Ptr m_changelogJob = nullptr;
 
     ModPlatform::IndexedPack m_pack;
 };
