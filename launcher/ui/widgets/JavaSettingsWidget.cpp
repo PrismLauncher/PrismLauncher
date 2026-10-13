@@ -62,9 +62,9 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
     if (m_instance == nullptr) {
         m_ui->javaDownloadBtn->hide();
         if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
-            connect(m_ui->autodetectJavaCheckBox, &QCheckBox::checkStateChanged, this, [this](bool state) {
+            connect(m_ui->autodetectJavaCheckBox, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
                 m_ui->autodownloadJavaCheckBox->setEnabled(state);
-                if (!state) {
+                if (state != Qt::Checked) {
                     m_ui->autodownloadJavaCheckBox->setChecked(false);
                 }
             });
