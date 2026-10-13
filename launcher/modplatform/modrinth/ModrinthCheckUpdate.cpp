@@ -1,9 +1,6 @@
 #include "ModrinthCheckUpdate.h"
 #include "Application.h"
 #include "ModrinthAPI.h"
-#include "ModrinthPackIndex.h"
-
-#include "Json.h"
 
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
@@ -107,7 +104,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
 
     auto [job, response] = ModrinthAPI::latestVersionsTask(hashes, m_hashType, m_gameVersions, loader, m_releaseTypes);
 
-    connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
+    connect(job.get(), &Task::succeeded, this, [this, response] { checkVersionsResponse(response); });
 
     connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
 
@@ -115,8 +112,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     job->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(QHash<QString, ModPlatform::IndexedVersion>* response,
-                                                std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(QHash<QString, ModPlatform::IndexedVersion>* response)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
