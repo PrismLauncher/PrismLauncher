@@ -29,6 +29,21 @@ class WideBar : public QToolBar {
 
     void removeAction(QAction* action);
 
+    // Shows a grip on the inner edge (vertical bars only) that lets the user drag to change the width
+    void setResizable(bool resizable);
+
+   signals:
+    void resizedByUser(int width);
+
+   protected:
+    void resizeEvent(QResizeEvent* event) override;
+    void moveEvent(QMoveEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
+   private:
+    bool isOnLeftSide() const;
+    void updateResizeGrip();
+
    private:
     struct BarEntry {
         enum class Type { None, Action, Separator, Spacer } type = Type::None;
@@ -42,4 +57,8 @@ class WideBar : public QToolBar {
     QList<BarEntry> m_entries;
 
     bool m_use_default_action = false;
+
+    QWidget* m_resizeGrip = nullptr;
+    int m_dragStartX = -1;
+    int m_dragStartWidth = 0;
 };

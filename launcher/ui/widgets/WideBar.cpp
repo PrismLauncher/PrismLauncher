@@ -2,6 +2,8 @@
 
 #include <QContextMenuEvent>
 #include <QCryptographicHash>
+#include <QMainWindow>
+#include <QMouseEvent>
 #include <QToolButton>
 
 #include <algorithm>
@@ -192,6 +194,81 @@ void WideBar::removeAction(QAction* action)
     iter->bar_action->setVisible(false);
     removeAction(iter->bar_action);
     m_entries.erase(iter);
+}
+
+void WideBar::setResizable(bool resizable)
+{
+    if (m_resizeGrip == nullptr) {
+        m_resizeGrip = new QWidget(this);
+        m_resizeGrip->setCursor(Qt::SizeHorCursor);
+        m_resizeGrip->installEventFilter(this);
+    }
+    m_resizeGrip->setVisible(resizable);
+    updateResizeGrip();
+}
+
+bool WideBar::isOnLeftSide() const
+{
+    auto* window = qobject_cast<QMainWindow*>(parentWidget());
+    return window != nullptr && window->toolBarArea(this) == Qt::LeftToolBarArea;
+}
+
+void WideBar::updateResizeGrip()
+{
+    if (m_resizeGrip == nullptr || m_resizeGrip->isHidden())
+        return;
+
+    const int gripWidth = 6;
+    // the grip sits on the edge facing the center of the window
+    m_resizeGrip->setGeometry(isOnLeftSide() ? width() - gripWidth : 0, 0, gripWidth, height());
+    m_resizeGrip->raise();
+}
+
+void WideBar::resizeEvent(QResizeEvent* event)
+{
+    QToolBar::resizeEvent(event);
+    updateResizeGrip();
+}
+
+void WideBar::moveEvent(QMoveEvent* event)
+{
+    QToolBar::moveEvent(event);
+    updateResizeGrip();
+}
+
+bool WideBar::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched != m_resizeGrip)
+        return QToolBar::eventFilter(watched, event);
+
+    switch (event->type()) {
+        case QEvent::MouseButtonPress: {
+            auto* mouseEvent = static_cast<QMouseEvent*>(event);
+            if (mouseEvent->button() != Qt::LeftButton)
+                break;
+            m_dragStartX = qRound(mouseEvent->globalPosition().x());
+            m_dragStartWidth = width();
+            return true;
+        }
+        case QEvent::MouseMove: {
+            if (m_dragStartX < 0)
+                break;
+            const int delta = qRound(static_cast<QMouseEvent*>(event)->globalPosition().x()) - m_dragStartX;
+            const int newWidth = isOnLeftSide() ? m_dragStartWidth + delta : m_dragStartWidth - delta;
+            const int maxWidth = window()->width() / 2;
+            setFixedWidth(std::max(minimumSizeHint().width(), std::min(newWidth, maxWidth)));
+            return true;
+        }
+        case QEvent::MouseButtonRelease:
+            if (m_dragStartX < 0)
+                break;
+            m_dragStartX = -1;
+            emit resizedByUser(width());
+            return true;
+        default:
+            break;
+    }
+    return false;
 }
 
 #include "WideBar.moc"
