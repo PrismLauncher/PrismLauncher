@@ -23,7 +23,6 @@
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
@@ -105,7 +104,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
     for (QJsonValueRef file : doc.value()) {
         auto process = [this, &hashes](const QJsonValue& file) -> Result<> {
             TRY_INTO(const auto& version,
-                     Json::requireObject(file).and_then([](const auto& v) { return FlameMod::loadIndexedPackVersion(v); }))
+                     Json::requireObject(file).and_then([](const auto& v) { return Flame::Parse::loadIndexedPackVersion(v); }))
             auto fileid = version.fileId.toInt();
             Q_ASSERT(fileid != 0);
             Q_ASSERT(m_manifest.files.contains(fileid));
@@ -152,7 +151,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
                 if (!url.isValid() && "sha1" == out.version.hashType && !out.version.hash.isEmpty()) {
                     auto parse = [&entries, &out]() -> Result<> {
                         TRY_INTO(const auto& file, Json::requireObject(entries, out.version.hash).and_then([](const auto& v) {
-                            return Modrinth::loadIndexedPackVersion(v);
+                            return Modrinth::Parse::loadIndexedPackVersion(v);
                         }))
 
                         out.version.downloadUrl = file.downloadUrl;

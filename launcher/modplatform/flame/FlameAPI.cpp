@@ -247,16 +247,20 @@ Net::RPC::Spec<QList<ModPlatform::Category>> FlameAPI::getCategories(ModPlatform
                 return categories;
             } };
 }
-
-std::optional<QString> FlameAPI::getDependencyURL(const DependencySearchArgs& args) const
+Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> FlameAPI::getVersions(const VersionSearchArgs& args) const
 {
-    auto addonId = args.dependency.addonId.toString();
-    auto url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
-    if ((args.loader != 0U) && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
-        int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
-        url += QString("&modLoaderType=%1").arg(mappedModLoader);
-    }
-    return url;
+    // https://docs.curseforge.com/rest-api/#get-mod-files
+    auto url = getVersionsURL(args);
+    return { { .url = url }, [args](const auto& response) -> Result<QList<ModPlatform::IndexedVersion>> {
+                TRY_INTO(auto doc, Json::requireObject(response, "ResourceAPI::getVersions").and_then([](const auto& v) {
+                    return Json::requireArray(v, "data");
+                }))
+
+                args.pack->resourceType = args.resourceType;
+                TRY(Flame::Parse::loadIndexedPackVersions(*args.pack, doc))
+
+                return args.pack->versions;
+            } };
 }
 
 QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)
@@ -290,17 +294,7 @@ QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)
     return BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + getArguments.join('&');
 }
 
-ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
-{
-    for (auto&& [type, c] : g_classIDMappings) {
-        if (c == classId) {
-            return type;
-        }
-    }
-    return ModPlatform::ResourceType::Unknown;
-}
-
-std::optional<QString> FlameAPI::getVersionsURL(const VersionSearchArgs& args) const
+QUrl FlameAPI::getVersionsURL(const VersionSearchArgs& args)
 {
     auto addonId = args.pack->addonId.toString();
     QString url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000").arg(addonId);
@@ -315,6 +309,16 @@ std::optional<QString> FlameAPI::getVersionsURL(const VersionSearchArgs& args) c
         url += QString("&modLoaderType=%1").arg(mappedModLoader);
     }
     return url;
+}
+
+ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
+{
+    for (auto&& [type, c] : g_classIDMappings) {
+        if (c == classId) {
+            return type;
+        }
+    }
+    return ModPlatform::ResourceType::Unknown;
 }
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
