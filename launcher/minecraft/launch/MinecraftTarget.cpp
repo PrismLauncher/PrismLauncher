@@ -17,21 +17,21 @@
 
 #include <QStringList>
 
-// FIXME: the way this is written, it can't ever do any sort of validation and can accept total junk
-MinecraftTarget MinecraftTarget::parse(const QString& fullAddress, bool useWorld)
+MinecraftTarget MinecraftTarget::fromWorldName(const QString& worldName)
 {
-    if (useWorld) {
-        MinecraftTarget target;
-        target.world = fullAddress;
-        return target;
-    }
+    return MinecraftTarget{ .world = worldName };
+}
+
+// FIXME: the way this is written, it can't ever do any sort of validation and can accept total junk
+MinecraftTarget MinecraftTarget::fromServerAddress(const QString& fullAddress)
+{
     QStringList split = fullAddress.split(":");
 
     // The logic below replicates the exact logic minecraft uses for parsing server addresses.
     // While the conversion is not lossless and eats errors, it ensures the same behavior
     // within Minecraft and Prism Launcher when entering server addresses.
     if (fullAddress.startsWith("[")) {
-        int bracket = fullAddress.indexOf("]");
+        qsizetype bracket = fullAddress.indexOf("]");
         if (bracket > 0) {
             QString ipv6 = fullAddress.mid(1, bracket - 1);
             QString port = fullAddress.mid(bracket + 1).trimmed();
@@ -61,5 +61,5 @@ MinecraftTarget MinecraftTarget::parse(const QString& fullAddress, bool useWorld
         }
     }
 
-    return MinecraftTarget{ realAddress, realPort };
+    return MinecraftTarget{ .address = realAddress, .port = realPort };
 }

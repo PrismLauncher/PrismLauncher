@@ -27,6 +27,7 @@
       ]
     },
     "tomlplusplus",
-    "zlib"
+    "zlib",
+    "cli11"
   ]
 }

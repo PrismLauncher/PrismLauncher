@@ -26,11 +26,12 @@
 #endif
 
 #include <system_error>
-namespace console {
-void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr);
-bool AttachWindowsConsole();
-std::error_code EnableAnsiSupport();
-void FreeWindowsConsole();
+
+namespace Console {
+void bindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr);
+bool attachWindowsConsole();
+std::error_code enableAnsiSupport();
+void freeWindowsConsole();
 
 class WindowsConsoleGuard {
    public:
@@ -41,4 +42,4 @@ class WindowsConsoleGuard {
     bool m_consoleAttached;
 };
 
-}  // namespace console
+}  // namespace Console

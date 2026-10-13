@@ -56,6 +56,8 @@ class Config {
     QString LAUNCHER_SVGFILENAME;
     QString LAUNCHER_ENVNAME;
 
+    QString LAUNCHER_SUMMARY;
+
     /// The major version number.
     int VERSION_MAJOR;
     /// The minor version number.
