@@ -205,8 +205,14 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
     }
     auto* pdata = static_cast<MinecraftInstance*>(index.internalPointer());
     auto newName = value.toString();
+    newName.replace('\n', ' ');
+    newName = newName.trimmed();
+    newName.truncate(128);
     if (pdata->name() == newName) {
         return true;
+    }
+    if (newName.isEmpty()) {
+        return false;
     }
     pdata->setName(newName);
     return true;

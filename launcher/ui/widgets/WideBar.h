@@ -20,7 +20,7 @@ class WideBar : public QToolBar {
     void addSeparator();
 
     void insertSpacer(QAction* action);
-    void insertSeparator(QAction* before);
+    QAction* insertSeparator(QAction* before);
     void insertActionBefore(QAction* before, QAction* action);
     void insertActionAfter(QAction* after, QAction* action);
     QAction* insertWidgetBefore(QAction* before, QWidget* widget);
