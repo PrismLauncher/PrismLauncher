@@ -56,6 +56,9 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/AccessibleInstanceView.h"
 
+#include <QTimer>
+#include <QPixmap>
+
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/AccountListPage.h"
@@ -335,7 +338,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
           { "show-window", "Show the main launcher window (useful in combination with --launch)" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-          { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
+          { "show", "Opens the window for the specified instance (by instance ID)", "show" },
+          { "screenshot", "Render the main window to the given PNG file and exit (debug helper)", "path" },
+          { "screenshot-size", "Size of the screenshot window, e.g. 1280x800 (default)", "size" } });
     // Has to be positional for some OS to handle that properly
     parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
 
@@ -356,6 +361,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     m_instanceIdToShowWindowOf = parser.value("show");
     m_showMainWindow = parser.isSet("show-window");
+
+    m_screenshotPath = parser.value("screenshot");
+    m_screenshotSize = parser.value("screenshot-size");
 
     for (const auto& url : parser.values("import")) {
         m_urlsToImport.append(normalizeImportUrl(url));
@@ -1247,6 +1255,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_themeManager->applyCurrentlySelectedTheme(true);
     }
     performMainStartupAction();
+
+    if (!m_screenshotPath.isEmpty()) {
+        scheduleScreenshot();
+    }
 }
 
 bool Application::createSetupWizard()
@@ -1278,6 +1290,10 @@ bool Application::createSetupWizard()
     bool login = !m_accounts->anyAccountIsValid() && (capabilities().testAnyFlags(Application::SupportsMSA));
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
+    if (m_screenshotPath.isEmpty() == false) {
+        // --screenshot renders the UI as-is, with no first-run interventions
+        wizardRequired = false;
+    }
     if (wizardRequired) {
         // set default theme after going into theme wizard
         if (!validIcons) {
@@ -1729,6 +1745,39 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_openWindows++;
     }
     return m_mainWindow;
+}
+
+void Application::scheduleScreenshot()
+{
+    // Debug helper: settle, resize, render the window to a PNG and exit
+    QTimer::singleShot(2500, this, [this] {
+        // --show opens the instance editor; grab that instead of the main window
+        QWidget* target = m_mainWindow;
+        if (!m_instanceIdToShowWindowOf.isEmpty()) {
+            for (auto* widget : QApplication::topLevelWidgets()) {
+                if (qobject_cast<InstanceWindow*>(widget)) {
+                    target = widget;
+                    break;
+                }
+            }
+        }
+        const QStringList sizeParts = m_screenshotSize.split(QLatin1Char('x'));
+        if (target && sizeParts.size() == 2) {
+            const int width = sizeParts[0].toInt();
+            const int height = sizeParts[1].toInt();
+            if (width > 0 && height > 0) {
+                target->resize(width, height);
+            }
+        }
+        const QPixmap shot = target ? target->grab() : QPixmap();
+        if (!shot.isNull() && shot.save(m_screenshotPath)) {
+            qInfo() << "Saved screenshot to" << m_screenshotPath;
+        } else {
+            qCritical() << "Failed to save screenshot to" << m_screenshotPath;
+        }
+        // Deterministic exit for the debug helper; quit() alone can be delayed by running jobs
+        ::exit(shot.isNull() ? 1 : 0);
+    });
 }
 
 ViewLogWindow* Application::showLogWindow()

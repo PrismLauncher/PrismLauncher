@@ -187,6 +187,8 @@ class Application : public QApplication {
 
     InstanceWindow* showInstanceWindow(MinecraftInstance* instance, const QString& page = QString());
     MainWindow* showMainWindow(bool minimized = false);
+    // Debug helper behind --screenshot: render the current window to a PNG and exit
+    void scheduleScreenshot();
     ViewLogWindow* showLogWindow();
 
     void updateIsRunning(bool running);
@@ -311,6 +313,9 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     bool m_showMainWindow = false;
+    // Debug helper: render the main window to a PNG and exit (--screenshot / --screenshot-size)
+    QString m_screenshotPath;
+    QString m_screenshotSize;
     std::unique_ptr<QFile> logFile;
     std::unique_ptr<LogModel> logModel;
 

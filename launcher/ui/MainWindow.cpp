@@ -57,6 +57,7 @@
 #include <QButtonGroup>
 #include <QFileDialog>
 #include <QFrame>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -530,59 +531,58 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         playKillLayout->addWidget(m_detailKillButton);
         detailLayout->addWidget(playKillRow);
 
-        // Quick links into the instance's content
-        auto* linksRow = new QWidget(m_detailPanel);
-        auto* linksLayout = new QHBoxLayout(linksRow);
-        linksLayout->setContentsMargins(0, 0, 0, 0);
-        linksLayout->setSpacing(2);
-        auto addLink = [this, linksRow, linksLayout](const char* iconName, const QString& text, const QString& page) {
-            auto* button = new QToolButton(linksRow);
+        // Quick links into the instance's content, in a 2x2 grid so the labels fit
+        auto* linksGrid = new QGridLayout;
+        linksGrid->setContentsMargins(0, 0, 0, 0);
+        linksGrid->setSpacing(2);
+        auto addLink = [this, linksGrid](const char* iconName, const QString& text, const QString& page, int column, int row) {
+            auto* button = new QToolButton(m_detailPanel);
             button->setText(text);
             button->setIcon(QIcon::fromTheme(QString::fromLatin1(iconName)));
-            button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            button->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
             button->setAutoRaise(true);
             button->setFocusPolicy(Qt::NoFocus);
+            button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
             button->setEnabled(false);
             connect(button, &QToolButton::clicked, this, [this, page] {
                 if (m_selectedInstance)
                     APPLICATION->showInstanceWindow(m_selectedInstance, page);
             });
-            linksLayout->addWidget(button);
+            linksGrid->addWidget(button, row, column);
             m_detailLinks.append(button);
         };
-        addLink("loadermods", tr("Mods"), QStringLiteral("mods"));
-        addLink("worlds", tr("Worlds"), QStringLiteral("worlds"));
-        addLink("screenshots", tr("Screenshots"), QStringLiteral("screenshots"));
-        addLink("server", tr("Servers"), QStringLiteral("servers"));
-        linksLayout->addStretch(1);
-        detailLayout->addWidget(linksRow);
+        addLink("loadermods", tr("Mods"), QStringLiteral("mods"), 0, 0);
+        addLink("worlds", tr("Worlds"), QStringLiteral("worlds"), 1, 0);
+        addLink("screenshots", tr("Screenshots"), QStringLiteral("screenshots"), 0, 1);
+        addLink("server", tr("Servers"), QStringLiteral("servers"), 1, 1);
+        detailLayout->addLayout(linksGrid);
 
-        // Edit, Folder, Export and the overflow menu
-        auto* actionsRow = new QWidget(m_detailPanel);
-        auto* actionsLayout = new QHBoxLayout(actionsRow);
-        actionsLayout->setContentsMargins(0, 0, 0, 0);
-        actionsLayout->setSpacing(2);
-        auto addActionButton = [actionsRow, actionsLayout](QAction* action) {
-            auto* button = new QToolButton(actionsRow);
+        // Edit, Folder, Export and the overflow menu, also in a 2x2 grid
+        auto* actionsGrid = new QGridLayout;
+        actionsGrid->setContentsMargins(0, 0, 0, 0);
+        actionsGrid->setSpacing(2);
+        auto addActionButton = [this, actionsGrid](QAction* action, int column, int row) {
+            auto* button = new QToolButton(m_detailPanel);
             button->setDefaultAction(action);
             button->setToolButtonStyle(Qt::ToolButtonTextOnly);
             button->setAutoRaise(true);
             button->setFocusPolicy(Qt::NoFocus);
-            actionsLayout->addWidget(button);
+            button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+            actionsGrid->addWidget(button, row, column);
         };
-        addActionButton(ui->actionEditInstance);
-        addActionButton(ui->actionViewSelectedInstFolder);
-        addActionButton(ui->actionExportInstance);
-        m_detailMoreButton = new QToolButton(actionsRow);
+        addActionButton(ui->actionEditInstance, 0, 0);
+        addActionButton(ui->actionViewSelectedInstFolder, 1, 0);
+        addActionButton(ui->actionExportInstance, 0, 1);
+        m_detailMoreButton = new QToolButton(m_detailPanel);
         m_detailMoreButton->setObjectName(QStringLiteral("detailMoreButton"));
         m_detailMoreButton->setMenu(createMoreMenu());
         m_detailMoreButton->setPopupMode(QToolButton::InstantPopup);
         m_detailMoreButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
         m_detailMoreButton->setAutoRaise(true);
         m_detailMoreButton->setFocusPolicy(Qt::NoFocus);
-        actionsLayout->addWidget(m_detailMoreButton);
-        actionsLayout->addStretch(1);
-        detailLayout->addWidget(actionsRow);
+        m_detailMoreButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        actionsGrid->addWidget(m_detailMoreButton, 1, 1);
+        detailLayout->addLayout(actionsGrid);
 
         detailLayout->addStretch(1);
 
@@ -635,6 +635,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         rootLayout->addWidget(m_activityStrip);
         setCentralWidget(root);
 
+        // The icon was set before the detail panel existed; sync it now
+        updateInstanceToolIcon(m_currentInstIcon);
         applyLayoutMode();
     }
     // The cat background
@@ -1683,7 +1685,9 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
     auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
     ui->actionChangeInstIcon->setIcon(icon);
     changeIconButton->setIcon(icon);
-    m_detailIconButton->setIcon(icon);
+    if (m_detailIconButton) {
+        m_detailIconButton->setIcon(icon);
+    }
 }
 
 void MainWindow::setSelectedInstanceById(const QString& id)
