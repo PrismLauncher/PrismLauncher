@@ -4,6 +4,16 @@ A fork of [Prism Launcher](https://prismlauncher.org) that reworks the user inte
 
 > This is a **fork** of the MultiMC Launcher and is **not** endorsed by, or affiliated with, Prism Launcher or MultiMC.
 
+## Project status
+
+![Progress](https://img.shields.io/badge/UI%20rework%20progress-62%25-7a5cfa)
+
+| Area | Progress | What remains |
+|---|---|---|
+| Tier 1 — structural wins | ▰▰▰▰▰▰▰▰▰▱ 90% | State badges on tiles (running, crashed, update) |
+| Tier 2 — new structure | ▰▰▰▰▰▰▰▱▱▱ 70% | Command palette, view modes (compact/list), drawer pause/retry/review rows, Discover as a full page |
+| Rebrand | ▱▱▱▱▱▱▱▱▱▱ 0% | Name, app ID, logo, desktop files, own API keys, project URLs |
+
 ## What's shipped
 
 The first milestone (**Tier 1**) is built on the `blocks-ui` branch and rendered headlessly with demo data. The screenshots below are of the launcher compiled from that branch, not mockups.
