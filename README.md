@@ -2,8 +2,6 @@
 
 A fork of [Prism Launcher](https://prismlauncher.org) that reworks the user interface.
 
-Prism's logo is a grass block refracted into a six-colour spectrum, but the window around it still uses the layout inherited from MultiMC: three toolbars, a status bar, and a grid of 100-pixel tiles that show only an icon and a name. The grass half of the logo shows up in the default icon theme and the lime selection colour; the spectrum half appears nowhere in the UI. This project rebuilds that surface so the launcher does more with the space it has — starting with the **Blocks** theme.
-
 > This is a **fork** of the MultiMC Launcher and is **not** endorsed by, or affiliated with, Prism Launcher or MultiMC.
 
 ## What's shipped
