@@ -329,9 +329,8 @@ void InstanceList::deleteGroup(const GroupId& name)
 
 void InstanceList::renameGroup(const QString& src, const QString& dst)
 {
-    const GroupData groupData = m_groupDataCache[src];
+    m_groupDataCache[dst] = GroupData{0, m_groupDataCache[src].iconKey};
     m_groupDataCache.remove(src);
-    m_groupDataCache[dst] = groupData;
 
     if (m_collapsedGroups.remove(src)) {
         m_collapsedGroups.insert(dst);
