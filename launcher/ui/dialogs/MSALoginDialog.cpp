@@ -203,10 +203,10 @@ void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, [[
     ui->stackedWidget->updateGeometry();
     this->adjustSize();
 
-    const auto linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
     if (url == "https://www.microsoft.com/link" && !code.isEmpty()) {
         url += QString("?otc=%1").arg(code);
     }
+    const auto linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
     ui->code->setText(code);
 
     auto size = QSize(150, 150);
