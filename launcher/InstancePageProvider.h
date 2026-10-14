@@ -10,6 +10,7 @@
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/pages/instance/NotesPage.h"
 #include "ui/pages/instance/OtherLogsPage.h"
+#include "ui/pages/instance/OverviewPage.h"
 #include "ui/pages/instance/ResourcePackPage.h"
 #include "ui/pages/instance/ScreenshotsPage.h"
 #include "ui/pages/instance/ServersPage.h"
@@ -27,24 +28,68 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
     virtual QList<BasePage*> getPages() override
     {
         QList<BasePage*> values;
-        values.append(new LogPage(inst));
-        values.append(new VersionPage(inst));
-        values.append(ManagedPackPage::createPage(inst));
+
+        // Overview: what the instance is, how it plays and where its content lives
+        values.append(new OverviewPage(inst));
+
+        // Content: everything inside the instance folder that people add, remove and browse
+        const QString contentSection = tr("Content");
         auto modsPage = new ModFolderPage(inst, inst->loaderModList());
         modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
+        modsPage->setSection(contentSection);
         values.append(modsPage);
-        values.append(new CoreModFolderPage(inst, inst->coreModList()));
-        values.append(new NilModFolderPage(inst, inst->nilModList()));
-        values.append(new ResourcePackPage(inst, inst->resourcePackList()));
-        values.append(new GlobalDataPackPage(inst));
-        values.append(new TexturePackPage(inst, inst->texturePackList()));
-        values.append(new ShaderPackPage(inst, inst->shaderPackList()));
-        values.append(new NotesPage(inst));
-        values.append(new WorldListPage(inst, inst->worldList()));
-        values.append(new ServersPage(inst));
-        values.append(new ScreenshotsPage(FS::PathCombine(inst->gameRoot(), "screenshots")));
-        values.append(new InstanceSettingsPage(inst));
-        values.append(new OtherLogsPage("logs", tr("Other Logs"), "Other-Logs", inst));
+        auto coreModsPage = new CoreModFolderPage(inst, inst->coreModList());
+        coreModsPage->setSection(contentSection);
+        values.append(coreModsPage);
+        auto nilModsPage = new NilModFolderPage(inst, inst->nilModList());
+        nilModsPage->setSection(contentSection);
+        values.append(nilModsPage);
+        auto resourcePacksPage = new ResourcePackPage(inst, inst->resourcePackList());
+        resourcePacksPage->setSection(contentSection);
+        values.append(resourcePacksPage);
+        auto dataPacksPage = new GlobalDataPackPage(inst);
+        dataPacksPage->setSection(contentSection);
+        values.append(dataPacksPage);
+        auto texturePacksPage = new TexturePackPage(inst, inst->texturePackList());
+        texturePacksPage->setSection(contentSection);
+        values.append(texturePacksPage);
+        auto shaderPacksPage = new ShaderPackPage(inst, inst->shaderPackList());
+        shaderPacksPage->setSection(contentSection);
+        values.append(shaderPacksPage);
+        auto notesPage = new NotesPage(inst);
+        notesPage->setSection(contentSection);
+        values.append(notesPage);
+        auto worldsPage = new WorldListPage(inst, inst->worldList());
+        worldsPage->setSection(contentSection);
+        values.append(worldsPage);
+        auto serversPage = new ServersPage(inst);
+        serversPage->setSection(contentSection);
+        values.append(serversPage);
+        auto screenshotsPage = new ScreenshotsPage(FS::PathCombine(inst->gameRoot(), "screenshots"));
+        screenshotsPage->setSection(contentSection);
+        values.append(screenshotsPage);
+
+        // Setup: what the instance is and how it starts
+        const QString setupSection = tr("Setup");
+        auto versionPage = new VersionPage(inst);
+        versionPage->setSection(setupSection);
+        values.append(versionPage);
+        auto managedPackPage = ManagedPackPage::createPage(inst);
+        managedPackPage->setSection(setupSection);
+        values.append(managedPackPage);
+        auto settingsPage = new InstanceSettingsPage(inst);
+        settingsPage->setSection(setupSection);
+        values.append(settingsPage);
+
+        // Logs: the console and the other logs; the console still opens automatically on launch
+        const QString logsSection = tr("Logs");
+        auto logPage = new LogPage(inst);
+        logPage->setSection(logsSection);
+        values.append(logPage);
+        auto otherLogsPage = new OtherLogsPage("logs", tr("Other Logs"), "Other-Logs", inst);
+        otherLogsPage->setSection(logsSection);
+        values.append(otherLogsPage);
+
         return values;
     }
 

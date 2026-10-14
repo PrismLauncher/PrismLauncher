@@ -52,6 +52,9 @@ class BasePage {
     virtual bool apply() { return true; }
     virtual bool shouldDisplay() const { return true; }
     virtual QString helpPage() const { return QString(); }
+    // A short title grouping this page with others in the page list; empty means no group
+    void setSection(const QString& section) { m_section = section; }
+    QString section() const { return m_section; }
     void opened()
     {
         isOpened = true;
@@ -75,6 +78,7 @@ class BasePage {
    protected:
     BasePageContainer* m_container = nullptr;
     bool isOpened = false;
+    QString m_section;
 };
 
 using BasePagePtr = std::shared_ptr<BasePage>;

@@ -17,11 +17,14 @@
 
 #include <QEvent>
 #include <QListView>
+#include <QPainter>
 #include <QScrollBar>
 #include <QStyledItemDelegate>
 
 class BasePage;
 const int pageIconSize = 24;
+// Role carrying a page's section title (see BasePage::section); empty means no section
+const int pageSectionRole = Qt::UserRole + 0x10;
 
 class PageViewDelegate : public QStyledItemDelegate {
    public:
@@ -30,7 +33,50 @@ class PageViewDelegate : public QStyledItemDelegate {
     {
         QSize size = QStyledItemDelegate::sizeHint(option, index);
         size.setHeight(qMax(size.height(), 32));
+        if (isSectionStart(index)) {
+            size.rheight() += sectionHeaderHeight;
+        }
         return size;
+    }
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+    {
+        if (!isSectionStart(index)) {
+            QStyledItemDelegate::paint(painter, option, index);
+            return;
+        }
+        // A header band above the first page of each section
+        const QRect headerRect(option.rect.topLeft(), QSize(option.rect.width(), sectionHeaderHeight));
+        painter->save();
+        painter->fillRect(headerRect, option.palette.base());
+        painter->setPen(option.palette.color(QPalette::Disabled, QPalette::Text));
+        QFont headerFont = option.font;
+        headerFont.setBold(true);
+        headerFont.setPointSizeF(qMax(7.0, headerFont.pointSizeF() - 1.0));
+        painter->setFont(headerFont);
+        painter->drawText(headerRect.adjusted(8, 0, -8, 0), Qt::AlignLeft | Qt::AlignVCenter, index.data(pageSectionRole).toString());
+        painter->restore();
+
+        QStyleOptionViewItem itemOption = option;
+        itemOption.rect.setTop(option.rect.top() + sectionHeaderHeight);
+        QStyledItemDelegate::paint(painter, itemOption, index);
+    }
+
+   private:
+    static constexpr int sectionHeaderHeight = 24;
+
+    bool isSectionStart(const QModelIndex& index) const
+    {
+        if (!index.isValid()) {
+            return false;
+        }
+        const QString section = index.data(pageSectionRole).toString();
+        if (section.isEmpty()) {
+            return false;
+        }
+        if (index.row() == 0) {
+            return true;
+        }
+        return index.sibling(index.row() - 1, index.column()).data(pageSectionRole).toString() != section;
     }
 };
 
@@ -57,6 +103,8 @@ class PageModel : public QAbstractListModel {
                 // HACK: fixes icon stretching on windows. TODO: report Qt bug for this
                 return QIcon(icon.pixmap(QSize(48, 48)));
             }
+            case pageSectionRole:
+                return m_pages.at(index.row())->section();
         }
         return QVariant();
     }
