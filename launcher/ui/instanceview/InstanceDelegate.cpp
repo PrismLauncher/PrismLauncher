@@ -244,17 +244,32 @@ void ListViewDelegate::paintSlot(QPainter* painter,
         fillFrame(painter, slot.adjusted(-2 * unit, -2 * unit, 2 * unit, 2 * unit), unit, frame);
     }
 
-    // FIXME: this really has no business of being here. Make generic.
+    // State as a word chip, so it is never conveyed by colour alone
     if (auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>()) {
-        QString badge;
+        QString word;
+        QColor color;
         if (instance->isRunning()) {
-            badge = "status-running";
+            word = QObject::tr("Running");
+            color = QColor(0x3f, 0xa3, 0x4d);
         } else if (instance->hasCrashed() || instance->hasVersionBroken()) {
-            badge = "status-bad";
+            word = QObject::tr("Crashed");
+            color = QColor(0xb0, 0x2e, 0x2e);
         }
-        if (!badge.isEmpty()) {
-            const QRect badgeRect(slot.right() - unit - 16, slot.top() + unit + 1, 16, 16);
-            QIcon::fromTheme(badge).paint(painter, badgeRect, Qt::AlignCenter, mode, QIcon::Off);
+        if (!word.isEmpty()) {
+            QFont chipFont = opt.font;
+            chipFont.setBold(true);
+            chipFont.setPixelSize(10);
+            painter->setFont(chipFont);
+            const QFontMetrics fm(chipFont);
+            const QRect chip(opt.rect.right() - fm.horizontalAdvance(word) - 14, opt.rect.top() + 2, fm.horizontalAdvance(word) + 10,
+                             fm.height() + 4);
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(color);
+            painter->drawRoundedRect(chip, 4, 4);
+            painter->setPen(Qt::white);
+            painter->drawText(chip, Qt::AlignCenter, word);
+            painter->setRenderHint(QPainter::Antialiasing, false);
         }
     }
     if (tokens.tileMetaLine) {

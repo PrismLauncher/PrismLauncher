@@ -835,6 +835,7 @@ bool MainWindow::isClassicLayout() const
 void MainWindow::applyLayoutMode()
 {
     const bool classic = isClassicLayout();
+    qInfo() << "Main window layout:" << (classic ? "classic" : "new");
 
     // The action lives in the View menu and can be triggered from there too
     if (m_classicAction->isChecked() != classic)

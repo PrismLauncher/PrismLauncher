@@ -627,6 +627,8 @@ void InstanceList::add(std::vector<std::unique_ptr<MinecraftInstance>>& t)
         m_instances.push_back(std::move(ptr));
         m_summaries.remove(inst->id());
         connect(inst, &MinecraftInstance::propertiesChanged, this, [this, inst]() { propertiesChanged(inst); });
+        // The tile badge follows the running state, so repaint when it flips
+        connect(inst, &BaseInstance::runningStatusChanged, this, [this, inst]() { propertiesChanged(inst); });
         if (auto* profile = inst->getPackProfile()) {
             // Versions and loaders shown on the tile come from the components; refresh them when those change.
             // Only announce real changes: views reacting to dataChanged may reload the components themselves.

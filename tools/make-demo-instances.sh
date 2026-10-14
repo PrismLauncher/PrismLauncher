@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Seeds a throwaway instance library for headless screenshots of the UI work.
-# Usage: make-demo-instances.sh <dir>   (creates/refreshes the directory)
+# Usage: make-demo-instances.sh <dir> [extra-cfg-lines-file]
+#   extra-cfg-lines-file: optional file whose lines are inserted at the TOP of the
+#   settings (after Language), before the app has a chance to write its own keys.
 set -euo pipefail
 
 DIR="${1:?usage: make-demo-instances.sh <dir>}"
+EXTRA="${2:-}"
 INSTANCES="$DIR/instances"
 mkdir -p "$INSTANCES"
 
@@ -17,6 +20,11 @@ CatOpacity=30
 JavaPath=/usr/bin/java
 LastHostname=$(hostname)
 EOF
+# Custom overrides go in early, right after Language: the QSettings INI reader
+# drops keys that follow malformed (backslash-escaped) app-written lines
+if [ -n "$EXTRA" ]; then
+    sed -i '2 r '"$EXTRA" "$DIR/prismlauncher.cfg"
+fi
 
 cat > "$DIR/instgroups.json" <<'EOF'
 {
