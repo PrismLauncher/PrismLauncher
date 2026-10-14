@@ -1,116 +1,81 @@
-<p align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg">
-  <source media="(prefers-color-scheme: light)" srcset="/program_info/org.prismlauncher.PrismLauncher.logo.svg">
-  <img alt="Prism Launcher" src="/program_info/org.prismlauncher.PrismLauncher.logo.svg" width="40%">
-</picture>
-</p>
+# NeoPrismLauncher
 
-<p align="center">
-  Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.<br />
-  <br />This is a <b>fork</b> of the MultiMC Launcher and is <b>not</b> endorsed by it.
-</p>
+A fork of [Prism Launcher](https://prismlauncher.org) that reworks the user interface.
 
-## Installation
+Prism's logo is a grass block refracted into a six-colour spectrum, but the window around it still uses the layout inherited from MultiMC: three toolbars, a status bar, and a grid of 100-pixel tiles that show only an icon and a name. The grass half of the logo shows up in the default icon theme and the lime selection colour; the spectrum half appears nowhere in the UI. This project rebuilds that surface so the launcher does more with the space it has — starting with the **Blocks** theme.
 
-- All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download).
-- Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (this also includes the pull requests status).
+> This is a **fork** of the MultiMC Launcher and is **not** endorsed by, or affiliated with, Prism Launcher or MultiMC.
 
-<p align="center">
-<a href="https://repology.org/project/prismlauncher/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg?columns=3" alt="Packaging status">
-</a>
-</p>
+## What's shipped
 
-### Development Builds
+The first milestone (**Tier 1**) is built on the `blocks-ui` branch and rendered headlessly with demo data. The screenshots below are of the launcher compiled from that branch, not mockups.
 
-Please understand that these builds are not intended for most users. There may be bugs, and other instabilities. You have been warned.
+**Blocks theme** — Minecraft's own UI language drawn as original pixel art: bevelled stone buttons, sunken inventory slots for instances, black text fields, an XP-bar progress meter and purple-framed tooltips. Two variants ship in Settings → Appearance:
 
-There are development builds available through:
+- **Blocks (Inventory)** — a dirt backdrop, the library as an inventory grid.
+- **Blocks (Deepslate)** — the dark variant, same layout.
 
-- [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) (includes builds from pull requests opened by contributors)
-- [nightly.link](https://prismlauncher.org/nightly) (this will always point only to the latest version of develop)
+It bundles the OFL-licensed [Pixelify Sans](https://github.com/electricity4/Pixelify-Sans) face and original dirt and deepslate textures. The console renders in Minecraft's chat colours, and the background cat is pixelated to match.
 
-These have debug information in the binaries, so their file sizes are relatively larger.
+**Richer tiles** — the Minecraft version, mod loader and modpack platform are read from the pack file once, cached, and shown under each name (with the platform in the slot corner), instead of only reaching the status bar.
 
-Prebuilt Development builds are provided for **Linux**, **Windows** and **macOS**.
+**Library filter bar** — a search field (**Ctrl+F**) across names, versions and loaders, group chips, and sort order moved out of Settings into the bar itself. An empty result now says so ("No instances match \"atm\"") instead of showing a blank grid.
 
-On Linux, we also offer our own [Flatpak nightly repository](https://github.com/PrismLauncher/flatpak). Most software centers are able to install it by opening [this link](https://flatpak.prismlauncher.org/prismlauncher-nightly.flatpakref).
+**A primary Play button** — Launch is the one green action. Rename, Change Icon, Change Group, Copy, Create Shortcut and Delete move into a More menu.
 
-## Community & Support
+**A better editor** — the instance editor opens on Mods instead of an empty console, gains page search, and shares clearer empty states with Settings.
 
-Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple community spaces where other community members can help you:
+## Why rework the UI
 
-- **Our Discord server:**
+- **Play is not the primary action.** Launch is one row among eleven in the instance toolbar, styled the same as Delete. Double-click launches unless a setting turns it into Edit.
+- **Tiles hide what makes instances different.** Minecraft version, loader, pack source, last played and playtime exist on every instance but only reach the status bar.
+- **There is no way to search the library.** With thirty or more instances, people scroll and collapse groups. The filtering model already exists; the search box does not.
+- **The editor opens on an empty console**, titled "Console window for …", with up to sixteen pages in one flat list that mixes runtime, content and configuration.
+- **Five bands of chrome.** Menu bar, main toolbar, instance toolbar, news toolbar and status bar each take a strip, with movable toolbars showing grips by default.
+- **Settings have no search** across roughly 130 options on nine pages.
 
-[![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://prismlauncher.org/discord)
+## The plan
 
-- **Our Matrix space:**
+The rework is split into three tiers, each including the one before it.
 
-[![Prism Launcher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&label=Matrix%20Space&logo=matrix&color=purple)](https://prismlauncher.org/matrix)
+### Tier 1 — the cheapest wins (shipped)
 
-- **Our Subreddit:**
+Tile v2 (64 px icon, one-line name, a version and loader line, source and state badges, columns that fill the row), the filter bar, a primary Play button with an overflow menu, the editor opening on Mods with section headers, and Settings search with a designed empty state.
 
-[![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=reddit)](https://prismlauncher.org/reddit)
+### Tier 2 — a new structure
 
-## Translations
+A navigation rail (Library, Discover, Activity, Settings, Account); a detail panel that absorbs the instance toolbar and status bar; an activity strip and drawer that replace modal progress dialogs; the instance editor regrouped into Overview, Content, Setup and Logs; and a Create hub that starts fresh, browses modpacks across providers, or imports — backed by a task model that keeps progress in the activity strip and turns errors into retryable rows.
 
-The translation effort for Prism Launcher is hosted on [Weblate](https://hosted.weblate.org/projects/prismlauncher/launcher/) and information about translating Prism Launcher is available at <https://github.com/PrismLauncher/Translations>.
+### Tier 3 — QML where it pays off
+
+Library and Discover rebuilt in QML inside the Widgets shell for GPU animation and richer cards, at the cost of new Qt Quick dependencies, accessibility parity and a harder native look on KDE and Windows.
+
+### The token layer
+
+Themes can recolour Prism but not reshape it: tile size, icon size, selection style and group headers are hard-coded in three C++ files. A small `ThemeTokens` struct (tile geometry, slot bevel, view textures, display font, cat pixelation) makes those values theme-driven. Its defaults reproduce today's look exactly — Dark and Bright render with **0 differing pixels** compared to an unmodified build — so existing themes keep loading, while custom themes can now use slots, textures and display fonts of their own.
+
+## Visual directions
+
+Five treatments were explored against the same structure and demo instances. Each can be applied to Tier 1 as a theme.
+
+| Direction | Role | Notes |
+|---|---|---|
+| **Refraction** | Recommended default | The logo's own spectrum as the working palette; Manrope type; a spectral selection ring and a two-pixel spectrum line under the title bar. |
+| **Blocks** | Theme pack | Shipped in this fork. Minecraft's UI language, pixel art, Pixelify Sans + Rubik. |
+| **Native** | Keep as System | System font, palette and accent; the rework lives in layout and information. |
+| **Biome** | View | Cover art per instance — latest screenshot, pack gallery image, or a generated pixel landscape whose sky follows the local time of day. |
+| **Cozy** | Theme pack | A sticker-book look around Prism's community art; the cat pack becomes a reactive mascot. |
 
 ## Building
 
-If you want to build Prism Launcher yourself, check the [build instructions](https://prismlauncher.org/wiki/development/build-instructions).
+To build this fork yourself, follow the [Prism Launcher build instructions](https://prismlauncher.org/wiki/development/build-instructions). The code is C++20 on Qt 6.8 Widgets, with no QML.
 
-## Sponsors & Partners
+## Forking / Redistributing / Custom builds
 
-We thank all the wonderful backers over at Open Collective! Support Prism Launcher by [becoming a backer](https://opencollective.com/prismlauncher).
+You are free to fork, redistribute and provide custom builds as long as you follow the terms of the [license](LICENSE). As a basic courtesy, make it clear that your fork is not Prism Launcher and is not endorsed by it, and go through [CMakeLists.txt](CMakeLists.txt) to replace Prism Launcher's API keys with your own or set them to empty strings (`""`) — CurseForge requires derivative works to use their own key.
 
-[![OpenCollective Backers](https://opencollective.com/prismlauncher/backers.svg?width=890&limit=1000)](https://opencollective.com/prismlauncher#backers)
+This fork still needs a full rebrand (name, app ID, logo and desktop files, plus pointing the news feed, bug tracker and updater URLs at its own project).
 
-Thanks to JetBrains for providing us a few licenses for all their products, as part of their [Open Source program](https://www.jetbrains.com/opensource/).
+## License [![License](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?label=License&logo=gnu&color=C4282D)](LICENSE)
 
-<a href="https://jb.gg/OpenSource">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://www.jetbrains.com/company/brand/img/logo_jb_dos_4.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg">
-  <img alt="JetBrains logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg" width="40%">
-</picture>
-</a>
-
-Thanks to Weblate for hosting our translation efforts.
-
-<a href="https://hosted.weblate.org/engage/prismlauncher/">
-<img src="https://hosted.weblate.org/widgets/prismlauncher/-/open-graph.png" alt="Translation status" width="300" />
-</a>
-
-Thanks to Netlify for providing us their excellent web services, as part of their [Open Source program](https://www.netlify.com/open-source/).
-
-<a href="https://www.netlify.com"> <img src="https://www.netlify.com/v3/img/components/netlify-color-accent.svg" alt="Deploys by Netlify" /> </a>
-
-Thanks to the awesome people over at [MacStadium](https://www.macstadium.com/), for providing M1-Macs for development purposes!
-
-<a href="https://www.macstadium.com"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="Powered by MacStadium" width="300"></a>
-
-## Forking/Redistributing/Custom builds policy
-
-You are free to fork, redistribute and provide custom builds as long as you follow the terms of the [license](LICENSE) (this is a legal responsibility), and if you made code changes rather than just packaging a custom build, please do the following as a basic courtesy:
-
-- Make it clear that your fork is not Prism Launcher and is not endorsed by or affiliated with the Prism Launcher project (<https://prismlauncher.org>).
-- Go through [CMakeLists.txt](CMakeLists.txt) and change Prism Launcher's API keys to your own or set them to empty strings (`""`) to disable them (this way the program will still compile but the functionality requiring those keys will be disabled).
-
-If you have any questions or want any clarification on the above conditions please make an issue and ask us.
-
-If you are just building Prism Launcher for your distribution, please make sure to set the `Launcher_BUILD_PLATFORM` to a slug representing your distribution. Examples are `archlinux`, `fedora` and `nixpkgs`.
-
-Note that if you build this software without removing the provided API keys in [CMakeLists.txt](CMakeLists.txt) you are accepting the following terms and conditions:
-
-- [Microsoft Identity Platform Terms of Use](https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use)
-- [CurseForge 3rd Party API Terms and Conditions](https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions)
-
-If you do not agree with these terms and conditions, then remove the associated API keys from the [CMakeLists.txt](CMakeLists.txt) file by setting them to an empty string (`""`).
-
-## License [![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?label=License&logo=gnu&color=C4282D)](LICENSE)
-
-All launcher code is available under the GPL-3.0-only license.
-
-The logo and related assets are under the CC BY-SA 4.0 license.
+All launcher code is available under the GPL-3.0-only license. The logo and related assets are under the CC BY-SA 4.0 license.
