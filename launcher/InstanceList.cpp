@@ -269,14 +269,14 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
 
 QStringList InstanceList::getGroups()
 {
-    return m_groupNameCache.keys();
+    return m_groupDataCache.keys();
 }
 
 QString InstanceList::getGroupIconKey(const GroupId& groupName) const
 {
-    auto iter = m_groupIconCache.find(groupName);
-    if (iter != m_groupIconCache.end()) {
-        return *iter;
+    auto iter = m_groupDataCache.find(groupName);
+    if (iter != m_groupDataCache.end()) {
+        return iter.value().iconKey;
     }
     return {};
 }
@@ -287,13 +287,13 @@ void InstanceList::setGroupIconKey(const GroupId& groupName, const QString& icon
         return;
 
     bool modified = false;
-    if (m_groupIconCache.contains(groupName)) {
-        if (m_groupIconCache[groupName] != iconKey) {
-            m_groupIconCache[groupName] = iconKey;
+    if (m_groupDataCache.contains(groupName)) {
+        if (m_groupDataCache[groupName].iconKey != iconKey) {
+            m_groupDataCache[groupName].iconKey = iconKey;
             modified = true;
         }
     } else {
-        m_groupIconCache.insert(groupName, iconKey);
+        m_groupDataCache[groupName].iconKey = iconKey;
         modified = true;
     }
 
@@ -304,8 +304,7 @@ void InstanceList::setGroupIconKey(const GroupId& groupName, const QString& icon
 
 void InstanceList::deleteGroup(const GroupId& name)
 {
-    m_groupNameCache.remove(name);
-    m_groupIconCache.remove(name);
+    m_groupDataCache.remove(name);
     m_collapsedGroups.remove(name);
 
     bool removed = false;
@@ -330,7 +329,9 @@ void InstanceList::deleteGroup(const GroupId& name)
 
 void InstanceList::renameGroup(const QString& src, const QString& dst)
 {
-    m_groupNameCache.remove(src);
+    const GroupData groupData = m_groupDataCache[src];
+    m_groupDataCache.remove(src);
+    m_groupDataCache[dst] = groupData;
 
     if (m_collapsedGroups.remove(src)) {
         m_collapsedGroups.insert(dst);
@@ -346,9 +347,6 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             increaseGroupCount(dst);
             qDebug() << "Set" << instID << "group to" << dst;
             modified = true;
-            if (m_groupIconCache.contains(src)) {
-                m_groupIconCache.insert(dst, m_groupIconCache.take(src));
-            }
             auto idx = getInstIndex(instance.get());
             if (idx >= 0) {
                 emit dataChanged(index(idx), index(idx), { GroupRole });
@@ -765,7 +763,7 @@ void InstanceList::increaseGroupCount(const QString& group)
         return;
     }
 
-    ++m_groupNameCache[group];
+    ++m_groupDataCache[group].refs;
 }
 
 void InstanceList::decreaseGroupCount(const QString& group)
@@ -774,8 +772,8 @@ void InstanceList::decreaseGroupCount(const QString& group)
         return;
     }
 
-    if (--m_groupNameCache[group] < 1) {
-        m_groupNameCache.remove(group);
+    if (--m_groupDataCache[group].refs < 1) {
+        m_groupDataCache.remove(group);
         m_collapsedGroups.remove(group);
     }
 }
@@ -809,7 +807,7 @@ void InstanceList::saveGroupList()
         QJsonObject groupObj;
         QJsonArray instanceArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
-        groupObj.insert("icon", QJsonValue(m_groupIconCache.value(name, "")));
+        groupObj.insert("icon", QJsonValue(m_groupDataCache.value(name, {}).iconKey));
         for (const auto& item : list) {
             instanceArr.append(QJsonValue(item));
         }
@@ -839,8 +837,7 @@ void InstanceList::loadGroupList()
     QString groupFileName = QDir::current().filePath("instgroups.json");
 
     m_instanceGroupIndex.clear();
-    m_groupNameCache.clear();
-    m_groupIconCache.clear();
+    m_groupDataCache.clear();
     m_collapsedGroups.clear();
 
     bool migratingLegacyGroups = false;
@@ -911,7 +908,7 @@ void InstanceList::loadGroupList()
         }
 
         auto icon = groupObj.value("icon").toString("");
-        m_groupIconCache[groupName] = icon;
+        m_groupDataCache[groupName].iconKey = icon;
 
         QJsonArray instancesArray = groupObj.value("instances").toArray();
         for (auto value : instancesArray) {

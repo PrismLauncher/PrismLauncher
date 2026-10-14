@@ -70,6 +70,11 @@ struct TrashHistoryItem {
     QList<TrashShortcutItem> shortcuts;
 };
 
+struct GroupData {
+    QString iconKey = "";
+    int refs = 0;
+};
+
 class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
@@ -192,8 +197,7 @@ class InstanceList : public QAbstractListModel {
     bool m_dirty = false;
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
     // id -> refs
-    QMap<QString, int> m_groupNameCache;
-    QMap<QString, QString> m_groupIconCache;
+    QMap<QString, GroupData> m_groupDataCache;
 
     SettingsObject* m_globalSettings;
     QStringList m_instDirs;
