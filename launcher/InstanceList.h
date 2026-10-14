@@ -115,6 +115,9 @@ class InstanceList : public QAbstractListModel {
     GroupId getInstanceGroup(const InstanceId& id) const;
     void setInstanceGroup(const InstanceId& id, GroupId name);
 
+    QString getGroupIconKey(const GroupId& groupName) const;
+    void setGroupIconKey(const GroupId& groupName, const QString& iconKey);
+
     void deleteGroup(const GroupId& name);
     void renameGroup(const GroupId& src, const GroupId& dst);
     bool trashInstance(const InstanceId& id);
@@ -190,6 +193,7 @@ class InstanceList : public QAbstractListModel {
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
+    QMap<QString, QString> m_groupIconCache;
 
     SettingsObject* m_globalSettings;
     QStringList m_instDirs;

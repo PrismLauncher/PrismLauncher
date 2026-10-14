@@ -272,9 +272,40 @@ QStringList InstanceList::getGroups()
     return m_groupNameCache.keys();
 }
 
+QString InstanceList::getGroupIconKey(const GroupId& groupName) const
+{
+    auto iter = m_groupIconCache.find(groupName);
+    if (iter != m_groupIconCache.end()) {
+        return *iter;
+    }
+    return {};
+}
+
+void InstanceList::setGroupIconKey(const GroupId& groupName, const QString& iconKey)
+{
+    if (groupName.isEmpty())
+        return;
+
+    bool modified = false;
+    if (m_groupIconCache.contains(groupName)) {
+        if (m_groupIconCache[groupName] != iconKey) {
+            m_groupIconCache[groupName] = iconKey;
+            modified = true;
+        }
+    } else {
+        m_groupIconCache.insert(groupName, iconKey);
+        modified = true;
+    }
+
+    if (modified) {
+        saveGroupList();
+    }
+}
+
 void InstanceList::deleteGroup(const GroupId& name)
 {
     m_groupNameCache.remove(name);
+    m_groupIconCache.remove(name);
     m_collapsedGroups.remove(name);
 
     bool removed = false;
@@ -300,6 +331,7 @@ void InstanceList::deleteGroup(const GroupId& name)
 void InstanceList::renameGroup(const QString& src, const QString& dst)
 {
     m_groupNameCache.remove(src);
+
     if (m_collapsedGroups.remove(src)) {
         m_collapsedGroups.insert(dst);
     }
@@ -314,6 +346,9 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             increaseGroupCount(dst);
             qDebug() << "Set" << instID << "group to" << dst;
             modified = true;
+            if (m_groupIconCache.contains(src)) {
+                m_groupIconCache.insert(dst, m_groupIconCache.take(src));
+            }
             auto idx = getInstIndex(instance.get());
             if (idx >= 0) {
                 emit dataChanged(index(idx), index(idx), { GroupRole });
@@ -774,6 +809,7 @@ void InstanceList::saveGroupList()
         QJsonObject groupObj;
         QJsonArray instanceArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
+        groupObj.insert("icon", QJsonValue(m_groupIconCache.value(name, "")));
         for (const auto& item : list) {
             instanceArr.append(QJsonValue(item));
         }
@@ -804,6 +840,7 @@ void InstanceList::loadGroupList()
 
     m_instanceGroupIndex.clear();
     m_groupNameCache.clear();
+    m_groupIconCache.clear();
     m_collapsedGroups.clear();
 
     bool migratingLegacyGroups = false;
@@ -872,6 +909,9 @@ void InstanceList::loadGroupList()
         if (hidden) {
             m_collapsedGroups.insert(groupName);
         }
+
+        auto icon = groupObj.value("icon").toString("");
+        m_groupIconCache[groupName] = icon;
 
         QJsonArray instancesArray = groupObj.value("instances").toArray();
         for (auto value : instancesArray) {

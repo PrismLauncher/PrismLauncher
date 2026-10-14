@@ -576,6 +576,16 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
             QAction* actionRenameGroup = new QAction(tr("&Rename group"), this);
             connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
             actions.append(actionRenameGroup);
+
+            QAction* actionChangeGroupIcon = new QAction(tr("Change group icon"), this);
+            connect(actionChangeGroupIcon, &QAction::triggered, this, [this, group] { setGroupIcon(group); });
+            actions.append(actionChangeGroupIcon);
+
+            if (!APPLICATION->instances()->getGroupIconKey(group).isEmpty()) {
+                QAction* actionRemoveGroupIcon = new QAction(tr("Remove group icon"), this);
+                connect(actionRemoveGroupIcon, &QAction::triggered, this, [this, group] { removeGroupIcon(group); });
+                actions.append(actionRemoveGroupIcon);
+            }
         }
     }
     QMenu myMenu;
@@ -1294,6 +1304,32 @@ void MainWindow::deleteGroup(QString group)
                                             QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
         APPLICATION->instances()->deleteGroup(group);
+}
+
+void MainWindow::setGroupIcon(QString group)
+{
+    Q_ASSERT(!group.isEmpty());
+
+    InstanceList* instances = APPLICATION->instances();
+
+    IconPickerDialog dlg(this);
+    dlg.execWithSelection(instances->getGroupIconKey(group));
+
+    if (dlg.result() == QDialog::Accepted) {
+        instances->setGroupIconKey(group, dlg.selectedIconKey);
+        view->updateGeometries();
+        view->viewport()->update();
+    }
+}
+
+void MainWindow::removeGroupIcon(QString group)
+{
+    Q_ASSERT(!group.isEmpty());
+
+    InstanceList* instances = APPLICATION->instances();
+    instances->setGroupIconKey(group, "");
+    view->updateGeometries();
+    view->viewport()->update();
 }
 
 void MainWindow::renameGroup(QString group)
