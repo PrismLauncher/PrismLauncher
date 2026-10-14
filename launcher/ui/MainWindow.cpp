@@ -110,6 +110,7 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceView.h"
+#include "ui/widgets/ActivityDrawer.h"
 #include "ui/widgets/LibraryFilterBar.h"
 
 #include <QPainter>
@@ -581,16 +582,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         detailLayout->addStretch(1);
 
-        // Activity drawer: task rows live here (filled in by the task model work)
-        m_activityDrawer = new QFrame(this);
+        // Activity drawer: task rows with progress; failures stay as copyable rows
+        m_activityDrawer = new ActivityDrawer(this);
         m_activityDrawer->setObjectName(QStringLiteral("activityDrawer"));
-        m_activityDrawer->setFrameShape(QFrame::StyledPanel);
-        auto* drawerLayout = new QVBoxLayout(m_activityDrawer);
-        m_drawerLabel = new QLabel(tr("Nothing is running."), m_activityDrawer);
-        m_drawerLabel->setAlignment(Qt::AlignCenter);
-        m_drawerLabel->setEnabled(false);
-        drawerLayout->addWidget(m_drawerLabel);
         m_activityDrawer->hide();
+        connect(m_activityDrawer, &ActivityDrawer::activeTaskCountChanged, this, &MainWindow::updateActivityLabel);
 
         // Activity strip: task summary on the left, news on the right
         m_activityStrip = new QWidget(this);
@@ -777,7 +773,8 @@ void MainWindow::retranslateUi()
     m_railSettings->setText(tr("Settings"));
     m_railAccount->setText(tr("Account"));
     m_activityButton->setText(tr("Nothing running"));
-    m_drawerLabel->setText(tr("Nothing is running."));
+    m_activityDrawer->retranslate();
+    updateActivityLabel();
     updateDetailMeta();
 
     // replace the %1 with the launcher display name in some actions
@@ -1259,9 +1256,34 @@ void MainWindow::runModalTask(Task* task)
     loadDialog.execWithTask(task);
 }
 
+void MainWindow::startActivityTask(std::unique_ptr<Task> task)
+{
+    // The drawer owns the task; errors and warnings become copyable rows instead of message boxes
+    connect(task.get(), &Task::succeeded, this, [this, taskPtr = task.get()] {
+        const QStringList warnings = taskPtr->warnings();
+        if (warnings.count()) {
+            m_activityDrawer->addNotice(tr("Warnings"), warnings.join('\n'));
+        }
+    });
+    Task* rawTask = task.release();
+    m_activityDrawer->addTask(rawTask);
+    rawTask->start();
+}
+
+void MainWindow::updateActivityLabel()
+{
+    const int count = m_activityDrawer ? m_activityDrawer->activeTaskCount() : 0;
+    m_activityButton->setText(count == 0 ? tr("Nothing running") : tr("%n task(s) running", nullptr, count));
+}
+
 void MainWindow::instanceFromInstanceTask(InstanceTask* rawTask)
 {
-    unique_qobject_ptr<Task> task(APPLICATION->instances()->wrapInstanceTask(rawTask));
+    Task* wrapped = APPLICATION->instances()->wrapInstanceTask(rawTask);
+    if (m_activityDrawer && !isClassicLayout()) {
+        startActivityTask(std::unique_ptr<Task>(wrapped));
+        return;
+    }
+    unique_qobject_ptr<Task> task(wrapped);
     runModalTask(task.get());
 }
 
@@ -1278,7 +1300,12 @@ void MainWindow::on_actionCopyInstance_triggered()
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
-    unique_qobject_ptr<Task> task(APPLICATION->instances()->wrapInstanceTask(copyTask));
+    Task* wrapped = APPLICATION->instances()->wrapInstanceTask(copyTask);
+    if (m_activityDrawer && !isClassicLayout()) {
+        startActivityTask(std::unique_ptr<Task>(wrapped));
+        return;
+    }
+    unique_qobject_ptr<Task> task(wrapped);
     runModalTask(task.get());
 }
 

@@ -60,6 +60,7 @@ class InstanceTask;
 class LibraryFilterBar;
 class QAction;
 class QFrame;
+class ActivityDrawer;
 
 namespace Ui {
 class MainWindow;
@@ -246,6 +247,9 @@ class MainWindow : public QMainWindow {
     bool isClassicLayout() const;
     void updateDetailMeta();
     QMenu* createMoreMenu();
+    // Runs a task in the activity drawer (new layout) instead of a modal progress dialog
+    void startActivityTask(std::unique_ptr<Task> task);
+    void updateActivityLabel();
 
    private:
     Ui::MainWindow* ui;
@@ -283,8 +287,7 @@ class MainWindow : public QMainWindow {
     QWidget* m_activityStrip = nullptr;
     QToolButton* m_activityButton = nullptr;
     QToolButton* m_stripNews = nullptr;
-    QFrame* m_activityDrawer = nullptr;
-    QLabel* m_drawerLabel = nullptr;
+    ActivityDrawer* m_activityDrawer = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 

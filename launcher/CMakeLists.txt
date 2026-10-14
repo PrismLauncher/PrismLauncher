@@ -1121,6 +1121,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/JavaWizardWidget.h
     ui/widgets/LanguageSelectionWidget.cpp
     ui/widgets/LanguageSelectionWidget.h
+    ui/widgets/ActivityDrawer.cpp
+    ui/widgets/ActivityDrawer.h
     ui/widgets/LibraryFilterBar.cpp
     ui/widgets/LibraryFilterBar.h
     ui/widgets/LogView.cpp
