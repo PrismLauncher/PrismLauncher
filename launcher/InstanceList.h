@@ -106,6 +106,7 @@ class InstanceList : public QAbstractListModel {
 
     /* O(n) */
     MinecraftInstance* getInstanceById(const QString& id) const;
+    int getInstIndex(MinecraftInstance* inst) const;
     /* O(n) */
     MinecraftInstance* getInstanceByManagedName(const QString& managedName) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
@@ -171,7 +172,6 @@ class InstanceList : public QAbstractListModel {
     void instanceDirContentsChanged(const QString& path);
 
    private:
-    int getInstIndex(MinecraftInstance* inst) const;
     void migrateTotalPlayTime();
     void suspendWatch();
     void resumeWatch();
