@@ -1146,6 +1146,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/MinecraftSettingsWidget.cpp
     ui/widgets/JavaSettingsWidget.h
     ui/widgets/JavaSettingsWidget.cpp
+    ui/widgets/EditableLabel.h
+    ui/widgets/EditableLabel.cpp
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
