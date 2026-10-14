@@ -90,11 +90,19 @@ class PageContainer : public QWidget, public BasePageContainer {
 
     void changeEvent(QEvent*) override;
 
-    void hidePageList() { m_pageList->hide(); }
+    void hidePageList()
+    {
+        m_pageList->hide();
+        m_search->hide();
+    }
 
    private:
     void createUI();
     void retranslate();
+    // The page title uses the theme's display face when it has one
+    void updateHeaderFont();
+    void applySearch(const QString& text);
+    void retranslateSearch();
 
    public slots:
     void help();
@@ -114,6 +122,7 @@ class PageContainer : public QWidget, public BasePageContainer {
     PageModel* m_model;
     QStackedLayout* m_pageStack;
     QListView* m_pageList;
+    QLineEdit* m_search;
     QLabel* m_header;
     QGridLayout* m_layout;
 };

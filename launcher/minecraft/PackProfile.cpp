@@ -1006,6 +1006,11 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
     }
 }
 
+bool PackProfile::isLoaded() const
+{
+    return d->loaded;
+}
+
 QString PackProfile::getComponentVersion(const QString& uid) const
 {
     const auto iter = d->componentIndex.find(uid);

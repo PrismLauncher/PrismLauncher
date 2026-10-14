@@ -88,7 +88,10 @@ class InstanceList : public QAbstractListModel {
     enum AdditionalRoles {
         GroupRole = Qt::UserRole,
         InstancePointerRole = 0x34B1CB48,  ///< Return pointer to real instance
-        InstanceIDRole = 0x34B1CB49        ///< Return id if the instance
+        InstanceIDRole = 0x34B1CB49,       ///< Return id if the instance
+        MinecraftVersionRole,              ///< Minecraft version, such as "1.21.1"
+        ModLoaderRole,                     ///< Display name of the mod loader, empty for vanilla
+        PackSourceRole,                    ///< Managed pack platform, such as "modrinth" or "flame"; empty otherwise
     };
     /*!
      * \brief Error codes returned by functions in the InstanceList class.
@@ -184,7 +187,15 @@ class InstanceList : public QAbstractListModel {
     void increaseGroupCount(const QString& group);
     void decreaseGroupCount(const QString& group);
 
+    // What tiles show under an instance's name. Read from the instance's components and cached.
+    struct InstanceSummary {
+        QString minecraftVersion;
+        QString modLoader;
+    };
+    const InstanceSummary& summaryOf(MinecraftInstance* inst) const;
+
    private:
+    mutable QHash<QString, InstanceSummary> m_summaries;
     int m_watchLevel = 0;
     bool m_dirty = false;
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;

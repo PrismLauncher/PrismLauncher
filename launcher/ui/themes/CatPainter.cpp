@@ -20,6 +20,7 @@
 #include <QPixmap>
 #include "Application.h"
 #include "settings/SettingsObject.h"
+#include "ui/themes/ThemeManager.h"
 
 CatPainter::CatPainter(const QString& path, QObject* parent) : QObject(parent)
 {
@@ -60,6 +61,13 @@ void CatPainter::paint(QPainter* painter, const QRect& viewport)
             widHeight = frame.height();
     }
     auto pixmap = frame.scaled(widWidth, widHeight, aspectMode, Qt::SmoothTransformation);
+    if (const int block = APPLICATION->themeManager()->getTokens().catPixelSize; block > 1 && !pixmap.isNull()) {
+        // Shrink, then scale back up without smoothing, so the cat turns into chunky pixel art
+        const QSize full = pixmap.size();
+        pixmap =
+            pixmap.scaled(qMax(1, full.width() / block), qMax(1, full.height() / block), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+                .scaled(full, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    }
     QRect rectOfPixmap = pixmap.rect();
     rectOfPixmap.moveBottomRight(viewport.bottomRight());
     painter->drawPixmap(rectOfPixmap.topLeft(), pixmap);

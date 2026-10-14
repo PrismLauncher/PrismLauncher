@@ -18,6 +18,7 @@
 #include <BaseInstance.h>
 #include <icons/IconList.h>
 #include "Application.h"
+#include "InstanceList.h"
 #include "InstanceView.h"
 
 #include <QDebug>
@@ -28,6 +29,42 @@ InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(
     m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
     // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
     m_naturalSort.setLocale(QLocale::system());
+}
+
+void InstanceProxyModel::setSearchText(const QString& text)
+{
+    const QString trimmed = text.trimmed();
+    if (trimmed == m_searchText) {
+        return;
+    }
+    m_searchText = trimmed;
+    invalidateRowsFilter();
+}
+
+void InstanceProxyModel::setGroupFilter(std::optional<QString> group)
+{
+    if (group == m_groupFilter) {
+        return;
+    }
+    m_groupFilter = std::move(group);
+    invalidateRowsFilter();
+}
+
+bool InstanceProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    const QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    if (m_groupFilter && index.data(InstanceViewRoles::GroupRole).toString() != *m_groupFilter) {
+        return false;
+    }
+    if (m_searchText.isEmpty()) {
+        return true;
+    }
+    for (const int role : { int(Qt::DisplayRole), int(InstanceList::MinecraftVersionRole), int(InstanceList::ModLoaderRole) }) {
+        if (index.data(role).toString().contains(m_searchText, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const

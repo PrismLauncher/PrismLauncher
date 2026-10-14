@@ -852,6 +852,10 @@ SET(LAUNCHER_SOURCES
     # GUI - themes
     ui/themes/FusionTheme.cpp
     ui/themes/FusionTheme.h
+    ui/themes/BlocksStyle.cpp
+    ui/themes/BlocksStyle.h
+    ui/themes/BlocksTheme.cpp
+    ui/themes/BlocksTheme.h
     ui/themes/BrightTheme.cpp
     ui/themes/BrightTheme.h
     ui/themes/CustomTheme.cpp
@@ -1115,6 +1119,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/JavaWizardWidget.h
     ui/widgets/LanguageSelectionWidget.cpp
     ui/widgets/LanguageSelectionWidget.h
+    ui/widgets/LibraryFilterBar.cpp
+    ui/widgets/LibraryFilterBar.h
     ui/widgets/LogView.cpp
     ui/widgets/LogView.h
     ui/widgets/InfoFrame.cpp
@@ -1196,6 +1202,7 @@ endif()
 
 qt_add_resources(LAUNCHER_RESOURCES
     resources/backgrounds/backgrounds.qrc
+    resources/blocks/blocks.qrc
     resources/multimc/multimc.qrc
     resources/pe_dark/pe_dark.qrc
     resources/pe_light/pe_light.qrc

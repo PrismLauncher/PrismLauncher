@@ -35,15 +35,57 @@
  */
 #pragma once
 #include <MessageLevel.h>
+#include <QFont>
+#include <QList>
 #include <QMap>
 #include <QPalette>
 #include <QString>
+#include <utility>
 
 class QStyle;
 
 struct LogColors {
     QMap<MessageLevel, QColor> background;
     QMap<MessageLevel, QColor> foreground;
+};
+
+// Visual parameters that a palette and a style sheet cannot express.
+// The defaults reproduce the classic look, so themes that don't set tokens render exactly as before.
+struct ThemeTokens {
+    enum class TileStyle { Classic, Slot };
+
+    // Instance grid
+    TileStyle tileStyle = TileStyle::Classic;
+    int tileWidth = 100;
+    int tileIconSize = 48;
+    int tileSpacing = 5;
+    // Show the Minecraft version and mod loader under the name, and the modpack platform on the slot
+    bool tileMetaLine = false;
+    // Size of one "pixel" of bevel art, in logical pixels
+    int pixelUnit = 2;
+
+    // Slot tiles: an inventory slot behind the icon and a frame around the selected one
+    QColor slotFill;
+    QColor slotShadow;
+    QColor slotHighlight;
+    QColor slotHover;
+    QColor selectionFrame;
+
+    // Text painted straight onto the instance view: group headers and tile names
+    QColor viewText;
+    QColor viewTextShadow;
+    // Translucent box behind tile names, like a Minecraft name tag, so they stay readable over the cat
+    QColor viewTextBacking;
+    QString displayFont;
+    int displayFontPixelSize = 0;
+
+    // Texture tiled behind the instance view, darkened with viewTextureTint
+    QString viewTexture;
+    int viewTextureScale = 1;
+    QColor viewTextureTint;
+
+    // Paint the background cat in blocks of this many pixels; 0 keeps it smooth
+    int catPixelSize = 0;
 };
 
 // TODO: rename to Theme; this is not an interface as it contains method implementations
@@ -63,6 +105,9 @@ class ITheme {
     virtual double fadeAmount() = 0;
     virtual LogColors logColorScheme() { return defaultLogColors(colorScheme()); }
     virtual QStringList searchPaths() { return {}; }
+    virtual ThemeTokens tokens() { return {}; }
+    // Fonts for specific widget classes, such as a display face on buttons
+    virtual QList<std::pair<QByteArray, QFont>> widgetFonts() { return {}; }
 
     static QPalette fadeInactive(QPalette in, qreal bias, QColor color);
     static LogColors defaultLogColors(const QPalette& palette);

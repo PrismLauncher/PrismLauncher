@@ -1,0 +1,11 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/blocks">
+        <!-- Pixelify Sans by Stefie Justprince, SIL Open Font License 1.1 (see fonts/OFL.txt) -->
+        <file>fonts/PixelifySans.ttf</file>
+        <file>fonts/OFL.txt</file>
+        <!-- Original 16x16 textures for the Blocks theme -->
+        <file>textures/dirt.png</file>
+        <file>textures/deepslate.png</file>
+    </qresource>
+</RCC>

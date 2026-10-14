@@ -261,5 +261,66 @@ Result<> CustomTheme::read(const QString& path, bool& hasCustomLogColors)
         readAndSetLogColor(MessageLevel::Error, true, "Error");
         readAndSetLogColor(MessageLevel::Fatal, true, "Fatal");
     }
+
+    if (root.contains("tokens")) {
+        TRY_INTO(const auto& tokensRoot, Json::requireObject(root, "tokens"))
+        readTokens(tokensRoot);
+    }
     return {};
+}
+
+void CustomTheme::readTokens(const QJsonObject& tokensRoot)
+{
+    auto readColor = [](const QJsonObject& object, const QString& key, QColor& out) {
+        const auto value = object[key].toString();
+        if (value.isEmpty()) {
+            return;
+        }
+        QColor color(value);
+        if (color.isValid()) {
+            out = color;
+        } else {
+            themeWarningLog() << "Token color" << value << "for" << key << "was not recognized.";
+        }
+    };
+    auto readInt = [](const QJsonObject& object, const QString& key, int& out) { out = object[key].toInt(out); };
+
+    const auto tile = tokensRoot["tile"].toObject();
+    if (tile["style"].toString() == "slot") {
+        m_tokens.tileStyle = ThemeTokens::TileStyle::Slot;
+    }
+    readInt(tile, "width", m_tokens.tileWidth);
+    readInt(tile, "iconSize", m_tokens.tileIconSize);
+    readInt(tile, "spacing", m_tokens.tileSpacing);
+    m_tokens.tileMetaLine = tile["metaLine"].toBool(m_tokens.tileMetaLine);
+    readInt(tokensRoot, "pixelUnit", m_tokens.pixelUnit);
+
+    const auto slot = tokensRoot["slot"].toObject();
+    readColor(slot, "fill", m_tokens.slotFill);
+    readColor(slot, "shadow", m_tokens.slotShadow);
+    readColor(slot, "highlight", m_tokens.slotHighlight);
+    readColor(slot, "hover", m_tokens.slotHover);
+    readColor(slot, "selection", m_tokens.selectionFrame);
+
+    const auto viewText = tokensRoot["viewText"].toObject();
+    readColor(viewText, "color", m_tokens.viewText);
+    readColor(viewText, "shadow", m_tokens.viewTextShadow);
+    readColor(viewText, "backing", m_tokens.viewTextBacking);
+    m_tokens.displayFont = viewText["font"].toString(m_tokens.displayFont);
+    readInt(viewText, "pixelSize", m_tokens.displayFontPixelSize);
+
+    const auto texture = tokensRoot["viewTexture"].toObject();
+    m_tokens.viewTexture = texture["image"].toString(m_tokens.viewTexture);
+    readInt(texture, "scale", m_tokens.viewTextureScale);
+    readColor(texture, "tint", m_tokens.viewTextureTint);
+
+    readInt(tokensRoot["cat"].toObject(), "pixelSize", m_tokens.catPixelSize);
+
+    // Keep geometry sane no matter what a theme file says
+    m_tokens.tileWidth = qBound(48, m_tokens.tileWidth, 512);
+    m_tokens.tileIconSize = qBound(16, m_tokens.tileIconSize, 256);
+    m_tokens.tileSpacing = qBound(0, m_tokens.tileSpacing, 64);
+    m_tokens.pixelUnit = qBound(1, m_tokens.pixelUnit, 8);
+    m_tokens.viewTextureScale = qBound(1, m_tokens.viewTextureScale, 16);
+    m_tokens.catPixelSize = qBound(0, m_tokens.catPixelSize, 64);
 }

@@ -57,6 +57,7 @@ class ThemeManager {
     QList<CatPack*> getValidCatPacks();
 
     const LogColors& getLogColors() { return m_logColors; }
+    const ThemeTokens& getTokens() { return m_tokens; }
 
     void refresh();
 
@@ -70,6 +71,8 @@ class ThemeManager {
     QPalette m_defaultPalette;
     QString m_defaultStyle;
     LogColors m_logColors;
+    ThemeTokens m_tokens;
+    bool m_widgetFontsApplied = false;
 
     void initializeThemes();
     void initializeCatPacks();

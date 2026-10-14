@@ -57,7 +57,9 @@
 
 #include "InstanceTask.h"
 #include "WatchLock.h"
+#include "minecraft/Component.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "settings/INISettingsObject.h"
 
 #ifdef Q_OS_WIN32
@@ -188,6 +190,15 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
         // HACK: see InstanceView.h in gui!
         case GroupRole: {
             return getInstanceGroup(pdata->id());
+        }
+        case MinecraftVersionRole: {
+            return summaryOf(pdata).minecraftVersion;
+        }
+        case ModLoaderRole: {
+            return summaryOf(pdata).modLoader;
+        }
+        case PackSourceRole: {
+            return pdata->isManagedPack() ? pdata->getManagedPackType() : QString();
         }
         default:
             break;
@@ -614,9 +625,74 @@ void InstanceList::add(std::vector<std::unique_ptr<MinecraftInstance>>& t)
     for (auto& ptr : t) {
         MinecraftInstance* inst = ptr.get();
         m_instances.push_back(std::move(ptr));
+        m_summaries.remove(inst->id());
         connect(inst, &MinecraftInstance::propertiesChanged, this, [this, inst]() { propertiesChanged(inst); });
+        if (auto* profile = inst->getPackProfile()) {
+            // Versions and loaders shown on the tile come from the components; refresh them when those change.
+            // Only announce real changes: views reacting to dataChanged may reload the components themselves.
+            const auto componentsChanged = [this, inst] {
+                const InstanceSummary previous = m_summaries.take(inst->id());
+                const InstanceSummary& current = summaryOf(inst);
+                if (current.minecraftVersion != previous.minecraftVersion || current.modLoader != previous.modLoader) {
+                    propertiesChanged(inst);
+                }
+            };
+            connect(profile, &QAbstractItemModel::modelReset, this, componentsChanged);
+            connect(profile, &QAbstractItemModel::rowsInserted, this, componentsChanged);
+            connect(profile, &QAbstractItemModel::rowsRemoved, this, componentsChanged);
+            connect(profile, &QAbstractItemModel::dataChanged, this, componentsChanged);
+        }
     }
     endInsertRows();
+}
+
+const InstanceList::InstanceSummary& InstanceList::summaryOf(MinecraftInstance* inst) const
+{
+    if (auto cached = m_summaries.constFind(inst->id()); cached != m_summaries.constEnd()) {
+        return *cached;
+    }
+
+    static const QList<std::pair<QString, QString>> s_loaderNames{
+        { "net.neoforged", "NeoForge" },         { "net.minecraftforge", "Forge" },          { "net.fabricmc.fabric-loader", "Fabric" },
+        { "org.quiltmc.quilt-loader", "Quilt" }, { "com.mumfrey.liteloader", "LiteLoader" },
+    };
+
+    InstanceSummary summary;
+    auto* profile = inst->getPackProfile();
+    if (profile && profile->isLoaded()) {
+        summary.minecraftVersion = profile->getComponentVersion("net.minecraft");
+        for (const auto& [uid, name] : s_loaderNames) {
+            if (auto component = profile->getComponent(uid); component && component->isEnabled()) {
+                summary.modLoader = name;
+                break;
+            }
+        }
+    }
+    if (summary.minecraftVersion.isEmpty()) {
+        // Loading a whole component list just to label a tile is wasteful; read the pack file instead
+        QFile packFile(FS::PathCombine(inst->instanceRoot(), "mmc-pack.json"));
+        if (packFile.open(QIODevice::ReadOnly)) {
+            const auto components = QJsonDocument::fromJson(packFile.readAll()).object().value("components").toArray();
+            for (const auto& value : components) {
+                const auto component = value.toObject();
+                if (component.value("disabled").toBool()) {
+                    continue;
+                }
+                const auto uid = component.value("uid").toString();
+                if (uid == "net.minecraft") {
+                    // The resolved version, or the requested one if the pack was never resolved
+                    summary.minecraftVersion = component.value("cachedVersion").toString(component.value("version").toString());
+                } else if (summary.modLoader.isEmpty()) {
+                    for (const auto& [loaderUid, name] : s_loaderNames) {
+                        if (uid == loaderUid) {
+                            summary.modLoader = name;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return *m_summaries.insert(inst->id(), summary);
 }
 
 void InstanceList::resumeWatch()
@@ -935,6 +1011,7 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
         m_groupsLoaded = false;
         beginRemoveRows(QModelIndex(), 0, count());
         m_instances.erase(m_instances.begin(), m_instances.end());
+        m_summaries.clear();
         endRemoveRows();
         emit instancesChanged();
     }

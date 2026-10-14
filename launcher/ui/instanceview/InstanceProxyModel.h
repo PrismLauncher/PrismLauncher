@@ -17,6 +17,7 @@
 
 #include <QCollator>
 #include <QSortFilterProxyModel>
+#include <optional>
 
 class InstanceProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -24,11 +25,20 @@ class InstanceProxyModel : public QSortFilterProxyModel {
    public:
     InstanceProxyModel(QObject* parent = 0);
 
+    // Shows only instances whose name, Minecraft version or mod loader contains the text
+    void setSearchText(const QString& text);
+    // Shows only one group; no value shows every group, an empty string the ungrouped instances
+    void setGroupFilter(std::optional<QString> group);
+    bool isFiltering() const { return !m_searchText.isEmpty() || m_groupFilter.has_value(); }
+
    protected:
     QVariant data(const QModelIndex& index, int role) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
     bool subSortLessThan(const QModelIndex& left, const QModelIndex& right) const;
 
    private:
     QCollator m_naturalSort;
+    QString m_searchText;
+    std::optional<QString> m_groupFilter;
 };

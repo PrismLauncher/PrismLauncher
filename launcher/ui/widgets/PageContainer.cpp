@@ -39,16 +39,21 @@
 #include "BuildConfig.h"
 #include "PageContainer_p.h"
 
+#include <QAbstractButton>
 #include <QDialogButtonBox>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListView>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QShortcut>
 #include <QSortFilterProxyModel>
 #include <QStackedLayout>
 #include <QStyledItemDelegate>
 #include <QUrl>
+#include <QVBoxLayout>
 #include <utility>
 
 #include "settings/SettingsObject.h"
@@ -57,23 +62,60 @@
 
 #include "Application.h"
 #include "DesktopServices.h"
+#include "ui/themes/ThemeManager.h"
 
 class PageEntryFilterModel : public QSortFilterProxyModel {
    public:
     explicit PageEntryFilterModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
-   protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
+    void setSearch(const QString& text)
     {
-        const QString pattern = filterRegularExpression().pattern();
+        m_search = text.trimmed();
+        invalidateRowsFilter();
+    }
+    // Page texts change with the language
+    void forgetPageText() { m_pageText.clear(); }
+
+   protected:
+    bool filterAcceptsRow(int sourceRow, [[maybe_unused]] const QModelIndex& sourceParent) const override
+    {
         auto* const model = static_cast<PageModel*>(sourceModel());
         auto* const page = model->pages().at(sourceRow);
         if (!page->shouldDisplay()) {
             return false;
         }
-        // Regular contents check, then check page-filter.
-        return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
+        if (m_search.isEmpty()) {
+            return true;
+        }
+        return page->displayName().contains(m_search, Qt::CaseInsensitive) || pageText(page).contains(m_search, Qt::CaseInsensitive);
     }
+
+   private:
+    // Everything a person can read on a page: labels, buttons and group titles
+    const QString& pageText(BasePage* page) const
+    {
+        auto it = m_pageText.find(page);
+        if (it == m_pageText.end()) {
+            QStringList parts;
+            if (auto* widget = dynamic_cast<QWidget*>(page)) {
+                for (auto* label : widget->findChildren<QLabel*>()) {
+                    parts << label->text();
+                }
+                for (auto* button : widget->findChildren<QAbstractButton*>()) {
+                    parts << button->text();
+                }
+                for (auto* group : widget->findChildren<QGroupBox*>()) {
+                    parts << group->title();
+                }
+            }
+            static const QRegularExpression s_markup(QStringLiteral("<[^>]*>"));
+            it = m_pageText.insert(page, parts.join(' ').remove(s_markup).remove('&'));
+        }
+        return *it;
+    }
+
+    QString m_search;
+    mutable QHash<BasePage*, QString> m_pageText;
 };
 
 PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, QWidget* parent)
@@ -164,14 +206,22 @@ void PageContainer::createUI()
     m_pageStack = new QStackedLayout;
     m_pageList = new PageView;
     m_header = new QLabel();
+    updateHeaderFont();
 
-    QFont headerLabelFont = m_header->font();
-    headerLabelFont.setBold(true);
-    const int pointSize = headerLabelFont.pointSize();
-    if (pointSize > 0) {
-        headerLabelFont.setPointSize(pointSize + 2);
-    }
-    m_header->setFont(headerLabelFont);
+    // Finds pages by name or by any text on them, such as a setting's label
+    m_search = new QLineEdit(this);
+    m_search->setObjectName(QStringLiteral("pageSearch"));
+    m_search->setClearButtonEnabled(true);
+    connect(m_search, &QLineEdit::textChanged, this, &PageContainer::applySearch);
+    auto* find = new QShortcut(QKeySequence::Find, this);
+    connect(find, &QShortcut::activated, this, [this] {
+        m_search->setFocus(Qt::ShortcutFocusReason);
+        m_search->selectAll();
+    });
+    auto* clear = new QShortcut(QKeySequence(Qt::Key_Escape), m_search);
+    clear->setContext(Qt::WidgetShortcut);
+    connect(clear, &QShortcut::activated, m_search, &QLineEdit::clear);
+    retranslateSearch();
 
     auto* headerHLayout = new QHBoxLayout;
     const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
@@ -182,17 +232,57 @@ void PageContainer::createUI()
     m_pageStack->setContentsMargins(0, 0, 0, 0);
     m_pageStack->addWidget(new QWidget(this));
 
+    auto* sidebar = new QVBoxLayout;
+    sidebar->setSpacing(4);
+    sidebar->setContentsMargins(4, 4, 0, 0);
+    sidebar->addWidget(m_search);
+    sidebar->addWidget(m_pageList);
+
     m_layout = new QGridLayout;
     m_layout->addLayout(headerHLayout, 0, 1, 1, 1);
-    m_layout->addWidget(m_pageList, 0, 0, 3, 1);
+    m_layout->addLayout(sidebar, 0, 0, 3, 1);
     m_layout->addLayout(m_pageStack, 1, 1, 1, 1);
     m_layout->setColumnStretch(1, 4);
     m_layout->setContentsMargins(0, 0, 0, 0);
     setLayout(m_layout);
 }
 
+void PageContainer::updateHeaderFont()
+{
+    QFont font = this->font();
+    if (const auto& tokens = APPLICATION->themeManager()->getTokens(); !tokens.displayFont.isEmpty()) {
+        font = QFont(tokens.displayFont);
+        font.setPixelSize(qMax(18, tokens.displayFontPixelSize + 6));
+    } else {
+        font.setBold(true);
+        const int pointSize = font.pointSize();
+        if (pointSize > 0) {
+            font.setPointSize(pointSize + 2);
+        }
+    }
+    m_header->setFont(font);
+}
+
+void PageContainer::applySearch(const QString& text)
+{
+    static_cast<PageEntryFilterModel*>(m_proxyModel)->setSearch(text);
+    // Keep showing a page that still matches; otherwise jump to the first one that does
+    if (!m_pageList->currentIndex().isValid() && m_proxyModel->rowCount() > 0) {
+        m_pageList->setCurrentIndex(m_proxyModel->index(0, 0));
+    }
+}
+
+void PageContainer::retranslateSearch()
+{
+    m_search->setPlaceholderText(tr("Search"));
+    m_search->setToolTip(
+        tr("Find a page by its name or by any text on it (%1)").arg(QKeySequence(QKeySequence::Find).toString(QKeySequence::NativeText)));
+}
+
 void PageContainer::retranslate()
 {
+    retranslateSearch();
+    static_cast<PageEntryFilterModel*>(m_proxyModel)->forgetPageText();
     if (m_currentPage) {
         m_header->setText(m_currentPage->displayName());
     }
@@ -215,6 +305,8 @@ void PageContainer::addButtons(QLayout* buttons)
 void PageContainer::useSidebarStyle(bool sidebar)
 {
     m_pageList->setProperty("_kde_side_panel_view", sidebar);
+    // Search only makes sense for page lists, not for lists of choices such as instance sources
+    m_search->setVisible(sidebar);
 }
 
 void PageContainer::showPage(int row)
@@ -250,7 +342,11 @@ void PageContainer::help()
 
 void PageContainer::currentChanged(const QModelIndex& current)
 {
-    int selectedIndex = current.isValid() ? m_proxyModel->mapToSource(current).row() : -1;
+    if (!current.isValid()) {
+        // The current page was filtered out by a search; keep showing it until another is picked
+        return;
+    }
+    int selectedIndex = m_proxyModel->mapToSource(current).row();
 
     Q_ASSERT(selectedIndex < m_model->pages().size() && selectedIndex >= 0);
 
@@ -287,6 +383,8 @@ void PageContainer::changeEvent(QEvent* event)
 {
     if (event->type() == QEvent::LanguageChange) {
         retranslate();
+    } else if (event->type() == QEvent::StyleChange) {
+        updateHeaderFont();
     }
     QWidget::changeEvent(event);
 }

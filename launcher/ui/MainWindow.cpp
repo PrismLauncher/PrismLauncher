@@ -109,6 +109,10 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceView.h"
+#include "ui/widgets/LibraryFilterBar.h"
+
+#include <QPainter>
+#include <QPixmap>
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 
@@ -186,10 +190,60 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         // QSizePolicy::Ignored allows the button to shrink or expand as necessary (ignoring the size hint)
         nameLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         nameLabel->setTextFormat(Qt::PlainText);
+        // Inside a toolbar a label defaults to button text, but it sits on the bare panel
+        nameLabel->setForegroundRole(QPalette::WindowText);
         infoLayout->addWidget(nameLabel);
 
         instanceInfoWidget = ui->instanceToolBar->insertWidgetBefore(ui->actionRenameInstance, infoWidget);
         Q_ASSERT(instanceInfoWidget != nullptr);
+
+        // Launching is what people come here for, so it gets a large button of its own
+        m_playButton = new QToolButton(this);
+        m_playButton->setObjectName(QStringLiteral("playButton"));
+        m_playButton->setProperty("_prism_primary", true);
+        m_playButton->setDefaultAction(ui->actionLaunchInstance);
+        m_playButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        m_playButton->setPopupMode(QToolButton::MenuButtonPopup);
+        m_playButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        m_playButton->setFocusPolicy(Qt::NoFocus);
+        ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, m_playButton);
+        ui->instanceToolBar->removeAction(ui->actionLaunchInstance);
+
+        // Less frequent actions share one menu, which keeps the panel short and Delete out of easy reach.
+        // They all stay in the File menu and the instance context menu too.
+        auto* moreMenu = new QMenu(this);
+        moreMenu->addAction(ui->actionRenameInstance);
+        moreMenu->addAction(ui->actionChangeInstIcon);
+        moreMenu->addAction(ui->actionChangeInstGroup);
+        moreMenu->addAction(ui->actionCopyInstance);
+        moreMenu->addAction(ui->actionCreateInstanceShortcut);
+        moreMenu->addSeparator();
+        moreMenu->addAction(ui->actionDeleteInstance);
+        for (auto* action : { ui->actionRenameInstance, ui->actionChangeInstGroup, ui->actionCopyInstance, ui->actionCreateInstanceShortcut,
+                              ui->actionDeleteInstance }) {
+            ui->instanceToolBar->removeAction(action);
+        }
+        auto* moreButton = new QToolButton(this);
+        moreButton->setObjectName(QStringLiteral("moreInstanceActions"));
+        moreButton->setIcon([] {
+            // Three dots in a neutral grey, readable on light and dark buttons alike
+            QPixmap dots(32, 32);
+            dots.fill(Qt::transparent);
+            QPainter painter(&dots);
+            for (int i = 0; i < 3; ++i) {
+                painter.fillRect(QRect(4 + i * 10, 13, 5, 5), QColor(0x8c, 0x8c, 0x8c));
+            }
+            return QIcon(dots);
+        }());
+        moreButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        moreButton->setPopupMode(QToolButton::InstantPopup);
+        moreButton->setMenu(moreMenu);
+        moreButton->setFocusPolicy(Qt::NoFocus);
+        moreButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        // Keep the text aligned with the other buttons on Breeze
+        moreButton->setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
+        ui->instanceToolBar->addWidget(moreButton);
+        m_moreButton = moreButton;
     }
 
     // set the menu for the folders help, accounts, and export tool buttons
@@ -332,7 +386,41 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         view->setSourceOfGroupCollapseStatus(
             [](const QString& groupName) -> bool { return APPLICATION->instances()->isGroupCollapsed(groupName); });
         connect(view, &InstanceView::groupStateChanged, APPLICATION->instances(), &InstanceList::on_GroupStateChanged);
-        ui->horizontalLayout->addWidget(view);
+
+        // Search, group chips and sort order sit right above the grid
+        m_filterBar = new LibraryFilterBar(ui->centralWidget);
+        m_filterBar->setSortMode(APPLICATION->settings()->get("InstSortMode").toString());
+        auto* libraryLayout = new QVBoxLayout();
+        libraryLayout->setContentsMargins(0, 0, 0, 0);
+        libraryLayout->setSpacing(0);
+        libraryLayout->addWidget(m_filterBar);
+        libraryLayout->addWidget(view);
+        ui->horizontalLayout->addLayout(libraryLayout);
+
+        connect(m_filterBar, &LibraryFilterBar::searchChanged, this, [this](const QString& text) {
+            proxymodel->setSearchText(text);
+            updateEmptyMessage();
+        });
+        connect(m_filterBar, &LibraryFilterBar::groupChanged, this, [this](std::optional<QString> group) {
+            proxymodel->setGroupFilter(std::move(group));
+            updateEmptyMessage();
+        });
+        connect(m_filterBar, &LibraryFilterBar::sortModeChanged, this, [this](const QString& mode) {
+            APPLICATION->settings()->set("InstSortMode", mode);
+            proxymodel->invalidate();
+            proxymodel->sort(0);
+        });
+
+        auto* instances = APPLICATION->instances();
+        connect(instances, &QAbstractItemModel::rowsInserted, this, &MainWindow::refreshLibraryGroups);
+        connect(instances, &QAbstractItemModel::rowsRemoved, this, &MainWindow::refreshLibraryGroups);
+        connect(instances, &QAbstractItemModel::modelReset, this, &MainWindow::refreshLibraryGroups);
+        connect(instances, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex&, const QModelIndex&, const QList<int>& roles) {
+            if (roles.isEmpty() || roles.contains(InstanceList::GroupRole)) {
+                refreshLibraryGroups();
+            }
+        });
+        refreshLibraryGroups();
     }
     // The cat background
     {
@@ -463,6 +551,8 @@ void MainWindow::retranslateUi()
     }
 
     changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
+    m_moreButton->setText(tr("More"));
+    m_moreButton->setToolTip(tr("Rename, regroup, copy or delete the selected instance, or create a shortcut to it."));
 
     // replace the %1 with the launcher display name in some actions
     if (helpMenuButton->toolTip().contains("%1"))
@@ -1395,8 +1485,43 @@ void MainWindow::on_actionSettings_triggered()
     APPLICATION->ShowGlobalSettings(this, "global-settings");
 }
 
+void MainWindow::refreshLibraryGroups()
+{
+    auto* instances = APPLICATION->instances();
+    QHash<QString, int> counts;
+    for (int i = 0; i < instances->rowCount(); ++i) {
+        counts[instances->index(i).data(InstanceList::GroupRole).toString()]++;
+    }
+    QStringList names = counts.keys();
+    // Same order as the grid: ungrouped first, then by name in the user's language
+    std::sort(names.begin(), names.end(), [](const QString& a, const QString& b) {
+        if (a.isEmpty() != b.isEmpty()) {
+            return a.isEmpty();
+        }
+        return QString::localeAwareCompare(a, b) < 0;
+    });
+    QList<LibraryFilterBar::GroupCount> groups;
+    for (const auto& name : names) {
+        groups.append({ name, counts.value(name) });
+    }
+    m_filterBar->setGroups(groups, instances->rowCount());
+    updateEmptyMessage();
+}
+
+void MainWindow::updateEmptyMessage()
+{
+    if (APPLICATION->instances()->rowCount() > 0 && proxymodel->rowCount() == 0) {
+        const QString search = m_filterBar->searchText().trimmed();
+        view->setEmptyMessage(search.isEmpty() ? tr("No instances in this group") : tr("No instances match \"%1\"").arg(search),
+                              tr("Try another search or group."));
+    } else {
+        view->setEmptyMessage(QString(), QString());
+    }
+}
+
 void MainWindow::globalSettingsClosed()
 {
+    m_filterBar->setSortMode(APPLICATION->settings()->get("InstSortMode").toString());
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateMainToolBar();
@@ -1818,24 +1943,14 @@ void MainWindow::refreshCurrentInstance()
 
 void MainWindow::updateNameLabel()
 {
-    if (m_selectedInstance == nullptr) {
-        nameLabel->setText(QObject::tr("No Instance Selected"));
-    } else {
-        const auto metrics = nameLabel->fontMetrics();
-        nameLabel->setText(metrics.elidedText(m_selectedInstance->name(), Qt::ElideRight, nameLabel->width()));
-    }
+    const QString name = m_selectedInstance == nullptr ? QObject::tr("No Instance Selected") : m_selectedInstance->name();
+    nameLabel->setText(nameLabel->fontMetrics().elidedText(name, Qt::ElideRight, nameLabel->width()));
 }
 
 void MainWindow::updateInstanceToolBarOrientation(Qt::Orientation orientation)
 {
-    ui->instanceToolBar->removeAction(ui->actionChangeInstIcon);
-
-    if (orientation == Qt::Vertical) {
-        instanceInfoWidget->setVisible(true);
-    } else {
-        instanceInfoWidget->setVisible(false);
-        ui->instanceToolBar->insertActionAfter(ui->actionRenameInstance, ui->actionChangeInstIcon);
-    }
+    // Changing the icon stays reachable through the "More" menu when the icon button is hidden
+    instanceInfoWidget->setVisible(orientation == Qt::Vertical);
     // HACK: sync size (no, I don't know why this works)
     ui->instanceToolBar->resize(0, 0);
 }

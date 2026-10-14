@@ -36,6 +36,7 @@
 
 #include "InstanceWindow.h"
 #include "Application.h"
+#include "BuildConfig.h"
 
 #include <QCloseEvent>
 #include <QHBoxLayout>
@@ -55,7 +56,7 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
     setAttribute(Qt::WA_DeleteOnClose);
 
     auto icon = APPLICATION->icons()->getIcon(m_instance->iconKey());
-    QString windowTitle = tr("Console window for ") + m_instance->name();
+    QString windowTitle = QStringLiteral("%1 — %2").arg(m_instance->name(), BuildConfig.LAUNCHER_DISPLAYNAME);
 
     // Set window properties
     {
@@ -66,7 +67,8 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
     // Add page container
     {
         auto provider = std::make_shared<InstancePageProvider>(m_instance);
-        m_container = new PageContainer(provider.get(), "console", this);
+        // Editing opens on the mods; launching asks for the console explicitly
+        m_container = new PageContainer(provider.get(), "mods", this);
         m_container->setParentContainer(this);
         setCentralWidget(m_container);
         setContentsMargins(0, 0, 0, 0);

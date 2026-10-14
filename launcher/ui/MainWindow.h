@@ -57,6 +57,7 @@ class BaseProfilerFactory;
 class InstanceView;
 class KonamiCode;
 class InstanceTask;
+class LibraryFilterBar;
 
 namespace Ui {
 class MainWindow;
@@ -232,11 +233,19 @@ class MainWindow : public QMainWindow {
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
 
+    // Group chips in the filter bar follow the groups instances are in
+    void refreshLibraryGroups();
+    // Tells the grid what to say when nothing is shown: welcome, or no search results
+    void updateEmptyMessage();
+
    private:
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;
     InstanceProxyModel* proxymodel = nullptr;
+    LibraryFilterBar* m_filterBar = nullptr;
+    QToolButton* m_playButton = nullptr;
+    QToolButton* m_moreButton = nullptr;
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;
     QLabel* m_statusCenter = nullptr;

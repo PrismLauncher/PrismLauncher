@@ -18,6 +18,8 @@
 #include <QCache>
 #include <QStyledItemDelegate>
 
+struct ThemeTokens;
+
 class ListViewDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
@@ -38,4 +40,8 @@ class ListViewDelegate : public QStyledItemDelegate {
 
    private slots:
     void editingDone();
+
+   private:
+    // Inventory-slot tiles, used when the theme asks for TileStyle::Slot
+    void paintSlot(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index, const ThemeTokens& tokens) const;
 };

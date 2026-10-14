@@ -48,6 +48,9 @@ int main(int argc, char* argv[])
     console::WindowsConsoleGuard _consoleGuard;
 #endif
 
+    // The Blocks theme loads its font and textures while the application starts up, so its resources must exist first
+    Q_INIT_RESOURCE(blocks);
+
     // initialize Qt
     Application app(argc, argv);
     switch (app.status()) {

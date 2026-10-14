@@ -36,6 +36,7 @@
 #pragma once
 
 #include <QFileInfo>
+#include <QJsonObject>
 #include "ITheme.h"
 #include "Result.h"
 
@@ -55,9 +56,11 @@ class CustomTheme : public ITheme {
     QString qtTheme() override;
     LogColors logColorScheme() override { return m_logColors; }
     QStringList searchPaths() override;
+    ThemeTokens tokens() override { return m_tokens; }
 
    private:
     Result<> read(const QString& path, bool& hasCustomLogColors);
+    void readTokens(const QJsonObject& tokensRoot);
 
     QPalette m_palette;
     QColor m_fadeColor;
@@ -68,6 +71,7 @@ class CustomTheme : public ITheme {
     QString m_widgets;
     QString m_qssFilePath;
     LogColors m_logColors;
+    ThemeTokens m_tokens;
     /**
      * The tooltip could be defined in the theme json,
      * or composed of other fields that could be in there.

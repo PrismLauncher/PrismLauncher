@@ -118,6 +118,9 @@ class PackProfile : public QAbstractListModel {
 
     QString getComponentVersion(const QString& uid) const;
 
+    /// whether the component list has been read from disk yet
+    bool isLoaded() const;
+
     bool setComponentVersion(const QString& uid, const QString& version, bool important = false);
 
     bool installEmpty(const QString& uid, const QString& name);

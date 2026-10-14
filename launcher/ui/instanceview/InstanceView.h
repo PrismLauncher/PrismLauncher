@@ -79,6 +79,8 @@ class InstanceView : public QAbstractItemView {
 
     int spacing() const { return m_spacing; };
     void setPaintCat(bool visible);
+    // Text shown when there are no instances to display; empty strings restore the welcome message
+    void setEmptyMessage(const QString& title, const QString& hint);
 
    public slots:
     virtual void updateGeometries() override;
@@ -97,6 +99,8 @@ class InstanceView : public QAbstractItemView {
 
    protected:
     bool isIndexHidden(const QModelIndex& index) const override;
+    void changeEvent(QEvent* event) override;
+    void leaveEvent(QEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
@@ -130,6 +134,14 @@ class InstanceView : public QAbstractItemView {
     int m_currentCursorColumn = -1;
     mutable QCache<int, QRect> m_geometryCache;
     CatPainter* m_cat = nullptr;
+    QPixmap m_viewTexture;
+    QPersistentModelIndex m_hoverIndex;
+    QString m_emptyTitle;
+    QString m_emptyHint;
+
+    // Picks up tile metrics and the background texture from the current theme
+    void applyThemeTokens();
+    void setHoverIndex(const QModelIndex& index);
 
     // point where the currently active mouse action started in geometry coordinates
     QPoint m_pressedPosition;

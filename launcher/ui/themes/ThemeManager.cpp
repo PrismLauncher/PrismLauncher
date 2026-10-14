@@ -26,6 +26,7 @@
 #include <QStyle>
 #include <QStyleFactory>
 #include "Result.h"
+#include "ui/themes/BlocksTheme.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
@@ -146,6 +147,8 @@ void ThemeManager::initializeWidgets()
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BlocksTheme>(BlocksTheme::Variant::Inventory));
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BlocksTheme>(BlocksTheme::Variant::Deepslate));
 
     themeDebugLog() << "<> Initializing System Widget Themes";
     QStringList styles = QStyleFactory::keys();
@@ -268,7 +271,19 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
     if (themeIter != m_themes.end()) {
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
+        // Set before apply(): widgets re-read tokens when they receive the style change event
+        m_tokens = theme->tokens();
+        if (m_widgetFontsApplied) {
+            // Setting the application font clears the per-class fonts the previous theme installed
+            QApplication::setFont(QApplication::font());
+            m_widgetFontsApplied = false;
+        }
         theme->apply(initial);
+        const auto widgetFonts = theme->widgetFonts();
+        for (const auto& [widgetClass, font] : widgetFonts) {
+            QApplication::setFont(font, widgetClass.constData());
+        }
+        m_widgetFontsApplied = !widgetFonts.isEmpty();
         setTitlebarColorOfAllWindowsOnMac(qApp->palette().window().color());
 
         m_logColors = theme->logColorScheme();

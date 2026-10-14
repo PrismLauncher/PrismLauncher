@@ -43,8 +43,88 @@
 
 #include <QIcon>
 #include <QTextEdit>
+#include "Application.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
+#include "ui/themes/ThemeManager.h"
+
+namespace {
+struct SlotLayout {
+    QRect slot;
+    QRect text;
+    QFont font;
+    int lineHeight = 0;
+    // Optional line under the name: Minecraft version and mod loader
+    QRect meta;
+    QFont metaFont;
+};
+
+SlotLayout slotLayout(const QRect& rect, const ThemeTokens& tokens, const QFont& fallbackFont)
+{
+    SlotLayout layout;
+    const int unit = tokens.pixelUnit;
+    // Room for the icon plus a four-pixel border, as in an inventory slot
+    const int slotSize = tokens.tileIconSize + 8 * unit;
+    // The selection frame sits two pixels outside the slot, so leave that much space above it
+    layout.slot = QRect(rect.left() + (rect.width() - slotSize) / 2, rect.top() + 2 * unit, slotSize, slotSize);
+    layout.font = fallbackFont;
+    if (!tokens.displayFont.isEmpty()) {
+        layout.font = QFont(tokens.displayFont);
+        if (tokens.displayFontPixelSize > 0) {
+            layout.font.setPixelSize(tokens.displayFontPixelSize);
+        }
+    }
+    layout.lineHeight = QFontMetrics(layout.font).height();
+    layout.text = QRect(rect.left() + unit, layout.slot.bottom() + 1 + 4 * unit, rect.width() - 2 * unit, 2 * layout.lineHeight);
+    if (tokens.tileMetaLine) {
+        layout.metaFont = QApplication::font();
+        layout.metaFont.setPixelSize(qMax(10, tokens.displayFontPixelSize - 4));
+        layout.meta = QRect(layout.text.left(), layout.text.bottom() + 1, layout.text.width(), QFontMetrics(layout.metaFont).height());
+    }
+    return layout;
+}
+
+int slotTileHeight(const SlotLayout& layout, const ThemeTokens& tokens)
+{
+    const QRect& last = layout.meta.isValid() ? layout.meta : layout.text;
+    return last.bottom() + 1 + 2 * tokens.pixelUnit;
+}
+
+QString packSourceIcon(const QString& source)
+{
+    return source == "ftb" ? QStringLiteral("ftb_logo") : source;
+}
+
+// Wraps text onto at most two lines and elides whatever doesn't fit on the second
+QStringList twoLines(const QString& text, const QFont& font, int width)
+{
+    QTextLayout layout(text, font);
+    QTextOption option;
+    option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    layout.setTextOption(option);
+    layout.beginLayout();
+    QStringList lines;
+    QTextLine line = layout.createLine();
+    if (line.isValid()) {
+        line.setLineWidth(width);
+        lines << text.mid(line.textStart(), line.textLength()).trimmed();
+        const QString rest = text.mid(line.textStart() + line.textLength()).trimmed();
+        if (!rest.isEmpty()) {
+            lines << QFontMetrics(font).elidedText(rest, Qt::ElideRight, width);
+        }
+    }
+    layout.endLayout();
+    return lines;
+}
+
+void fillFrame(QPainter* painter, const QRect& rect, int width, const QColor& color)
+{
+    painter->fillRect(QRect(rect.left(), rect.top(), rect.width(), width), color);
+    painter->fillRect(QRect(rect.left(), rect.bottom() - width + 1, rect.width(), width), color);
+    painter->fillRect(QRect(rect.left(), rect.top() + width, width, rect.height() - 2 * width), color);
+    painter->fillRect(QRect(rect.right() - width + 1, rect.top() + width, width, rect.height() - 2 * width), color);
+}
+}  // namespace
 
 // Origin: Qt
 static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
@@ -130,8 +210,117 @@ static QSize viewItemTextSize(const QStyleOptionViewItem* option)
     return QSize(size.width() + 2 * textMargin, size.height());
 }
 
+void ListViewDelegate::paintSlot(QPainter* painter,
+                                 const QStyleOptionViewItem& option,
+                                 const QModelIndex& index,
+                                 const ThemeTokens& tokens) const
+{
+    QStyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+    painter->save();
+    painter->setClipRect(opt.rect);
+
+    const auto layout = slotLayout(opt.rect, tokens, opt.font);
+    const QRect& slot = layout.slot;
+    const int unit = tokens.pixelUnit;
+    const QIcon::Mode mode = (opt.state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled;
+
+    // A recessed square: dark top-left edge, light bottom-right edge
+    painter->fillRect(slot, tokens.slotFill);
+    painter->fillRect(QRect(slot.left(), slot.top(), slot.width(), unit), tokens.slotShadow);
+    painter->fillRect(QRect(slot.left(), slot.top(), unit, slot.height()), tokens.slotShadow);
+    painter->fillRect(QRect(slot.left() + unit, slot.bottom() - unit + 1, slot.width() - unit, unit), tokens.slotHighlight);
+    painter->fillRect(QRect(slot.right() - unit + 1, slot.top() + unit, unit, slot.height() - unit), tokens.slotHighlight);
+
+    opt.icon.paint(painter, slot.adjusted(4 * unit, 4 * unit, -4 * unit, -4 * unit), Qt::AlignCenter, mode, QIcon::Off);
+
+    // Like an inventory, the slot under the pointer is washed with white
+    if ((opt.state & QStyle::State_MouseOver) && tokens.slotHover.isValid()) {
+        painter->fillRect(slot.adjusted(unit, unit, -unit, -unit), tokens.slotHover);
+    }
+    // The selected slot gets a frame, like the active hotbar slot
+    if (opt.state & QStyle::State_Selected) {
+        const QColor frame = tokens.selectionFrame.isValid() ? tokens.selectionFrame : opt.palette.color(QPalette::Highlight);
+        fillFrame(painter, slot.adjusted(-2 * unit, -2 * unit, 2 * unit, 2 * unit), unit, frame);
+    }
+
+    // FIXME: this really has no business of being here. Make generic.
+    if (auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>()) {
+        QString badge;
+        if (instance->isRunning()) {
+            badge = "status-running";
+        } else if (instance->hasCrashed() || instance->hasVersionBroken()) {
+            badge = "status-bad";
+        }
+        if (!badge.isEmpty()) {
+            const QRect badgeRect(slot.right() - unit - 16, slot.top() + unit + 1, 16, 16);
+            QIcon::fromTheme(badge).paint(painter, badgeRect, Qt::AlignCenter, mode, QIcon::Off);
+        }
+    }
+    if (tokens.tileMetaLine) {
+        // Where the modpack came from, tucked into the slot's corner like an item's enchantment glint
+        if (const QString source = index.data(InstanceList::PackSourceRole).toString(); !source.isEmpty()) {
+            const QRect sourceRect(slot.right() - unit - 16, slot.bottom() - unit - 16, 16, 16);
+            QIcon::fromTheme(packSourceIcon(source)).paint(painter, sourceRect, Qt::AlignCenter, mode, QIcon::Off);
+        }
+    }
+
+    // A translucent box hugging the text, like a name tag
+    const auto drawBacking = [&](const QRect& lineRect, const QFontMetrics& metrics, const QString& text) {
+        if (!tokens.viewTextBacking.isValid() || text.isEmpty()) {
+            return;
+        }
+        const int width = qMin(lineRect.width(), metrics.horizontalAdvance(text) + 2 * unit);
+        painter->fillRect(QRect(lineRect.center().x() - width / 2, lineRect.top(), width, lineRect.height()), tokens.viewTextBacking);
+    };
+
+    painter->setFont(layout.font);
+    const QColor textColor = tokens.viewText.isValid() ? tokens.viewText : opt.palette.color(QPalette::Text);
+    const QFontMetrics nameMetrics(layout.font);
+    int top = layout.text.top();
+    for (const auto& line : twoLines(opt.text, layout.font, layout.text.width())) {
+        const QRect lineRect(layout.text.left(), top, layout.text.width(), layout.lineHeight);
+        drawBacking(lineRect, nameMetrics, line);
+        if (tokens.viewTextShadow.isValid()) {
+            painter->setPen(tokens.viewTextShadow);
+            painter->drawText(lineRect.translated(1, 1), Qt::AlignHCenter | Qt::AlignTop, line);
+        }
+        painter->setPen(textColor);
+        painter->drawText(lineRect, Qt::AlignHCenter | Qt::AlignTop, line);
+        top += layout.lineHeight;
+    }
+
+    if (layout.meta.isValid()) {
+        QString meta = index.data(InstanceList::MinecraftVersionRole).toString();
+        if (const QString loader = index.data(InstanceList::ModLoaderRole).toString(); !loader.isEmpty()) {
+            meta = meta.isEmpty() ? loader : QStringLiteral("%1 · %2").arg(meta, loader);
+        }
+        if (!meta.isEmpty()) {
+            painter->setFont(layout.metaFont);
+            const QFontMetrics metaMetrics(layout.metaFont);
+            meta = metaMetrics.elidedText(meta, Qt::ElideRight, layout.meta.width());
+            drawBacking(layout.meta, metaMetrics, meta);
+            if (tokens.viewTextShadow.isValid()) {
+                painter->setPen(tokens.viewTextShadow);
+                painter->drawText(layout.meta.translated(1, 1), Qt::AlignHCenter | Qt::AlignTop, meta);
+            }
+            QColor metaColor = textColor;
+            metaColor.setAlpha(200);
+            painter->setPen(metaColor);
+            painter->drawText(layout.meta, Qt::AlignHCenter | Qt::AlignTop, meta);
+        }
+    }
+
+    painter->restore();
+}
+
 void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    if (const auto& tokens = APPLICATION->themeManager()->getTokens(); tokens.tileStyle == ThemeTokens::TileStyle::Slot) {
+        paintSlot(painter, option, index, tokens);
+        return;
+    }
+
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     painter->save();
@@ -213,6 +402,12 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
 QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    if (const auto& tokens = APPLICATION->themeManager()->getTokens(); tokens.tileStyle == ThemeTokens::TileStyle::Slot) {
+        // Every slot tile has room for two lines of text, so rows line up like an inventory grid
+        const auto layout = slotLayout(QRect(0, 0, tokens.tileWidth, 0), tokens, option.font);
+        return QSize(tokens.tileWidth, slotTileHeight(layout, tokens));
+    }
+
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     opt.features |= QStyleOptionViewItem::WrapText;
@@ -263,6 +458,11 @@ void ListViewDelegate::updateEditorGeometry(QWidget* editor,
                                             const QStyleOptionViewItem& option,
                                             [[maybe_unused]] const QModelIndex& index) const
 {
+    if (const auto& tokens = APPLICATION->themeManager()->getTokens(); tokens.tileStyle == ThemeTokens::TileStyle::Slot) {
+        editor->setGeometry(slotLayout(option.rect, tokens, option.font).text);
+        return;
+    }
+
     const int iconSize = 48;
     QRect textRect = option.rect;
     textRect.adjust(0, iconSize + 5, 0, 0);

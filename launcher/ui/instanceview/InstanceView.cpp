@@ -72,6 +72,8 @@ InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
+    setMouseTracking(true);
+    applyThemeTokens();
     setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
     connect(verticalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, viewport(), QOverload<>::of(&QWidget::update));
@@ -207,6 +209,65 @@ void InstanceView::updateGeometries()
     viewport()->update();
 }
 
+void InstanceView::applyThemeTokens()
+{
+    const auto& tokens = APPLICATION->themeManager()->getTokens();
+    m_itemWidth = tokens.tileWidth;
+    m_spacing = tokens.tileSpacing;
+
+    m_viewTexture = QPixmap();
+    if (!tokens.viewTexture.isEmpty()) {
+        QPixmap texture(tokens.viewTexture);
+        if (!texture.isNull()) {
+            // Scale with whole device pixels and no smoothing, so the texture stays crisp
+            const qreal ratio = devicePixelRatioF();
+            m_viewTexture = texture.scaled(texture.size() * tokens.viewTextureScale * ratio, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+            m_viewTexture.setDevicePixelRatio(ratio);
+        }
+    }
+}
+
+void InstanceView::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::StyleChange || event->type() == QEvent::DevicePixelRatioChange) {
+        applyThemeTokens();
+        m_currentItemsPerRow = calculateItemsPerRow();
+        m_currentCursorColumn = -1;
+        updateGeometries();
+    }
+    QAbstractItemView::changeEvent(event);
+}
+
+void InstanceView::setHoverIndex(const QModelIndex& index)
+{
+    if (index == m_hoverIndex) {
+        return;
+    }
+    if (m_hoverIndex.isValid()) {
+        viewport()->update(visualRect(m_hoverIndex));
+    }
+    m_hoverIndex = index;
+    if (m_hoverIndex.isValid()) {
+        viewport()->update(visualRect(m_hoverIndex));
+    }
+}
+
+void InstanceView::setEmptyMessage(const QString& title, const QString& hint)
+{
+    if (title == m_emptyTitle && hint == m_emptyHint) {
+        return;
+    }
+    m_emptyTitle = title;
+    m_emptyHint = hint;
+    viewport()->update();
+}
+
+void InstanceView::leaveEvent(QEvent* event)
+{
+    setHoverIndex(QModelIndex());
+    QAbstractItemView::leaveEvent(event);
+}
+
 bool InstanceView::isIndexHidden(const QModelIndex& index) const
 {
     VisualGroup* cat = category(index);
@@ -324,6 +385,10 @@ void InstanceView::mouseMoveEvent(QMouseEvent* event)
     QPoint topLeft;
     QPoint visualPos = event->pos();
     QPoint geometryPos = event->pos() + offset();
+
+    if (event->buttons() == Qt::NoButton) {
+        setHoverIndex(indexAt(visualPos));
+    }
 
     if (state() == ExpandingState || state() == CollapsingState) {
         return;
@@ -459,6 +524,15 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
     QPainter painter(this->viewport());
 
+    if (!m_viewTexture.isNull()) {
+        const QRect area = viewport()->rect();
+        painter.fillRect(area, QBrush(m_viewTexture));
+        const auto& tint = APPLICATION->themeManager()->getTokens().viewTextureTint;
+        if (tint.isValid()) {
+            painter.fillRect(area, tint);
+        }
+    }
+
     if (m_cat) {
         m_cat->paint(&painter, this->viewport()->rect());
     }
@@ -469,7 +543,35 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
     if (model()->rowCount() == 0) {
         painter.save();
-        QString emptyString = tr("Welcome!") + "\n" + tr("Click \"Add Instance\" to get started.");
+        const QString title = m_emptyTitle.isEmpty() ? tr("Welcome!") : m_emptyTitle;
+        const QString hint = m_emptyTitle.isEmpty() ? tr("Click \"Add Instance\" to get started.") : m_emptyHint;
+
+        if (const auto& tokens = APPLICATION->themeManager()->getTokens(); tokens.viewText.isValid()) {
+            // Themed: large display text straight on the backdrop, with the theme's hard shadow
+            QFont titleFont = tokens.displayFont.isEmpty() ? QApplication::font() : QFont(tokens.displayFont);
+            titleFont.setPixelSize(qMax(24, tokens.displayFontPixelSize * 2));
+            titleFont.setBold(true);
+            const QFont hintFont = QApplication::font();
+            const int titleHeight = QFontMetrics(titleFont).height();
+            const QRect area = viewport()->rect().adjusted(16, 0, -16, 0);
+            const QRect titleRect(area.left(), area.center().y() - titleHeight, area.width(), titleHeight);
+            const QRect hintRect(area.left(), titleRect.bottom() + 9, area.width(), QFontMetrics(hintFont).height() * 2);
+            const auto drawShadowed = [&](const QRect& rect, const QFont& font, const QString& text) {
+                painter.setFont(font);
+                if (tokens.viewTextShadow.isValid()) {
+                    painter.setPen(tokens.viewTextShadow);
+                    painter.drawText(rect.translated(1, 1), Qt::AlignHCenter | Qt::AlignTop | Qt::TextWordWrap, text);
+                }
+                painter.setPen(tokens.viewText);
+                painter.drawText(rect, Qt::AlignHCenter | Qt::AlignTop | Qt::TextWordWrap, text);
+            };
+            drawShadowed(titleRect, titleFont, title);
+            drawShadowed(hintRect, hintFont, hint);
+            painter.restore();
+            return;
+        }
+
+        QString emptyString = hint.isEmpty() ? title : title + "\n" + hint;
 
         // calculate the rect for the overlay
         painter.setRenderHint(QPainter::Antialiasing, true);
@@ -537,7 +639,8 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
         } else {
             option.state &= ~QStyle::State_Selected;
         }
-        option.state |= (index == currentIndex()) ? QStyle::State_HasFocus : QStyle::State_None;
+        option.state.setFlag(QStyle::State_HasFocus, index == currentIndex());
+        option.state.setFlag(QStyle::State_MouseOver, index == m_hoverIndex);
         if (!(flags & Qt::ItemIsEnabled)) {
             option.state &= ~QStyle::State_Enabled;
         }

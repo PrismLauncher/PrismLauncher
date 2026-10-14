@@ -43,7 +43,42 @@
 #include <QtMath>
 #include <utility>
 
+#include "Application.h"
 #include "InstanceView.h"
+#include "ui/themes/ThemeManager.h"
+
+namespace {
+// Headers use the theme's display face when it has one, otherwise the application font in bold
+QFont headerFont()
+{
+    const auto& tokens = APPLICATION->themeManager()->getTokens();
+    if (tokens.displayFont.isEmpty()) {
+        QFont font(QApplication::font());
+        font.setBold(true);
+        return font;
+    }
+    QFont font(tokens.displayFont);
+    if (tokens.displayFontPixelSize > 0) {
+        font.setPixelSize(tokens.displayFontPixelSize + 2);
+    }
+    font.setWeight(QFont::DemiBold);
+    return font;
+}
+
+const char* const s_arrowCollapsed[] = { "#...", "##..", "###.", "####", "###.", "##..", "#..." };
+const char* const s_arrowExpanded[] = { "#######", ".#####.", "..###..", "...#..." };
+
+void drawPixelGlyph(QPainter* painter, QPoint topLeft, const char* const* rows, int columns, int lines, int pixel, const QColor& color)
+{
+    for (int y = 0; y < lines; ++y) {
+        for (int x = 0; x < columns; ++x) {
+            if (rows[y][x] == '#') {
+                painter->fillRect(QRect(topLeft.x() + x * pixel, topLeft.y() + y * pixel, pixel, pixel), color);
+            }
+        }
+    }
+}
+}  // namespace
 
 VisualGroup::VisualGroup(QString text, InstanceView* view) : view(view), text(std::move(text)), collapsed(false) {}
 
@@ -69,7 +104,7 @@ void VisualGroup::update()
             if (currentRow >= rows.size()) {
                 currentRow = rows.size() - 1;
             }
-            offsetFromTop += maxRowHeight + 5;
+            offsetFromTop += maxRowHeight + view->spacing();
             positionInRow = 0;
             maxRowHeight = 0;
         }
@@ -141,10 +176,53 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
 
 void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option) const
 {
+    if (const auto& tokens = APPLICATION->themeManager()->getTokens(); tokens.viewText.isValid()) {
+        // Themed header: display face, hard shadow and a pixel-art arrow
+        QRect rect = option.rect;
+        rect.setTop(rect.top() + 7);
+        const QFont font = headerFont();
+        const QFontMetrics metrics(font);
+        const QString& label = text.isEmpty() ? QObject::tr("Ungrouped") : text;
+        const QColor& shadow = tokens.viewTextShadow;
+        const int pixel = tokens.pixelUnit;
+        const int centerY = rect.top() + metrics.height() / 2;
+
+        painter->save();
+        painter->setFont(font);
+
+        const int arrowLeft = rect.left() + 8;
+        const int arrowBox = 7 * pixel;
+        const auto* glyph = collapsed ? s_arrowCollapsed : s_arrowExpanded;
+        const int columns = collapsed ? 4 : 7;
+        const int lines = collapsed ? 7 : 4;
+        const QPoint arrowTopLeft(arrowLeft + (arrowBox - columns * pixel) / 2, centerY - lines * pixel / 2);
+        if (shadow.isValid()) {
+            drawPixelGlyph(painter, arrowTopLeft + QPoint(1, 1), glyph, columns, lines, pixel, shadow);
+        }
+        drawPixelGlyph(painter, arrowTopLeft, glyph, columns, lines, pixel, tokens.viewText);
+
+        const int textLeft = arrowLeft + arrowBox + 8;
+        const QRect textRect(textLeft, rect.top(), rect.right() - textLeft, metrics.height());
+        if (shadow.isValid()) {
+            painter->setPen(shadow);
+            painter->drawText(textRect.translated(1, 1), Qt::AlignLeft | Qt::AlignVCenter, label);
+        }
+        painter->setPen(tokens.viewText);
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, label);
+
+        const int ruleLeft = textLeft + metrics.horizontalAdvance(label) + 12;
+        if (ruleLeft < rect.right() - 4) {
+            QColor rule = tokens.viewText;
+            rule.setAlpha(60);
+            painter->fillRect(QRect(ruleLeft, centerY, rect.right() - 4 - ruleLeft, pixel), rule);
+        }
+        painter->restore();
+        return;
+    }
+
     QRect optRect = option.rect;
     optRect.setTop(optRect.top() + 7);
-    QFont font(QApplication::font());
-    font.setBold(true);
+    const QFont font = headerFont();
     const QFontMetrics fontMetrics = QFontMetrics(font);
     painter->setFont(font);
 
@@ -217,9 +295,7 @@ int VisualGroup::totalHeight() const
 
 int VisualGroup::headerHeight()
 {
-    QFont font(QApplication::font());
-    font.setBold(true);
-    QFontMetrics fontMetrics(font);
+    QFontMetrics fontMetrics(headerFont());
 
     const int height = fontMetrics.height() + 1 /* 1 pixel-width gradient */
                        + 11 /* top and bottom separation */;
