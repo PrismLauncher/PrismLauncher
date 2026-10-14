@@ -56,6 +56,7 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QFileDialog>
+#include <QFrame>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -211,18 +212,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         // Less frequent actions share one menu, which keeps the panel short and Delete out of easy reach.
         // They all stay in the File menu and the instance context menu too.
-        auto* moreMenu = new QMenu(this);
-        moreMenu->addAction(ui->actionRenameInstance);
-        moreMenu->addAction(ui->actionChangeInstIcon);
-        moreMenu->addAction(ui->actionChangeInstGroup);
-        moreMenu->addAction(ui->actionCopyInstance);
-        moreMenu->addAction(ui->actionCreateInstanceShortcut);
-        moreMenu->addSeparator();
-        moreMenu->addAction(ui->actionDeleteInstance);
-        for (auto* action : { ui->actionRenameInstance, ui->actionChangeInstGroup, ui->actionCopyInstance, ui->actionCreateInstanceShortcut,
-                              ui->actionDeleteInstance }) {
-            ui->instanceToolBar->removeAction(action);
-        }
+        auto* moreMenu = createMoreMenu();
         auto* moreButton = new QToolButton(this);
         moreButton->setObjectName(QStringLiteral("moreInstanceActions"));
         moreButton->setIcon([] {
@@ -422,6 +412,231 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         });
         refreshLibraryGroups();
     }
+
+    // Tier 2 layout: navigation rail, detail panel and activity strip.
+    // The instance toolbar, the status bar and the news toolbar stay for the "Classic layout" mode.
+    {
+        m_classicAction = new QAction(tr("Classic layout"), this);
+        m_classicAction->setCheckable(true);
+        m_classicAction->setToolTip(tr("Use the classic toolbar and status bar arrangement instead of the new layout."));
+        ui->viewMenu->addAction(m_classicAction);
+        connect(m_classicAction, &QAction::toggled, this, [this](bool classic) {
+            APPLICATION->settings()->set("ClassicLayout", classic);
+            applyLayoutMode();
+        });
+
+        // Navigation rail: Library, Discover, Activity, Settings, Account
+        m_rail = new QWidget(this);
+        m_rail->setObjectName(QStringLiteral("navigationRail"));
+        m_rail->setFixedWidth(150);
+        auto* railLayout = new QVBoxLayout(m_rail);
+        railLayout->setContentsMargins(6, 8, 6, 8);
+        railLayout->setSpacing(2);
+        auto* railGroup = new QButtonGroup(m_rail);
+        railGroup->setExclusive(true);
+        auto makeRailButton = [this, railLayout, railGroup](const QString& text, const char* iconName, bool checkable) {
+            auto* button = new QToolButton(m_rail);
+            button->setText(text);
+            if (iconName)
+                button->setIcon(QIcon::fromTheme(QString::fromLatin1(iconName)));
+            button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            button->setAutoRaise(true);
+            button->setCheckable(checkable);
+            button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+            button->setFocusPolicy(Qt::NoFocus);
+            if (checkable)
+                railGroup->addButton(button);
+            railLayout->addWidget(button);
+            return button;
+        };
+        m_railLibrary = makeRailButton(tr("Library"), "minecraft", true);
+        m_railLibrary->setChecked(true);
+        m_railDiscover = makeRailButton(tr("Discover"), "new", false);
+        m_railActivity = makeRailButton(tr("Activity"), "log", true);
+        m_railSettings = makeRailButton(tr("Settings"), "settings", false);
+        m_railAccount = makeRailButton(tr("Account"), "accounts", false);
+        railLayout->addStretch(1);
+
+        connect(m_railDiscover, &QToolButton::clicked, this, &MainWindow::on_actionAddInstance_triggered);
+        connect(m_railSettings, &QToolButton::clicked, this, &MainWindow::on_actionSettings_triggered);
+        // Account opens the same menu as the account button in the main toolbar
+        connect(m_railAccount, &QToolButton::clicked, this, [this] {
+            if (auto* menu = ui->actionAccountsButton->menu()) {
+                menu->exec(m_railAccount->mapToGlobal(QPoint(m_railAccount->width(), 0)));
+            } else {
+                on_actionManageAccounts_triggered();
+            }
+        });
+
+        // Detail panel: everything about the selected instance that the toolbars used to carry
+        m_detailPanel = new QWidget(this);
+        m_detailPanel->setObjectName(QStringLiteral("detailPanel"));
+        m_detailPanel->setFixedWidth(264);
+        auto* detailLayout = new QVBoxLayout(m_detailPanel);
+        detailLayout->setContentsMargins(12, 12, 12, 12);
+        detailLayout->setSpacing(8);
+
+        m_detailIconButton = new QToolButton(m_detailPanel);
+        m_detailIconButton->setObjectName(QStringLiteral("detailIconButton"));
+        m_detailIconButton->setIconSize({ 80, 80 });
+        m_detailIconButton->setAutoRaise(true);
+        m_detailIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        m_detailIconButton->setFocusPolicy(Qt::NoFocus);
+        connect(m_detailIconButton, &QToolButton::clicked, this, &MainWindow::on_actionChangeInstIcon_triggered);
+        detailLayout->addWidget(m_detailIconButton);
+
+        m_detailName = new QLabel(m_detailPanel);
+        m_detailName->setObjectName(QStringLiteral("detailName"));
+        m_detailName->setAlignment(Qt::AlignCenter);
+        m_detailName->setTextFormat(Qt::PlainText);
+        m_detailName->setWordWrap(true);
+        detailLayout->addWidget(m_detailName);
+
+        m_detailMeta = new QLabel(m_detailPanel);
+        m_detailMeta->setObjectName(QStringLiteral("detailMeta"));
+        m_detailMeta->setAlignment(Qt::AlignCenter);
+        m_detailMeta->setWordWrap(true);
+        detailLayout->addWidget(m_detailMeta);
+
+        m_detailPlaytime = new QLabel(m_detailPanel);
+        m_detailPlaytime->setObjectName(QStringLiteral("detailPlaytime"));
+        m_detailPlaytime->setAlignment(Qt::AlignCenter);
+        detailLayout->addWidget(m_detailPlaytime);
+
+        // Launch is the primary action; Kill sits next to it and only matters while the instance runs
+        auto* playKillRow = new QWidget(m_detailPanel);
+        auto* playKillLayout = new QHBoxLayout(playKillRow);
+        playKillLayout->setContentsMargins(0, 0, 0, 0);
+        playKillLayout->setSpacing(4);
+        auto* detailPlayButton = new QToolButton(playKillRow);
+        detailPlayButton->setObjectName(QStringLiteral("detailPlayButton"));
+        detailPlayButton->setProperty("_prism_primary", true);
+        detailPlayButton->setDefaultAction(ui->actionLaunchInstance);
+        detailPlayButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        detailPlayButton->setPopupMode(QToolButton::MenuButtonPopup);
+        detailPlayButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        detailPlayButton->setFocusPolicy(Qt::NoFocus);
+        playKillLayout->addWidget(detailPlayButton);
+        m_detailKillButton = new QToolButton(playKillRow);
+        m_detailKillButton->setDefaultAction(ui->actionKillInstance);
+        m_detailKillButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        m_detailKillButton->setAutoRaise(true);
+        m_detailKillButton->setFocusPolicy(Qt::NoFocus);
+        playKillLayout->addWidget(m_detailKillButton);
+        detailLayout->addWidget(playKillRow);
+
+        // Quick links into the instance's content
+        auto* linksRow = new QWidget(m_detailPanel);
+        auto* linksLayout = new QHBoxLayout(linksRow);
+        linksLayout->setContentsMargins(0, 0, 0, 0);
+        linksLayout->setSpacing(2);
+        auto addLink = [this, linksRow, linksLayout](const char* iconName, const QString& text, const QString& page) {
+            auto* button = new QToolButton(linksRow);
+            button->setText(text);
+            button->setIcon(QIcon::fromTheme(QString::fromLatin1(iconName)));
+            button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+            button->setAutoRaise(true);
+            button->setFocusPolicy(Qt::NoFocus);
+            button->setEnabled(false);
+            connect(button, &QToolButton::clicked, this, [this, page] {
+                if (m_selectedInstance)
+                    APPLICATION->showInstanceWindow(m_selectedInstance, page);
+            });
+            linksLayout->addWidget(button);
+            m_detailLinks.append(button);
+        };
+        addLink("loadermods", tr("Mods"), QStringLiteral("mods"));
+        addLink("worlds", tr("Worlds"), QStringLiteral("worlds"));
+        addLink("screenshots", tr("Screenshots"), QStringLiteral("screenshots"));
+        addLink("server", tr("Servers"), QStringLiteral("servers"));
+        linksLayout->addStretch(1);
+        detailLayout->addWidget(linksRow);
+
+        // Edit, Folder, Export and the overflow menu
+        auto* actionsRow = new QWidget(m_detailPanel);
+        auto* actionsLayout = new QHBoxLayout(actionsRow);
+        actionsLayout->setContentsMargins(0, 0, 0, 0);
+        actionsLayout->setSpacing(2);
+        auto addActionButton = [actionsRow, actionsLayout](QAction* action) {
+            auto* button = new QToolButton(actionsRow);
+            button->setDefaultAction(action);
+            button->setToolButtonStyle(Qt::ToolButtonTextOnly);
+            button->setAutoRaise(true);
+            button->setFocusPolicy(Qt::NoFocus);
+            actionsLayout->addWidget(button);
+        };
+        addActionButton(ui->actionEditInstance);
+        addActionButton(ui->actionViewSelectedInstFolder);
+        addActionButton(ui->actionExportInstance);
+        m_detailMoreButton = new QToolButton(actionsRow);
+        m_detailMoreButton->setObjectName(QStringLiteral("detailMoreButton"));
+        m_detailMoreButton->setMenu(createMoreMenu());
+        m_detailMoreButton->setPopupMode(QToolButton::InstantPopup);
+        m_detailMoreButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        m_detailMoreButton->setAutoRaise(true);
+        m_detailMoreButton->setFocusPolicy(Qt::NoFocus);
+        actionsLayout->addWidget(m_detailMoreButton);
+        actionsLayout->addStretch(1);
+        detailLayout->addWidget(actionsRow);
+
+        detailLayout->addStretch(1);
+
+        // Activity drawer: task rows live here (filled in by the task model work)
+        m_activityDrawer = new QFrame(this);
+        m_activityDrawer->setObjectName(QStringLiteral("activityDrawer"));
+        m_activityDrawer->setFrameShape(QFrame::StyledPanel);
+        auto* drawerLayout = new QVBoxLayout(m_activityDrawer);
+        m_drawerLabel = new QLabel(tr("Nothing is running."), m_activityDrawer);
+        m_drawerLabel->setAlignment(Qt::AlignCenter);
+        m_drawerLabel->setEnabled(false);
+        drawerLayout->addWidget(m_drawerLabel);
+        m_activityDrawer->hide();
+
+        // Activity strip: task summary on the left, news on the right
+        m_activityStrip = new QWidget(this);
+        m_activityStrip->setObjectName(QStringLiteral("activityStrip"));
+        auto* stripLayout = new QHBoxLayout(m_activityStrip);
+        stripLayout->setContentsMargins(8, 4, 8, 4);
+        stripLayout->setSpacing(8);
+        m_activityButton = new QToolButton(m_activityStrip);
+        m_activityButton->setText(tr("Nothing running"));
+        m_activityButton->setIcon(QIcon::fromTheme(QStringLiteral("log")));
+        m_activityButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        m_activityButton->setAutoRaise(true);
+        m_activityButton->setFocusPolicy(Qt::NoFocus);
+        stripLayout->addWidget(m_activityButton);
+        stripLayout->addStretch(1);
+        m_stripNews = new QToolButton(m_activityStrip);
+        m_stripNews->setIcon(QIcon::fromTheme(QStringLiteral("news")));
+        m_stripNews->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        m_stripNews->setFocusPolicy(Qt::NoFocus);
+        stripLayout->addWidget(m_stripNews);
+        connect(m_stripNews, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
+
+        // Both the strip's task summary and the rail's Activity button toggle the drawer
+        connect(m_activityButton, &QToolButton::clicked, this, [this] { m_railActivity->setChecked(!m_activityDrawer->isVisible()); });
+        connect(m_railActivity, &QToolButton::toggled, this, [this](bool on) { m_activityDrawer->setVisible(on); });
+
+        // Root: [rail | library | detail panel] over [drawer | activity strip]
+        auto* root = new QWidget(this);
+        root->setObjectName(QStringLiteral("mainRoot"));
+        auto* rootLayout = new QVBoxLayout(root);
+        rootLayout->setContentsMargins(0, 0, 0, 0);
+        rootLayout->setSpacing(0);
+        auto* body = new QWidget(root);
+        auto* bodyLayout = new QHBoxLayout(body);
+        bodyLayout->setContentsMargins(0, 0, 0, 0);
+        bodyLayout->setSpacing(0);
+        bodyLayout->addWidget(m_rail);
+        bodyLayout->addWidget(ui->centralWidget, 1);
+        bodyLayout->addWidget(m_detailPanel);
+        rootLayout->addWidget(body, 1);
+        rootLayout->addWidget(m_activityDrawer);
+        rootLayout->addWidget(m_activityStrip);
+        setCentralWidget(root);
+
+        applyLayoutMode();
+    }
     // The cat background
     {
         // set the cat action priority here so you can still see the action in qt designer
@@ -553,6 +768,17 @@ void MainWindow::retranslateUi()
     changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
     m_moreButton->setText(tr("More"));
     m_moreButton->setToolTip(tr("Rename, regroup, copy or delete the selected instance, or create a shortcut to it."));
+    m_detailMoreButton->setText(tr("More"));
+    m_detailMoreButton->setToolTip(m_moreButton->toolTip());
+    m_classicAction->setText(tr("Classic layout"));
+    m_railLibrary->setText(tr("Library"));
+    m_railDiscover->setText(tr("Discover"));
+    m_railActivity->setText(tr("Activity"));
+    m_railSettings->setText(tr("Settings"));
+    m_railAccount->setText(tr("Account"));
+    m_activityButton->setText(tr("Nothing running"));
+    m_drawerLabel->setText(tr("Nothing is running."));
+    updateDetailMeta();
 
     // replace the %1 with the launcher display name in some actions
     if (helpMenuButton->toolTip().contains("%1"))
@@ -578,10 +804,65 @@ QMenu* MainWindow::createPopupMenu()
 
     return filteredMenu;
 }
+
+QMenu* MainWindow::createMoreMenu()
+{
+    // Rename, icon, group, copy, shortcut and delete share one overflow menu.
+    // They all stay in the File menu and the instance context menu too.
+    auto* menu = new QMenu(this);
+    menu->addAction(ui->actionRenameInstance);
+    menu->addAction(ui->actionChangeInstIcon);
+    menu->addAction(ui->actionChangeInstGroup);
+    menu->addAction(ui->actionCopyInstance);
+    menu->addAction(ui->actionCreateInstanceShortcut);
+    menu->addSeparator();
+    menu->addAction(ui->actionDeleteInstance);
+    for (auto* action : { ui->actionRenameInstance, ui->actionChangeInstGroup, ui->actionCopyInstance, ui->actionCreateInstanceShortcut,
+                          ui->actionDeleteInstance }) {
+        ui->instanceToolBar->removeAction(action);
+    }
+    return menu;
+}
+
+bool MainWindow::isClassicLayout() const
+{
+    return APPLICATION->settings()->get("ClassicLayout").toBool();
+}
+
+void MainWindow::applyLayoutMode()
+{
+    const bool classic = isClassicLayout();
+
+    // The action lives in the View menu and can be triggered from there too
+    if (m_classicAction->isChecked() != classic)
+        m_classicAction->setChecked(classic);
+
+    // Classic: toolbars and status bar as before. New: rail, detail panel and activity strip.
+    ui->instanceToolBar->setVisible(classic);
+    ui->newsToolBar->setVisible(classic);
+    statusBar()->setVisible(classic && APPLICATION->settings()->get("StatusBarVisible").toBool());
+
+    m_rail->setVisible(!classic);
+    m_detailPanel->setVisible(!classic);
+    m_activityStrip->setVisible(!classic);
+    if (classic) {
+        m_activityDrawer->hide();
+        m_railActivity->setChecked(false);
+    }
+}
+
+void MainWindow::updateDetailMeta()
+{
+    if (m_selectedInstance) {
+        m_detailMeta->setText(m_selectedInstance->getStatusbarDescription());
+    } else {
+        m_detailMeta->setText(tr("No instance selected"));
+    }
+}
 void MainWindow::setStatusBarVisibility(bool state)
 {
-    statusBar()->setVisible(state);
     APPLICATION->settings()->set("StatusBarVisible", state);
+    applyLayoutMode();
 }
 void MainWindow::lockToolbars(bool state)
 {
@@ -895,21 +1176,26 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* ev)
 
 void MainWindow::updateNewsLabel()
 {
+    QString text;
+    bool enabled = false;
     if (m_newsChecker->isLoadingNews()) {
-        newsLabel->setText(tr("Loading news..."));
-        newsLabel->setEnabled(false);
-        ui->actionMoreNews->setVisible(false);
+        text = tr("Loading news...");
     } else {
         QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
         if (entries.length() > 0) {
-            newsLabel->setText(entries[0]->title);
-            newsLabel->setEnabled(true);
-            ui->actionMoreNews->setVisible(true);
+            text = entries[0]->title;
+            enabled = true;
         } else {
-            newsLabel->setText(tr("No news available."));
-            newsLabel->setEnabled(false);
-            ui->actionMoreNews->setVisible(false);
+            text = tr("No news available.");
         }
+    }
+    ui->actionMoreNews->setVisible(enabled);
+    newsLabel->setText(text);
+    newsLabel->setEnabled(enabled);
+    if (m_stripNews) {
+        // The strip mirrors the news toolbar; it only exists once the Tier 2 layout is built
+        m_stripNews->setText(text);
+        m_stripNews->setEnabled(enabled);
     }
 }
 
@@ -1342,6 +1628,7 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
     auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
     ui->actionChangeInstIcon->setIcon(icon);
     changeIconButton->setIcon(icon);
+    m_detailIconButton->setIcon(icon);
 }
 
 void MainWindow::setSelectedInstanceById(const QString& id)
@@ -1831,6 +2118,7 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         updateNameLabel();
         nameLabel->setToolTip(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
+        updateDetailMeta();
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
 
@@ -1866,6 +2154,7 @@ void MainWindow::selectionBad()
     // start by reseting everything...
     m_selectedInstance = nullptr;
     m_statusLeft->setText(tr("No instance selected"));
+    updateDetailMeta();
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
@@ -1914,12 +2203,15 @@ void MainWindow::checkInstancePathForProblems()
 
 void MainWindow::updateStatusCenter()
 {
-    m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
+    const bool show = APPLICATION->settings()->get("ShowGlobalGameTime").toBool();
+    m_statusCenter->setVisible(show);
+    m_detailPlaytime->setVisible(show);
     int64_t timePlayed = APPLICATION->playtimeSettings()->get("TotalPlayTime").toLongLong();
     if (timePlayed > 0) {
-        m_statusCenter->setText(
-            tr("Total playtime: %1")
-                .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
+        const QString text = tr("Total playtime: %1")
+                                 .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool()));
+        m_statusCenter->setText(text);
+        m_detailPlaytime->setText(text);
     }
 }
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
@@ -1933,6 +2225,9 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionDeleteInstance->setEnabled(enabled);
     ui->actionCopyInstance->setEnabled(enabled);
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
+    for (auto* link : m_detailLinks) {
+        link->setEnabled(enabled);
+    }
 }
 
 void MainWindow::refreshCurrentInstance()
@@ -1945,10 +2240,14 @@ void MainWindow::updateNameLabel()
 {
     const QString name = m_selectedInstance == nullptr ? QObject::tr("No Instance Selected") : m_selectedInstance->name();
     nameLabel->setText(nameLabel->fontMetrics().elidedText(name, Qt::ElideRight, nameLabel->width()));
+    m_detailName->setText(name);
+    m_detailName->setToolTip(name);
 }
 
 void MainWindow::updateInstanceToolBarOrientation(Qt::Orientation orientation)
 {
+    if (!isClassicLayout())
+        return;
     // Changing the icon stays reachable through the "More" menu when the icon button is hidden
     instanceInfoWidget->setVisible(orientation == Qt::Vertical);
     // HACK: sync size (no, I don't know why this works)

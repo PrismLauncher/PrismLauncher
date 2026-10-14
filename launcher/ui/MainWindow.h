@@ -58,6 +58,8 @@ class InstanceView;
 class KonamiCode;
 class InstanceTask;
 class LibraryFilterBar;
+class QAction;
+class QFrame;
 
 namespace Ui {
 class MainWindow;
@@ -238,6 +240,13 @@ class MainWindow : public QMainWindow {
     // Tells the grid what to say when nothing is shown: welcome, or no search results
     void updateEmptyMessage();
 
+    // Tier 2 layout: navigation rail, detail panel and activity strip replace the
+    // instance toolbar, the status bar and the news toolbar (Classic layout keeps them)
+    void applyLayoutMode();
+    bool isClassicLayout() const;
+    void updateDetailMeta();
+    QMenu* createMoreMenu();
+
    private:
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
@@ -254,6 +263,28 @@ class MainWindow : public QMainWindow {
     QLabel* nameLabel = nullptr;
     QToolButton* helpMenuButton = nullptr;
     KonamiCode* secretEventFilter = nullptr;
+
+    // Tier 2 layout widgets
+    QAction* m_classicAction = nullptr;
+    QWidget* m_rail = nullptr;
+    QToolButton* m_railLibrary = nullptr;
+    QToolButton* m_railDiscover = nullptr;
+    QToolButton* m_railActivity = nullptr;
+    QToolButton* m_railSettings = nullptr;
+    QToolButton* m_railAccount = nullptr;
+    QWidget* m_detailPanel = nullptr;
+    QToolButton* m_detailIconButton = nullptr;
+    QLabel* m_detailName = nullptr;
+    QLabel* m_detailMeta = nullptr;
+    QLabel* m_detailPlaytime = nullptr;
+    QToolButton* m_detailKillButton = nullptr;
+    QToolButton* m_detailMoreButton = nullptr;
+    QList<QToolButton*> m_detailLinks;
+    QWidget* m_activityStrip = nullptr;
+    QToolButton* m_activityButton = nullptr;
+    QToolButton* m_stripNews = nullptr;
+    QFrame* m_activityDrawer = nullptr;
+    QLabel* m_drawerLabel = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 

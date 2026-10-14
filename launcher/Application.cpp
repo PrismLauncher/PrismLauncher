@@ -822,6 +822,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("ToolbarsLocked", false);
 
+        // Tier 2: keep the classic toolbars/status bar arrangement for one release
+        m_settings->registerSetting("ClassicLayout", false);
+
         // Instance
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("InstRenamingMode", "AskEverytime");
