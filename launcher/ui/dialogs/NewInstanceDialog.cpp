@@ -71,7 +71,8 @@
 NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
                                      const QString& url,
                                      const QMap<QString, QString>& extraInfo,
-                                     QWidget* parent)
+                                     QWidget* parent,
+                                     const QString& initialPage)
     : QDialog(parent), ui(new Ui::NewInstanceDialog), m_instIconKey("default")
 {
     ui->setupUi(this);
@@ -149,6 +150,9 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
             m_importPage->setUrl(url);
             m_importPage->setExtraInfo(extraInfo);
         }
+    } else if (!initialPage.isEmpty()) {
+        // The Create hub lands here: start on the page for the chosen way of creating
+        m_container->selectPage(initialPage);
     }
 
     updateDialogState();

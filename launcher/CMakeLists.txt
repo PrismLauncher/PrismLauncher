@@ -1047,6 +1047,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ProfileSetupDialog.h
     ui/dialogs/CopyInstanceDialog.cpp
     ui/dialogs/CopyInstanceDialog.h
+    ui/dialogs/CreateHubDialog.cpp
+    ui/dialogs/CreateHubDialog.h
     ui/dialogs/CreateShortcutDialog.cpp
     ui/dialogs/CreateShortcutDialog.h
     ui/dialogs/CustomMessageBox.cpp

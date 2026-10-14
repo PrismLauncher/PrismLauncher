@@ -97,6 +97,7 @@
 #include "ui/ViewLogWindow.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
+#include "ui/dialogs/CreateHubDialog.h"
 #include "ui/dialogs/CreateShortcutDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
@@ -458,7 +459,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_railAccount = makeRailButton(tr("Account"), "accounts", false);
         railLayout->addStretch(1);
 
-        connect(m_railDiscover, &QToolButton::clicked, this, &MainWindow::on_actionAddInstance_triggered);
+        connect(m_railDiscover, &QToolButton::clicked, this, [this] {
+            // Discover is the browse-modpacks surface of the Create hub
+            addInstance(QString(), {}, QStringLiteral("modrinth"));
+        });
         connect(m_railSettings, &QToolButton::clicked, this, &MainWindow::on_actionSettings_triggered);
         // Account opens the same menu as the account button in the main toolbar
         connect(m_railAccount, &QToolButton::clicked, this, [this] {
@@ -1309,7 +1313,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     runModalTask(task.get());
 }
 
-void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
+void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info, const QString& initialPage)
 {
     QString groupName;
     do {
@@ -1329,7 +1333,31 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
+    QString dialogUrl = url;
+    QString dialogPage = initialPage;
+    if (dialogUrl.isEmpty() && dialogPage.isEmpty() && !isClassicLayout()) {
+        // The Create hub is the new-layout entry point: choose how to start
+        CreateHubDialog hub(this);
+        if (hub.exec() != QDialog::Accepted)
+            return;
+        switch (hub.chosenAction()) {
+            case CreateHubDialog::Action::StartFresh:
+                break;  // the dialog's first page is Custom
+            case CreateHubDialog::Action::BrowsePacks:
+                dialogPage = QStringLiteral("modrinth");
+                break;
+            case CreateHubDialog::Action::Import: {
+                const QString file = QFileDialog::getOpenFileName(this, tr("Select a modpack to import"), QString(),
+                                                                  tr("Modpacks (*.zip *.mrpack);;All files (*)"));
+                if (file.isEmpty())
+                    return;
+                dialogUrl = QUrl::fromLocalFile(file).toString();
+                break;
+            }
+        }
+    }
+
+    NewInstanceDialog newInstDlg(groupName, dialogUrl, extra_info, this, dialogPage);
     if (!newInstDlg.exec())
         return;
 
