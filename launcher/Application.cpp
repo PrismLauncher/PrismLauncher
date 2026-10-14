@@ -56,8 +56,8 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/AccessibleInstanceView.h"
 
-#include <QTimer>
 #include <QPixmap>
+#include <QTimer>
 
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/global/APIPage.h"
