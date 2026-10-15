@@ -184,13 +184,19 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep)
 {
     auto provider = pDep->pack->provider;
-    auto [info, responseInfo] = getAPI(provider)->getProjectTask(pDep->pack->addonId.toString());
+    auto [info, responseInfo] = getAPI(provider)->getProjectTask(pDep->pack->addonId.toString(), false, false);
     connect(info.get(), &NetJob::succeeded, this, [responseInfo, pDep] { *pDep->pack = *responseInfo; });
     QObject::connect(info.get(), &NetJob::failed, this, [this, info, pDep] {
         removePack(pDep->pack->addonId);
         m_failed.remove(info.get());
     });
     return info;
+}
+
+void GetModDependenciesTask::subTaskFailed(Task::Ptr task, const QString& msg)
+{
+    ConcurrentTask::subTaskFailed(task, msg);
+    m_failed.remove(task.get());
 }
 
 Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
@@ -266,10 +272,10 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     };
 
     auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
-    QObject::connect(version.get(), &NetJob::failed, this, [this, version, pDep] {
-        removePack(pDep->pack->addonId);
-        m_failed.remove(version.get());
-    });
+    if (auto* netJob = dynamic_cast<NetJob*>(version.get())) {
+        netJob->setAskRetry(false);
+    }
+    QObject::connect(version.get(), &NetJob::failed, this, [this, pDep] { removePack(pDep->pack->addonId); });
     tasks->addTask(version);
     return tasks;
 }
