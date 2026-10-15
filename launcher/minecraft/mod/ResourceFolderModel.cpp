@@ -581,16 +581,14 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 result.setValue(icons(row));
                 return result;
             }
+            if (column == VersionColumn && at(row).lockUpdate()) {
+                return QIcon::fromTheme("status-locked");
+            }
             return {};
         }
         case Qt::CheckStateRole:
             if (column == ActiveColumn) {
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
-            }
-            return {};
-        case Qt::UserRole:
-            if (column == LockUpdateColumn) {
-                return at(row).lockUpdate();
             }
             return {};
         case Qt::SizeHintRole:
@@ -648,7 +646,6 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                 case ProviderColumn:
                 case SizeColumn:
                 case FileNameColumn:
-                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -671,8 +668,6 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("The size of the resource.");
                 case FileNameColumn:
                     return tr("The file name of the resource.");
-                case LockUpdateColumn:
-                    return tr("Should this mod be updated?");
                 default:
                     return {};
             }
@@ -1075,9 +1070,9 @@ bool ResourceFolderModel::setUpdateLock(const QModelIndexList& indexes, EnableAc
     }
 
     bool succeeded = true;
-    auto updateColumn = static_cast<int>(columnNames(false).indexOf("Update"));
+    auto versionColumn = static_cast<int>(columnNames(false).indexOf("Version"));
     for (const auto& idx : indexes) {
-        if (!validateIndex(idx) || idx.column() != updateColumn) {
+        if (!validateIndex(idx) || idx.column() != 0) {
             continue;
         }
 
@@ -1108,7 +1103,10 @@ bool ResourceFolderModel::setUpdateLock(const QModelIndexList& indexes, EnableAc
             meta->lockUpdate = lockUpdate;
             Metadata::update(indexDir(), *meta.get());
             resource->setMetadata(*meta.get());
-            emit dataChanged(index(row, updateColumn), index(row, columnCount(QModelIndex()) - 1));
+
+            if (versionColumn != -1) {
+                emit dataChanged(index(row, versionColumn), index(row, versionColumn));
+            }
         }
     }
 

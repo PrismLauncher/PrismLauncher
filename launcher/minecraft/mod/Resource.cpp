@@ -237,12 +237,6 @@ int Resource::compare(const Resource& other, SortType type) const
             }
             break;
         }
-        case SortType::LockUpdate: {
-            if (lockUpdate() != other.lockUpdate()) {
-                return lockUpdate() ? -1 : 1;
-            }
-            break;
-        }
     }
 
     return 0;

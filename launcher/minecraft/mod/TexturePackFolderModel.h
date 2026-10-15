@@ -51,7 +51,6 @@ class TexturePackFolderModel : public ResourceFolderModel {
         ProviderColumn,
         SizeColumn,
         FileNameColumn,
-        LockUpdateColumn,
         NumColumns
     };
 
