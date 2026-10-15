@@ -48,42 +48,6 @@
 #include <QStyledItemDelegate>
 #include <algorithm>
 
-namespace {
-class LockDelegate : public QStyledItemDelegate {
-   public:
-    explicit LockDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent) {}
-
-    void paint(QPainter* painter, const QStyleOptionViewItem& opt, const QModelIndex& index) const override
-    {
-        QStyleOptionViewItem option(opt);
-        initStyleOption(&option, index);
-
-        bool locked = index.data(Qt::UserRole).toBool();
-
-        option.text.clear();
-        option.icon = QIcon::fromTheme(locked ? "lock" : "unlock");
-        option.features |= QStyleOptionViewItem::HasDecoration;
-        option.decorationAlignment = Qt::AlignBottom | Qt::AlignHCenter;
-        option.decorationPosition = QStyleOptionViewItem::Top;
-
-        int size = qMin(option.rect.width(), option.rect.height()) * 3 / 4;
-        option.decorationSize = QSize(size, size);
-
-        option.widget->style()->drawControl(QStyle::CE_ItemViewItem, &option, painter);
-    }
-
-    bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) override
-    {
-        if (event->type() == QEvent::MouseButtonRelease) {
-            bool locked = index.data(Qt::UserRole).toBool();
-            model->setData(index, !locked, Qt::UserRole);
-            return true;
-        }
-        return event->type() == QEvent::MouseButtonDblClick;  // if double click ignore it
-    }
-};
-}  // namespace
-
 ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, ResourceFolderModel* model, QWidget* parent)
     : QMainWindow(parent)
     , m_instance(instance)
@@ -102,10 +66,7 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     m_filterModel->setFilterKeyColumn(-1);
     m_ui->treeView->setModel(m_filterModel);
 
-    // keep the Update at the end of the list(otherwise there will be a need to iterate over the columns)
-    auto lockColumn = static_cast<int>(model->columnNames(false).size()) - 1;
-    m_ui->treeView->setItemDelegateForColumn(lockColumn, new LockDelegate(m_ui->treeView));
-    m_ui->treeView->setItemDelegateForColumn(ResourceFolderModel::NameColumn, new MultiDecorationItemDelegate(this));
+    m_ui->treeView->setItemDelegate(new MultiDecorationItemDelegate(this));
     // must come after setModel
     const auto& resizeModes = m_model->columnResizeModes();
     for (int i = 0; i < resizeModes.count(); ++i) {

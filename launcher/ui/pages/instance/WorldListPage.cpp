@@ -67,6 +67,7 @@
 #include "DesktopServices.h"
 #include "Json.h"
 #include "ui/GuiUtil.h"
+#include "ui/MultiDecorationItemDelegate.h"
 
 #include "Application.h"
 #include "DataPackPage.h"
@@ -84,13 +85,27 @@ class WorldListProxyModel : public QSortFilterProxyModel {
         QModelIndex sourceIndex = mapToSource(index);
 
         if (index.column() == 0 && role == Qt::DecorationRole) {
+            QList<MultiDecorationItemDelegate::Icon> icons;
+
             auto* worlds = qobject_cast<WorldList*>(sourceModel());
             auto iconFile = worlds->data(sourceIndex, WorldList::IconFileRole).toString();
-            if (iconFile.isNull()) {
-                // NOTE: Minecraft uses the same placeholder for servers AND worlds
-                return QIcon::fromTheme("unknown_server");
+            // NOTE: Minecraft uses the same placeholder for servers AND worlds
+            const auto icon = !iconFile.isNull() ? QIcon(iconFile) : QIcon::fromTheme("unknown_server");
+            icons.append({
+                .icon = icon,
+                .size = { 64, 64 },
+            });
+
+            if (worlds->data(sourceIndex, WorldList::LinkedRole).toBool()) {
+                icons.append({
+                    .icon = QIcon::fromTheme("status-linked"),
+                    .size = { 16, 16 },
+                });
             }
-            return QIcon(iconFile);
+
+            QVariant result;
+            result.setValue(icons);
+            return result;
         }
 
         return sourceIndex.data(role);
@@ -114,6 +129,7 @@ WorldListPage::WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget
     m_ui->worldTreeView->installEventFilter(this);
     m_ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     m_ui->worldTreeView->setIconSize(QSize(64, 64));
+    m_ui->worldTreeView->setItemDelegate(new MultiDecorationItemDelegate(this));
     connect(m_ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &WorldListPage::ShowContextMenu);
     connect(m_ui->worldTreeView, &QAbstractItemView::activated, this, [this] {
         if (m_ui->actionJoin->isEnabled()) {
