@@ -59,8 +59,13 @@ void MultiDecorationItemDelegate::paint(QPainter* painter, const QStyleOptionVie
 
     const int spacing = iconSpacing(option);
 
+    const auto icons = iconsAt(index);
+    if (!icons.has_value()) {
+        return;
+    }
+
     int x = 0;
-    for (const auto& [icon, size] : iconsAt(index).value_or({})) {
+    for (const auto& [icon, size] : icons.value()) {
         if (x != 0) {
             x += spacing;
         }
