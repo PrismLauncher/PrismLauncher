@@ -236,7 +236,10 @@ void ResourceUpdateDialog::checkCandidates()
                     warnings = depTask->warnings();
                 }
                 if (warnings.count()) {
-                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+                    CustomMessageBox::selectable(this, tr("Warnings"),
+                                                 warnings.join('\n') + "\nThe mod may not work correctly without it.",
+                                                 QMessageBox::Warning)
+                        ->exec();
                 }
             });
 
