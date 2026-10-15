@@ -32,6 +32,7 @@
         <file>scalable/status-good.svg</file>
         <file>scalable/status-yellow.svg</file>
         <file>scalable/status-locked.svg</file>
+        <file>scalable/status-linked.svg</file>
         <file>scalable/viewfolder.svg</file>
         <file>scalable/worlds.svg</file>
         <file>scalable/delete.svg</file>

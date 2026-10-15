@@ -187,6 +187,13 @@
         <file>32x32/status-locked.png</file>
         <file>scalable/status-locked.svg</file>
 
+        <file>16x16/status-linked.png</file>
+        <file>22x22/status-linked.png</file>
+        <file>32x32/status-linked.png</file>
+        <file>48x48/status-linked.png</file>
+        <file>64x64/status-linked.png</file>
+        <file>scalable/status-linked.svg</file>
+
         <!-- View folder. CC-BY-SA 3.0, http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-open-folder.png -->
         <file>scalable/viewfolder.svg</file>
         <file>16x16/viewfolder.png</file>

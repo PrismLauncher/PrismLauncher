@@ -563,13 +563,13 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 if (at(row).isSymLinkUnder(instDirPath())) {
                     tooltip +=
                         m_resources[row]->internalId() +
-                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                        tr("\nThis resource is symbolically linked from elsewhere. Editing it will also change the original."
                            "\nCanonical Path: %1")
                             .arg(at(row).fileinfo().canonicalFilePath());
                 }
 
                 if (at(row).isMoreThanOneHardLink()) {
-                    tooltip += tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+                    tooltip += tr("\nThis resource is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
 
@@ -611,7 +611,7 @@ QList<MultiDecorationItemDelegate::Icon> ResourceFolderModel::icons(int row) con
     }
 
     if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
-        result.append({ .icon = QIcon::fromTheme("status-yellow"), .size = s_iconSize });
+        result.append({ .icon = QIcon::fromTheme("status-linked"), .size = s_iconSize });
     }
 
     return result;

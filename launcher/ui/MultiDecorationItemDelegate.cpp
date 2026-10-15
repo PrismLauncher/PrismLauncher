@@ -75,7 +75,7 @@ void MultiDecorationItemDelegate::paint(QPainter* painter, const QStyleOptionVie
         int iconX = (size.width() - actualSize.width()) / 2;
         int iconY = (option.rect.height() - actualSize.height()) / 2;
 
-        icon.paint(painter, option.rect.x() + iconX, option.rect.y() + iconY, actualSize.width(), actualSize.height(),
+        icon.paint(painter, option.rect.x() + x + iconX, option.rect.y() + iconY, actualSize.width(), actualSize.height(),
                    Qt::AlignLeft | Qt::AlignTop, mode, state);
         x += size.width();
     }
