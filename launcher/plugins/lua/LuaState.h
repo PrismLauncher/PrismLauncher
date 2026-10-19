@@ -40,8 +40,9 @@ class LuaState {
 
     // Runs a text chunk. Returns the error message on failure.
     std::optional<QString> run(const QByteArray& code, const QString& chunkName);
-    // Calls the function below the nargs arguments at the top of the stack with a fresh instruction budget, and pops
-    // them, discarding any results. Returns the error message, with a traceback, on failure.
+    // Calls the function below the nargs arguments at the top of the stack with a fresh instruction budget (unless it
+    // is nested in another call), and pops them, discarding any results. Returns the error message, with a traceback,
+    // on failure.
     std::optional<QString> call(int nargs);
 
    private:
@@ -60,5 +61,7 @@ class LuaState {
     Memory m_memory;
     std::uint64_t m_instructionLimit = s_defaultInstructionLimit;
     std::uint64_t m_instructionsUsed = 0;
+    // Calls into Lua made while another one runs (e.g. from a C function) share its budget
+    int m_callDepth = 0;
     lua_State* m_state = nullptr;
 };

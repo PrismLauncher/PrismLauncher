@@ -113,6 +113,9 @@ class LaunchTask : public Task {
     // A step is about to start; id is its phase (see LaunchStepIds), empty if it has none
     void stepStarted(const QString& id);
 
+    // A line was added to the log, after censoring private info
+    void logLineAdded(const QString& line, MessageLevel level);
+
    public slots:
     void onLogLines(const QStringList& lines, MessageLevel defaultLevel = MessageLevel::Launcher);
     void onLogLine(QString line, MessageLevel defaultLevel = MessageLevel::Launcher);

@@ -6,8 +6,10 @@
 
 #include <launch/LaunchStep.h>
 #include <launch/LaunchTask.h>
+#include <launch/LogModel.h>
 #include <plugins/Plugin.h>
 #include <plugins/PluginManager.h>
+#include <plugins/lua/LuaState.h>
 #include <settings/INISettingsObject.h>
 #include <settings/Setting.h>
 
@@ -27,7 +29,8 @@ class DummyStep : public LaunchStep {
 // create() needs a real instance; the steps can be tested without one
 class TestLaunchTask : public LaunchTask {
    public:
-    TestLaunchTask() : LaunchTask(nullptr) {}
+    // The log model would otherwise be created from the instance's settings
+    TestLaunchTask() : LaunchTask(nullptr) { m_logModel.reset(new LogModel()); }
 
     void addPhase(const QString& id) { appendStep(makeShared<DummyStep>(this), id); }
     QList<shared_qobject_ptr<LaunchStep>> steps() const { return m_steps; }
@@ -221,6 +224,53 @@ class LuaLaunchStepTest : public QObject {
         emit task->stepStarted("java");
         QTest::ignoreMessage(QtInfoMsg, "[com.example.watch] finished false ''");
         emit task->finished();
+    }
+
+    void test_gameLog()
+    {
+        addPlugin("com.example.log", R"(
+            lines, skipped = {}, 0
+            prism.on("game.log", function(e)
+                table.insert(lines, e.level .. ":" .. e.line)
+                skipped = skipped + e.skipped
+            end)
+        )",
+                  "[\"game.log\"]");
+        startManager({ "com.example.log" });
+        auto task = phases();
+        m_manager->watchLaunch(task.get());
+        task->setCensorFilter({ { "s3cr3t-token", "<ACCESS TOKEN>" } });
+
+        task->onLogLine("[12:00:00] [main/INFO]: hello with s3cr3t-token", MessageLevel::Info);
+        task->onLogLine("launcher's own line", MessageLevel::Launcher);
+        task->onLogLine("oops", MessageLevel::Error);
+        LuaState* lua = m_manager->plugin("com.example.log")->lua();
+        QCOMPARE(lua->run(R"(
+            assert(#lines == 2, #lines)
+            assert(lines[1] == "info:[12:00:00] [main/INFO]: hello with <ACCESS TOKEN>", lines[1])
+            assert(lines[2] == "error:oops", lines[2])
+        )",
+                          "check"),
+                 std::nullopt);
+
+        // At most s_maxGameLogLinesPerSecond lines per second; the next delivered line reports how many were dropped
+        for (int i = 0; i < PluginManager::s_maxGameLogLinesPerSecond + 50; i++) {
+            task->onLogLine(QString("spam %1").arg(i), MessageLevel::Info);
+        }
+        QCOMPARE(lua->run("assert(#lines <= 2 + 200, #lines) delivered = #lines", "check"), std::nullopt);
+        QTest::qWait(1100);
+        task->onLogLine("after the burst", MessageLevel::Info);
+        QCOMPARE(lua->run("assert(lines[#lines] == 'info:after the burst') assert(skipped == 2 + 250 - delivered, skipped)", "check"),
+                 std::nullopt);
+    }
+
+    void test_gameLogNeedsPermission()
+    {
+        addPlugin("com.example.nolog", "prism.on('game.log', function() end)", "[\"instances.read\"]");
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Failed to load plugin \"com.example.nolog\""));
+        startManager({ "com.example.nolog" });
+        QVERIFY2(m_manager->plugin("com.example.nolog")->error().contains("event 'game.log' requires the 'game.log' permission"),
+                 qPrintable(m_manager->plugin("com.example.nolog")->error()));
     }
 
     void test_registrationErrors()

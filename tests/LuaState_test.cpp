@@ -260,6 +260,41 @@ class LuaStateTest : public QObject {
         }
     }
 
+    void test_nestedCallsShareBudget()
+    {
+        LuaState state;
+        state.setInstructionLimit(100'000);
+        QCOMPARE(state.run("function small() for i = 1, 5000 do end end", "def"), std::nullopt);
+
+        // A C function that calls back into Lua, as a launcher signal handled during a call would
+        lua_pushlightuserdata(state.get(), &state);
+        lua_pushcclosure(
+            state.get(),
+            [](lua_State* L) -> int {
+                auto* self = static_cast<LuaState*>(lua_touserdata(L, lua_upvalueindex(1)));
+                lua_getglobal(L, "small");
+                bool failed = false;
+                {
+                    auto error = self->call(0);
+                    failed = error.has_value();
+                }
+                if (failed) {
+                    return luaL_error(L, "nested call failed");
+                }
+                return 0;
+            },
+            1);
+        lua_setglobal(state.get(), "nested");
+
+        // Each nested call fits the limit, all of them together do not
+        auto error = state.run("for i = 1, 100 do nested() end", "outer");
+        QVERIFY(error);
+        QVERIFY2(error->contains("nested call failed") || error->contains("instruction limit exceeded"), qPrintable(*error));
+
+        // A new top-level call starts over
+        QCOMPARE(state.run("nested()", "again"), std::nullopt);
+    }
+
     void test_tooSmallLimit()
     {
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Failed to (create Lua state|open Lua libraries)"));

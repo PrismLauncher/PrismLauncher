@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QPointer>
 
 #include <algorithm>
@@ -137,6 +138,31 @@ void PluginManager::watchLaunch(LaunchTask* task)
     connect(task, &Task::finished, this, [this, task, instanceId] {
         emitEvent("launch.finished",
                   { { "id", instanceId }, { "success", task->wasSuccessful() }, { "reason", task->failReason().toUtf8() } });
+    });
+
+    struct RateLimit {
+        QElapsedTimer window;
+        int lines = 0;
+        qint64 skipped = 0;
+    };
+    auto limit = std::make_shared<RateLimit>();
+    connect(task, &LaunchTask::logLineAdded, this, [this, instanceId, limit](const QString& line, MessageLevel level) {
+        if (level == MessageLevel::Launcher) {
+            return;
+        }
+        if (!limit->window.isValid() || limit->window.elapsed() >= 1000) {
+            limit->window.start();
+            limit->lines = 0;
+        }
+        if (++limit->lines > s_maxGameLogLinesPerSecond) {
+            limit->skipped++;
+            return;
+        }
+        emitEvent("game.log", { { "id", instanceId },
+                                { "line", line.toUtf8() },
+                                { "level", level.toString().toLower().toUtf8() },
+                                { "skipped", limit->skipped } });
+        limit->skipped = 0;
     });
 }
 

@@ -292,6 +292,7 @@ bool LaunchTask::parseXmlLogs(const QString& line, MessageLevel level)
                            .arg(entry.message);
             msg = censorPrivateInfo(msg);
             model->append(entry.level, msg);
+            emit logLineAdded(msg, entry.level);
         } else if (std::holds_alternative<LogParser::PlainText>(item)) {
             auto msg = std::get<LogParser::PlainText>(item).message;
 
@@ -303,6 +304,7 @@ bool LaunchTask::parseXmlLogs(const QString& line, MessageLevel level)
             msg = censorPrivateInfo(msg);
 
             model->append(newLevel, msg);
+            emit logLineAdded(msg, newLevel);
         }
     }
 
@@ -326,6 +328,7 @@ void LaunchTask::onLogLine(QString line, MessageLevel level)
     line = censorPrivateInfo(line);
 
     getLogModel()->append(level, line);
+    emit logLineAdded(line, level);
 }
 
 void LaunchTask::emitSucceeded()

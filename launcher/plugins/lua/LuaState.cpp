@@ -181,11 +181,15 @@ std::optional<QString> LuaState::call(int nargs)
         return QStringLiteral("Lua state is not initialized");
     }
 
-    resetInstructionBudget();
+    if (m_callDepth == 0) {
+        resetInstructionBudget();
+    }
     const int base = lua_gettop(m_state) - nargs - 1;
     lua_pushcfunction(m_state, messageHandler);
     lua_insert(m_state, base + 1);
+    m_callDepth++;
     const int status = lua_pcall(m_state, nargs, 0, base + 1);
+    m_callDepth--;
 
     std::optional<QString> error;
     if (status != LUA_OK) {

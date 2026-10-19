@@ -96,6 +96,7 @@ constexpr std::array s_events = {
     EventInfo{ "instance.status", "instances.read" },
     EventInfo{ "launch.step", "instances.read" },
     EventInfo{ "launch.finished", "instances.read" },
+    EventInfo{ "game.log", "game.log" },
 };
 
 const EventInfo* findEvent(const char* name)
