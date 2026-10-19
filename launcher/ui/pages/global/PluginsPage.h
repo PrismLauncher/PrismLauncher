@@ -48,6 +48,7 @@ class PluginsPage : public QWidget, public BasePage {
     QPushButton* m_openFolder;
     QPushButton* m_reload;
     QPushButton* m_reviewPermissions;
+    QPushButton* m_reloadPlugin;
     // Set while the list is filled, so the checkboxes do not enable or disable plugins
     bool m_updating = false;
 };

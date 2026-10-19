@@ -44,6 +44,8 @@ class Plugin {
     // Does nothing if already loaded. Returns whether the plugin is loaded.
     bool load();
     void unload();
+    // Unloads the plugin and reads its manifest again, leaving it Disabled (or in Error if the manifest is invalid)
+    void refresh();
 
     // Calls the plugin's handlers for the event if it is loaded. A failing handler is logged, the plugin stays loaded.
     void emitEvent(const char* event, const PrismApi::EventFields& fields = {});

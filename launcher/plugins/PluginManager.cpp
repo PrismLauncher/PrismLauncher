@@ -6,11 +6,16 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QElapsedTimer>
+#include <QFileSystemWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QPointer>
+#include <QTimer>
+
+#include <utility>
 
 #include <algorithm>
 #include <memory>
@@ -86,7 +91,120 @@ void PluginManager::discover()
             loadPlugin(plugin.get());
         }
     }
+    watchPlugins();
     emit pluginsChanged();
+}
+
+void PluginManager::reloadPlugin(const QString& id)
+{
+    Plugin* plugin = this->plugin(id);
+    if (!plugin) {
+        return;
+    }
+    plugin->refresh();
+    if (isEnabled(id)) {
+        loadPlugin(plugin);
+    }
+    qInfo() << "Reloaded plugin" << id;
+    m_fingerprints[id] = codeFingerprint(plugin->directory());
+    emit pluginChanged(id);
+}
+
+void PluginManager::setAutoReload(bool enabled)
+{
+    if (!enabled) {
+        m_watcher.reset();
+        return;
+    }
+    if (m_watcher) {
+        return;
+    }
+    m_watcher = std::make_unique<QFileSystemWatcher>();
+    connect(m_watcher.get(), &QFileSystemWatcher::fileChanged, this, &PluginManager::onPathChanged);
+    connect(m_watcher.get(), &QFileSystemWatcher::directoryChanged, this, &PluginManager::onPathChanged);
+    if (!m_reloadTimer) {
+        m_reloadTimer = new QTimer(this);
+        m_reloadTimer->setSingleShot(true);
+        m_reloadTimer->setInterval(s_reloadDelayMs);
+        connect(m_reloadTimer, &QTimer::timeout, this, &PluginManager::reloadChangedPlugins);
+    }
+    watchPlugins();
+}
+
+QStringList PluginManager::codeFingerprint(const QString& directory)
+{
+    QStringList fingerprint;
+    QDirIterator it(directory, { "*.lua", "plugin.toml" }, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        const QFileInfo info = it.nextFileInfo();
+        const QString relative = QDir(directory).relativeFilePath(info.filePath());
+        // The plugin's own data is not code
+        if (relative.startsWith("data/") || relative.startsWith('.')) {
+            continue;
+        }
+        fingerprint.append(QString("%1|%2|%3").arg(relative).arg(info.size()).arg(info.lastModified().toMSecsSinceEpoch()));
+    }
+    fingerprint.sort();
+    return fingerprint;
+}
+
+void PluginManager::watchPlugins()
+{
+    if (!m_watcher) {
+        return;
+    }
+    const QStringList watched = m_watcher->files() + m_watcher->directories();
+    if (!watched.isEmpty()) {
+        m_watcher->removePaths(watched);
+    }
+    m_fingerprints.clear();
+    QStringList paths;
+    for (const auto& plugin : m_plugins) {
+        const QString directory = plugin->directory();
+        m_fingerprints[plugin->id()] = codeFingerprint(directory);
+        // Folders tell about added and removed files, files about changes
+        paths.append(directory);
+        QDirIterator it(directory, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            const QString folder = it.next();
+            if (!QDir(directory).relativeFilePath(folder).startsWith("data")) {
+                paths.append(folder);
+            }
+        }
+        QDirIterator files(directory, { "*.lua", "plugin.toml" }, QDir::Files, QDirIterator::Subdirectories);
+        while (files.hasNext()) {
+            paths.append(files.next());
+        }
+    }
+    if (!paths.isEmpty()) {
+        m_watcher->addPaths(paths);
+    }
+}
+
+void PluginManager::onPathChanged(const QString& path)
+{
+    for (const auto& plugin : m_plugins) {
+        const QString directory = plugin->directory();
+        if (path == directory || path.startsWith(directory + '/')) {
+            m_pendingReloads.insert(plugin->id());
+        }
+    }
+    // Waits for the burst of changes a save causes to end
+    m_reloadTimer->start();
+}
+
+void PluginManager::reloadChangedPlugins()
+{
+    const QSet<QString> pending = std::exchange(m_pendingReloads, {});
+    for (const QString& id : pending) {
+        const Plugin* plugin = this->plugin(id);
+        if (plugin && codeFingerprint(plugin->directory()) != m_fingerprints.value(id)) {
+            qInfo() << "Plugin" << id << "changed on disk";
+            reloadPlugin(id);
+        }
+    }
+    // Saving often replaces files, which drops them from the watcher
+    watchPlugins();
 }
 
 QList<Plugin*> PluginManager::plugins() const

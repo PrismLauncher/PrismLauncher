@@ -7,8 +7,11 @@
 
 #include <plugins/Plugin.h>
 #include <plugins/PluginManager.h>
+#include <plugins/lua/LuaState.h>
 #include <settings/INISettingsObject.h>
 #include <settings/Setting.h>
+
+#include <lua.hpp>
 #include <memory>
 
 class PluginManagerTest : public QObject {
@@ -298,6 +301,76 @@ class PluginManagerTest : public QObject {
 
         // The grants are kept outside the plugin, in the launcher settings
         QVERIFY(grants->get().toString().contains("com.example.perm"));
+    }
+
+    static QString globalString(Plugin* plugin, const char* name)
+    {
+        if (!plugin->lua()) {
+            return {};
+        }
+        lua_State* L = plugin->lua()->get();
+        lua_getglobal(L, name);
+        QString value = QString::fromUtf8(lua_tostring(L, -1));
+        lua_pop(L, 1);
+        return value;
+    }
+
+    void test_autoReload()
+    {
+        addPlugin("com.example.live", "value = 'first'");
+        m_enabled->set(QStringList({ "com.example.live" }));
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.setAutoReload(true);
+        manager.discover();
+        Plugin* plugin = manager.plugin("com.example.live");
+        QCOMPARE(globalString(plugin, "value"), "first");
+        const int loads = plugin->loadCount();
+
+        // Changing the code reloads it
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("changed on disk"));
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Loaded plugin"));
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Reloaded plugin"));
+        writeFile(QDir(pluginsDir()).filePath("com.example.live/main.lua"), "value = 'second one'");
+        QTRY_COMPARE_WITH_TIMEOUT(globalString(plugin, "value"), "second one", 5000);
+        QCOMPARE(plugin->loadCount(), loads + 1);
+
+        // A new module in a folder too
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("changed on disk"));
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Loaded plugin"));
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Reloaded plugin"));
+        QVERIFY(QDir(pluginsDir()).mkpath("com.example.live/lib"));
+        writeFile(QDir(pluginsDir()).filePath("com.example.live/lib/extra.lua"), "return 1");
+        QTRY_COMPARE_WITH_TIMEOUT(plugin->loadCount(), loads + 2, 5000);
+
+        // What the plugin writes itself does not
+        QVERIFY(plugin->lua()->run("prism.settings{ n = 0 }.n = 5 prism.fs.data():write(\"notes.txt\", \"x\")", "write") == std::nullopt);
+        QTest::qWait(PluginManager::s_reloadDelayMs * 3);
+        QCOMPARE(plugin->loadCount(), loads + 2);
+    }
+
+    void test_reloadPlugin()
+    {
+        addPlugin("com.example.manual", "value = 'old'");
+        auto grants = m_settings->registerSetting("PluginPermissions", QString("{}"));
+        m_enabled->set(QStringList({ "com.example.manual" }));
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.setGrantsSetting(grants);
+        manager.discover();
+        Plugin* plugin = manager.plugin("com.example.manual");
+
+        writeFile(QDir(pluginsDir()).filePath("com.example.manual/main.lua"), "value = 'new'");
+        QSignalSpy changed(&manager, &PluginManager::pluginChanged);
+        manager.reloadPlugin("com.example.manual");
+        QCOMPARE(globalString(plugin, "value"), "new");
+        QCOMPARE(changed.count(), 1);
+
+        // The manifest is read again: new permissions block it
+        writeFile(QDir(pluginsDir()).filePath("com.example.manual/plugin.toml"),
+                  "id = \"com.example.manual\"\nname = \"Renamed\"\nversion = \"2\"\napi = 1\npermissions = [\"net\"]\n");
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Not loading plugin"));
+        manager.reloadPlugin("com.example.manual");
+        QCOMPARE(plugin->manifest()->name, "Renamed");
+        QCOMPARE(plugin->state(), Plugin::State::Error);
     }
 
     void test_rediscover()

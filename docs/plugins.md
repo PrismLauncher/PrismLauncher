@@ -305,7 +305,8 @@ end)
 - In Lua 5.5 the variables of a `for` loop are constant: `for name in ... do name = name:lower() end` does not compile.
   Use a new local instead.
 - `print` goes to the launcher log, not a console.
-- A plugin's code only runs again when it is disabled and enabled, or the launcher restarts.
+- Enabled plugins restart by themselves when their `.lua` files or `plugin.toml` change (Settings → Plugins → Reload
+  Plugin does it by hand). What a plugin writes itself (`settings.ini`, its data folder) does not restart it.
 - Keep work per call small: it runs on the launcher's main thread, within the instruction limit.
 - `prism.http` only works inside `prism.async`; errors inside a task are logged, not raised to whoever started it.
 - With `unrestricted`, native modules (`.so`, `.dll`) cannot be loaded, and on Windows `io.open` fails with paths that

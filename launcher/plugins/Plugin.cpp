@@ -100,6 +100,15 @@ void Plugin::unload()
     m_state = State::Disabled;
 }
 
+void Plugin::refresh()
+{
+    unload();
+    m_manifest = readManifest(m_directory);
+    if (!m_manifest) {
+        fail(m_manifest.error());
+    }
+}
+
 void Plugin::emitEvent(const char* event, const PrismApi::EventFields& fields)
 {
     if (m_state != State::Loaded) {

@@ -1043,6 +1043,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         m_plugins.reset(new PluginManager(FS::PathCombine(m_dataPath, "plugins"), m_settings->getSetting("EnabledPlugins")));
         m_plugins->setGrantsSetting(m_settings->getSetting("PluginPermissions"));
+        m_plugins->setAutoReload(true);
         m_plugins->setHttpClient(std::make_unique<NetworkHttpClient>(m_network.get(), getUserAgent().toUtf8()));
         qInfo() << "Loading plugins...";
         m_plugins->discover();

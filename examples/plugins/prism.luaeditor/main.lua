@@ -222,7 +222,7 @@ local function open()
         end
         state.saved = text
         -- Shown in the window instead of a notification, which are limited per minute
-        state.note = "Saved; disable and enable its plugin to apply the changes."
+        state.note = "Saved; enabled plugins restart by themselves when their code changes."
         update()
     end
 

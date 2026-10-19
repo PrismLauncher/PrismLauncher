@@ -8,6 +8,7 @@
 #include <QHash>
 #include <QList>
 #include <QObject>
+#include <QSet>
 #include <QString>
 #include <QStringList>
 
@@ -19,6 +20,8 @@
 class BaseInstance;
 class InstanceList;
 class LaunchTask;
+class QFileSystemWatcher;
+class QTimer;
 class Plugin;
 class Setting;
 
@@ -65,6 +68,14 @@ class PluginManager : public QObject, public PrismApi::Notifier {
     // Sends launcher.ready to the loaded plugins, and from now on to each plugin right after it loads
     void setLauncherReady();
 
+    static constexpr int s_reloadDelayMs = 300;
+
+    // Reads the plugin's manifest again and, if it is enabled, runs it from scratch
+    void reloadPlugin(const QString& id);
+    // Watches the plugins' code (.lua files) and manifests, and reloads a plugin shortly after they change. Files the
+    // plugins write themselves (settings.ini, data/) are ignored.
+    void setAutoReload(bool enabled);
+
     // Inserts the steps the loaded plugins registered with prism.launch.addStep. Steps anchored to a phase that this
     // launch does not have are skipped.
     void contributeLaunchSteps(LaunchTask* task);
@@ -109,6 +120,11 @@ class PluginManager : public QObject, public PrismApi::Notifier {
     void watchInstance(BaseInstance* instance);
     QStringList enabledIds() const;
     bool loadPlugin(Plugin* plugin);
+    void watchPlugins();
+    void onPathChanged(const QString& path);
+    void reloadChangedPlugins();
+    // The code files of a plugin with their sizes and modification times, to tell real changes apart
+    static QStringList codeFingerprint(const QString& directory);
 
     QString m_pluginsDir;
     std::shared_ptr<Setting> m_enabledPlugins;
@@ -117,6 +133,11 @@ class PluginManager : public QObject, public PrismApi::Notifier {
     std::unique_ptr<PrismApi::InstanceSource> m_instanceSource;
     std::unique_ptr<PrismApi::HttpClient> m_http;
     std::vector<std::unique_ptr<Plugin>> m_plugins;
+    // Null unless auto reload is on
+    std::unique_ptr<QFileSystemWatcher> m_watcher;
+    QTimer* m_reloadTimer = nullptr;
+    QSet<QString> m_pendingReloads;
+    QHash<QString, QStringList> m_fingerprints;
     bool m_launcherReady = false;
     QElapsedTimer m_clock;
     // When each plugin's recent notifications were sent, in m_clock milliseconds

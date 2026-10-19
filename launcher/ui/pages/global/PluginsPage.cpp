@@ -45,9 +45,12 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
     m_reload = new QPushButton(this);
     m_reviewPermissions = new QPushButton(this);
     m_reviewPermissions->hide();
+    m_reloadPlugin = new QPushButton(this);
+    m_reloadPlugin->hide();
     auto* buttons = new QHBoxLayout;
     buttons->addWidget(m_openFolder);
     buttons->addWidget(m_reload);
+    buttons->addWidget(m_reloadPlugin);
     buttons->addWidget(m_reviewPermissions);
     buttons->addStretch();
 
@@ -65,6 +68,11 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
     connect(m_reviewPermissions, &QPushButton::clicked, this, [this] {
         if (QTreeWidgetItem* item = m_list->currentItem()) {
             reviewPermissions(item->data(NameColumn, Qt::UserRole).toString());
+        }
+    });
+    connect(m_reloadPlugin, &QPushButton::clicked, this, [this] {
+        if (QTreeWidgetItem* item = m_list->currentItem()) {
+            m_manager->reloadPlugin(item->data(NameColumn, Qt::UserRole).toString());
         }
     });
     connect(m_list, &QTreeWidget::itemDoubleClicked, this,
@@ -85,6 +93,8 @@ void PluginsPage::retranslate()
     m_openFolder->setText(tr("Open Folder"));
     m_reload->setText(tr("Reload"));
     m_reviewPermissions->setText(tr("Review Permissions..."));
+    m_reloadPlugin->setText(tr("Reload Plugin"));
+    m_reloadPlugin->setToolTip(tr("Read the selected plugin again and restart it. Plugins also reload when their code changes."));
     m_reload->setToolTip(tr("Look for new plugins and restart the enabled ones."));
 
     for (int i = 0; i < m_list->topLevelItemCount(); i++) {
@@ -149,6 +159,7 @@ void PluginsPage::updateDetails()
     const Plugin* plugin = item ? m_manager->plugin(item->data(NameColumn, Qt::UserRole).toString()) : nullptr;
     // Only for plugins whose manifest asks for permissions that were not granted
     m_reviewPermissions->setVisible(plugin && plugin->manifest() && !m_manager->missingPermissions(plugin->id()).isEmpty());
+    m_reloadPlugin->setVisible(plugin != nullptr);
     if (!plugin) {
         m_details->setText(m_list->topLevelItemCount() == 0 ? tr("No plugins found. Put each plugin in its own folder "
                                                                  "inside the plugins folder.")
