@@ -254,8 +254,11 @@ class MainWindow : public QMainWindow {
     QToolButton* helpMenuButton = nullptr;
 #ifdef ENABLE_LUA_PLUGINS
     QMenu* m_pluginsMenu = nullptr;
+    // The menu bar entry; not m_pluginsMenu->menuAction(), which setMenu() turns into m_pluginsButton
+    QAction* m_pluginsMenuBarAction = nullptr;
     QAction* m_pluginsButton = nullptr;
     QAction* m_instancePluginsAction = nullptr;
+    bool m_instancePluginsInToolBar = false;
     class PluginNotifications* m_pluginNotifications = nullptr;
 #endif
     KonamiCode* secretEventFilter = nullptr;

@@ -55,6 +55,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QCursor>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -612,7 +613,7 @@ void MainWindow::setupPluginActions()
     // Launcher actions: a menu in the menu bar, also shown by a button in the main toolbar
     m_pluginsMenu = new QMenu(tr("&Plugins"), this);
     connect(m_pluginsMenu, &QMenu::aboutToShow, this, [this] { fillPluginMenu(m_pluginsMenu, false); });
-    ui->menuBar->insertMenu(ui->helpMenu->menuAction(), m_pluginsMenu);
+    m_pluginsMenuBarAction = ui->menuBar->insertMenu(ui->helpMenu->menuAction(), m_pluginsMenu);
 
     m_pluginsButton = new QAction(QIcon::fromTheme("plugins"), tr("Plugins"), this);
     m_pluginsButton->setToolTip(tr("Actions added by plugins"));
@@ -628,10 +629,8 @@ void MainWindow::setupPluginActions()
     m_instancePluginsAction = new QAction(QIcon::fromTheme("plugins"), tr("Plugins"), this);
     m_instancePluginsAction->setToolTip(tr("Actions added by plugins for this instance"));
     m_instancePluginsAction->setMenu(instanceMenu);
-    ui->instanceToolBar->addAction(m_instancePluginsAction);
-    if (auto* button = qobject_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(m_instancePluginsAction))) {
-        button->setPopupMode(QToolButton::InstantPopup);
-    }
+    // The instance toolbar shows actions with menus as split buttons: make the main part open the menu too
+    connect(m_instancePluginsAction, &QAction::triggered, this, [instanceMenu] { instanceMenu->exec(QCursor::pos()); });
 
     connect(plugins, &PluginManager::pluginsChanged, this, &MainWindow::updatePluginActions);
     connect(plugins, &PluginManager::pluginChanged, this, &MainWindow::updatePluginActions);
@@ -648,9 +647,17 @@ void MainWindow::updatePluginActions()
 {
     // Only shown when a running plugin may add actions, so nothing changes for users without such plugins
     const bool visible = APPLICATION->plugins()->hasUiPlugins();
-    m_pluginsMenu->menuAction()->setVisible(visible);
+    m_pluginsMenuBarAction->setVisible(visible);
     m_pluginsButton->setVisible(visible);
     m_instancePluginsAction->setVisible(visible);
+
+    // The instance toolbar keeps buttons of hidden actions (only greyed out), so add or remove it instead
+    if (visible && !m_instancePluginsInToolBar) {
+        ui->instanceToolBar->addAction(m_instancePluginsAction);
+    } else if (!visible && m_instancePluginsInToolBar) {
+        ui->instanceToolBar->removeAction(m_instancePluginsAction);
+    }
+    m_instancePluginsInToolBar = visible;
 }
 
 void MainWindow::fillPluginMenu(QMenu* menu, bool instanceActions)
@@ -669,7 +676,10 @@ void MainWindow::fillPluginMenu(QMenu* menu, bool instanceActions)
         connect(item, &QAction::triggered, this, [this, action, instanceActions] {
             const QString instanceId = instanceActions && m_selectedInstance ? m_selectedInstance->id() : QString();
             if (auto error = APPLICATION->plugins()->runAction(action, instanceId)) {
-                CustomMessageBox::selectable(this, tr("Plugin action failed"), *error, QMessageBox::Warning)->show();
+                // Not a modal dialog: opened while the menu closes, it may never show up and still block the window
+                // (seen on KDE Wayland). The full error, with its traceback, is in the log.
+                m_pluginNotifications->show(action.pluginName, tr("\"%1\" failed: %2").arg(action.text, error->section('\n', 0, 0)),
+                                            PrismApi::NotifyLevel::Error);
             }
         });
     }
