@@ -73,4 +73,7 @@ ecm_add_test(Commandline_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_M
 if(Launcher_ENABLE_LUA_PLUGINS)
     ecm_add_test(LuaState_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
         TEST_NAME LuaState)
+
+    ecm_add_test(PluginManifest_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+        TEST_NAME PluginManifest)
 endif()

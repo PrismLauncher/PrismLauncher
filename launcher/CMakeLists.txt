@@ -580,6 +580,8 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(PLUGINS_SOURCES
+    plugins/PluginManifest.h
+    plugins/PluginManifest.cpp
     plugins/lua/LuaState.h
     plugins/lua/LuaState.cpp
 )
