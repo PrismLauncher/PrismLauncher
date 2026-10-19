@@ -2,7 +2,9 @@
 #include <QDialog>
 #include <QDir>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListWidget>
+#include <QPlainTextEdit>
 #include <QPushButton>
 #include <QTemporaryDir>
 #include <QTest>
@@ -10,6 +12,7 @@
 #include <FileSystem.h>
 #include <plugins/Plugin.h>
 #include <plugins/PluginManager.h>
+#include <plugins/lua/LuaState.h>
 #include <settings/INISettingsObject.h>
 #include <settings/Setting.h>
 #include <ui/widgets/LuaCodeEditor.h>
@@ -71,6 +74,29 @@ class LuaEditorPluginTest : public QObject {
                  qPrintable(m_manager->plugin("prism.luaeditor")->error()));
     }
 
+    void test_everyApiIsDocumented()
+    {
+        // Runs in the editor's own state, where require finds its docs module
+        LuaState* lua = m_manager->plugin("prism.luaeditor")->lua();
+        auto error = lua->run(
+            "local known = {}\n"
+            "for _, entry in ipairs(require(\"docs\")) do known[entry.name] = true end\n"
+            "local missing = {}\n"
+            "local function walk(value, name, seen)\n"
+            "    if not known[name] then missing[#missing + 1] = name end\n"
+            "    if type(value) ~= \"table\" or seen[value] then return end\n"
+            "    seen[value] = true\n"
+            "    for key, child in pairs(value) do\n"
+            "        if type(key) == \"string\" then walk(child, name .. \".\" .. key, seen) end\n"
+            "    end\n"
+            "end\n"
+            "walk(prism, \"prism\", {})\n"
+            "table.sort(missing)\n"
+            "assert(#missing == 0, \"not documented in docs.lua: \" .. table.concat(missing, \", \"))\n",
+            "coverage");
+        QVERIFY2(!error, qPrintable(error.value_or("")));
+    }
+
     void test_editAndCheck()
     {
         const auto actions = m_manager->actions(PrismApi::ActionScope::Launcher);
@@ -127,6 +153,36 @@ class LuaEditorPluginTest : public QObject {
         editor->setPlainText("changed");
         QTest::mouseClick(button(window, "Revert"), Qt::LeftButton);
         QCOMPARE(editor->toPlainText(), "prism.log.info(\"saved\")\n");
+
+        // Completion offers the API and Lua
+        QVERIFY(editor->completionsFor("prism.fs.").contains("prism.fs.data"));
+        QVERIFY(editor->completionsFor("string.f").contains("string.format"));
+        QVERIFY(!editor->completionsFor("folder").contains("folder:read"));
+
+        // The documentation follows the cursor
+        QPlainTextEdit* docView = nullptr;
+        for (auto* edit : window->findChildren<QPlainTextEdit*>()) {
+            if (!qobject_cast<LuaCodeEditor*>(edit)) {
+                docView = edit;
+            }
+        }
+        QVERIFY(docView);
+        QTextCursor cursor = editor->textCursor();
+        cursor.setPosition(8);  // inside prism.log.info
+        editor->setTextCursor(cursor);
+        QVERIFY2(docView->toPlainText().startsWith("prism.log.info(...)"), qPrintable(docView->toPlainText()));
+
+        // Searching, by name and by description
+        const auto lists = window->findChildren<QListWidget*>();
+        QListWidget* results = lists.last();
+        QTest::keyClicks(window->findChild<QLineEdit*>(), "http");
+        QStringList found;
+        for (int i = 0; i < results->count(); i++) {
+            found.append(results->item(i)->text());
+        }
+        QVERIFY2(found.contains("prism.http.get") && found.contains("prism.async"), qPrintable(found.join(", ")));
+        results->setCurrentRow(static_cast<int>(found.indexOf("prism.http.get")));
+        QVERIFY(docView->toPlainText().contains("Needs the net permission"));
     }
 };
 

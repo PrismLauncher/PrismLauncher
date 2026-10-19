@@ -1,6 +1,42 @@
--- A small editor for the Lua files of the installed plugins, which points out problems while typing.
+-- A small editor for the Lua files of the installed plugins, which points out problems while typing, completes names
+-- and shows the documentation of the prism API and of Lua.
 local checks = require("checks")
+local docs = require("docs")
 local plugins = prism.fs.plugins()
+
+local docsByName = {}
+local completions = {}
+for _, entry in ipairs(docs) do
+    docsByName[entry.name] = entry
+    if not entry.method then
+        completions[#completions + 1] = entry
+    end
+end
+
+local function describe(entry)
+    local text = entry.signature .. "\n\n" .. entry.doc
+    if entry.permission then
+        text = text .. "\n\nNeeds the " .. entry.permission .. " permission."
+    end
+    return text
+end
+
+-- The entries whose name or description contain the text, names first
+local function search(text)
+    text = text:lower()
+    local byName, byDoc = {}, {}
+    for _, entry in ipairs(docs) do
+        if entry.name:lower():find(text, 1, true) then
+            byName[#byName + 1] = entry.name
+        elseif text ~= "" and entry.doc:lower():find(text, 1, true) then
+            byDoc[#byDoc + 1] = entry.name
+        end
+    end
+    for _, name in ipairs(byDoc) do
+        byName[#byName + 1] = name
+    end
+    return byName
+end
 
 local editor = nil
 
@@ -117,18 +153,41 @@ local function open()
         end
     end
 
-    window = prism.ui.window{ title = "Lua editor", width = 1000, height = 650, onClose = function() editor = nil end }
+    -- Documentation panel
+    local docView, results
+
+    local function showDoc(name)
+        local entry = docsByName[name]
+        -- Keep the last one while the cursor is on something undocumented
+        if entry then
+            docView:setText(describe(entry))
+        end
+    end
+
+    local function filter(text)
+        results:setItems(search(text))
+    end
+
+    window = prism.ui.window{ title = "Lua editor", width = 1300, height = 700, onClose = function() editor = nil end }
     local row = window:add("row", { stretch = 1 })
     local left = row:add("column", { stretch = 1 })
     list = left:add("list", { stretch = 1, onSelect = select })
     left:add("button", { text = "Refresh", onClick = refresh })
-    local right = row:add("column", { stretch = 3 })
-    status = right:add("label", { text = "Pick a file on the left." })
-    code = right:add("code", { stretch = 1, onChange = update })
+    local middle = row:add("column", { stretch = 3 })
+    status = middle:add("label", { text = "Pick a file on the left." })
+    code = middle:add("code", { stretch = 1, onChange = update, onFocus = showDoc })
+    code:setCompletions(completions)
     code:setEnabled(false)
-    local buttons = right:add("row")
+    local buttons = middle:add("row")
     buttons:add("button", { text = "Save", onClick = save })
     buttons:add("button", { text = "Revert", onClick = revert })
+    local right = row:add("column", { stretch = 2 })
+    right:add("label", { text = "Documentation: put the cursor on a name, or search (Ctrl+Space completes)." })
+    local query
+    query = right:add("input", { placeholder = "Search, e.g. http or string.f", onChange = function() filter(query:text()) end })
+    results = right:add("list", { stretch = 1, onSelect = function(_, name) showDoc(name) end })
+    docView = right:add("text", { stretch = 1, readOnly = true })
+    filter("prism")
 
     refresh()
     editor = { window = window }
