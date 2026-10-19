@@ -27,6 +27,10 @@ class LaunchStep : public Task {
     explicit LaunchStep(LaunchTask* parent);
     virtual ~LaunchStep() = default;
 
+    // Identifies the phase of the launch this step belongs to (see LaunchStepIds), empty if none
+    QString id() const { return m_id; }
+    void setId(const QString& id) { m_id = id; }
+
    signals:
     void logLines(QStringList lines, MessageLevel level);
     void logLine(QString line, MessageLevel level);
@@ -40,4 +44,7 @@ class LaunchStep : public Task {
 
    protected: /* data */
     LaunchTask* m_parent;
+
+   private:
+    QString m_id;
 };

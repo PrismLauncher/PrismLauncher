@@ -61,14 +61,51 @@ std::unique_ptr<LaunchTask> LaunchTask::create(MinecraftInstance* inst)
 
 LaunchTask::LaunchTask(MinecraftInstance* instance) : m_instance(instance) {}
 
-void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
+void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step, const QString& id)
 {
+    if (!id.isEmpty()) {
+        step->setId(id);
+    }
     m_steps.append(step);
 }
 
-void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
+void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step, const QString& id)
 {
+    if (!id.isEmpty()) {
+        step->setId(id);
+    }
     m_steps.prepend(step);
+}
+
+bool LaunchTask::insertStep(shared_qobject_ptr<LaunchStep> step, const QString& anchorId, Position position)
+{
+    if (state != NotStarted || anchorId.isEmpty()) {
+        return false;
+    }
+
+    qsizetype index = -1;
+    for (qsizetype i = 0; i < m_steps.size(); i++) {
+        if (m_steps[i]->id() == anchorId) {
+            index = i;
+            if (position == Position::Before) {
+                break;
+            }
+        }
+    }
+    if (index == -1) {
+        return false;
+    }
+    m_steps.insert(position == Position::Before ? index : index + 1, step);
+    return true;
+}
+
+QStringList LaunchTask::stepIds() const
+{
+    QStringList ids;
+    for (const auto& step : m_steps) {
+        ids.append(step->id());
+    }
+    return ids;
 }
 
 void LaunchTask::executeTask()

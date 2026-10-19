@@ -52,13 +52,19 @@ class LaunchTask : public Task {
 
    public:
     enum State { NotStarted, Running, Waiting, Failed, Aborted, Finished };
+    enum class Position { Before, After };
 
    public: /* methods */
     static std::unique_ptr<LaunchTask> create(MinecraftInstance* inst);
     virtual ~LaunchTask() = default;
 
-    void appendStep(shared_qobject_ptr<LaunchStep> step);
-    void prependStep(shared_qobject_ptr<LaunchStep> step);
+    // The id, if any, names the phase the step belongs to (see LaunchStepIds)
+    void appendStep(shared_qobject_ptr<LaunchStep> step, const QString& id = {});
+    void prependStep(shared_qobject_ptr<LaunchStep> step, const QString& id = {});
+    // Inserts the step before the first or after the last step with the anchor id. Only possible before the launch
+    // starts. Returns false if no step has that id.
+    bool insertStep(shared_qobject_ptr<LaunchStep> step, const QString& anchorId, Position position);
+    QStringList stepIds() const;
     void setCensorFilter(QMap<QString, QString> filter);
 
     MinecraftInstance* instance() { return m_instance; }

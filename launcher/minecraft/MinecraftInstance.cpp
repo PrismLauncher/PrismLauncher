@@ -47,6 +47,7 @@
 #include "MMCTime.h"
 #include "java/JavaVersion.h"
 
+#include "launch/LaunchStepIds.h"
 #include "launch/LaunchTask.h"
 #include "launch/TaskStepWrapper.h"
 #include "launch/steps/CheckJava.h"
@@ -1163,12 +1164,13 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 
     // print a header
     {
-        process->appendStep(makeShared<TextPrint>(pptr, "Minecraft folder is:\n  " + gameRoot() + "\n", MessageLevel::Launcher));
+        process->appendStep(makeShared<TextPrint>(pptr, "Minecraft folder is:\n  " + gameRoot() + "\n", MessageLevel::Launcher),
+                            LaunchStepIds::Header);
     }
 
     // create the .minecraft folder and server-resource-packs (workaround for Minecraft bug MCL-3732)
     {
-        process->appendStep(makeShared<CreateGameFolders>(pptr));
+        process->appendStep(makeShared<CreateGameFolders>(pptr), LaunchStepIds::CreateFolders);
     }
 
     if (!targetToJoin && settings()->get("JoinServerOnLaunch").toBool()) {
@@ -1188,75 +1190,75 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         auto step = makeShared<LookupServerAddress>(pptr);
         step->setLookupAddress(targetToJoin->address);
         step->setOutputAddressPtr(targetToJoin);
-        process->appendStep(step);
+        process->appendStep(step, LaunchStepIds::LookupServer);
     }
 
     // run pre-load command if that's needed, before the metadata is loaded
     if (!getPreLoadCommand().isEmpty()) {
         auto step = makeShared<LaunchCommand>(pptr, getPreLoadCommand(), tr("Pre-Load"));
         step->setWorkingDirectory(gameRoot());
-        process->appendStep(step);
+        process->appendStep(step, LaunchStepIds::PreLoadCommand);
     }
 
     // load meta
     {
         auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
-        process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode)));
+        process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode)), LaunchStepIds::LoadMeta);
     }
 
     // check java
     {
-        process->appendStep(makeShared<AutoInstallJava>(pptr));
-        process->appendStep(makeShared<CheckJava>(pptr));
+        process->appendStep(makeShared<AutoInstallJava>(pptr), LaunchStepIds::Java);
+        process->appendStep(makeShared<CheckJava>(pptr), LaunchStepIds::Java);
         // verify that minimum Java requirements are met
-        process->appendStep(makeShared<VerifyJavaInstall>(pptr));
+        process->appendStep(makeShared<VerifyJavaInstall>(pptr), LaunchStepIds::Java);
     }
 
     // run pre-launch command if that's needed
     if (!getPreLaunchCommand().isEmpty()) {
         auto step = makeShared<LaunchCommand>(pptr, getPreLaunchCommand(), tr("Pre-Launch"));
         step->setWorkingDirectory(gameRoot());
-        process->appendStep(step);
+        process->appendStep(step, LaunchStepIds::PreLaunchCommand);
     }
 
     // if we aren't in offline mode
     if (session->launchMode != LaunchMode::Offline) {
-        process->appendStep(makeShared<ClaimAccount>(pptr, session));
+        process->appendStep(makeShared<ClaimAccount>(pptr, session), LaunchStepIds::Update);
         for (auto t : createUpdateTask()) {
-            process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
+            process->appendStep(makeShared<TaskStepWrapper>(pptr, t), LaunchStepIds::Update);
         }
     } else {
-        process->appendStep(makeShared<EnsureOfflineLibraries>(pptr, this));
+        process->appendStep(makeShared<EnsureOfflineLibraries>(pptr, this), LaunchStepIds::Update);
     }
 
     // if there are any jar mods
     {
-        process->appendStep(makeShared<ModMinecraftJar>(pptr));
+        process->appendStep(makeShared<ModMinecraftJar>(pptr), LaunchStepIds::JarMods);
     }
 
     // Scan mods folders for mods
     {
-        process->appendStep(makeShared<ScanModFolders>(pptr));
+        process->appendStep(makeShared<ScanModFolders>(pptr), LaunchStepIds::ScanMods);
     }
 
     // make sure we have enough RAM, warn the user if we don't
     {
-        process->appendStep(makeShared<EnsureAvailableMemory>(pptr, this));
+        process->appendStep(makeShared<EnsureAvailableMemory>(pptr, this), LaunchStepIds::CheckMemory);
     }
 
     // print some instance info here...
     {
-        process->appendStep(makeShared<PrintInstanceInfo>(pptr, session, targetToJoin));
+        process->appendStep(makeShared<PrintInstanceInfo>(pptr, session, targetToJoin), LaunchStepIds::InstanceInfo);
     }
 
     // extract native jars if needed
     {
-        process->appendStep(makeShared<ExtractNatives>(pptr));
+        process->appendStep(makeShared<ExtractNatives>(pptr), LaunchStepIds::Natives);
     }
 
     // reconstruct assets if needed
     {
-        process->appendStep(makeShared<ReconstructAssets>(pptr));
+        process->appendStep(makeShared<ReconstructAssets>(pptr), LaunchStepIds::Assets);
     }
 
     {
@@ -1265,20 +1267,20 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         step->setWorkingDirectory(gameRoot());
         step->setAuthSession(session);
         step->setTargetToJoin(targetToJoin);
-        process->appendStep(step);
+        process->appendStep(step, LaunchStepIds::Launch);
     }
 
     // run post-exit command if that's needed
     if (!getPostExitCommand().isEmpty()) {
         auto step = makeShared<LaunchCommand>(pptr, getPostExitCommand(), tr("Post-Launch"));
         step->setWorkingDirectory(gameRoot());
-        process->appendStep(step);
+        process->appendStep(step, LaunchStepIds::PostExitCommand);
     }
     if (session) {
         process->setCensorFilter(createCensorFilterFromSession(session));
     }
     if (m_settings->get("QuitAfterGameStop").toBool()) {
-        process->appendStep(makeShared<QuitAfterGameStop>(pptr));
+        process->appendStep(makeShared<QuitAfterGameStop>(pptr), LaunchStepIds::QuitAfterStop);
     }
     m_launchProcess = std::move(process);
     emit launchTaskChanged(m_launchProcess.get());
