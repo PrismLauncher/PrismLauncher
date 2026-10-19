@@ -1,3 +1,4 @@
+#include <QRegularExpression>
 #include <QTest>
 
 #include <plugins/lua/LuaState.h>
@@ -101,6 +102,60 @@ class LuaStateTest : public QObject {
         LuaState second;
         QCOMPARE(first.run("shared = 'first'", "first"), std::nullopt);
         QCOMPARE(second.run("assert(shared == nil)", "second"), std::nullopt);
+    }
+
+    void test_memoryIsTracked()
+    {
+        LuaState state;
+        QVERIFY(state.isValid());
+        QCOMPARE(state.memoryLimit(), LuaState::s_defaultMemoryLimit);
+        const std::size_t initial = state.memoryUsed();
+        QVERIFY(initial > 0);
+
+        QCOMPARE(state.run("big = string.rep('x', 1024 * 1024)", "grow"), std::nullopt);
+        QVERIFY(state.memoryUsed() >= initial + 1024 * 1024);
+
+        QCOMPARE(state.run("big = nil; collectgarbage()", "shrink"), std::nullopt);
+        QVERIFY(state.memoryUsed() < initial + 1024 * 1024);
+    }
+
+    void test_memoryLimitStopsAllocations()
+    {
+        const std::size_t limit = 1024 * 1024;
+        LuaState state(limit);
+        QVERIFY(state.isValid());
+
+        auto error = state.run("local t = {} for i = 1, 1e8 do t[i] = i end", "table");
+        QVERIFY(error);
+        QVERIFY2(error->contains("not enough memory"), qPrintable(*error));
+        QVERIFY(state.memoryUsed() <= limit);
+
+        error = state.run("local s = string.rep('x', 2 * 1024 * 1024)", "string");
+        QVERIFY(error);
+        QVERIFY2(error->contains("not enough memory"), qPrintable(*error));
+
+        // The state is still usable after running out of memory
+        QCOMPARE(state.run("collectgarbage(); ok = 'yes'", "after"), std::nullopt);
+        QCOMPARE(globalString(state, "ok"), "yes");
+    }
+
+    void test_memoryErrorCanBeCaught()
+    {
+        LuaState state(1024 * 1024);
+        QCOMPARE(state.run(R"(
+            local ok, err = pcall(string.rep, 'x', 2 * 1024 * 1024)
+            assert(not ok and err:find('not enough memory'))
+        )",
+                           "pcall"),
+                 std::nullopt);
+    }
+
+    void test_tooSmallLimit()
+    {
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Failed to (create Lua state|open Lua libraries)"));
+        LuaState state(1024);
+        QVERIFY(!state.isValid());
+        QCOMPARE(state.run("x = 1", "invalid"), QString("Lua state is not initialized"));
     }
 };
 

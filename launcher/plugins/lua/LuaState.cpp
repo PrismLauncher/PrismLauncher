@@ -7,6 +7,7 @@
 #include <QDebug>
 
 #include <algorithm>
+#include <cstdlib>
 
 #include <lua.hpp>
 
@@ -55,14 +56,23 @@ int messageHandler(lua_State* L)
     return 1;
 }
 
+int panic(lua_State* L)
+{
+    const char* msg = lua_type(L, -1) == LUA_TSTRING ? lua_tostring(L, -1) : "error object is not a string";
+    qCritical() << "Unprotected error in call to Lua API:" << msg;
+    return 0;  // Lua aborts after this
+}
+
 }  // namespace
 
-LuaState::LuaState() : m_state(luaL_newstate())
+LuaState::LuaState(std::size_t memoryLimit) : m_memory{ 0, memoryLimit }
 {
+    m_state = lua_newstate(allocate, &m_memory, luaL_makeseed(nullptr));
     if (!m_state) {
         qWarning() << "Failed to create Lua state";
         return;
     }
+    lua_atpanic(m_state, panic);
 
     lua_pushcfunction(m_state, openSafeLibs);
     if (lua_pcall(m_state, 0, 0, 0) != LUA_OK) {
@@ -77,6 +87,31 @@ LuaState::~LuaState()
     if (m_state) {
         lua_close(m_state);
     }
+    Q_ASSERT(m_memory.used == 0);
+}
+
+void* LuaState::allocate(void* ud, void* ptr, std::size_t osize, std::size_t nsize)
+{
+    auto* memory = static_cast<Memory*>(ud);
+    // When ptr is null, osize encodes the type of the new object instead of a size
+    const std::size_t oldSize = ptr ? osize : 0;
+
+    if (nsize == 0) {
+        std::free(ptr);
+        memory->used -= oldSize;
+        return nullptr;
+    }
+
+    // Only growth is checked against the limit
+    if (nsize > oldSize && nsize - oldSize > memory->limit - memory->used) {
+        return nullptr;
+    }
+
+    void* newPtr = std::realloc(ptr, nsize);
+    if (newPtr) {
+        memory->used = memory->used - oldSize + nsize;
+    }
+    return newPtr;
 }
 
 std::optional<QString> LuaState::run(const QByteArray& code, const QString& chunkName)
