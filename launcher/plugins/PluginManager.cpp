@@ -96,6 +96,12 @@ void PluginManager::emitEvent(const char* event)
     }
 }
 
+void PluginManager::setLauncherReady()
+{
+    m_launcherReady = true;
+    emitEvent("launcher.ready");
+}
+
 QStringList PluginManager::enabledIds() const
 {
     return m_enabledPlugins->get().toStringList();
@@ -108,5 +114,8 @@ bool PluginManager::loadPlugin(Plugin* plugin)
         return false;
     }
     qInfo() << "Loaded plugin" << plugin->id();
+    if (m_launcherReady) {
+        plugin->emitEvent("launcher.ready");
+    }
     return true;
 }

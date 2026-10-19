@@ -39,6 +39,8 @@ class PluginManager : public QObject {
 
     // Sends the event to every loaded plugin
     void emitEvent(const char* event);
+    // Sends launcher.ready to the loaded plugins, and from now on to each plugin right after it loads
+    void setLauncherReady();
 
    signals:
     // The list of plugins was rebuilt
@@ -53,4 +55,5 @@ class PluginManager : public QObject {
     QString m_pluginsDir;
     std::shared_ptr<Setting> m_enabledPlugins;
     std::vector<std::unique_ptr<Plugin>> m_plugins;
+    bool m_launcherReady = false;
 };

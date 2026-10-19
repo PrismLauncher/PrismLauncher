@@ -66,6 +66,9 @@
 #include "ui/pages/global/LauncherPage.h"
 #include "ui/pages/global/MinecraftPage.h"
 #include "ui/pages/global/ProxyPage.h"
+#ifdef ENABLE_LUA_PLUGINS
+#include "ui/pages/global/PluginsPage.h"
+#endif
 
 #include "ui/setupwizard/AutoJavaWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -941,6 +944,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<APIPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
+#ifdef ENABLE_LUA_PLUGINS
+            // Pages are created when the dialog opens, after the plugin manager exists
+            m_globalSettingsProvider->addPage<PluginsPage>();
+#endif
         }
 
         PixmapCache::setInstance(new PixmapCache(this));
@@ -1389,7 +1396,7 @@ void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
 #ifdef ENABLE_LUA_PLUGINS
-    m_plugins->emitEvent("launcher.ready");
+    m_plugins->setLauncherReady();
 #endif
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto* inst = instances()->getInstanceById(m_instanceIdToLaunch);

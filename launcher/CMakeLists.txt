@@ -1191,6 +1191,14 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.h
 )
 
+if(Launcher_ENABLE_LUA_PLUGINS)
+    set(LAUNCHER_SOURCES
+        ${LAUNCHER_SOURCES}
+        ui/pages/global/PluginsPage.h
+        ui/pages/global/PluginsPage.cpp
+    )
+endif()
+
 if (APPLE)
     set(LAUNCHER_SOURCES
         ${LAUNCHER_SOURCES}

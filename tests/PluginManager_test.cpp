@@ -178,6 +178,27 @@ class PluginManagerTest : public QObject {
         QCOMPARE(manager.plugin("com.example.b")->state(), Plugin::State::Loaded);
     }
 
+    void test_lateLoadsGetLauncherReady()
+    {
+        addPlugin("com.example.early", "prism.on('launcher.ready', function() prism.log.info('early ready') end)");
+        addPlugin("com.example.late", "prism.on('launcher.ready', function() prism.log.info('late ready') end)");
+        m_enabled->set(QStringList({ "com.example.early" }));
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.discover();
+
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.early] early ready");
+        manager.setLauncherReady();
+
+        // Enabled after the launcher was ready: gets the event right after loading
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.late] late ready");
+        QVERIFY(manager.setEnabled("com.example.late", true));
+
+        // Reloading restarts the plugins, which get it again
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.early] early ready");
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.late] late ready");
+        manager.discover();
+    }
+
     void test_rediscover()
     {
         addPlugin("com.example.a");
