@@ -7,6 +7,7 @@
   jdk17,
   kdePackages,
   libnbtplusplus,
+  lua5_5,
   ninja,
   pkg-config,
   qrencode,
@@ -49,6 +50,7 @@ stdenv.mkDerivation {
 
       ../buildconfig
       ../cmake
+      ../examples
       ../launcher
       ../libraries
       ../program_info
@@ -82,6 +84,7 @@ stdenv.mkDerivation {
     kdePackages.qtnetworkauth
     qrencode
     libarchive
+    lua5_5
     tomlplusplus
     zlib
   ]
@@ -90,6 +93,8 @@ stdenv.mkDerivation {
   cmakeFlags = [
     # downstream branding
     (lib.cmakeFeature "Launcher_BUILD_PLATFORM" "nixpkgs")
+    # Lua for plugins, from nixpkgs instead of the bundled copy
+    (lib.cmakeBool "Launcher_USE_SYSTEM_LUA" true)
   ]
   ++ lib.optionals (msaClientID != null) [
     (lib.cmakeFeature "Launcher_MSA_CLIENT_ID" (toString msaClientID))
