@@ -1,0 +1,5 @@
+id = "prism.playtime"
+name = "Play time"
+version = "1.0.0"
+api = 1
+permissions = ["instances.read", "ui"]

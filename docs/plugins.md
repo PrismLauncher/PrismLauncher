@@ -246,6 +246,15 @@ several steps: "before" goes before the first one, "after" after the last one. `
 
 ## Examples
 
+Complete plugins to copy into the plugins folder are in [examples/plugins](../examples/plugins):
+
+- `prism.luaeditor`: an editor for plugins, with completion, live checks and this API's documentation.
+- `prism.worldbackup`: backs up an instance's worlds before every launch and restores them from a window.
+- `prism.playtime`: counts play sessions and shows the time played per instance.
+- `prism.mcnews`: tells when a new Minecraft release or snapshot is out.
+
+Smaller ones follow.
+
 ### Back up the worlds before playing
 
 ```toml

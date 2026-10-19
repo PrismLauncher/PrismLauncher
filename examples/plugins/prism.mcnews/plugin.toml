@@ -1,0 +1,5 @@
+id = "prism.mcnews"
+name = "Minecraft releases"
+version = "1.0.0"
+api = 1
+permissions = ["net", "ui"]

@@ -1,0 +1,5 @@
+id = "prism.worldbackup"
+name = "World backup"
+version = "1.0.0"
+api = 1
+permissions = ["launch.hooks", "fs.instance", "ui"]
