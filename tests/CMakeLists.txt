@@ -85,4 +85,7 @@ if(Launcher_ENABLE_LUA_PLUGINS)
 
     ecm_add_test(PrismApi_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
         TEST_NAME PrismApi)
+
+    ecm_add_test(SettingsApi_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+        TEST_NAME SettingsApi)
 endif()

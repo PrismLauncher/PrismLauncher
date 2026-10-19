@@ -592,6 +592,8 @@ set(PLUGINS_SOURCES
     plugins/lua/LuaState.cpp
     plugins/lua/PrismApi.h
     plugins/lua/PrismApi.cpp
+    plugins/lua/SettingsApi.h
+    plugins/lua/SettingsApi.cpp
 )
 
 set(LINKEXE_SOURCES

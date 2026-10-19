@@ -69,7 +69,7 @@ bool Plugin::load()
         fail("could not create the Lua state");
         return false;
     }
-    if (auto error = PrismApi::install(*lua, *m_manifest)) {
+    if (auto error = PrismApi::install(*lua, *m_manifest, m_directory)) {
         fail(*error);
         return false;
     }

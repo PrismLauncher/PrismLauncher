@@ -10,6 +10,8 @@
 class PrismApiTest : public QObject {
     Q_OBJECT
 
+    QTemporaryDir m_dir;
+
     static PluginManifest manifest()
     {
         PluginManifest manifest;
@@ -30,7 +32,7 @@ class PrismApiTest : public QObject {
     void test_log()
     {
         LuaState state;
-        QCOMPARE(PrismApi::install(state, manifest()), std::nullopt);
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
 
         QTest::ignoreMessage(QtInfoMsg, "[com.example.log] hello 1 2.5 true nil");
         QTest::ignoreMessage(QtWarningMsg, "[com.example.log] careful");
@@ -47,7 +49,7 @@ class PrismApiTest : public QObject {
     void test_printIsLogged()
     {
         LuaState state;
-        QCOMPARE(PrismApi::install(state, manifest()), std::nullopt);
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
         QTest::ignoreMessage(QtInfoMsg, "[com.example.log] from print");
         runOk(state, "print('from', 'print')");
     }
@@ -55,7 +57,7 @@ class PrismApiTest : public QObject {
     void test_tostringMetamethod()
     {
         LuaState state;
-        QCOMPARE(PrismApi::install(state, manifest()), std::nullopt);
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
         QTest::ignoreMessage(QtInfoMsg, "[com.example.log] <point 1,2>");
         runOk(state, R"(
             local point = setmetatable({ x = 1, y = 2 }, {
@@ -68,7 +70,7 @@ class PrismApiTest : public QObject {
     void test_tostringErrorIsReported()
     {
         LuaState state;
-        QCOMPARE(PrismApi::install(state, manifest()), std::nullopt);
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
         auto error = state.run("prism.log.info(setmetatable({}, { __tostring = function() error('bad') end }))", "test");
         QVERIFY(error);
         QVERIFY2(error->contains("bad"), qPrintable(*error));
@@ -77,7 +79,7 @@ class PrismApiTest : public QObject {
     void test_longMessagesAreTruncated()
     {
         LuaState state;
-        QCOMPARE(PrismApi::install(state, manifest()), std::nullopt);
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
 
         const QString expected = "[com.example.log] " + QString(PrismApi::s_maxLogMessageLength, 'x') + " [truncated]";
         QTest::ignoreMessage(QtInfoMsg, qPrintable(expected));
@@ -92,7 +94,7 @@ class PrismApiTest : public QObject {
     void test_utf8()
     {
         LuaState state;
-        QCOMPARE(PrismApi::install(state, manifest()), std::nullopt);
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
         QTest::ignoreMessage(QtInfoMsg, "[com.example.log] ñandú ✓");
         runOk(state, "prism.log.info('ñandú', '✓')");
     }

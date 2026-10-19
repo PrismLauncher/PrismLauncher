@@ -7,6 +7,8 @@
 
 #include "PrismApi.h"
 
+#include <QDir>
+
 #include <algorithm>
 
 #include <lua.hpp>
@@ -14,6 +16,7 @@
 #include "plugins/Logging.h"
 #include "plugins/PluginManifest.h"
 #include "plugins/lua/LuaState.h"
+#include "plugins/lua/SettingsApi.h"
 
 namespace {
 
@@ -77,6 +80,7 @@ void pushLogFunction(lua_State* L, LogLevel level)
 
 struct InstallArgs {
     QByteArray id;
+    QByteArray settingsPath;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -99,6 +103,9 @@ int openPrism(lua_State* L)
     lua_pop(L, 1);  // plugin id
     lua_setfield(L, -2, "log");
 
+    PrismApi::pushSettingsFunction(L, args->settingsPath);
+    lua_setfield(L, -2, "settings");
+
     lua_setglobal(L, "prism");
     return 0;
 }
@@ -107,10 +114,10 @@ int openPrism(lua_State* L)
 
 namespace PrismApi {
 
-std::optional<QString> install(LuaState& state, const PluginManifest& manifest)
+std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory)
 {
     // Everything that allocates Lua memory happens inside the protected call, so running out of memory cannot panic
-    const InstallArgs args{ manifest.id.toUtf8() };
+    const InstallArgs args{ manifest.id.toUtf8(), QDir(directory).filePath("settings.ini").toUtf8() };
     lua_State* L = state.get();
     lua_pushcfunction(L, openPrism);
     lua_pushlightuserdata(L, const_cast<InstallArgs*>(&args));
