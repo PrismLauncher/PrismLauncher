@@ -1,5 +1,6 @@
 #include <QAbstractItemView>
 #include <QApplication>
+#include <QComboBox>
 #include <QCompleter>
 #include <QDialog>
 #include <QLineEdit>
@@ -10,6 +11,7 @@
 #include <QSplitter>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTreeWidget>
 
 #include <plugins/PluginManifest.h>
 #include <plugins/lua/LuaState.h>
@@ -195,6 +197,53 @@ class UiApiTest : public QObject {
         QCOMPARE(window->findChildren<QSplitter*>().last()->orientation(), Qt::Vertical);
         expectError(*state, "left:sizes()", "a list has no method 'sizes'");
         expectError(*state, "split:setSizes(5)", "table expected");
+    }
+
+    void test_comboAndTree()
+    {
+        auto state = newState();
+        runOk(*state, R"lua(
+            win = prism.ui.window{ title = "Pickers" }
+            combo = win:add("combo", { items = { "alpha", "beta" }, onSelect = function(i, text) picked = i .. ":" .. text end })
+            tree = win:add("tree", { onSelect = function(id, text) chosen = id .. "|" .. text end })
+            tree:setItems({
+                { text = "src", children = {
+                    { text = "util", children = { { text = "deep.lua", id = "src/util/deep.lua" } } },
+                    { text = "a.lua", id = "src/a.lua" },
+                } },
+                { text = "main.lua", id = "main.lua" },
+            })
+            win:show()
+        )lua");
+        QDialog* window = findWindow("Pickers");
+        auto* comboBox = window->findChild<QComboBox*>();
+        auto* treeWidget = window->findChild<QTreeWidget*>();
+        QCOMPARE(comboBox->count(), 2);
+        QCOMPARE(treeWidget->topLevelItemCount(), 2);
+        QCOMPARE(treeWidget->topLevelItem(0)->childCount(), 2);
+
+        runOk(*state, R"lua(
+            assert(combo:selected() == 1 and combo:text() == "alpha")
+            combo:select(2)
+            assert(picked == "2:beta", picked)
+            assert(combo:selected() == 2)
+
+            assert(tree:selected() == nil)
+            tree:select("src/util/deep.lua")
+            assert(chosen == "src/util/deep.lua|deep.lua", chosen)
+            assert(tree:selected() == "src/util/deep.lua" and tree:text() == "deep.lua")
+        )lua");
+        // Selecting opened the folders above it
+        QVERIFY(treeWidget->topLevelItem(0)->isExpanded());
+        QVERIFY(treeWidget->topLevelItem(0)->child(0)->isExpanded());
+
+        // Folders have no id
+        treeWidget->setCurrentItem(treeWidget->topLevelItem(0));
+        runOk(*state, "assert(chosen == \"|src\", chosen) assert(tree:selected() == nil)");
+
+        expectError(*state, "tree:setItems({ { id = \"x\" } })", "tree items need a text");
+        expectError(*state, "tree:setItems({ { text = \"x\", id = 1 } })", "'id' must be a string");
+        expectError(*state, "win:add(\"label\"):select(1)", "a label has no method 'select'");
     }
 
     void test_closeAndUnload()

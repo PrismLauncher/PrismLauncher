@@ -9,6 +9,7 @@
 
 #include "UiApi.h"
 
+#include <QComboBox>
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -18,6 +19,8 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QSplitter>
+#include <QTreeWidget>
+#include <QTreeWidgetItemIterator>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -183,18 +186,91 @@ T* checkKind(lua_State* L, int index, const char* method)
     return nullptr;
 }
 
-void setItems(lua_State* L, QListWidget* list, int index)
+constexpr int s_maxTreeDepth = 16;
+
+// Adds the items of the table at index to the tree, under parent (or at the top). Items are { text, id, children,
+// expanded }. Items belong to the tree as soon as they are created, so an error halfway leaks nothing.
+void addTreeItems(lua_State* L, QTreeWidget* tree, QTreeWidgetItem* parent, int index, int depth)
+{
+    if (depth > s_maxTreeDepth) {
+        luaL_error(L, "tree items are nested more than %d levels", s_maxTreeDepth);
+    }
+    luaL_checktype(L, index, LUA_TTABLE);
+    const auto count = static_cast<lua_Integer>(lua_rawlen(L, index));
+    for (lua_Integer i = 1; i <= count; i++) {
+        lua_rawgeti(L, index, i);
+        const int entry = lua_gettop(L);
+        luaL_checktype(L, entry, LUA_TTABLE);
+        if (lua_getfield(L, entry, "text") != LUA_TSTRING) {
+            luaL_error(L, "tree items need a text");
+        }
+        const int idType = lua_getfield(L, entry, "id");
+        if (idType != LUA_TNIL && idType != LUA_TSTRING) {
+            luaL_error(L, "'id' must be a string");
+        }
+        lua_getfield(L, entry, "expanded");
+        const bool expanded = lua_toboolean(L, -1);
+        size_t textLength = 0;
+        const char* text = lua_tolstring(L, entry + 1, &textLength);
+
+        QTreeWidgetItem* item = parent ? new QTreeWidgetItem(parent) : new QTreeWidgetItem(tree);
+        item->setText(0, QString::fromUtf8(text, static_cast<qsizetype>(textLength)));
+        if (idType == LUA_TSTRING) {
+            item->setData(0, Qt::UserRole, QString::fromUtf8(lua_tostring(L, entry + 2)));
+        }
+
+        if (lua_getfield(L, entry, "children") != LUA_TNIL) {
+            addTreeItems(L, tree, item, lua_gettop(L), depth + 1);
+        }
+        item->setExpanded(expanded);
+        lua_settop(L, entry - 1);
+    }
+}
+
+// Replaces the items of a list, combo or tree with the table at index
+void setItems(lua_State* L, QWidget* widget, int index)
 {
     luaL_checktype(L, index, LUA_TTABLE);
-    list->clear();
+    if (auto* tree = qobject_cast<QTreeWidget*>(widget)) {
+        tree->clear();
+        addTreeItems(L, tree, nullptr, index, 1);
+        return;
+    }
+    auto* list = qobject_cast<QListWidget*>(widget);
+    auto* combo = qobject_cast<QComboBox*>(widget);
+    if (list) {
+        list->clear();
+    } else {
+        combo->clear();
+    }
     const auto count = static_cast<lua_Integer>(lua_rawlen(L, index));
     for (lua_Integer i = 1; i <= count; i++) {
         lua_rawgeti(L, index, i);
         size_t length = 0;
         const char* text = luaL_tolstring(L, -1, &length);
-        list->addItem(QString::fromUtf8(text, static_cast<qsizetype>(length)));
+        if (list) {
+            list->addItem(QString::fromUtf8(text, static_cast<qsizetype>(length)));
+        } else {
+            combo->addItem(QString::fromUtf8(text, static_cast<qsizetype>(length)));
+        }
         lua_pop(L, 2);
     }
+}
+
+bool hasItems(QWidget* widget)
+{
+    return qobject_cast<QListWidget*>(widget) || qobject_cast<QComboBox*>(widget) || qobject_cast<QTreeWidget*>(widget);
+}
+
+// Raises an error unless the widget is a list, combo or tree
+QWidget* checkItems(lua_State* L, int index, const char* method)
+{
+    QWidget* widget = checkWidget(L, index);
+    if (!hasItems(widget)) {
+        s_text = kindOf(widget);
+        luaL_error(L, "a %s has no method '%s'", s_text.constData(), method);
+    }
+    return widget;
 }
 
 void setProblems(lua_State* L, LuaCodeEditor* editor, int index)
@@ -238,7 +314,7 @@ struct WidgetOptions {
 
 bool isKnownKind(const char* kind)
 {
-    for (const char* known : { "label", "button", "input", "text", "code", "list", "row", "column", "split" }) {
+    for (const char* known : { "label", "button", "input", "text", "code", "list", "combo", "tree", "row", "column", "split" }) {
         if (std::strcmp(kind, known) == 0) {
             return true;
         }
@@ -284,6 +360,24 @@ QWidget* createWidget(LuaState* state, const WidgetOptions& options)
             });
         }
         widget = edit;
+    } else if (std::strcmp(kind, "combo") == 0) {
+        auto* combo = new QComboBox;
+        QObject::connect(combo, &QComboBox::currentIndexChanged, combo, [state, lifetime, ref = options.onSelect, combo](int index) {
+            if (index >= 0) {
+                callBack(state, lifetime, ref, { qint64(index + 1), combo->itemText(index).toUtf8() });
+            }
+        });
+        widget = combo;
+    } else if (std::strcmp(kind, "tree") == 0) {
+        auto* tree = new QTreeWidget;
+        tree->setHeaderHidden(true);
+        QObject::connect(tree, &QTreeWidget::currentItemChanged, tree, [state, lifetime, ref = options.onSelect](QTreeWidgetItem* item) {
+            if (item) {
+                // Items without an id (e.g. folders) give an empty one
+                callBack(state, lifetime, ref, { item->data(0, Qt::UserRole).toString().toUtf8(), item->text(0).toUtf8() });
+            }
+        });
+        widget = tree;
     } else if (std::strcmp(kind, "list") == 0) {
         auto* list = new QListWidget;
         QObject::connect(list, &QListWidget::currentRowChanged, list, [state, lifetime, ref = options.onSelect, list](int row) {
@@ -343,10 +437,10 @@ int addWidget(lua_State* L)
     }
 
     pushHandle(L, widget);
-    if (auto* list = qobject_cast<QListWidget*>(widget); list && lua_istable(L, 3)) {
+    if (hasItems(widget) && lua_istable(L, 3)) {
         lua_getfield(L, 3, "items");
         if (!lua_isnil(L, -1)) {
-            setItems(L, list, lua_gettop(L));
+            setItems(L, widget, lua_gettop(L));
         }
         lua_pop(L, 1);
     }
@@ -366,6 +460,10 @@ int widgetText(lua_State* L)
         s_text = button->text().toUtf8();
     } else if (auto* list = qobject_cast<QListWidget*>(widget)) {
         s_text = list->currentItem() ? list->currentItem()->text().toUtf8() : QByteArray();
+    } else if (auto* combo = qobject_cast<QComboBox*>(widget)) {
+        s_text = combo->currentText().toUtf8();
+    } else if (auto* tree = qobject_cast<QTreeWidget*>(widget)) {
+        s_text = tree->currentItem() ? tree->currentItem()->text(0).toUtf8() : QByteArray();
     } else {
         s_text = kindOf(widget);
         return luaL_error(L, "a %s has no text", s_text.constData());
@@ -467,27 +565,57 @@ int widgetSetVisible(lua_State* L)
 
 int widgetSetItems(lua_State* L)
 {
-    setItems(L, checkKind<QListWidget>(L, 1, "setItems"), 2);
+    setItems(L, checkItems(L, 1, "setItems"), 2);
     return 0;
 }
 
+// The selected index of a list or combo, or the id of the selected tree item; nil if there is none
 int widgetSelected(lua_State* L)
 {
-    auto* list = checkKind<QListWidget>(L, 1, "selected");
-    const int row = list->currentRow();
-    if (row < 0) {
-        lua_pushnil(L);
+    QWidget* widget = checkItems(L, 1, "selected");
+    if (auto* tree = qobject_cast<QTreeWidget*>(widget)) {
+        QTreeWidgetItem* item = tree->currentItem();
+        s_text = item ? item->data(0, Qt::UserRole).toString().toUtf8() : QByteArray();
+        if (s_text.isEmpty()) {
+            lua_pushnil(L);
+        } else {
+            lua_pushlstring(L, s_text.constData(), s_text.size());
+        }
         return 1;
     }
-    lua_pushinteger(L, row + 1);
+    auto* list = qobject_cast<QListWidget*>(widget);
+    const int row = list ? list->currentRow() : qobject_cast<QComboBox*>(widget)->currentIndex();
+    if (row < 0) {
+        lua_pushnil(L);
+    } else {
+        lua_pushinteger(L, row + 1);
+    }
     return 1;
 }
 
+// Selects an item: by index in a list or combo, by id in a tree (opening its folders)
 int widgetSelect(lua_State* L)
 {
-    auto* list = checkKind<QListWidget>(L, 1, "select");
-    const lua_Integer row = luaL_checkinteger(L, 2);
-    list->setCurrentRow(static_cast<int>(row - 1));
+    QWidget* widget = checkItems(L, 1, "select");
+    if (auto* tree = qobject_cast<QTreeWidget*>(widget)) {
+        const char* id = luaL_checkstring(L, 2);
+        for (QTreeWidgetItemIterator it(tree); *it; ++it) {
+            if ((*it)->data(0, Qt::UserRole).toString() == QString::fromUtf8(id)) {
+                for (QTreeWidgetItem* parent = (*it)->parent(); parent; parent = parent->parent()) {
+                    parent->setExpanded(true);
+                }
+                tree->setCurrentItem(*it);
+                break;
+            }
+        }
+        return 0;
+    }
+    const auto row = static_cast<int>(luaL_checkinteger(L, 2) - 1);
+    if (auto* list = qobject_cast<QListWidget*>(widget)) {
+        list->setCurrentRow(row);
+    } else {
+        qobject_cast<QComboBox*>(widget)->setCurrentIndex(row);
+    }
     return 0;
 }
 

@@ -75,7 +75,7 @@ api("prism.ui.notify", "prism.ui.notify(text, [level])", "Shows a notification; 
 api("prism.ui.window", "prism.ui.window{ title, width, height, onClose } -> window",
     "Creates a window. Add widgets with window:add(kind, options) and show it with window:show().", "ui")
 method("widget:add", "container:add(kind, [options]) -> widget",
-    "Adds a widget to a window, row, column or split. Kinds: label, button, input, text, code, list, row, column, split (resizable panes; vertical = true stacks them). Options: text, placeholder, readOnly, stretch, items, vertical, onClick, onChange, onSelect, onFocus.")
+    "Adds a widget to a window, row, column or split. Kinds: label, button, input, text, code, list, combo (drop-down list), tree (items { text, id, children, expanded }), row, column, split (resizable panes; vertical = true stacks them). Options: text, placeholder, readOnly, stretch, items, vertical, onClick, onChange, onSelect, onFocus.")
 method("widget:text", "widget:text() -> text", "The text of a label, button, input, text or code widget, or the selected item of a list.")
 method("widget:setText", "widget:setText(text)", "Changes the text; for a window, its title.")
 method("widget:setEnabled", "widget:setEnabled(on)", "Enables or disables the widget.")
@@ -83,9 +83,9 @@ method("widget:setVisible", "widget:setVisible(on)", "Shows or hides the widget;
 method("widget:size", "widget:size() -> width, height", "The current size of a widget or window.")
 method("widget:sizes", "split:sizes() -> { sizes }", "The size of each pane of a split.")
 method("widget:setSizes", "split:setSizes({ sizes })", "Resizes the panes of a split; proportions are kept if the space differs.")
-method("widget:setItems", "list:setItems(items)", "Replaces the items of a list.")
-method("widget:selected", "list:selected() -> index | nil", "The selected item of a list.")
-method("widget:select", "list:select(index)", "Selects an item of a list.")
+method("widget:setItems", "list:setItems(items)", "Replaces the items of a list, combo or tree.")
+method("widget:selected", "list:selected() -> index | id | nil", "The selected index of a list or combo, or the id of the selected tree item.")
+method("widget:select", "list:select(index | id)", "Selects an item: by index in lists and combos, by id in trees (opening its folders).")
 method("widget:setProblems", "code:setProblems({ { line, message } })", "Marks lines of a code editor; hovering them shows the message.")
 method("widget:setCompletions", "code:setCompletions({ { name, signature, doc } })", "What a code editor offers while typing or with Ctrl+Space.")
 method("widget:show", "window:show()", "Shows a window.")

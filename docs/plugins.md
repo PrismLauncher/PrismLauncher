@@ -193,14 +193,16 @@ Needs `ui`.
   ```
 
   Widget kinds for `container:add(kind, options)`: `label`, `button`, `input` (one line), `text` (several lines),
-  `code` (Lua editor), `list`, and the containers `row`, `column` and `split` (panes the user resizes by dragging;
+  `code` (Lua editor), `list`, `combo` (drop-down list), `tree` (items `{ text, id, children, expanded }`), and the
+  containers `row`, `column` and `split` (panes the user resizes by dragging;
   `vertical = true` stacks them). Options: `text`, `placeholder`, `readOnly`,
   `stretch` (share of the space), `items` (lists), `onClick` (buttons, and Enter in inputs), `onChange` (inputs and
-  editors), `onSelect` (lists, `function(index, text)`), `onFocus` (code editors, `function(name)`: the name under the
+  editors), `onSelect` (lists and combos: `function(index, text)`; trees: `function(id, text)`, with an empty id for
+  items without one), `onFocus` (code editors, `function(name)`: the name under the
   cursor or highlighted in the completion list).
 
   Methods: `text()`, `setText(text)`, `setEnabled(on)`, `setVisible(on)`, `setItems(items)`, `selected()`,
-  `select(index)`, `size()` (width and height, also of windows), `sizes()` and `setSizes({ ... })` (panes of a split),
+  `select(index)` (`select(id)` in trees, which also opens their folders), `size()` (width and height, also of windows), `sizes()` and `setSizes({ ... })` (panes of a split),
   `setProblems({ { line, message } })` and `setCompletions({ { name, signature, doc } })` (code
   editors: offered while typing or with Ctrl+Space, with the names used in the text), and `show()` and `close()`
   (windows). A plugin
