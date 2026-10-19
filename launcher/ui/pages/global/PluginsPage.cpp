@@ -43,9 +43,12 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
 
     m_openFolder = new QPushButton(this);
     m_reload = new QPushButton(this);
+    m_reviewPermissions = new QPushButton(this);
+    m_reviewPermissions->hide();
     auto* buttons = new QHBoxLayout;
     buttons->addWidget(m_openFolder);
     buttons->addWidget(m_reload);
+    buttons->addWidget(m_reviewPermissions);
     buttons->addStretch();
 
     auto* layout = new QVBoxLayout(this);
@@ -59,6 +62,13 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
     connect(m_list, &QTreeWidget::currentItemChanged, this, &PluginsPage::updateDetails);
     connect(m_openFolder, &QPushButton::clicked, this, [this] { DesktopServices::openPath(m_manager->pluginsDir(), true); });
     connect(m_reload, &QPushButton::clicked, m_manager, &PluginManager::discover);
+    connect(m_reviewPermissions, &QPushButton::clicked, this, [this] {
+        if (QTreeWidgetItem* item = m_list->currentItem()) {
+            reviewPermissions(item->data(NameColumn, Qt::UserRole).toString());
+        }
+    });
+    connect(m_list, &QTreeWidget::itemDoubleClicked, this,
+            [this](QTreeWidgetItem* item) { reviewPermissions(item->data(NameColumn, Qt::UserRole).toString()); });
     connect(m_manager, &PluginManager::pluginsChanged, this, &PluginsPage::rebuild);
     connect(m_manager, &PluginManager::pluginChanged, this, &PluginsPage::onPluginChanged);
 
@@ -74,6 +84,7 @@ void PluginsPage::retranslate()
     m_list->setHeaderLabels({ tr("Name"), tr("ID"), tr("Version"), tr("Status") });
     m_openFolder->setText(tr("Open Folder"));
     m_reload->setText(tr("Reload"));
+    m_reviewPermissions->setText(tr("Review Permissions..."));
     m_reload->setToolTip(tr("Look for new plugins and restart the enabled ones."));
 
     for (int i = 0; i < m_list->topLevelItemCount(); i++) {
@@ -136,6 +147,8 @@ void PluginsPage::updateDetails()
 {
     QTreeWidgetItem* item = m_list->currentItem();
     const Plugin* plugin = item ? m_manager->plugin(item->data(NameColumn, Qt::UserRole).toString()) : nullptr;
+    // Only for plugins whose manifest asks for permissions that were not granted
+    m_reviewPermissions->setVisible(plugin && plugin->manifest() && !m_manager->missingPermissions(plugin->id()).isEmpty());
     if (!plugin) {
         m_details->setText(m_list->topLevelItemCount() == 0 ? tr("No plugins found. Put each plugin in its own folder "
                                                                  "inside the plugins folder.")
@@ -214,6 +227,18 @@ bool PluginsPage::askForPermissions(const Plugin* plugin, const QStringList& mis
     }
     box.exec();
     return box.clickedButton() == enable;
+}
+
+void PluginsPage::reviewPermissions(const QString& id)
+{
+    const Plugin* plugin = m_manager->plugin(id);
+    const QStringList missing = m_manager->missingPermissions(id);
+    if (!plugin || !plugin->manifest() || missing.isEmpty() || !askForPermissions(plugin, missing)) {
+        return;
+    }
+    m_manager->grantPermissions(id);
+    // Granting is meant to make it run: enables it, or loads it if it already was
+    m_manager->setEnabled(id, true);
 }
 
 void PluginsPage::onItemChanged(QTreeWidgetItem* item, int column)

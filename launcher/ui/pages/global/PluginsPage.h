@@ -37,6 +37,8 @@ class PluginsPage : public QWidget, public BasePage {
     void onPluginChanged(const QString& id);
     // Shows the permissions the plugin requests and returns whether the user accepted them
     bool askForPermissions(const Plugin* plugin, const QStringList& missing);
+    // Asks for the permissions the plugin is missing and, if accepted, enables and loads it
+    void reviewPermissions(const QString& id);
     static QString describePermission(const QString& permission);
 
     PluginManager* m_manager;
@@ -45,6 +47,7 @@ class PluginsPage : public QWidget, public BasePage {
     QLabel* m_details;
     QPushButton* m_openFolder;
     QPushButton* m_reload;
+    QPushButton* m_reviewPermissions;
     // Set while the list is filled, so the checkboxes do not enable or disable plugins
     bool m_updating = false;
 };
