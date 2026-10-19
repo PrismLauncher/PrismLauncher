@@ -212,6 +212,7 @@ class PrismApiTest : public QObject {
             {
                 return { { "a", "Alpha", "Modded", true, 1700000000, 3600 }, { "b", "Beta ñ", "", false, 0, 0 } };
             }
+            QString gameRoot(const QByteArray&) const override { return {}; }
         } source;
 
         auto withPermission = manifest();

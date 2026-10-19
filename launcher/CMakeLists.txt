@@ -593,6 +593,8 @@ set(PLUGINS_SOURCES
     plugins/PluginManifest.cpp
     plugins/lua/LuaState.h
     plugins/lua/LuaState.cpp
+    plugins/lua/FsApi.h
+    plugins/lua/FsApi.cpp
     plugins/lua/PrismApi.h
     plugins/lua/PrismApi.cpp
     plugins/lua/SettingsApi.h

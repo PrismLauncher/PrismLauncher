@@ -97,4 +97,7 @@ if(Launcher_ENABLE_LUA_PLUGINS)
 
     ecm_add_test(PluginNotifications_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
         TEST_NAME PluginNotifications)
+
+    ecm_add_test(FsApi_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+        TEST_NAME FsApi)
 endif()

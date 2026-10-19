@@ -39,6 +39,12 @@ class InstanceListSource : public PrismApi::InstanceSource {
         return result;
     }
 
+    QString gameRoot(const QByteArray& id) const override
+    {
+        const BaseInstance* instance = list ? list->getInstanceById(QString::fromUtf8(id)) : nullptr;
+        return instance ? instance->gameRoot() : QString();
+    }
+
     QPointer<InstanceList> list;
 };
 

@@ -18,6 +18,7 @@
 #include "launch/LaunchStepIds.h"
 #include "plugins/Logging.h"
 #include "plugins/PluginManifest.h"
+#include "plugins/lua/FsApi.h"
 #include "plugins/lua/LuaState.h"
 #include "plugins/lua/SettingsApi.h"
 
@@ -556,6 +557,8 @@ struct InstallArgs {
     PrismApi::InstanceSource* instances;
     bool ui;
     PrismApi::Notifier* notifier;
+    QByteArray dataDir;
+    bool fsInstance;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -610,6 +613,9 @@ int openPrism(lua_State* L)
     lua_setfield(L, -2, "get");
     lua_setfield(L, -2, "instances");
 
+    PrismApi::pushFsTable(L, args->dataDir, args->fsInstance, args->instances);
+    lua_setfield(L, -2, "fs");
+
     lua_newtable(L);
     lua_setfield(L, LUA_REGISTRYINDEX, s_uiActionsKey);
     lua_createtable(L, 0, 1);  // prism.ui
@@ -645,7 +651,9 @@ std::optional<QString> install(LuaState& state,
                       manifest.hasPermission("instances.read"),
                       instances,
                       manifest.hasPermission("ui"),
-                      notifier };
+                      notifier,
+                      QDir(directory).filePath("data").toUtf8(),
+                      manifest.hasPermission("fs.instance") };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

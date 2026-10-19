@@ -37,6 +37,8 @@ class InstanceSource {
    public:
     virtual ~InstanceSource() = default;
     virtual QList<InstanceInfo> instances() const = 0;
+    // The game folder (.minecraft) of the instance, empty if there is no such instance
+    virtual QString gameRoot(const QByteArray& id) const = 0;
 
     // Holds the results while they are pushed to Lua, which may raise errors that skip C++ destructors
     QList<InstanceInfo> scratch;
