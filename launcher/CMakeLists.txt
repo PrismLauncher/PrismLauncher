@@ -603,6 +603,8 @@ set(PLUGINS_SOURCES
     plugins/lua/PrismApi.cpp
     plugins/lua/SettingsApi.h
     plugins/lua/SettingsApi.cpp
+    plugins/lua/UiApi.h
+    plugins/lua/UiApi.cpp
 )
 
 set(LINKEXE_SOURCES
@@ -1207,6 +1209,8 @@ if(Launcher_ENABLE_LUA_PLUGINS)
         ui/pages/global/PluginsPage.cpp
         ui/widgets/PluginNotifications.h
         ui/widgets/PluginNotifications.cpp
+        ui/widgets/LuaCodeEditor.h
+        ui/widgets/LuaCodeEditor.cpp
     )
 endif()
 

@@ -118,6 +118,8 @@ LuaState::LuaState(std::size_t memoryLimit) : m_memory{ 0, memoryLimit }
 
 LuaState::~LuaState()
 {
+    // Expired first: closing the state may destroy objects (e.g. windows) whose callbacks must not reach it anymore
+    m_lifetime.reset();
     if (m_state) {
         lua_close(m_state);
     }

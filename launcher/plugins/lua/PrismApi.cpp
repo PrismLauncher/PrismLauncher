@@ -22,6 +22,7 @@
 #include "plugins/lua/HttpApi.h"
 #include "plugins/lua/LuaState.h"
 #include "plugins/lua/SettingsApi.h"
+#include "plugins/lua/UiApi.h"
 
 namespace {
 
@@ -639,6 +640,7 @@ int openPrism(lua_State* L)
     lua_pushlstring(L, args->id.constData(), args->id.size());
     lua_pushcclosure(L, notify, 3);
     lua_setfield(L, -2, "notify");
+    PrismApi::addWindowFunction(L, args->ui);
     lua_setfield(L, -2, "ui");
 
     lua_setglobal(L, "prism");
