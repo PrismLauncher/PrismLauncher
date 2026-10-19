@@ -35,6 +35,7 @@
 
 #include "MSALoginDialog.h"
 #include "Application.h"
+#include "Handle.h"
 #include "settings/SettingsObject.h"
 
 #include "ui_MSALoginDialog.h"
@@ -166,7 +167,8 @@ void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 
 void paintQR(QPainter& painter, const QSize canvasSize, const QString& data, QColor fg)
 {
-    const auto* qr = QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8, 1);
+    Handle<QRcode, QRcode_free> qr{ QRcode_encodeString(data.toUtf8().constData(), 0, QRecLevel::QR_ECLEVEL_M, QRencodeMode::QR_MODE_8,
+                                                        1) };
     if (!qr) {
         qWarning() << "Unable to encode" << data << "as QR code";
         return;
