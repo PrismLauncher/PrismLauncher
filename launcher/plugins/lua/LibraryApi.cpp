@@ -121,7 +121,7 @@ void installLibrary(lua_State* L, const QByteArray& pluginDir)
     }
     lua_pop(L, 1);
 
-    if (luaL_loadbufferx(L, s_prelude, sizeof(s_prelude) - 1, "=prelude", "t") != LUA_OK) {
+    if (luaL_loadbufferx(L, reinterpret_cast<const char*>(s_prelude), sizeof(s_prelude) - 1, "=prelude", "t") != LUA_OK) {
         lua_error(L);
     }
     lua_pushvalue(L, prism);

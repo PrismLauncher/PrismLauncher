@@ -815,7 +815,9 @@ endif()
 if(Launcher_ENABLE_LUA_PLUGINS)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PLUGINS_SOURCES})
     # The helpers written in Lua are compiled into the launcher
-    file(READ plugins/lua/prelude.lua LUA_PLUGIN_PRELUDE)
+    # As a byte array: MSVC limits string literals to about 16 KB
+    file(READ plugins/lua/prelude.lua LUA_PLUGIN_PRELUDE HEX)
+    string(REGEX REPLACE "(..)" "0x\\1," LUA_PLUGIN_PRELUDE "${LUA_PLUGIN_PRELUDE}")
     configure_file(plugins/lua/Prelude.h.in ${CMAKE_CURRENT_BINARY_DIR}/plugins/lua/Prelude.h @ONLY)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS plugins/lua/prelude.lua plugins/lua/Prelude.h.in)
 endif()

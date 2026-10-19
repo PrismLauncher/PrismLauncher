@@ -682,7 +682,8 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
                       manifest.hasPermission("net"),
                       host.http,
                       (QDir(directory).filePath("?.lua") + ';' + QDir(directory).filePath("?/init.lua")).toUtf8(),
-                      (QDir(directory).filePath("?.so") + ';' + QDir(directory).filePath("?.dll")).toUtf8(),
+                      // Native modules are not supported: the launcher does not export the Lua API they link against
+                      QByteArray(),
                       directory.toUtf8(),
                       // Each plugin is a folder inside the plugins folder
                       QFileInfo(directory).absolutePath().toUtf8(),

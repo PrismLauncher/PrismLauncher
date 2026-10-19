@@ -126,6 +126,9 @@ class FsApiTest : public QObject {
 
     void test_symlinksCannotEscape()
     {
+#ifdef Q_OS_WIN
+        QSKIP("QFile::link creates shortcuts, not symlinks, on Windows");
+#endif
         QVERIFY(QDir().mkpath(pluginDir() + "/data"));
         QVERIFY(QFile::link(outsideDir() + "/secret.txt", pluginDir() + "/data/link.txt"));
         QVERIFY(QFile::link(outsideDir(), pluginDir() + "/data/linkdir"));
