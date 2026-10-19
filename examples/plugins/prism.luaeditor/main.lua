@@ -5,7 +5,7 @@ local docs = require("docs")
 local plugins = prism.fs.plugins()
 
 -- The editor's layout, remembered between uses; panes are the sizes of the file list, the code and the help
-local layout = prism.settings{ width = 1300, height = 700, showHelp = true, panes = "" }
+local layout = prism.settings{ width = 1300, height = 700, showHelp = true, panes = "", plugin = "" }
 
 local function parseSizes(text)
     local sizes = {}
@@ -55,24 +55,44 @@ local function isLua(path)
     return path:match("%.lua$") ~= nil
 end
 
--- Every .lua file and plugin.toml of every plugin, as paths relative to the plugins folder
-local function pluginFiles()
-    local files = {}
+-- Files the editor opens: code, the manifest and plain text
+local function isEditable(name)
+    return isLua(name) or name == "plugin.toml" or name:match("%.json$") or name:match("%.md$") or name:match("%.txt$")
+end
+
+-- The folders of the installed plugins
+local function pluginFolders()
+    local folders = {}
+    for _, entry in ipairs(plugins:list()) do
+        if entry.dir and entry.name:sub(1, 1) ~= "." then
+            folders[#folders + 1] = entry.name
+        end
+    end
+    table.sort(folders)
+    return folders
+end
+
+-- Tree items for the editable files of a plugin, with its folders; ids are paths inside the plugins folder
+local function fileTree(plugin)
     local function walk(dir, depth)
+        local items = {}
         for _, entry in ipairs(plugins:list(dir)) do
-            local path = dir == "" and entry.name or (dir .. "/" .. entry.name)
+            local path = dir .. "/" .. entry.name
             if entry.name:sub(1, 1) ~= "." then
-                if entry.dir and depth < 4 then
-                    walk(path, depth + 1)
-                elseif not entry.dir and (isLua(path) or entry.name == "plugin.toml") then
-                    files[#files + 1] = path
+                if entry.dir and depth < 8 then
+                    local children = walk(path, depth + 1)
+                    -- Folders without anything to edit are left out
+                    if #children > 0 then
+                        items[#items + 1] = { text = entry.name, children = children }
+                    end
+                elseif not entry.dir and isEditable(entry.name) then
+                    items[#items + 1] = { text = entry.name, id = path }
                 end
             end
         end
+        return items
     end
-    walk("", 0)
-    table.sort(files)
-    return files
+    return walk(plugin, 1)
 end
 
 local function open()
@@ -82,8 +102,9 @@ local function open()
     end
 
     -- note: a message shown until the file changes again, such as "Saved."
-    local state = { files = {}, current = nil, saved = "", selecting = false, note = nil }
-    local window, list, status, code
+    -- plugin: the folder being edited; current: the open file, as a path inside the plugins folder
+    local state = { folders = {}, plugin = nil, current = nil, saved = "", selecting = false, note = nil }
+    local window, pluginPicker, tree, status, code
 
     local function modified()
         return state.current ~= nil and code:text() ~= state.saved
@@ -112,31 +133,72 @@ local function open()
         window:setText("Lua editor - " .. state.current .. (modified() and " *" or ""))
     end
 
-    local function refresh()
-        state.files = pluginFiles()
+    -- Runs fn without reacting to the selection changes it causes
+    local function quietly(fn)
         state.selecting = true
-        list:setItems(state.files)
-        for i, file in ipairs(state.files) do
-            if file == state.current then
-                list:select(i)
-            end
-        end
+        fn()
         state.selecting = false
     end
 
-    local function select(index, file)
-        if state.selecting or file == state.current then
+    local function refreshTree()
+        quietly(function()
+            tree:setItems(state.plugin and fileTree(state.plugin) or {})
+            if state.current then
+                tree:select(state.current)
+            end
+        end)
+    end
+
+    local function selectPluginInPicker()
+        quietly(function()
+            for i, folder in ipairs(state.folders) do
+                if folder == state.plugin then
+                    pluginPicker:select(i)
+                end
+            end
+        end)
+    end
+
+    local function refresh()
+        state.folders = pluginFolders()
+        quietly(function() pluginPicker:setItems(state.folders) end)
+        selectPluginInPicker()
+        refreshTree()
+    end
+
+    local function closeFile()
+        state.current = nil
+        state.saved = ""
+        quietly(function() code:setText("") end)
+        code:setProblems({})
+        code:setEnabled(false)
+        status:setText("Pick a file of " .. (state.plugin or "a plugin") .. ".")
+        window:setText("Lua editor")
+    end
+
+    local function choosePlugin(_, folder)
+        if state.selecting or folder == state.plugin then
+            return
+        end
+        if modified() then
+            -- Go back instead of losing the changes
+            selectPluginInPicker()
+            status:setText("Save or revert " .. state.current .. " before opening another plugin.")
+            return
+        end
+        state.plugin = folder
+        layout.plugin = folder
+        closeFile()
+        refreshTree()
+    end
+
+    local function select(file)
+        if state.selecting or file == "" or file == state.current then
             return
         end
         if modified() then
             -- Go back to the open file instead of losing its changes
-            state.selecting = true
-            for i, other in ipairs(state.files) do
-                if other == state.current then
-                    list:select(i)
-                end
-            end
-            state.selecting = false
+            quietly(function() tree:select(state.current) end)
             status:setText("Save or revert " .. state.current .. " before opening another file.")
             return
         end
@@ -219,11 +281,13 @@ local function open()
     -- Three panes the user resizes by dragging the handles between them
     panes = window:add("split", { stretch = 1 })
     local left = panes:add("column", { stretch = 1 })
-    list = left:add("list", { stretch = 1, onSelect = select })
+    left:add("label", { text = "Plugin to edit:" })
+    pluginPicker = left:add("combo", { onSelect = choosePlugin })
+    tree = left:add("tree", { stretch = 1, onSelect = select })
     left:add("button", { text = "Refresh", onClick = refresh })
 
     local middle = panes:add("column", { stretch = 3 })
-    status = middle:add("label", { text = "Pick a file on the left." })
+    status = middle:add("label", { text = "Pick a plugin and one of its files on the left." })
     code = middle:add("code", { stretch = 1, onChange = update, onFocus = showDoc })
     code:setCompletions(completions)
     code:setEnabled(false)
@@ -242,6 +306,14 @@ local function open()
     docView = help:add("text", { stretch = 1, readOnly = true })
     filter("prism")
 
+    -- Start with the plugin edited last time, or the first one
+    state.folders = pluginFolders()
+    state.plugin = state.folders[1]
+    for _, folder in ipairs(state.folders) do
+        if folder == layout.plugin then
+            state.plugin = folder
+        end
+    end
     refresh()
     editor = { window = window }
     window:show()

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QComboBox>
 #include <QDialog>
 #include <QDir>
 #include <QLabel>
@@ -9,6 +10,8 @@
 #include <QSplitter>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTreeWidget>
+#include <QTreeWidgetItemIterator>
 
 #include <FileSystem.h>
 #include <plugins/Plugin.h>
@@ -18,6 +21,7 @@
 #include <settings/Setting.h>
 #include <ui/widgets/LuaCodeEditor.h>
 #include <algorithm>
+#include <functional>
 #include <memory>
 
 // Drives the example editor plugin (examples/plugins/prism.luaeditor) through its window
@@ -41,15 +45,40 @@ class LuaEditorPluginTest : public QObject {
         return nullptr;
     }
 
-    // The list of files: its entries are paths inside the plugins folder
-    static QListWidget* filesList(QDialog* window)
+    // Ids of the files in the tree, with "/" separating folders as shown
+    static QStringList treeEntries(QDialog* window)
     {
-        for (auto* list : window->findChildren<QListWidget*>()) {
-            if (list->count() > 0 && list->item(0)->text().contains('/')) {
-                return list;
+        QStringList entries;
+        std::function<void(QTreeWidgetItem*, const QString&)> walk = [&](QTreeWidgetItem* item, const QString& prefix) {
+            const QString name = prefix + item->text(0);
+            entries.append(item->childCount() > 0 ? name + "/" : name);
+            for (int i = 0; i < item->childCount(); i++) {
+                walk(item->child(i), name + "/");
+            }
+        };
+        auto* tree = window->findChild<QTreeWidget*>();
+        for (int i = 0; i < tree->topLevelItemCount(); i++) {
+            walk(tree->topLevelItem(i), "");
+        }
+        return entries;
+    }
+
+    static void openFile(QDialog* window, const QString& id)
+    {
+        auto* tree = window->findChild<QTreeWidget*>();
+        for (QTreeWidgetItemIterator it(tree); *it; ++it) {
+            if ((*it)->data(0, Qt::UserRole).toString() == id) {
+                tree->setCurrentItem(*it);
+                return;
             }
         }
-        return nullptr;
+        QFAIL(qPrintable("no " + id + " in the tree"));
+    }
+
+    static QString openedFile(QDialog* window)
+    {
+        QTreeWidgetItem* item = window->findChild<QTreeWidget*>()->currentItem();
+        return item ? item->data(0, Qt::UserRole).toString() : QString();
     }
 
     // The status line above the code, not the documentation's title
@@ -88,6 +117,15 @@ class LuaEditorPluginTest : public QObject {
         QVERIFY(main.open(QIODevice::WriteOnly));
         main.write("prism.log.info(\"hello\")\n");
         main.close();
+        // A module in a folder, and files the editor does not show
+        QVERIFY(dir.mkpath("com.example.target/lib"));
+        QVERIFY(dir.mkpath("com.example.target/assets"));
+        for (const char* path :
+             { "com.example.target/lib/util.lua", "com.example.target/icon.png", "com.example.target/assets/logo.png" }) {
+            QFile file(dir.filePath(path));
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write("return {}\n");
+        }
 
         m_settings = std::make_unique<INISettingsObject>(m_root.filePath("settings.cfg"));
         auto enabled = m_settings->registerSetting("EnabledPlugins", QStringList({ "prism.luaeditor" }));
@@ -129,17 +167,18 @@ class LuaEditorPluginTest : public QObject {
 
         QDialog* window = editorWindow();
         QVERIFY(window);
-        auto* list = filesList(window);
-        QVERIFY(list);
-        QStringList files;
-        for (int i = 0; i < list->count(); i++) {
-            files.append(list->item(i)->text());
-        }
-        QVERIFY2(files.contains("com.example.target/main.lua"), qPrintable(files.join(", ")));
-        QVERIFY(files.contains("prism.luaeditor/checks.lua"));
-        QVERIFY(files.contains("com.example.target/plugin.toml"));
 
-        list->setCurrentRow(static_cast<int>(files.indexOf("com.example.target/main.lua")));
+        // A plugin is picked first; only its files show, in their folders
+        auto* picker = window->findChild<QComboBox*>();
+        QStringList plugins;
+        for (int i = 0; i < picker->count(); i++) {
+            plugins.append(picker->itemText(i));
+        }
+        QCOMPARE(plugins, QStringList({ "com.example.target", "prism.luaeditor" }));
+        QCOMPARE(picker->currentText(), "com.example.target");
+        QCOMPARE(treeEntries(window), QStringList({ "lib/", "lib/util.lua", "main.lua", "plugin.toml" }));
+
+        openFile(window, "com.example.target/main.lua");
         auto* editor = window->findChild<LuaCodeEditor*>();
         QCOMPARE(editor->toPlainText(), "prism.log.info(\"hello\")\n");
         QVERIFY(editor->problems().isEmpty());
@@ -159,11 +198,12 @@ class LuaEditorPluginTest : public QObject {
         QCOMPARE(problems.size(), 3);
         QVERIFY(window->windowTitle().endsWith("*"));
 
-        // Cannot switch files with unsaved changes
-        const int current = list->currentRow();
-        list->setCurrentRow(static_cast<int>(files.indexOf("prism.luaeditor/checks.lua")));
-        QCOMPARE(list->currentRow(), current);
+        // Cannot switch files or plugins with unsaved changes
+        openFile(window, "com.example.target/lib/util.lua");
+        QCOMPARE(openedFile(window), "com.example.target/main.lua");
         QVERIFY(statusLabel(window)->text().contains("Save or revert"));
+        picker->setCurrentText("prism.luaeditor");
+        QCOMPARE(picker->currentText(), "com.example.target");
 
         // Saving writes the file
         editor->setPlainText("prism.log.info(\"saved\")\n");
@@ -179,8 +219,16 @@ class LuaEditorPluginTest : public QObject {
         QTest::mouseClick(button(window, "Revert"), Qt::LeftButton);
         QCOMPARE(editor->toPlainText(), "prism.log.info(\"saved\")\n");
 
+        // Another plugin: its files, and nothing open
+        picker->setCurrentText("prism.luaeditor");
+        QCOMPARE(treeEntries(window), QStringList({ "checks.lua", "docs.lua", "main.lua", "plugin.toml" }));
+        QVERIFY(editor->toPlainText().isEmpty());
+        openFile(window, "prism.luaeditor/checks.lua");
+        QVERIFY(editor->toPlainText().contains("Finds problems in Lua code"));
+
         // Manifests open too, without Lua checks
-        list->setCurrentRow(static_cast<int>(files.indexOf("com.example.target/plugin.toml")));
+        picker->setCurrentText("com.example.target");
+        openFile(window, "com.example.target/plugin.toml");
         QVERIFY(editor->toPlainText().startsWith("id = \"com.example.target\""));
         QVERIFY(editor->problems().isEmpty());
         QVERIFY(statusLabel(window)->text().contains("need approval again"));
@@ -204,8 +252,7 @@ class LuaEditorPluginTest : public QObject {
         QVERIFY2(docView->toPlainText().startsWith("prism.log.info(...)"), qPrintable(docView->toPlainText()));
 
         // Searching, by name and by description
-        const auto lists = window->findChildren<QListWidget*>();
-        QListWidget* results = lists.first() == filesList(window) ? lists.last() : lists.first();
+        auto* results = window->findChild<QListWidget*>();
         QTest::keyClicks(window->findChild<QLineEdit*>(), "http");
         QStringList found;
         for (int i = 0; i < results->count(); i++) {
@@ -240,6 +287,7 @@ class LuaEditorPluginTest : public QObject {
         QDialog* reopened = editorWindow();
         QVERIFY(reopened);
         QCOMPARE(reopened->size(), QSize(1111, 666));
+        QCOMPARE(reopened->findChild<QComboBox*>()->currentText(), "com.example.target");
         QVERIFY(button(reopened, "Show help"));
         reopened->close();
         QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
