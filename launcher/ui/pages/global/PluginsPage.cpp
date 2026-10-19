@@ -4,6 +4,7 @@
 
 #include "PluginsPage.h"
 
+#include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -43,6 +44,7 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
 
     m_openFolder = new QPushButton(this);
     m_reload = new QPushButton(this);
+    m_install = new QPushButton(this);
     m_reviewPermissions = new QPushButton(this);
     m_reviewPermissions->hide();
     m_reloadPlugin = new QPushButton(this);
@@ -50,6 +52,7 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
     auto* buttons = new QHBoxLayout;
     buttons->addWidget(m_openFolder);
     buttons->addWidget(m_reload);
+    buttons->addWidget(m_install);
     buttons->addWidget(m_reloadPlugin);
     buttons->addWidget(m_reviewPermissions);
     buttons->addStretch();
@@ -65,6 +68,7 @@ PluginsPage::PluginsPage(QWidget* parent) : QWidget(parent), m_manager(APPLICATI
     connect(m_list, &QTreeWidget::currentItemChanged, this, &PluginsPage::updateDetails);
     connect(m_openFolder, &QPushButton::clicked, this, [this] { DesktopServices::openPath(m_manager->pluginsDir(), true); });
     connect(m_reload, &QPushButton::clicked, m_manager, &PluginManager::discover);
+    connect(m_install, &QPushButton::clicked, this, &PluginsPage::installFromZip);
     connect(m_reviewPermissions, &QPushButton::clicked, this, [this] {
         if (QTreeWidgetItem* item = m_list->currentItem()) {
             reviewPermissions(item->data(NameColumn, Qt::UserRole).toString());
@@ -92,6 +96,7 @@ void PluginsPage::retranslate()
     m_list->setHeaderLabels({ tr("Name"), tr("ID"), tr("Version"), tr("Status") });
     m_openFolder->setText(tr("Open Folder"));
     m_reload->setText(tr("Reload"));
+    m_install->setText(tr("Install from Zip..."));
     m_reviewPermissions->setText(tr("Review Permissions..."));
     m_reloadPlugin->setText(tr("Reload Plugin"));
     m_reloadPlugin->setToolTip(tr("Read the selected plugin again and restart it. Plugins also reload when their code changes."));
@@ -238,6 +243,29 @@ bool PluginsPage::askForPermissions(const Plugin* plugin, const QStringList& mis
     }
     box.exec();
     return box.clickedButton() == enable;
+}
+
+void PluginsPage::installFromZip()
+{
+    const QString zip = QFileDialog::getOpenFileName(this, tr("Install Plugin"), QString(), tr("Zip files (*.zip)"));
+    if (zip.isEmpty()) {
+        return;
+    }
+    auto installed = m_manager->installFromZip(zip, [this](const PluginManifest& incoming, const Plugin& existing) {
+        const QString current = existing.manifest() ? existing.manifest()->version : tr("unknown");
+        return QMessageBox::question(this, tr("Replace Plugin"),
+                                     tr("%1 is already installed (version %2). Replace it with version %3? Its settings and data are kept.")
+                                         .arg(incoming.name, current, incoming.version)) == QMessageBox::Yes;
+    });
+    if (!installed) {
+        QMessageBox::warning(this, tr("Install Plugin"), installed.error());
+        return;
+    }
+    for (int i = 0; i < m_list->topLevelItemCount(); i++) {
+        if (m_list->topLevelItem(i)->data(NameColumn, Qt::UserRole).toString() == *installed) {
+            m_list->setCurrentItem(m_list->topLevelItem(i));
+        }
+    }
 }
 
 void PluginsPage::reviewPermissions(const QString& id)

@@ -18,7 +18,9 @@ table, and anything beyond basic scripting needs a permission the user grants wh
 
 ## Quick start
 
-1. Open the plugins folder: Settings → Plugins → Open Folder (it is `<data folder>/plugins`).
+1. Open the plugins folder: Settings → Plugins → Open Folder (it is `<data folder>/plugins`). To share a plugin, zip
+   its folder: Settings → Plugins → Install from Zip installs it, and replaces an older version keeping its
+   `settings.ini` and data folder.
 2. Create a folder named after your plugin's id, for example `com.example.hello`.
 3. Add `plugin.toml`:
 

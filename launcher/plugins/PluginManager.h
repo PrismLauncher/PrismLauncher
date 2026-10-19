@@ -12,9 +12,12 @@
 #include <QString>
 #include <QStringList>
 
+#include <functional>
 #include <memory>
 #include <vector>
 
+#include "Result.h"
+#include "plugins/PluginManifest.h"
 #include "plugins/lua/PrismApi.h"
 
 class BaseInstance;
@@ -72,6 +75,16 @@ class PluginManager : public QObject, public PrismApi::Notifier {
 
     // Reads the plugin's manifest again and, if it is enabled, runs it from scratch
     void reloadPlugin(const QString& id);
+
+    static constexpr int s_maxZipFiles = 2000;
+    static constexpr qint64 s_maxZipSize = 64 * 1024 * 1024;
+
+    // Installs the plugin in a zip file, with its plugin.toml at the top or inside its only folder. New plugins stay
+    // disabled. If one with the same id exists, replace(incoming, existing) decides whether it is replaced; its
+    // settings.ini and data folder are kept. Rejects symbolic links and zips with more than s_maxZipFiles files or
+    // s_maxZipSize bytes. Returns the plugin's id.
+    Result<QString> installFromZip(const QString& zipPath,
+                                   const std::function<bool(const PluginManifest& incoming, const Plugin& existing)>& replace);
     // Watches the plugins' code (.lua files) and manifests, and reloads a plugin shortly after they change. Files the
     // plugins write themselves (settings.ini, data/) are ignored.
     void setAutoReload(bool enabled);

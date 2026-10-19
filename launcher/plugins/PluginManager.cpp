@@ -13,6 +13,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QPointer>
+#include <QTemporaryDir>
 #include <QTimer>
 
 #include <utility>
@@ -21,7 +22,9 @@
 #include <memory>
 
 #include "BaseInstance.h"
+#include "FileSystem.h"
 #include "InstanceList.h"
+#include "MMCZip.h"
 #include "launch/LaunchStepIds.h"
 #include "launch/LaunchTask.h"
 #include "plugins/Logging.h"
@@ -108,6 +111,88 @@ void PluginManager::reloadPlugin(const QString& id)
     qInfo() << "Reloaded plugin" << id;
     m_fingerprints[id] = codeFingerprint(plugin->directory());
     emit pluginChanged(id);
+}
+
+Result<QString> PluginManager::installFromZip(const QString& zipPath,
+                                              const std::function<bool(const PluginManifest&, const Plugin&)>& replace)
+{
+    // Hidden, so it is never taken for a plugin, and in the same folder, so moving it in place is a rename
+    QTemporaryDir staging(QDir(m_pluginsDir).filePath(".install-XXXXXX"));
+    if (!staging.isValid()) {
+        return std::unexpected(tr("Could not create a temporary folder in %1.").arg(m_pluginsDir));
+    }
+    // Rejects entries that would land outside the folder
+    if (auto extracted = MMCZip::extractDir(zipPath, staging.path()); !extracted) {
+        return std::unexpected(tr("Could not extract %1: %2").arg(zipPath, extracted.error()));
+    }
+
+    int files = 0;
+    qint64 size = 0;
+    QDirIterator it(staging.path(), QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        const QFileInfo info = it.nextFileInfo();
+        if (info.isSymLink()) {
+            return std::unexpected(tr("The zip contains a symbolic link (%1), which plugins cannot have.").arg(info.fileName()));
+        }
+        if (info.isFile()) {
+            files++;
+            size += info.size();
+        }
+    }
+    if (files > s_maxZipFiles || size > s_maxZipSize) {
+        return std::unexpected(
+            tr("The zip is too large: plugins can have up to %1 files and %2 MiB.").arg(s_maxZipFiles).arg(s_maxZipSize / 1024 / 1024));
+    }
+
+    // The manifest is at the top, or inside the only folder (zipping a folder does that); macOS adds __MACOSX
+    QString root = staging.path();
+    if (!QFile::exists(QDir(root).filePath("plugin.toml"))) {
+        QStringList folders = QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        folders.removeAll("__MACOSX");
+        if (folders.size() != 1 || !QFile::exists(QDir(root).filePath(folders.first() + "/plugin.toml"))) {
+            return std::unexpected(tr("The zip has no plugin.toml at its top or inside its only folder."));
+        }
+        root = QDir(root).filePath(folders.first());
+    }
+    auto manifest = PluginManifest::load(QDir(root).filePath("plugin.toml"));
+    if (!manifest) {
+        return std::unexpected(tr("The plugin.toml in the zip is not valid: %1").arg(manifest.error()));
+    }
+
+    const QString id = manifest->id;
+    const QString target = QDir(m_pluginsDir).filePath(id);
+    Plugin* existing = plugin(id);
+    if (existing || QFileInfo::exists(target)) {
+        if (!existing || !replace(*manifest, *existing)) {
+            return std::unexpected(tr("A plugin with the id %1 is already installed.").arg(id));
+        }
+        existing->unload();
+        // The user's settings and the plugin's data survive the update
+        for (const QString& kept : { QString("settings.ini"), QString("data") }) {
+            const QString from = QDir(target).filePath(kept);
+            const QString to = QDir(root).filePath(kept);
+            if (QFileInfo::exists(from) && !QFileInfo::exists(to) && !FS::move(from, to)) {
+                return std::unexpected(tr("Could not keep %1 of the installed plugin.").arg(kept));
+            }
+        }
+        if (!FS::deletePath(target)) {
+            return std::unexpected(tr("Could not remove the installed version of %1.").arg(id));
+        }
+    }
+    if (!QDir().rename(root, target)) {
+        return std::unexpected(tr("Could not move the plugin into %1.").arg(target));
+    }
+
+    if (existing) {
+        reloadPlugin(id);
+    } else {
+        m_plugins.push_back(std::make_unique<Plugin>(target, PrismApi::Host{ m_instanceSource.get(), this, m_http.get() }));
+        std::sort(m_plugins.begin(), m_plugins.end(), [](const auto& a, const auto& b) { return a->id() < b->id(); });
+        watchPlugins();
+        emit pluginsChanged();
+    }
+    qInfo() << "Installed plugin" << id << "from" << zipPath;
+    return id;
 }
 
 void PluginManager::setAutoReload(bool enabled)

@@ -5,6 +5,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <archive/ArchiveWriter.h>
 #include <plugins/Plugin.h>
 #include <plugins/PluginManager.h>
 #include <plugins/lua/LuaState.h>
@@ -371,6 +372,122 @@ class PluginManagerTest : public QObject {
         manager.reloadPlugin("com.example.manual");
         QCOMPARE(plugin->manifest()->name, "Renamed");
         QCOMPARE(plugin->state(), Plugin::State::Error);
+    }
+
+    // A zip with the files (path -> contents); "->target" contents make a symbolic link instead
+    QString makeZip(const QString& name, const QMap<QString, QByteArray>& files)
+    {
+        const QString path = m_root->filePath(name);
+        MMCZip::ArchiveWriter zip(path);
+        if (!zip.open()) {
+            qFatal("cannot create %s", qPrintable(path));
+        }
+        for (auto it = files.begin(); it != files.end(); ++it) {
+            if (it.value().startsWith("->")) {
+                const QString link = m_root->filePath("link-" + QString::number(qHash(it.key())));
+                QFile::link(QString::fromUtf8(it.value().mid(2)), link);
+                if (!zip.addFile(link, it.key())) {
+                    qFatal("cannot add link");
+                }
+            } else if (!zip.addFile(it.key(), it.value())) {
+                qFatal("cannot add %s", qPrintable(it.key()));
+            }
+        }
+        if (!zip.close()) {
+            qFatal("cannot close %s", qPrintable(path));
+        }
+        return path;
+    }
+
+    static QByteArray manifestFor(const QByteArray& id, const QByteArray& version = "1")
+    {
+        return "id = \"" + id + "\"\nname = \"Zipped\"\nversion = \"" + version + "\"\napi = 1\n";
+    }
+
+    void test_installFromZip()
+    {
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.discover();
+        const auto never = [](const PluginManifest&, const Plugin&) { return false; };
+        const auto always = [](const PluginManifest&, const Plugin&) { return true; };
+
+        // Manifest at the top
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Installed plugin"));
+        auto installed = manager.installFromZip(
+            makeZip("top.zip",
+                    { { "plugin.toml", manifestFor("com.example.zipped") }, { "main.lua", "value = 1" }, { "lib/util.lua", "return 1" } }),
+            never);
+        QVERIFY2(installed, qPrintable(installed.error_or("")));
+        QCOMPARE(*installed, "com.example.zipped");
+        QCOMPARE(manager.plugin("com.example.zipped")->state(), Plugin::State::Disabled);
+        QVERIFY(QFile::exists(QDir(pluginsDir()).filePath("com.example.zipped/lib/util.lua")));
+
+        // Inside the only folder, as zipping a folder does
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Installed plugin"));
+        installed = manager.installFromZip(
+            makeZip("folder.zip", { { "whatever/plugin.toml", manifestFor("com.example.folder") }, { "whatever/main.lua", "" } }), never);
+        QVERIFY2(installed, qPrintable(installed.error_or("")));
+        QVERIFY(manager.plugin("com.example.folder"));
+
+        // Same id: replaced only when allowed, keeping the settings and data
+        QVERIFY(manager.setEnabled("com.example.zipped", true));
+        writeFile(QDir(pluginsDir()).filePath("com.example.zipped/settings.ini"), "[General]\nConfigVersion=1.3\nn=5\n");
+        QVERIFY(QDir(pluginsDir()).mkpath("com.example.zipped/data"));
+        writeFile(QDir(pluginsDir()).filePath("com.example.zipped/data/keep.txt"), "kept");
+        const QString update =
+            makeZip("update.zip", { { "plugin.toml", manifestFor("com.example.zipped", "2") }, { "main.lua", "value = 2" } });
+        auto refused = manager.installFromZip(update, never);
+        QVERIFY(!refused && refused.error().contains("already installed"));
+        QCOMPARE(manager.plugin("com.example.zipped")->manifest()->version, "1");
+
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Loaded plugin"));
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Reloaded plugin"));
+        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("^Installed plugin"));
+        installed = manager.installFromZip(update, always);
+        QVERIFY2(installed, qPrintable(installed.error_or("")));
+        Plugin* updated = manager.plugin("com.example.zipped");
+        QCOMPARE(updated->manifest()->version, "2");
+        QCOMPARE(updated->state(), Plugin::State::Loaded);
+        QVERIFY(QFile::exists(QDir(pluginsDir()).filePath("com.example.zipped/settings.ini")));
+        QVERIFY(QFile::exists(QDir(pluginsDir()).filePath("com.example.zipped/data/keep.txt")));
+        QVERIFY(!QFile::exists(QDir(pluginsDir()).filePath("com.example.zipped/lib/util.lua")));
+
+        // Nothing is left behind
+        QVERIFY(QDir(pluginsDir()).entryList({ ".install-*" }, QDir::Dirs | QDir::Hidden).isEmpty());
+    }
+
+    void test_installRejects()
+    {
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.discover();
+        const auto never = [](const PluginManifest&, const Plugin&) { return false; };
+        auto expectFailure = [&](const QString& zip, const QString& expected) {
+            auto result = manager.installFromZip(zip, never);
+            QVERIFY2(!result, qPrintable(zip));
+            QVERIFY2(result.error().contains(expected), qPrintable(result.error()));
+        };
+
+        expectFailure(makeZip("none.zip", { { "main.lua", "" } }), "no plugin.toml");
+        expectFailure(
+            makeZip("two.zip", { { "a/plugin.toml", manifestFor("com.example.a") }, { "b/plugin.toml", manifestFor("com.example.b") } }),
+            "no plugin.toml");
+        expectFailure(makeZip("bad.zip", { { "plugin.toml", "id = " } }), "is not valid");
+        expectFailure(makeZip("escape.zip", { { "plugin.toml", manifestFor("com.example.escape") }, { "../outside.lua", "evil" } }),
+                      "Could not extract");
+        QVERIFY(!QFile::exists(m_root->filePath("outside.lua")));
+#ifndef Q_OS_WIN
+        // A link out of the plugin is stopped while extracting (installFromZip also rejects any link left afterwards)
+        expectFailure(makeZip("link.zip", { { "plugin.toml", manifestFor("com.example.link") }, { "secret", "->/etc/passwd" } }),
+                      "outside root");
+#endif
+        QMap<QString, QByteArray> many = { { "plugin.toml", manifestFor("com.example.many") } };
+        for (int i = 0; i < PluginManager::s_maxZipFiles; i++) {
+            many.insert(QString("f/%1.txt").arg(i), "x");
+        }
+        expectFailure(makeZip("many.zip", many), "too large");
+
+        QVERIFY(manager.plugins().isEmpty());
+        QVERIFY(QDir(pluginsDir()).entryList({ ".install-*" }, QDir::Dirs | QDir::Hidden).isEmpty());
     }
 
     void test_rediscover()
