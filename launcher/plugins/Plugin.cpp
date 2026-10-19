@@ -8,6 +8,7 @@
 #include <QFile>
 
 #include "plugins/lua/LuaState.h"
+#include "plugins/lua/PrismApi.h"
 
 namespace {
 
@@ -66,6 +67,10 @@ bool Plugin::load()
     auto lua = std::make_unique<LuaState>();
     if (!lua->isValid()) {
         fail("could not create the Lua state");
+        return false;
+    }
+    if (auto error = PrismApi::install(*lua, *m_manifest)) {
+        fail(*error);
         return false;
     }
     if (auto error = lua->run(code, entry)) {

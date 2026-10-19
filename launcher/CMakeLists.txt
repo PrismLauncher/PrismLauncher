@@ -580,6 +580,8 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(PLUGINS_SOURCES
+    plugins/Logging.h
+    plugins/Logging.cpp
     plugins/Plugin.h
     plugins/Plugin.cpp
     plugins/PluginManager.h
@@ -588,6 +590,8 @@ set(PLUGINS_SOURCES
     plugins/PluginManifest.cpp
     plugins/lua/LuaState.h
     plugins/lua/LuaState.cpp
+    plugins/lua/PrismApi.h
+    plugins/lua/PrismApi.cpp
 )
 
 set(LINKEXE_SOURCES
@@ -694,6 +698,14 @@ ecm_qt_export_logging_category(
     CATEGORY_NAME "launcher.instance.profile.resolve"
     DEFAULT_SEVERITY Debug
     DESCRIPTION "Profile component resolusion actions"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER pluginLogC
+    CATEGORY_NAME "launcher.plugins"
+    DEFAULT_SEVERITY Info
+    DESCRIPTION "Messages logged by plugins"
     EXPORT "${Launcher_Name}"
 )
 
