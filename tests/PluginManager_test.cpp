@@ -264,6 +264,41 @@ class PluginManagerTest : public QObject {
         QCOMPARE(notifications.first().at(2).toString(), "message 1");
     }
 
+    void test_permissionsMustBeGranted()
+    {
+        addPlugin("com.example.perm");
+        const QString toml = QDir(pluginsDir()).filePath("com.example.perm/plugin.toml");
+        writeFile(toml, "id = \"com.example.perm\"\nname = \"Perm\"\nversion = \"1\"\napi = 1\npermissions = [\"net\"]\n");
+        auto grants = m_settings->registerSetting("PluginPermissions", QString("{}"));
+
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.setGrantsSetting(grants);
+        manager.discover();
+        QCOMPARE(manager.missingPermissions("com.example.perm"), QStringList({ "net" }));
+
+        // Enabling without granting does not load it
+        QTest::ignoreMessage(QtWarningMsg,
+                             QRegularExpression("^Not loading plugin \"com.example.perm\" until its permissions are granted"));
+        QVERIFY(!manager.setEnabled("com.example.perm", true));
+        QCOMPARE(manager.plugin("com.example.perm")->state(), Plugin::State::Error);
+        QVERIFY(manager.plugin("com.example.perm")->error().contains("Requests permissions you have not granted: net"));
+
+        manager.grantPermissions("com.example.perm");
+        QVERIFY(manager.missingPermissions("com.example.perm").isEmpty());
+        QVERIFY(manager.setEnabled("com.example.perm", true));
+        QCOMPARE(manager.plugin("com.example.perm")->state(), Plugin::State::Loaded);
+
+        // An update asking for more is blocked until granted again
+        writeFile(toml, "id = \"com.example.perm\"\nname = \"Perm\"\nversion = \"2\"\napi = 1\npermissions = [\"net\", \"ui\"]\n");
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Not loading plugin \"com.example.perm\""));
+        manager.discover();
+        QCOMPARE(manager.missingPermissions("com.example.perm"), QStringList({ "ui" }));
+        QCOMPARE(manager.plugin("com.example.perm")->state(), Plugin::State::Error);
+
+        // The grants are kept outside the plugin, in the launcher settings
+        QVERIFY(grants->get().toString().contains("com.example.perm"));
+    }
+
     void test_rediscover()
     {
         addPlugin("com.example.a");

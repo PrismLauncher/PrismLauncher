@@ -51,9 +51,10 @@ class Plugin {
     // Increases every time the plugin loads, so work prepared for one run can tell if it is still valid
     int loadCount() const { return m_loadCount; }
 
-   private:
+    // Puts the plugin in the Error state without loading it
     void fail(const QString& error);
 
+   private:
     QString m_directory;
     Result<PluginManifest> m_manifest;
     State m_state = State::Disabled;

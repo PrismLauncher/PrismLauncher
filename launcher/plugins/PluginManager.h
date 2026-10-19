@@ -52,6 +52,14 @@ class PluginManager : public QObject, public PrismApi::Notifier {
     // Remembers the choice and loads or unloads the plugin. Returns false if the plugin is unknown or failed to load.
     bool setEnabled(const QString& id, bool enabled);
 
+    // Where the permissions the user granted to each plugin are kept, as a JSON object mapping ids to lists. Plugins
+    // requesting permissions that were not granted are not loaded. Without it every permission counts as granted.
+    void setGrantsSetting(std::shared_ptr<Setting> grants) { m_grants = std::move(grants); }
+    // The permissions the plugin requests that the user has not granted
+    QStringList missingPermissions(const QString& id) const;
+    // Grants every permission the plugin requests now
+    void grantPermissions(const QString& id);
+
     // Sends the event to every loaded plugin
     void emitEvent(const char* event, const PrismApi::EventFields& fields = {});
     // Sends launcher.ready to the loaded plugins, and from now on to each plugin right after it loads
@@ -104,6 +112,7 @@ class PluginManager : public QObject, public PrismApi::Notifier {
 
     QString m_pluginsDir;
     std::shared_ptr<Setting> m_enabledPlugins;
+    std::shared_ptr<Setting> m_grants;
     // Declared before the plugins, which use them until they are destroyed
     std::unique_ptr<PrismApi::InstanceSource> m_instanceSource;
     std::unique_ptr<PrismApi::HttpClient> m_http;

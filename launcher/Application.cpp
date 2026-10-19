@@ -719,8 +719,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("MoveModsFromDownloadsDir", false);
 
 #ifdef ENABLE_LUA_PLUGINS
-        // Ids of the plugins the user enabled
+        // Ids of the plugins the user enabled, and the permissions granted to each (JSON object of id -> list)
         m_settings->registerSetting("EnabledPlugins", QVariant(QStringList()));
+        m_settings->registerSetting("PluginPermissions", QString("{}"));
 #endif
         m_settings->registerSetting("SkinsDir", "skins");
         m_settings->registerSetting("JavaDir", "java");
@@ -1041,6 +1042,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // after the instances, which plugins may use
     {
         m_plugins.reset(new PluginManager(FS::PathCombine(m_dataPath, "plugins"), m_settings->getSetting("EnabledPlugins")));
+        m_plugins->setGrantsSetting(m_settings->getSetting("PluginPermissions"));
         m_plugins->setHttpClient(std::make_unique<NetworkHttpClient>(m_network.get(), getUserAgent().toUtf8()));
         qInfo() << "Loading plugins...";
         m_plugins->discover();

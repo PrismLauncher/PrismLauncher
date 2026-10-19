@@ -7,6 +7,9 @@
 #include <QDebug>
 #include <QDir>
 #include <QElapsedTimer>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QPointer>
 
 #include <algorithm>
@@ -344,8 +347,41 @@ QStringList PluginManager::enabledIds() const
     return m_enabledPlugins->get().toStringList();
 }
 
+QStringList PluginManager::missingPermissions(const QString& id) const
+{
+    const Plugin* plugin = this->plugin(id);
+    if (!m_grants || !plugin || !plugin->manifest()) {
+        return {};
+    }
+    const QJsonObject grants = QJsonDocument::fromJson(m_grants->get().toString().toUtf8()).object();
+    const QStringList granted = grants.value(id).toVariant().toStringList();
+    QStringList missing;
+    for (const QString& permission : plugin->manifest()->permissions) {
+        if (!granted.contains(permission)) {
+            missing.append(permission);
+        }
+    }
+    return missing;
+}
+
+void PluginManager::grantPermissions(const QString& id)
+{
+    const Plugin* plugin = this->plugin(id);
+    if (!m_grants || !plugin || !plugin->manifest()) {
+        return;
+    }
+    QJsonObject grants = QJsonDocument::fromJson(m_grants->get().toString().toUtf8()).object();
+    grants.insert(id, QJsonArray::fromStringList(plugin->manifest()->permissions));
+    m_grants->set(QString::fromUtf8(QJsonDocument(grants).toJson(QJsonDocument::Compact)));
+}
+
 bool PluginManager::loadPlugin(Plugin* plugin)
 {
+    if (const QStringList missing = missingPermissions(plugin->id()); !missing.isEmpty()) {
+        plugin->fail(tr("Requests permissions you have not granted: %1. Enable it again to review them.").arg(missing.join(", ")));
+        qWarning() << "Not loading plugin" << plugin->id() << "until its permissions are granted:" << missing;
+        return false;
+    }
     if (!plugin->load()) {
         qWarning() << "Failed to load plugin" << plugin->id() << ":" << plugin->error();
         return false;

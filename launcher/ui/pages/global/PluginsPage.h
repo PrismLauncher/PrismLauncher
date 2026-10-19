@@ -35,6 +35,9 @@ class PluginsPage : public QWidget, public BasePage {
     void updateDetails();
     void onItemChanged(QTreeWidgetItem* item, int column);
     void onPluginChanged(const QString& id);
+    // Shows the permissions the plugin requests and returns whether the user accepted them
+    bool askForPermissions(const Plugin* plugin, const QStringList& missing);
+    static QString describePermission(const QString& permission);
 
     PluginManager* m_manager;
     QLabel* m_intro;

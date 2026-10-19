@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -152,13 +153,86 @@ void PluginsPage::updateDetails()
     m_details->setText(text);
 }
 
+QString PluginsPage::describePermission(const QString& permission)
+{
+    if (permission == "instances.read") {
+        return tr("See your instances and what happens with them (launches, whether the game is running).");
+    }
+    if (permission == "fs.instance") {
+        return tr("Read and change the files in your instances' game folders (worlds, mods, options).");
+    }
+    if (permission == "game.log") {
+        return tr("Read the game's log while it runs. It may include chat messages and server addresses.");
+    }
+    if (permission == "launch.hooks") {
+        return tr("Run its own steps when an instance is launched, and stop the launch.");
+    }
+    if (permission == "net") {
+        return tr("Connect to the internet.");
+    }
+    if (permission == "ui") {
+        return tr("Add buttons and menus to the launcher, and show notifications.");
+    }
+    if (permission == "unrestricted") {
+        return tr("Full access to your computer: read, change and delete any of your files, and run programs.");
+    }
+    return permission;
+}
+
+bool PluginsPage::askForPermissions(const Plugin* plugin, const QStringList& missing)
+{
+    const auto& manifest = *plugin->manifest();
+    QString text = tr("<b>%1</b> asks for these permissions:").arg(manifest.name.toHtmlEscaped()) + "<ul>";
+    for (const QString& permission : manifest.permissions) {
+        const QString description = describePermission(permission).toHtmlEscaped();
+        // Highlight what was not granted before, e.g. after an update
+        text += missing.contains(permission) && missing.size() != manifest.permissions.size()
+                    ? "<li><b>" + tr("New:") + "</b> " + description + "</li>"
+                    : "<li>" + description + "</li>";
+    }
+    text += "</ul>";
+
+    const bool unrestricted = manifest.permissions.contains("unrestricted");
+    if (unrestricted) {
+        text += "<p><b>" +
+                tr("Warning: this plugin asks for full access. It could damage your system or steal your data, and the launcher "
+                   "cannot protect you from it. Only enable it if you completely trust its author.") +
+                "</b></p>";
+    }
+
+    QMessageBox box(unrestricted ? QMessageBox::Warning : QMessageBox::Question, tr("Enable plugin"), text, QMessageBox::Cancel, this);
+    box.setTextFormat(Qt::RichText);
+    QPushButton* enable = box.addButton(tr("Enable"), QMessageBox::AcceptRole);
+    // A full access plugin needs a deliberate click
+    if (unrestricted) {
+        box.setDefaultButton(QMessageBox::Cancel);
+    } else {
+        box.setDefaultButton(enable);
+    }
+    box.exec();
+    return box.clickedButton() == enable;
+}
+
 void PluginsPage::onItemChanged(QTreeWidgetItem* item, int column)
 {
     if (m_updating || column != NameColumn) {
         return;
     }
+    const QString id = item->data(NameColumn, Qt::UserRole).toString();
+    const bool enabled = item->checkState(NameColumn) == Qt::Checked;
+    if (enabled) {
+        const Plugin* plugin = m_manager->plugin(id);
+        const QStringList missing = m_manager->missingPermissions(id);
+        if (plugin && plugin->manifest() && !missing.isEmpty()) {
+            if (!askForPermissions(plugin, missing)) {
+                updateItem(item, plugin);
+                return;
+            }
+            m_manager->grantPermissions(id);
+        }
+    }
     // The manager reports the outcome through pluginChanged, which updates the item
-    m_manager->setEnabled(item->data(NameColumn, Qt::UserRole).toString(), item->checkState(NameColumn) == Qt::Checked);
+    m_manager->setEnabled(id, enabled);
 }
 
 void PluginsPage::onPluginChanged(const QString& id)
