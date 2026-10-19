@@ -24,7 +24,7 @@ class PluginsPage : public QWidget, public BasePage {
     ~PluginsPage() override = default;
 
     QString displayName() const override { return tr("Plugins"); }
-    QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
+    QIcon icon() const override { return QIcon::fromTheme("plugins"); }
     QString id() const override { return "plugins"; }
 
     void retranslate() override;
