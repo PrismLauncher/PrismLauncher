@@ -292,7 +292,7 @@ local function open()
     code:setCompletions(completions)
     code:setEnabled(false)
     local buttons = middle:add("row")
-    buttons:add("button", { text = "Save", onClick = save })
+    buttons:add("button", { text = "Save (Ctrl+S)", onClick = save })
     buttons:add("button", { text = "Revert", onClick = revert })
     helpButton = buttons:add("button", { text = "Hide help", onClick = toggleHelp })
 
@@ -314,6 +314,8 @@ local function open()
             state.plugin = folder
         end
     end
+    window:addShortcut("Ctrl+S", save)
+
     refresh()
     editor = { window = window }
     window:show()

@@ -207,7 +207,10 @@ class LuaEditorPluginTest : public QObject {
 
         // Saving writes the file
         editor->setPlainText("prism.log.info(\"saved\")\n");
-        QTest::mouseClick(button(window, "Save"), Qt::LeftButton);
+        // With the shortcut
+        window->activateWindow();
+        QVERIFY(QTest::qWaitForWindowActive(window));
+        QTest::keyClick(editor, Qt::Key_S, Qt::ControlModifier);
         QVERIFY2(statusLabel(window)->text().contains("Saved"), qPrintable(statusLabel(window)->text()));
         QFile saved(pluginsDir() + "/com.example.target/main.lua");
         QVERIFY(saved.open(QIODevice::ReadOnly));

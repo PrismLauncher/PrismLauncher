@@ -87,8 +87,9 @@ method("widget:setItems", "list:setItems(items)", "Replaces the items of a list,
 method("widget:selected", "list:selected() -> index | id | nil", "The selected index of a list or combo, or the id of the selected tree item.")
 method("widget:select", "list:select(index | id)", "Selects an item: by index in lists and combos, by id in trees (opening its folders).")
 method("widget:setProblems", "code:setProblems({ { line, message } })", "Marks lines of a code editor; hovering them shows the message.")
-method("widget:setCompletions", "code:setCompletions({ { name, signature, doc } })", "What a code editor offers while typing or with Ctrl+Space.")
+method("widget:setCompletions", "code:setCompletions({ { name, signature, doc } })", "What a code editor offers while typing or with Ctrl+Space. Code editors also copy (Ctrl+C) and cut (Ctrl+X) the whole line without a selection, and paste a whole line below the current one (Ctrl+V).")
 method("widget:show", "window:show()", "Shows a window.")
+method("widget:addShortcut", "window:addShortcut(keys, fn)", "Calls fn when the keys, written like \"Ctrl+S\", are pressed in the window.")
 method("widget:close", "window:close()", "Closes a window.")
 
 api("prism.json", "prism.json", "JSON text to Lua values and back.")
