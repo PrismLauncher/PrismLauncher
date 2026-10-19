@@ -116,8 +116,8 @@ class LuaEditorPluginTest : public QObject {
 
         // Saving writes the file
         editor->setPlainText("prism.log.info(\"saved\")\n");
-        QTest::ignoreMessage(QtInfoMsg, QRegularExpression("notification: Saved com.example.target/main.lua"));
         QTest::mouseClick(button(window, "Save"), Qt::LeftButton);
+        QVERIFY2(window->findChild<QLabel*>()->text().contains("Saved"), qPrintable(window->findChild<QLabel*>()->text()));
         QFile saved(pluginsDir() + "/com.example.target/main.lua");
         QVERIFY(saved.open(QIODevice::ReadOnly));
         QCOMPARE(saved.readAll(), "prism.log.info(\"saved\")\n");

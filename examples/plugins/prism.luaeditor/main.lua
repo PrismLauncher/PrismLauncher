@@ -30,7 +30,8 @@ local function open()
         return
     end
 
-    local state = { files = {}, current = nil, saved = "", selecting = false }
+    -- note: a message shown until the file changes again, such as "Saved."
+    local state = { files = {}, current = nil, saved = "", selecting = false, note = nil }
     local window, list, status, code
 
     local function modified()
@@ -50,7 +51,10 @@ local function open()
             local first = problems[1]
             summary = string.format("%d problem%s. Line %d: %s", #problems, #problems == 1 and "" or "s", first.line, first.message)
         end
-        status:setText(state.current .. (modified() and " (modified)" or "") .. " - " .. summary)
+        if modified() then
+            state.note = nil
+        end
+        status:setText(state.current .. (modified() and " (modified)" or "") .. " - " .. (state.note and (state.note .. " ") or "") .. summary)
         window:setText("Lua editor - " .. state.current .. (modified() and " *" or ""))
     end
 
@@ -95,10 +99,15 @@ local function open()
             return
         end
         local text = code:text()
-        plugins:write(state.current, text)
+        local ok, err = pcall(plugins.write, plugins, state.current, text)
+        if not ok then
+            status:setText("Could not save " .. state.current .. ": " .. tostring(err))
+            return
+        end
         state.saved = text
+        -- Shown in the window instead of a notification, which are limited per minute
+        state.note = "Saved; disable and enable its plugin to apply the changes."
         update()
-        prism.ui.notify("Saved " .. state.current .. ". Disable and enable its plugin to apply the changes.")
     end
 
     local function revert()
