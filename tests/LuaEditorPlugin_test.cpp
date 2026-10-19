@@ -6,6 +6,7 @@
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QSplitter>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -35,6 +36,28 @@ class LuaEditorPluginTest : public QObject {
             if (auto* dialog = qobject_cast<QDialog*>(widget);
                 dialog && dialog->windowTitle().startsWith("Lua editor") && dialog->isVisible()) {
                 return dialog;
+            }
+        }
+        return nullptr;
+    }
+
+    // The list of files: its entries are paths inside the plugins folder
+    static QListWidget* filesList(QDialog* window)
+    {
+        for (auto* list : window->findChildren<QListWidget*>()) {
+            if (list->count() > 0 && list->item(0)->text().contains('/')) {
+                return list;
+            }
+        }
+        return nullptr;
+    }
+
+    // The status line above the code, not the documentation's title
+    static QLabel* statusLabel(QDialog* window)
+    {
+        for (auto* label : window->findChildren<QLabel*>()) {
+            if (!label->text().startsWith("Documentation:")) {
+                return label;
             }
         }
         return nullptr;
@@ -106,7 +129,8 @@ class LuaEditorPluginTest : public QObject {
 
         QDialog* window = editorWindow();
         QVERIFY(window);
-        auto* list = window->findChild<QListWidget*>();
+        auto* list = filesList(window);
+        QVERIFY(list);
         QStringList files;
         for (int i = 0; i < list->count(); i++) {
             files.append(list->item(i)->text());
@@ -139,12 +163,12 @@ class LuaEditorPluginTest : public QObject {
         const int current = list->currentRow();
         list->setCurrentRow(static_cast<int>(files.indexOf("prism.luaeditor/checks.lua")));
         QCOMPARE(list->currentRow(), current);
-        QVERIFY(window->findChild<QLabel*>()->text().contains("Save or revert"));
+        QVERIFY(statusLabel(window)->text().contains("Save or revert"));
 
         // Saving writes the file
         editor->setPlainText("prism.log.info(\"saved\")\n");
         QTest::mouseClick(button(window, "Save"), Qt::LeftButton);
-        QVERIFY2(window->findChild<QLabel*>()->text().contains("Saved"), qPrintable(window->findChild<QLabel*>()->text()));
+        QVERIFY2(statusLabel(window)->text().contains("Saved"), qPrintable(statusLabel(window)->text()));
         QFile saved(pluginsDir() + "/com.example.target/main.lua");
         QVERIFY(saved.open(QIODevice::ReadOnly));
         QCOMPARE(saved.readAll(), "prism.log.info(\"saved\")\n");
@@ -159,7 +183,7 @@ class LuaEditorPluginTest : public QObject {
         list->setCurrentRow(static_cast<int>(files.indexOf("com.example.target/plugin.toml")));
         QVERIFY(editor->toPlainText().startsWith("id = \"com.example.target\""));
         QVERIFY(editor->problems().isEmpty());
-        QVERIFY(window->findChild<QLabel*>()->text().contains("need approval again"));
+        QVERIFY(statusLabel(window)->text().contains("need approval again"));
 
         // Completion offers the API and Lua
         QVERIFY(editor->completionsFor("prism.fs.").contains("prism.fs.data"));
@@ -181,7 +205,7 @@ class LuaEditorPluginTest : public QObject {
 
         // Searching, by name and by description
         const auto lists = window->findChildren<QListWidget*>();
-        QListWidget* results = lists.last();
+        QListWidget* results = lists.first() == filesList(window) ? lists.last() : lists.first();
         QTest::keyClicks(window->findChild<QLineEdit*>(), "http");
         QStringList found;
         for (int i = 0; i < results->count(); i++) {
@@ -190,6 +214,35 @@ class LuaEditorPluginTest : public QObject {
         QVERIFY2(found.contains("prism.http.get") && found.contains("prism.async"), qPrintable(found.join(", ")));
         results->setCurrentRow(static_cast<int>(found.indexOf("prism.http.get")));
         QVERIFY(docView->toPlainText().contains("Needs the net permission"));
+
+        // The panes can be resized and the help hidden
+        QVERIFY(window->findChild<QSplitter*>());
+        QTest::mouseClick(button(window, "Hide help"), Qt::LeftButton);
+        QVERIFY(!docView->isVisible());
+        QVERIFY(button(window, "Show help"));
+        QTest::mouseClick(button(window, "Show help"), Qt::LeftButton);
+        QVERIFY(docView->isVisible());
+
+        // Closing remembers the layout; reopening restores it, also with the help hidden
+        QTest::mouseClick(button(window, "Hide help"), Qt::LeftButton);
+        window->resize(1111, 666);
+        window->close();
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+        // Plugin settings are written once control returns to the event loop
+        QCoreApplication::processEvents();
+        QFile settings(pluginsDir() + "/prism.luaeditor/settings.ini");
+        QVERIFY(settings.open(QIODevice::ReadOnly));
+        const QByteArray layout = settings.readAll();
+        QVERIFY2(layout.contains("showHelp=false") && layout.contains("width=1111"), layout.constData());
+        settings.close();
+
+        QCOMPARE(m_manager->runAction(m_manager->actions(PrismApi::ActionScope::Launcher).first()), std::nullopt);
+        QDialog* reopened = editorWindow();
+        QVERIFY(reopened);
+        QCOMPARE(reopened->size(), QSize(1111, 666));
+        QVERIFY(button(reopened, "Show help"));
+        reopened->close();
+        QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     }
 };
 

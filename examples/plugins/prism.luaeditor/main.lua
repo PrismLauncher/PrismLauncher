@@ -4,6 +4,17 @@ local checks = require("checks")
 local docs = require("docs")
 local plugins = prism.fs.plugins()
 
+-- The editor's layout, remembered between uses; panes are the sizes of the file list, the code and the help
+local layout = prism.settings{ width = 1300, height = 700, showHelp = true, panes = "" }
+
+local function parseSizes(text)
+    local sizes = {}
+    for size in text:gmatch("%d+") do
+        sizes[#sizes + 1] = tonumber(size)
+    end
+    return #sizes == 3 and sizes or nil
+end
+
 local docsByName = {}
 local completions = {}
 for _, entry in ipairs(docs) do
@@ -175,12 +186,43 @@ local function open()
         results:setItems(search(text))
     end
 
-    window = prism.ui.window{ title = "Lua editor", width = 1300, height = 700, onClose = function() editor = nil end }
-    local row = window:add("row", { stretch = 1 })
-    local left = row:add("column", { stretch = 1 })
+    local panes, right, helpButton
+
+    local function rememberPanes()
+        -- Only while the help is shown: hidden, its pane measures nothing
+        if layout.showHelp then
+            layout.panes = table.concat(panes:sizes(), ",")
+        end
+    end
+
+    local function showHelp(visible)
+        right:setVisible(visible)
+        helpButton:setText(visible and "Hide help" or "Show help")
+        local sizes = visible and parseSizes(layout.panes)
+        if sizes then
+            panes:setSizes(sizes)
+        end
+    end
+
+    local function toggleHelp()
+        rememberPanes()
+        layout.showHelp = not layout.showHelp
+        showHelp(layout.showHelp)
+    end
+
+    window = prism.ui.window{ title = "Lua editor", width = layout.width, height = layout.height, onClose = function()
+        layout.width, layout.height = window:size()
+        rememberPanes()
+        editor = nil
+    end }
+
+    -- Three panes the user resizes by dragging the handles between them
+    panes = window:add("split", { stretch = 1 })
+    local left = panes:add("column", { stretch = 1 })
     list = left:add("list", { stretch = 1, onSelect = select })
     left:add("button", { text = "Refresh", onClick = refresh })
-    local middle = row:add("column", { stretch = 3 })
+
+    local middle = panes:add("column", { stretch = 3 })
     status = middle:add("label", { text = "Pick a file on the left." })
     code = middle:add("code", { stretch = 1, onChange = update, onFocus = showDoc })
     code:setCompletions(completions)
@@ -188,17 +230,22 @@ local function open()
     local buttons = middle:add("row")
     buttons:add("button", { text = "Save", onClick = save })
     buttons:add("button", { text = "Revert", onClick = revert })
-    local right = row:add("column", { stretch = 2 })
+    helpButton = buttons:add("button", { text = "Hide help", onClick = toggleHelp })
+
+    right = panes:add("column", { stretch = 2 })
     right:add("label", { text = "Documentation: put the cursor on a name, or search (Ctrl+Space completes)." })
     local query
     query = right:add("input", { placeholder = "Search, e.g. http or string.f", onChange = function() filter(query:text()) end })
-    results = right:add("list", { stretch = 1, onSelect = function(_, name) showDoc(name) end })
-    docView = right:add("text", { stretch = 1, readOnly = true })
+    -- The results and the documentation share the height, also resizable
+    local help = right:add("split", { vertical = true, stretch = 1 })
+    results = help:add("list", { stretch = 1, onSelect = function(_, name) showDoc(name) end })
+    docView = help:add("text", { stretch = 1, readOnly = true })
     filter("prism")
 
     refresh()
     editor = { window = window }
     window:show()
+    showHelp(layout.showHelp)
 end
 
 prism.ui.addAction{ text = "Lua editor", scope = "launcher", run = open }
