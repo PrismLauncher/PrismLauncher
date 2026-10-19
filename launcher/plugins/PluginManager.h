@@ -37,6 +37,9 @@ class PluginManager : public QObject {
     // Remembers the choice and loads or unloads the plugin. Returns false if the plugin is unknown or failed to load.
     bool setEnabled(const QString& id, bool enabled);
 
+    // Sends the event to every loaded plugin
+    void emitEvent(const char* event);
+
    signals:
     // The list of plugins was rebuilt
     void pluginsChanged();

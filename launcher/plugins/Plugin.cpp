@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QFile>
 
+#include "plugins/Logging.h"
 #include "plugins/lua/LuaState.h"
 #include "plugins/lua/PrismApi.h"
 
@@ -88,6 +89,16 @@ void Plugin::unload()
     m_lua.reset();
     m_error.clear();
     m_state = State::Disabled;
+}
+
+void Plugin::emitEvent(const char* event)
+{
+    if (m_state != State::Loaded) {
+        return;
+    }
+    if (auto error = PrismApi::emitEvent(*m_lua, event)) {
+        qCWarning(pluginLogC).noquote() << QString("[%1] error handling %2: %3").arg(id(), event, *error);
+    }
 }
 
 void Plugin::fail(const QString& error)

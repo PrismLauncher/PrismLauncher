@@ -7,6 +7,8 @@
 #include <plugins/lua/LuaState.h>
 #include <plugins/lua/PrismApi.h>
 
+#include <lua.hpp>
+
 class PrismApiTest : public QObject {
     Q_OBJECT
 
@@ -97,6 +99,66 @@ class PrismApiTest : public QObject {
         QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
         QTest::ignoreMessage(QtInfoMsg, "[com.example.log] ñandú ✓");
         runOk(state, "prism.log.info('ñandú', '✓')");
+    }
+
+    void test_events()
+    {
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
+        QCOMPARE(PrismApi::emitEvent(state, "launcher.ready"), std::nullopt);
+
+        runOk(state, R"(
+            calls = {}
+            prism.on("launcher.ready", function() table.insert(calls, "first") end)
+            prism.on("launcher.ready", function()
+                table.insert(calls, "second")
+                -- Registered while dispatching: only runs from the next event on
+                prism.on("launcher.ready", function() table.insert(calls, "late") end)
+            end)
+        )");
+        QCOMPARE(PrismApi::emitEvent(state, "launcher.ready"), std::nullopt);
+        runOk(state, "assert(table.concat(calls, ',') == 'first,second', table.concat(calls, ','))");
+        QCOMPARE(PrismApi::emitEvent(state, "launcher.ready"), std::nullopt);
+        runOk(state, "assert(table.concat(calls, ',') == 'first,second,first,second,late', table.concat(calls, ','))");
+        QCOMPARE(lua_gettop(state.get()), 0);
+    }
+
+    void test_invalidHandlers()
+    {
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
+        auto error = state.run("prism.on('no.such.event', function() end)", "test");
+        QVERIFY(error && error->contains("unknown event 'no.such.event'"));
+        error = state.run("prism.on('launcher.ready', 42)", "test");
+        QVERIFY(error && error->contains("function expected"));
+    }
+
+    void test_failingHandler()
+    {
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
+        runOk(state, R"(
+            prism.on("launcher.ready", function() error("boom") end)
+            prism.on("launcher.ready", function() reached = true end)
+        )");
+        auto error = PrismApi::emitEvent(state, "launcher.ready");
+        QVERIFY(error);
+        QVERIFY2(error->contains("test:2: boom") && error->contains("stack traceback:"), qPrintable(*error));
+        runOk(state, "assert(reached == nil)");
+
+        runOk(state, "prism.on('launcher.ready', function() while true do end end)");
+        error = PrismApi::emitEvent(state, "launcher.ready");
+        QVERIFY(error);
+    }
+
+    void test_handlerRunsOutOfInstructions()
+    {
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
+        runOk(state, "prism.on('launcher.ready', function() while true do end end)");
+        auto error = PrismApi::emitEvent(state, "launcher.ready");
+        QVERIFY(error);
+        QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
     }
 
     void test_pluginLoadsWithApi()

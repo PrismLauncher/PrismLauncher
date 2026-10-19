@@ -61,6 +61,9 @@ class QFile;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
+#ifdef ENABLE_LUA_PLUGINS
+class PluginManager;
+#endif
 class AccountList;
 class IconList;
 class QNetworkAccessManager;
@@ -134,6 +137,10 @@ class Application : public QApplication {
     JavaInstallList* javalist();
 
     InstanceList* instances() const { return m_instances.get(); }
+
+#ifdef ENABLE_LUA_PLUGINS
+    PluginManager* plugins() const { return m_plugins.get(); }
+#endif
 
     IconList* icons() const { return m_icons.get(); }
 
@@ -256,6 +263,10 @@ class Application : public QApplication {
     std::unique_ptr<SettingsObject> m_settings;
     std::unique_ptr<SettingsObject> m_playtimeSettings;
     std::unique_ptr<InstanceList> m_instances;
+#ifdef ENABLE_LUA_PLUGINS
+    // Declared after the instances so it is destroyed first
+    std::unique_ptr<PluginManager> m_plugins;
+#endif
     std::unique_ptr<IconList> m_icons;
     std::unique_ptr<JavaInstallList> m_javalist;
     std::unique_ptr<TranslationsModel> m_translations;

@@ -20,4 +20,8 @@ constexpr qsizetype s_maxLogMessageLength = 4096;
 // `print` to prism.log.info. Returns the error message on failure.
 std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory);
 
+// Calls the handlers registered with prism.on for the event, in registration order. The first failing handler stops
+// the others. Returns its error message.
+std::optional<QString> emitEvent(LuaState& state, const char* event);
+
 }  // namespace PrismApi

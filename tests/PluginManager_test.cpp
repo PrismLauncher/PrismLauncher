@@ -162,6 +162,22 @@ class PluginManagerTest : public QObject {
         QCOMPARE(m_enabled->get().toStringList(), QStringList({ "com.example.a", "com.example.gone" }));
     }
 
+    void test_emitEvent()
+    {
+        addPlugin("com.example.a", "prism.on('launcher.ready', function() prism.log.info('ready') end)");
+        addPlugin("com.example.b", "prism.on('launcher.ready', function() error('boom') end)");
+        addPlugin("com.example.off", "prism.on('launcher.ready', function() prism.log.info('should not run') end)");
+        m_enabled->set(QStringList({ "com.example.a", "com.example.b" }));
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.discover();
+
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.a] ready");
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^\\[com.example.b\\] error handling launcher.ready: main.lua:1: boom"));
+        manager.emitEvent("launcher.ready");
+        // A failing handler does not unload the plugin
+        QCOMPARE(manager.plugin("com.example.b")->state(), Plugin::State::Loaded);
+    }
+
     void test_rediscover()
     {
         addPlugin("com.example.a");

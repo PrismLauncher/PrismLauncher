@@ -43,6 +43,9 @@ class Plugin {
     bool load();
     void unload();
 
+    // Calls the plugin's handlers for the event if it is loaded. A failing handler is logged, the plugin stays loaded.
+    void emitEvent(const char* event);
+
    private:
     void fail(const QString& error);
 

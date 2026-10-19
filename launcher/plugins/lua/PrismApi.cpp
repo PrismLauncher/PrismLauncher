@@ -10,6 +10,8 @@
 #include <QDir>
 
 #include <algorithm>
+#include <array>
+#include <cstring>
 
 #include <lua.hpp>
 
@@ -78,6 +80,53 @@ void pushLogFunction(lua_State* L, LogLevel level)
     lua_pushcclosure(L, log, 2);
 }
 
+// Registry key of the table that maps event names to arrays of handlers
+constexpr const char* s_handlersKey = "prism.handlers";
+constexpr std::array s_events = { "launcher.ready" };
+
+bool isKnownEvent(const char* event)
+{
+    return std::any_of(s_events.begin(), s_events.end(), [event](const char* known) { return std::strcmp(event, known) == 0; });
+}
+
+// prism.on(event, handler)
+int on(lua_State* L)
+{
+    const char* event = luaL_checkstring(L, 1);
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+    if (!isKnownEvent(event)) {
+        return luaL_error(L, "unknown event '%s'", event);
+    }
+
+    lua_getfield(L, LUA_REGISTRYINDEX, s_handlersKey);
+    if (lua_getfield(L, -1, event) == LUA_TNIL) {
+        lua_pop(L, 1);
+        lua_newtable(L);
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -3, event);
+    }
+    lua_pushvalue(L, 2);
+    lua_rawseti(L, -2, static_cast<lua_Integer>(lua_rawlen(L, -2)) + 1);
+    return 0;
+}
+
+// Calls the handlers of an event. Argument 1 is a light userdata pointing to the event name.
+int dispatch(lua_State* L)
+{
+    const char* event = static_cast<const char*>(lua_touserdata(L, 1));
+    lua_getfield(L, LUA_REGISTRYINDEX, s_handlersKey);
+    if (lua_getfield(L, -1, event) != LUA_TTABLE) {
+        return 0;
+    }
+    // Handlers registered meanwhile only run from the next event on
+    const auto count = static_cast<lua_Integer>(lua_rawlen(L, -1));
+    for (lua_Integer i = 1; i <= count; i++) {
+        lua_rawgeti(L, -1, i);
+        lua_call(L, 0, 0);
+    }
+    return 0;
+}
+
 struct InstallArgs {
     QByteArray id;
     QByteArray settingsPath;
@@ -106,6 +155,11 @@ int openPrism(lua_State* L)
     PrismApi::pushSettingsFunction(L, args->settingsPath);
     lua_setfield(L, -2, "settings");
 
+    lua_newtable(L);
+    lua_setfield(L, LUA_REGISTRYINDEX, s_handlersKey);
+    lua_pushcfunction(L, on);
+    lua_setfield(L, -2, "on");
+
     lua_setglobal(L, "prism");
     return 0;
 }
@@ -127,6 +181,14 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
         return error;
     }
     return std::nullopt;
+}
+
+std::optional<QString> emitEvent(LuaState& state, const char* event)
+{
+    lua_State* L = state.get();
+    lua_pushcfunction(L, dispatch);
+    lua_pushlightuserdata(L, const_cast<char*>(event));
+    return state.call(1);
 }
 
 }  // namespace PrismApi

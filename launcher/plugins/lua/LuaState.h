@@ -40,6 +40,9 @@ class LuaState {
 
     // Runs a text chunk. Returns the error message on failure.
     std::optional<QString> run(const QByteArray& code, const QString& chunkName);
+    // Calls the function below the nargs arguments at the top of the stack with a fresh instruction budget, and pops
+    // them, discarding any results. Returns the error message, with a traceback, on failure.
+    std::optional<QString> call(int nargs);
 
    private:
     struct Memory {

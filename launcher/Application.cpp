@@ -106,6 +106,9 @@
 #include <utility>
 
 #include "InstanceList.h"
+#ifdef ENABLE_LUA_PLUGINS
+#include "plugins/PluginManager.h"
+#endif
 #include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
@@ -710,6 +713,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
         m_settings->registerSetting("DownloadsDirWatchRecursive", false);
         m_settings->registerSetting("MoveModsFromDownloadsDir", false);
+
+#ifdef ENABLE_LUA_PLUGINS
+        // Ids of the plugins the user enabled
+        m_settings->registerSetting("EnabledPlugins", QVariant(QStringList()));
+#endif
         m_settings->registerSetting("SkinsDir", "skins");
         m_settings->registerSetting("JavaDir", "java");
 
@@ -1020,6 +1028,16 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_instances->loadList();
         qInfo() << "<> Instances loaded.";
     }
+
+#ifdef ENABLE_LUA_PLUGINS
+    // after the instances, which plugins may use
+    {
+        m_plugins.reset(new PluginManager(FS::PathCombine(m_dataPath, "plugins"), m_settings->getSetting("EnabledPlugins")));
+        qInfo() << "Loading plugins...";
+        m_plugins->discover();
+        qInfo() << "<> Plugins loaded.";
+    }
+#endif
 
     // and accounts
     {
@@ -1370,6 +1388,9 @@ bool Application::event(QEvent* event)
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
+#ifdef ENABLE_LUA_PLUGINS
+    m_plugins->emitEvent("launcher.ready");
+#endif
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto* inst = instances()->getInstanceById(m_instanceIdToLaunch);
         if (inst) {

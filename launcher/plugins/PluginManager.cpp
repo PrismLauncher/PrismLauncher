@@ -89,6 +89,13 @@ bool PluginManager::setEnabled(const QString& id, bool enabled)
     return ok;
 }
 
+void PluginManager::emitEvent(const char* event)
+{
+    for (const auto& plugin : m_plugins) {
+        plugin->emitEvent(event);
+    }
+}
+
 QStringList PluginManager::enabledIds() const
 {
     return m_enabledPlugins->get().toStringList();

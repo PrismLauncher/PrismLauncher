@@ -229,6 +229,37 @@ class LuaStateTest : public QObject {
         // Closing the state must not hang either
     }
 
+    void test_call()
+    {
+        LuaState state;
+        QCOMPARE(state.run("function add(a, b) result = a + b return result end", "def"), std::nullopt);
+
+        lua_State* L = state.get();
+        lua_getglobal(L, "add");
+        lua_pushinteger(L, 2);
+        lua_pushinteger(L, 3);
+        QCOMPARE(state.call(2), std::nullopt);
+        QCOMPARE(lua_gettop(L), 0);
+        QCOMPARE(globalString(state, "result"), "5");
+
+        lua_getglobal(L, "add");
+        lua_pushinteger(L, 2);
+        lua_pushboolean(L, true);
+        auto error = state.call(2);
+        QVERIFY(error);
+        QVERIFY2(error->contains("attempt to perform arithmetic") && error->contains("stack traceback:"), qPrintable(*error));
+        QCOMPARE(lua_gettop(L), 0);
+
+        // Each call gets a fresh budget
+        state.setInstructionLimit(100'000);
+        QCOMPARE(state.run("function spin(n) for i = 1, n do end end", "def"), std::nullopt);
+        for (int i = 0; i < 10; i++) {
+            lua_getglobal(L, "spin");
+            lua_pushinteger(L, 20'000);
+            QCOMPARE(state.call(1), std::nullopt);
+        }
+    }
+
     void test_tooSmallLimit()
     {
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Failed to (create Lua state|open Lua libraries)"));

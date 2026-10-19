@@ -165,15 +165,27 @@ std::optional<QString> LuaState::run(const QByteArray& code, const QString& chun
         return QStringLiteral("Lua state is not initialized");
     }
 
-    resetInstructionBudget();
-    const int base = lua_gettop(m_state);
-    lua_pushcfunction(m_state, messageHandler);
-
     const QByteArray name = '=' + chunkName.toUtf8();
-    int status = luaL_loadbufferx(m_state, code.constData(), code.size(), name.constData(), "t");
-    if (status == LUA_OK) {
-        status = lua_pcall(m_state, 0, 0, base + 1);
+    if (luaL_loadbufferx(m_state, code.constData(), code.size(), name.constData(), "t") != LUA_OK) {
+        const char* msg = lua_tostring(m_state, -1);
+        std::optional<QString> error = msg ? QString::fromUtf8(msg) : QStringLiteral("unknown Lua error");
+        lua_pop(m_state, 1);
+        return error;
     }
+    return call(0);
+}
+
+std::optional<QString> LuaState::call(int nargs)
+{
+    if (!m_state) {
+        return QStringLiteral("Lua state is not initialized");
+    }
+
+    resetInstructionBudget();
+    const int base = lua_gettop(m_state) - nargs - 1;
+    lua_pushcfunction(m_state, messageHandler);
+    lua_insert(m_state, base + 1);
+    const int status = lua_pcall(m_state, nargs, 0, base + 1);
 
     std::optional<QString> error;
     if (status != LUA_OK) {
