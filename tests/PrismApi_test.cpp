@@ -1,4 +1,5 @@
 #include <QDir>
+#include <QFile>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -349,6 +350,17 @@ class PrismApiTest : public QObject {
         QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), { .notifier = &notifier }), std::nullopt);
         auto error = denied.run("prism.ui.notify('x')", "test");
         QVERIFY(error && error->contains("prism.ui.notify requires the 'ui' permission"));
+    }
+
+    void test_library()
+    {
+        // The script lives in a file: moc misreads raw strings with escaped quotes
+        QFile script(QFINDTESTDATA("testdata/PrismApi/library.lua"));
+        QVERIFY(script.open(QIODevice::ReadOnly));
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
+        auto error = state.run(script.readAll(), "library.lua");
+        QVERIFY2(!error, qPrintable(error.value_or("")));
     }
 
     void test_pluginLoadsWithApi()

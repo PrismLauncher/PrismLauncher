@@ -20,6 +20,7 @@
 #include "plugins/PluginManifest.h"
 #include "plugins/lua/FsApi.h"
 #include "plugins/lua/HttpApi.h"
+#include "plugins/lua/LibraryApi.h"
 #include "plugins/lua/LuaState.h"
 #include "plugins/lua/SettingsApi.h"
 #include "plugins/lua/UiApi.h"
@@ -566,6 +567,7 @@ struct InstallArgs {
     // Where require looks for modules, when package is available
     QByteArray packagePath;
     QByteArray packageCPath;
+    QByteArray pluginDir;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -643,6 +645,7 @@ int openPrism(lua_State* L)
     PrismApi::addWindowFunction(L, args->ui);
     lua_setfield(L, -2, "ui");
 
+    PrismApi::installLibrary(L, args->pluginDir);
     lua_setglobal(L, "prism");
 
     // Only unrestricted plugins have package: let require load the plugin's own modules
@@ -676,7 +679,8 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
                       manifest.hasPermission("net"),
                       host.http,
                       (QDir(directory).filePath("?.lua") + ';' + QDir(directory).filePath("?/init.lua")).toUtf8(),
-                      (QDir(directory).filePath("?.so") + ';' + QDir(directory).filePath("?.dll")).toUtf8() };
+                      (QDir(directory).filePath("?.so") + ';' + QDir(directory).filePath("?.dll")).toUtf8(),
+                      directory.toUtf8() };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

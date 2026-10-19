@@ -188,9 +188,40 @@ class PluginTest : public QObject {
     {
         Plugin plugin(
             makePlugin("boxed", { { "plugin.toml", manifest("boxed") },
-                                  { "main.lua", "names = tostring(io) .. tostring(os) .. tostring(package) .. tostring(require)" } }));
+                                  { "main.lua", "names = tostring(io) .. tostring(os) .. tostring(package) .. type(require)" } }));
         QVERIFY2(plugin.load(), qPrintable(plugin.error()));
-        QCOMPARE(globalString(plugin, "names"), "nilnilnilnil");
+        // require only loads modules from the plugin's folder
+        QCOMPARE(globalString(plugin, "names"), "nilnilnilfunction");
+    }
+
+    void test_require()
+    {
+        Plugin plugin(makePlugin("modules", { { "plugin.toml", manifest("modules") },
+                                              { "util/strings.lua", "loads = (loads or 0) + 1 return { shout = string.upper }" },
+                                              { "util/init.lua", "return { name = ... }" },
+                                              { "noresult.lua", "x = 1" },
+                                              { "broken.lua", "error(\"broken module\")" },
+                                              { "loop.lua", "require(\"loop\")" },
+                                              { "main.lua",
+                                                "local s = require(\"util.strings\")\n"
+                                                "assert(require(\"util.strings\") == s)\n"
+                                                "shouted = s.shout(\"hi\")\n"
+                                                "utilName = require(\"util\").name\n"
+                                                "noresult = tostring(require(\"noresult\"))\n"
+                                                "local function message(name) local ok, err = pcall(require, name) return err end\n"
+                                                "missing = message(\"missing\")\n"
+                                                "escape = message(\"..secret\")\n"
+                                                "broken = message(\"broken\")\n"
+                                                "loop = message(\"loop\")\n" } }));
+        QVERIFY2(plugin.load(), qPrintable(plugin.error()));
+        QCOMPARE(globalString(plugin, "shouted"), "HI");
+        QCOMPARE(globalString(plugin, "loads"), "1");
+        QCOMPARE(globalString(plugin, "utilName"), "util");
+        QCOMPARE(globalString(plugin, "noresult"), "true");
+        QVERIFY(globalString(plugin, "missing").contains("module 'missing' not found"));
+        QVERIFY(globalString(plugin, "escape").contains("invalid module name '..secret'"));
+        QVERIFY(globalString(plugin, "broken").contains("broken module"));
+        QVERIFY(globalString(plugin, "loop").contains("module 'loop' requires itself"));
     }
 
     void test_trailingSlash()
