@@ -40,8 +40,12 @@ end
 
 local editor = nil
 
--- Every .lua file of every plugin, as paths relative to the plugins folder
-local function luaFiles()
+local function isLua(path)
+    return path:match("%.lua$") ~= nil
+end
+
+-- Every .lua file and plugin.toml of every plugin, as paths relative to the plugins folder
+local function pluginFiles()
     local files = {}
     local function walk(dir, depth)
         for _, entry in ipairs(plugins:list(dir)) do
@@ -49,7 +53,7 @@ local function luaFiles()
             if entry.name:sub(1, 1) ~= "." then
                 if entry.dir and depth < 4 then
                     walk(path, depth + 1)
-                elseif not entry.dir and path:match("%.lua$") then
+                elseif not entry.dir and (isLua(path) or entry.name == "plugin.toml") then
                     files[#files + 1] = path
                 end
             end
@@ -78,10 +82,13 @@ local function open()
         if not state.current then
             return
         end
-        local problems = checks.run(code:text(), state.current)
+        -- The checks are for Lua; manifests are plain TOML
+        local problems = isLua(state.current) and checks.run(code:text(), state.current) or {}
         code:setProblems(problems)
         local summary
-        if #problems == 0 then
+        if not isLua(state.current) then
+            summary = "Changes to permissions need approval again in Settings > Plugins."
+        elseif #problems == 0 then
             summary = "No problems."
         else
             local first = problems[1]
@@ -95,7 +102,7 @@ local function open()
     end
 
     local function refresh()
-        state.files = luaFiles()
+        state.files = pluginFiles()
         state.selecting = true
         list:setItems(state.files)
         for i, file in ipairs(state.files) do

@@ -113,6 +113,7 @@ class LuaEditorPluginTest : public QObject {
         }
         QVERIFY2(files.contains("com.example.target/main.lua"), qPrintable(files.join(", ")));
         QVERIFY(files.contains("prism.luaeditor/checks.lua"));
+        QVERIFY(files.contains("com.example.target/plugin.toml"));
 
         list->setCurrentRow(static_cast<int>(files.indexOf("com.example.target/main.lua")));
         auto* editor = window->findChild<LuaCodeEditor*>();
@@ -153,6 +154,12 @@ class LuaEditorPluginTest : public QObject {
         editor->setPlainText("changed");
         QTest::mouseClick(button(window, "Revert"), Qt::LeftButton);
         QCOMPARE(editor->toPlainText(), "prism.log.info(\"saved\")\n");
+
+        // Manifests open too, without Lua checks
+        list->setCurrentRow(static_cast<int>(files.indexOf("com.example.target/plugin.toml")));
+        QVERIFY(editor->toPlainText().startsWith("id = \"com.example.target\""));
+        QVERIFY(editor->problems().isEmpty());
+        QVERIFY(window->findChild<QLabel*>()->text().contains("need approval again"));
 
         // Completion offers the API and Lua
         QVERIFY(editor->completionsFor("prism.fs.").contains("prism.fs.data"));
