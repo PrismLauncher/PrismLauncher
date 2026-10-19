@@ -376,6 +376,16 @@ endif()
 
 find_package(ZLIB REQUIRED)
 
+option(Launcher_ENABLE_LUA_PLUGINS "Enable Lua plugin support" ON)
+option(Launcher_USE_SYSTEM_LUA "Use the system Lua library instead of the bundled one" OFF)
+
+if(Launcher_ENABLE_LUA_PLUGINS AND Launcher_USE_SYSTEM_LUA)
+    find_package(Lua 5.5 REQUIRED)
+    if(LUA_VERSION_STRING VERSION_GREATER_EQUAL 5.6)
+        message(FATAL_ERROR "Lua 5.5 is required, but Lua ${LUA_VERSION_STRING} was found")
+    endif()
+endif()
+
 
 include(ECMQtDeclareLoggingCategory)
 
@@ -534,6 +544,9 @@ add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 add_subdirectory(libraries/qdcss) # css parser
+if(Launcher_ENABLE_LUA_PLUGINS)
+    add_subdirectory(libraries/lua) # scripting language for plugins
+endif()
 
 ############################### Built Artifacts ###############################
 

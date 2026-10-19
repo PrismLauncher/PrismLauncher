@@ -1271,6 +1271,11 @@ if (Launcher_ENABLE_GAMEMODE)
     target_compile_definitions(Launcher_logic PUBLIC ENABLE_GAMEMODE)
 endif()
 
+if (Launcher_ENABLE_LUA_PLUGINS)
+    target_link_libraries(Launcher_logic Launcher_lua)
+    target_compile_definitions(Launcher_logic PUBLIC ENABLE_LUA_PLUGINS)
+endif()
+
 target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Xml

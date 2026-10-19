@@ -77,6 +77,14 @@ BSD licensed, derived from [QtSingleApplication](https://github.com/qtproject/qt
 
 Changes are made to make the code more generic and useful in less usual conditions.
 
+## lua
+
+The [Lua](https://www.lua.org) 5.5.1 interpreter, used to run launcher plugins. Only the library sources are included, unmodified.
+
+Can be replaced with the system library by setting `Launcher_USE_SYSTEM_LUA`.
+
+Licenced under the MIT licence.
+
 ## murmur2
 
 Canonical implementation of the murmur2 hash, taken from [SMHasher](https://github.com/aappleby/smhasher).
