@@ -46,6 +46,9 @@ class Plugin {
     // Calls the plugin's handlers for the event if it is loaded. A failing handler is logged, the plugin stays loaded.
     void emitEvent(const char* event);
 
+    // Increases every time the plugin loads, so work prepared for one run can tell if it is still valid
+    int loadCount() const { return m_loadCount; }
+
    private:
     void fail(const QString& error);
 
@@ -54,4 +57,5 @@ class Plugin {
     State m_state = State::Disabled;
     QString m_error;
     std::unique_ptr<LuaState> m_lua;
+    int m_loadCount = 0;
 };

@@ -81,6 +81,7 @@ bool Plugin::load()
 
     m_lua = std::move(lua);
     m_state = State::Loaded;
+    m_loadCount++;
     return true;
 }
 

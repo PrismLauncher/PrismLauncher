@@ -12,6 +12,7 @@
 #include <memory>
 #include <vector>
 
+class LaunchTask;
 class Plugin;
 class Setting;
 
@@ -41,6 +42,10 @@ class PluginManager : public QObject {
     void emitEvent(const char* event);
     // Sends launcher.ready to the loaded plugins, and from now on to each plugin right after it loads
     void setLauncherReady();
+
+    // Inserts the steps the loaded plugins registered with prism.launch.addStep. Steps anchored to a phase that this
+    // launch does not have are skipped.
+    void contributeLaunchSteps(LaunchTask* task);
 
    signals:
     // The list of plugins was rebuilt

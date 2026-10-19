@@ -9,7 +9,11 @@
 
 #include <algorithm>
 
+#include "launch/LaunchTask.h"
+#include "plugins/Logging.h"
+#include "plugins/LuaLaunchStep.h"
 #include "plugins/Plugin.h"
+#include "plugins/lua/PrismApi.h"
 #include "settings/Setting.h"
 
 PluginManager::PluginManager(const QString& pluginsDir, std::shared_ptr<Setting> enabledPlugins, QObject* parent)
@@ -100,6 +104,52 @@ void PluginManager::setLauncherReady()
 {
     m_launcherReady = true;
     emitEvent("launcher.ready");
+}
+
+void PluginManager::contributeLaunchSteps(LaunchTask* task)
+{
+    struct Contribution {
+        Plugin* plugin;
+        PrismApi::LaunchStepInfo info;
+    };
+    QList<Contribution> contributions;
+    for (const auto& plugin : m_plugins) {
+        if (plugin->state() != Plugin::State::Loaded) {
+            continue;
+        }
+        QList<PrismApi::LaunchStepInfo> steps;
+        if (auto error = PrismApi::launchSteps(*plugin->lua(), steps)) {
+            qCWarning(pluginLogC).noquote() << QString("[%1] could not read launch steps: %2").arg(plugin->id(), *error);
+            continue;
+        }
+        for (const auto& step : steps) {
+            contributions.append({ plugin.get(), step });
+        }
+    }
+
+    // Each insertion goes right before the first or after the last step of its phase. To keep the registration order,
+    // "before" steps are inserted in order and "after" steps in reverse.
+    auto insert = [this, task](const Contribution& contribution) {
+        Plugin* plugin = contribution.plugin;
+        const auto& info = contribution.info;
+        const QString name = info.name.isEmpty() ? plugin->manifest()->name : info.name;
+        auto step = makeShared<LuaLaunchStep>(task, this, plugin->id(), plugin->loadCount(), info.index, name);
+        step->setId("plugin:" + plugin->id());
+        if (!task->insertStep(step, info.anchor, info.before ? LaunchTask::Position::Before : LaunchTask::Position::After)) {
+            qCInfo(pluginLogC).noquote()
+                << QString("[%1] skipping launch step \"%2\": this launch has no '%3' phase").arg(plugin->id(), name, info.anchor);
+        }
+    };
+    for (const auto& contribution : contributions) {
+        if (contribution.info.before) {
+            insert(contribution);
+        }
+    }
+    for (auto it = contributions.crbegin(); it != contributions.crend(); ++it) {
+        if (!it->info.before) {
+            insert(*it);
+        }
+    }
 }
 
 QStringList PluginManager::enabledIds() const

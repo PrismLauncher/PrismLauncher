@@ -37,6 +37,9 @@
 
 #include "MinecraftInstance.h"
 #include "Application.h"
+#ifdef ENABLE_LUA_PLUGINS
+#include "plugins/PluginManager.h"
+#endif
 #include "BuildConfig.h"
 #include "Json.h"
 #include "QObjectPtr.h"
@@ -1282,6 +1285,11 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     if (m_settings->get("QuitAfterGameStop").toBool()) {
         process->appendStep(makeShared<QuitAfterGameStop>(pptr), LaunchStepIds::QuitAfterStop);
     }
+#ifdef ENABLE_LUA_PLUGINS
+    if (auto* plugins = APPLICATION->plugins()) {
+        plugins->contributeLaunchSteps(pptr);
+    }
+#endif
     m_launchProcess = std::move(process);
     emit launchTaskChanged(m_launchProcess.get());
     return m_launchProcess.get();

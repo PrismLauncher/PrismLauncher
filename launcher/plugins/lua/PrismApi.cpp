@@ -15,6 +15,7 @@
 
 #include <lua.hpp>
 
+#include "launch/LaunchStepIds.h"
 #include "plugins/Logging.h"
 #include "plugins/PluginManifest.h"
 #include "plugins/lua/LuaState.h"
@@ -127,9 +128,159 @@ int dispatch(lua_State* L)
     return 0;
 }
 
+// Registry key of the array of steps registered with prism.launch.addStep
+constexpr const char* s_launchStepsKey = "prism.launchSteps";
+// Registry key (by address) of the box holding the LaunchContext of the running step
+const char s_contextKey = 0;
+
+bool isLaunchPhase(const char* id)
+{
+    return std::any_of(LaunchStepIds::all.begin(), LaunchStepIds::all.end(),
+                       [id](const char* phase) { return std::strcmp(id, phase) == 0; });
+}
+
+// prism.launch.addStep{ before = phase | after = phase, run = function(ctx), name = string }: upvalue 1 tells whether
+// the plugin has the launch.hooks permission
+int addLaunchStep(lua_State* L)
+{
+    if (!lua_toboolean(L, lua_upvalueindex(1))) {
+        return luaL_error(L, "prism.launch.addStep requires the 'launch.hooks' permission");
+    }
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_settop(L, 1);
+
+    const int beforeType = lua_getfield(L, 1, "before");
+    const int afterType = lua_getfield(L, 1, "after");
+    if ((beforeType == LUA_TNIL) == (afterType == LUA_TNIL)) {
+        return luaL_error(L, "set either 'before' or 'after' to a launch phase");
+    }
+    const bool before = beforeType != LUA_TNIL;
+    const int anchor = before ? 2 : 3;
+    if (lua_type(L, anchor) != LUA_TSTRING || !isLaunchPhase(lua_tostring(L, anchor))) {
+        return luaL_error(L, "unknown launch phase '%s'", luaL_tolstring(L, anchor, nullptr));
+    }
+    if (lua_getfield(L, 1, "run") != LUA_TFUNCTION) {
+        return luaL_error(L, "'run' must be a function");
+    }
+    const int nameType = lua_getfield(L, 1, "name");
+    if (nameType != LUA_TNIL && nameType != LUA_TSTRING) {
+        return luaL_error(L, "'name' must be a string");
+    }
+    // Stack: spec, before, after, run, name
+
+    lua_getfield(L, LUA_REGISTRYINDEX, s_launchStepsKey);
+    const auto count = static_cast<lua_Integer>(lua_rawlen(L, -1));
+    if (count >= PrismApi::s_maxLaunchSteps) {
+        return luaL_error(L, "too many launch steps, the maximum is %d", PrismApi::s_maxLaunchSteps);
+    }
+    lua_createtable(L, 0, 4);
+    lua_pushvalue(L, anchor);
+    lua_setfield(L, -2, "anchor");
+    lua_pushboolean(L, before);
+    lua_setfield(L, -2, "before");
+    lua_pushvalue(L, 4);
+    lua_setfield(L, -2, "run");
+    lua_pushvalue(L, 5);
+    lua_setfield(L, -2, "name");
+    lua_rawseti(L, -2, count + 1);
+    return 0;
+}
+
+// Argument 1 is a light userdata pointing to the QList<LaunchStepInfo> to fill
+int collectLaunchSteps(lua_State* L)
+{
+    auto* steps = static_cast<QList<PrismApi::LaunchStepInfo>*>(lua_touserdata(L, 1));
+    lua_getfield(L, LUA_REGISTRYINDEX, s_launchStepsKey);
+    const auto count = static_cast<int>(lua_rawlen(L, -1));
+    for (int i = 1; i <= count; i++) {
+        lua_rawgeti(L, -1, i);
+        lua_getfield(L, -1, "anchor");
+        lua_getfield(L, -2, "before");
+        lua_getfield(L, -3, "name");
+        // Only non-raising accessors while C++ temporaries exist
+        steps->append({ i, QString::fromUtf8(lua_tostring(L, -3)), bool(lua_toboolean(L, -2)),
+                        lua_isstring(L, -1) ? QString::fromUtf8(lua_tostring(L, -1)) : QString() });
+        lua_pop(L, 4);
+    }
+    return 0;
+}
+
+PrismApi::LaunchContext* checkContext(lua_State* L)
+{
+    auto* context = *static_cast<PrismApi::LaunchContext**>(lua_touserdata(L, lua_upvalueindex(1)));
+    if (!context) {
+        luaL_error(L, "this launch step has already finished");
+    }
+    return context;
+}
+
+// ctx.log(text): upvalue 1 is the context box
+int contextLog(lua_State* L)
+{
+    PrismApi::LaunchContext* context = checkContext(L);
+    size_t length = 0;
+    const char* text = luaL_checklstring(L, 1, &length);
+    length = std::min<size_t>(length, PrismApi::s_maxLogMessageLength);
+    context->log(QString::fromUtf8(text, static_cast<qsizetype>(length)));
+    return 0;
+}
+
+// ctx.abort([reason]): upvalue 1 is the context box
+int contextAbort(lua_State* L)
+{
+    PrismApi::LaunchContext* context = checkContext(L);
+    size_t length = 0;
+    const char* reason = luaL_optlstring(L, 1, "aborted by plugin", &length);
+    length = std::min<size_t>(length, PrismApi::s_maxLogMessageLength);
+    context->aborted = true;
+    context->abortReason = QString::fromUtf8(reason, static_cast<qsizetype>(length));
+    // Stop the step; even if the script catches this, the launch is aborted
+    return luaL_error(L, "launch aborted: %s", reason);
+}
+
+struct RunStepArgs {
+    int index;
+    PrismApi::LaunchContext* context;
+};
+
+// Argument 1 is a light userdata pointing to the RunStepArgs
+int runStep(lua_State* L)
+{
+    const auto* args = static_cast<const RunStepArgs*>(lua_touserdata(L, 1));
+    lua_getfield(L, LUA_REGISTRYINDEX, s_launchStepsKey);
+    if (lua_rawgeti(L, -1, args->index) != LUA_TTABLE) {
+        return luaL_error(L, "unknown launch step %d", args->index);
+    }
+    lua_getfield(L, -1, "run");
+
+    // ctx
+    lua_createtable(L, 0, 3);
+    lua_createtable(L, 0, 2);
+    lua_pushlstring(L, args->context->instanceId.constData(), args->context->instanceId.size());
+    lua_setfield(L, -2, "id");
+    lua_pushlstring(L, args->context->instanceName.constData(), args->context->instanceName.size());
+    lua_setfield(L, -2, "name");
+    lua_setfield(L, -2, "instance");
+
+    // The box is cleared once the step returns, so a ctx kept by the script cannot reach a dead context
+    auto* box = static_cast<PrismApi::LaunchContext**>(lua_newuserdatauv(L, sizeof(PrismApi::LaunchContext*), 0));
+    *box = args->context;
+    lua_pushvalue(L, -1);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, &s_contextKey);
+    lua_pushvalue(L, -1);
+    lua_pushcclosure(L, contextLog, 1);
+    lua_setfield(L, -3, "log");
+    lua_pushcclosure(L, contextAbort, 1);
+    lua_setfield(L, -2, "abort");
+
+    lua_call(L, 1, 0);
+    return 0;
+}
+
 struct InstallArgs {
     QByteArray id;
     QByteArray settingsPath;
+    bool launchHooks;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -160,6 +311,14 @@ int openPrism(lua_State* L)
     lua_pushcfunction(L, on);
     lua_setfield(L, -2, "on");
 
+    lua_newtable(L);
+    lua_setfield(L, LUA_REGISTRYINDEX, s_launchStepsKey);
+    lua_createtable(L, 0, 1);  // prism.launch
+    lua_pushboolean(L, args->launchHooks);
+    lua_pushcclosure(L, addLaunchStep, 1);
+    lua_setfield(L, -2, "addStep");
+    lua_setfield(L, -2, "launch");
+
     lua_setglobal(L, "prism");
     return 0;
 }
@@ -171,7 +330,8 @@ namespace PrismApi {
 std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory)
 {
     // Everything that allocates Lua memory happens inside the protected call, so running out of memory cannot panic
-    const InstallArgs args{ manifest.id.toUtf8(), QDir(directory).filePath("settings.ini").toUtf8() };
+    const InstallArgs args{ manifest.id.toUtf8(), QDir(directory).filePath("settings.ini").toUtf8(),
+                            manifest.hasPermission("launch.hooks") };
     lua_State* L = state.get();
     lua_pushcfunction(L, openPrism);
     lua_pushlightuserdata(L, const_cast<InstallArgs*>(&args));
@@ -181,6 +341,30 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
         return error;
     }
     return std::nullopt;
+}
+
+std::optional<QString> launchSteps(LuaState& state, QList<LaunchStepInfo>& steps)
+{
+    lua_State* L = state.get();
+    lua_pushcfunction(L, collectLaunchSteps);
+    lua_pushlightuserdata(L, &steps);
+    return state.call(1);
+}
+
+std::optional<QString> runLaunchStep(LuaState& state, int index, LaunchContext& context)
+{
+    lua_State* L = state.get();
+    RunStepArgs args{ index, &context };
+    lua_pushcfunction(L, runStep);
+    lua_pushlightuserdata(L, &args);
+    auto error = state.call(1);
+
+    // Neither of these raises errors
+    if (lua_rawgetp(L, LUA_REGISTRYINDEX, &s_contextKey) == LUA_TUSERDATA) {
+        *static_cast<LaunchContext**>(lua_touserdata(L, -1)) = nullptr;
+    }
+    lua_pop(L, 1);
+    return error;
 }
 
 std::optional<QString> emitEvent(LuaState& state, const char* event)
