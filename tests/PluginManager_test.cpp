@@ -199,6 +199,49 @@ class PluginManagerTest : public QObject {
         manager.discover();
     }
 
+    void test_actions()
+    {
+        addPlugin("com.example.ui", R"(
+            prism.ui.addAction{ text = "Hello", scope = "launcher", run = function() prism.log.info("hello action") end }
+            prism.ui.addAction{ text = "Per instance", scope = "instance", run = function(ctx) end }
+            prism.ui.addAction{ text = "Fails", scope = "launcher", run = function() error("broken action") end }
+        )");
+        addPlugin("com.example.plain");
+        QDir dir(pluginsDir());
+        writeFile(dir.filePath("com.example.ui/plugin.toml"),
+                  "id = \"com.example.ui\"\nname = \"UI plugin\"\nversion = \"1\"\napi = 1\npermissions = [\"ui\"]\n");
+
+        PluginManager manager(pluginsDir(), m_enabled);
+        manager.discover();
+        QVERIFY(!manager.hasUiPlugins());
+
+        m_enabled->set(QStringList({ "com.example.ui", "com.example.plain" }));
+        manager.discover();
+        QVERIFY(manager.hasUiPlugins());
+
+        const auto launcherActions = manager.actions(PrismApi::ActionScope::Launcher);
+        QCOMPARE(launcherActions.size(), 2);
+        QCOMPARE(launcherActions[0].pluginName, "UI plugin");
+        QCOMPARE(launcherActions[0].text, "Hello");
+        QCOMPARE(manager.actions(PrismApi::ActionScope::Instance).size(), 1);
+
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.ui] hello action");
+        QCOMPARE(manager.runAction(launcherActions[0]), std::nullopt);
+
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("action \"Fails\" failed: .*broken action"));
+        auto error = manager.runAction(launcherActions[1]);
+        QVERIFY(error && error->contains("broken action"));
+
+        // Without the instance list there is no such instance
+        error = manager.runAction(manager.actions(PrismApi::ActionScope::Instance).first(), "missing");
+        QVERIFY(error && error->contains("does not exist"));
+
+        manager.setEnabled("com.example.ui", false);
+        QVERIFY(!manager.hasUiPlugins());
+        error = manager.runAction(launcherActions[0]);
+        QVERIFY(error && error->contains("is not running"));
+    }
+
     void test_rediscover()
     {
         addPlugin("com.example.a");

@@ -77,6 +77,25 @@ struct LaunchContext {
 // if the step failed; context.aborted tells whether it asked to abort the launch.
 std::optional<QString> runLaunchStep(LuaState& state, int index, LaunchContext& context);
 
+enum class ActionScope { Instance, Launcher };
+
+// An action registered with prism.ui.addAction
+struct UiActionInfo {
+    int index;
+    ActionScope scope;
+    QString text;
+};
+
+constexpr int s_maxUiActions = 16;
+constexpr qsizetype s_maxUiActionTextLength = 100;
+
+// Reads the actions registered with prism.ui.addAction. Returns the error message on failure.
+std::optional<QString> uiActions(LuaState& state, QList<UiActionInfo>& actions);
+
+// Runs the action registered with the given index. ctx.instance holds the instance for instance actions, and is nil
+// when instance is null. Returns the error message on failure.
+std::optional<QString> runUiAction(LuaState& state, int index, const InstanceInfo* instance);
+
 // A field of the table passed to event handlers
 struct EventField {
     const char* key;

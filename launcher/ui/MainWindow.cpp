@@ -94,6 +94,10 @@
 
 #include "ui/GuiUtil.h"
 #include "ui/ViewLogWindow.h"
+
+#ifdef ENABLE_LUA_PLUGINS
+#include "plugins/PluginManager.h"
+#endif
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CreateShortcutDialog.h"
@@ -213,6 +217,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
+
+#ifdef ENABLE_LUA_PLUGINS
+    setupPluginActions();
+#endif
 
     // hide, disable and show stuff
     {
@@ -578,6 +586,11 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
             actions.append(actionRenameGroup);
         }
     }
+#ifdef ENABLE_LUA_PLUGINS
+    if (onInstance && m_instancePluginsAction && m_instancePluginsAction->isVisible()) {
+        actions.append(m_instancePluginsAction);
+    }
+#endif
     QMenu myMenu;
     myMenu.addActions(actions);
     /*
@@ -586,6 +599,83 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
     */
     myMenu.exec(view->mapToGlobal(pos));
 }
+
+#ifdef ENABLE_LUA_PLUGINS
+void MainWindow::setupPluginActions()
+{
+    PluginManager* plugins = APPLICATION->plugins();
+    if (!plugins) {
+        return;
+    }
+
+    // Launcher actions: a menu in the menu bar, also shown by a button in the main toolbar
+    m_pluginsMenu = new QMenu(tr("&Plugins"), this);
+    connect(m_pluginsMenu, &QMenu::aboutToShow, this, [this] { fillPluginMenu(m_pluginsMenu, false); });
+    ui->menuBar->insertMenu(ui->helpMenu->menuAction(), m_pluginsMenu);
+
+    m_pluginsButton = new QAction(QIcon::fromTheme("plugins"), tr("Plugins"), this);
+    m_pluginsButton->setToolTip(tr("Actions added by plugins"));
+    m_pluginsButton->setMenu(m_pluginsMenu);
+    ui->mainToolBar->insertAction(ui->actionHelpButton, m_pluginsButton);
+    if (auto* button = qobject_cast<QToolButton*>(ui->mainToolBar->widgetForAction(m_pluginsButton))) {
+        button->setPopupMode(QToolButton::InstantPopup);
+    }
+
+    // Instance actions: a button in the instance toolbar, also added to the instance context menu
+    auto* instanceMenu = new QMenu(this);
+    connect(instanceMenu, &QMenu::aboutToShow, this, [this, instanceMenu] { fillPluginMenu(instanceMenu, true); });
+    m_instancePluginsAction = new QAction(QIcon::fromTheme("plugins"), tr("Plugins"), this);
+    m_instancePluginsAction->setToolTip(tr("Actions added by plugins for this instance"));
+    m_instancePluginsAction->setMenu(instanceMenu);
+    ui->instanceToolBar->addAction(m_instancePluginsAction);
+    if (auto* button = qobject_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(m_instancePluginsAction))) {
+        button->setPopupMode(QToolButton::InstantPopup);
+    }
+
+    connect(plugins, &PluginManager::pluginsChanged, this, &MainWindow::updatePluginActions);
+    connect(plugins, &PluginManager::pluginChanged, this, &MainWindow::updatePluginActions);
+    updatePluginActions();
+}
+
+void MainWindow::updatePluginActions()
+{
+    // Only shown when a running plugin may add actions, so nothing changes for users without such plugins
+    const bool visible = APPLICATION->plugins()->hasUiPlugins();
+    m_pluginsMenu->menuAction()->setVisible(visible);
+    m_pluginsButton->setVisible(visible);
+    m_instancePluginsAction->setVisible(visible);
+}
+
+void MainWindow::fillPluginMenu(QMenu* menu, bool instanceActions)
+{
+    menu->clear();
+    const auto actions =
+        APPLICATION->plugins()->actions(instanceActions ? PrismApi::ActionScope::Instance : PrismApi::ActionScope::Launcher);
+    QString lastPlugin;
+    for (const auto& action : actions) {
+        if (action.pluginId != lastPlugin) {
+            menu->addSection(action.pluginName);
+            lastPlugin = action.pluginId;
+        }
+        // Plugin text is not meant to define shortcuts
+        QAction* item = menu->addAction(QString(action.text).replace('&', "&&"));
+        connect(item, &QAction::triggered, this, [this, action, instanceActions] {
+            const QString instanceId = instanceActions && m_selectedInstance ? m_selectedInstance->id() : QString();
+            if (auto error = APPLICATION->plugins()->runAction(action, instanceId)) {
+                CustomMessageBox::selectable(this, tr("Plugin action failed"), *error, QMessageBox::Warning)->show();
+            }
+        });
+    }
+    if (actions.isEmpty()) {
+        menu->addAction(tr("No actions"))->setEnabled(false);
+    }
+    if (!instanceActions) {
+        menu->addSeparator();
+        menu->addAction(QIcon::fromTheme("plugins"), tr("Manage Plugins..."), this,
+                        [this] { APPLICATION->ShowGlobalSettings(this, "plugins"); });
+    }
+}
+#endif
 
 void MainWindow::updateMainToolBar()
 {

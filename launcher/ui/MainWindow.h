@@ -49,6 +49,7 @@
 class LaunchController;
 class NewsChecker;
 class QToolButton;
+class QMenu;
 class InstanceProxyModel;
 class QLabel;
 class MinecraftInstance;
@@ -229,6 +230,13 @@ class MainWindow : public QMainWindow {
     void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
 
+#ifdef ENABLE_LUA_PLUGINS
+    // Menus and buttons for the actions plugins add with prism.ui.addAction
+    void setupPluginActions();
+    void updatePluginActions();
+    void fillPluginMenu(QMenu* menu, bool instanceActions);
+#endif
+
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
 
@@ -244,6 +252,11 @@ class MainWindow : public QMainWindow {
     QAction* instanceInfoWidget = nullptr;
     QLabel* nameLabel = nullptr;
     QToolButton* helpMenuButton = nullptr;
+#ifdef ENABLE_LUA_PLUGINS
+    QMenu* m_pluginsMenu = nullptr;
+    QAction* m_pluginsButton = nullptr;
+    QAction* m_instancePluginsAction = nullptr;
+#endif
     KonamiCode* secretEventFilter = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;

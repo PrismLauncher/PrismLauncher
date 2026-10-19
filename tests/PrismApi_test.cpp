@@ -248,6 +248,62 @@ class PrismApiTest : public QObject {
         QVERIFY(error && error->contains("requires the 'instances.read' permission"));
     }
 
+    void test_uiActions()
+    {
+        auto withPermission = manifest();
+        withPermission.permissions = { "ui" };
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path()), std::nullopt);
+        runOk(state, R"(
+            prism.ui.addAction{ text = "Back up", scope = "instance", run = function(ctx) last = "instance:" .. ctx.instance.name end }
+            prism.ui.addAction{ text = "Say hi", scope = "launcher", run = function(ctx) last = "launcher:" .. tostring(ctx.instance) end }
+            prism.ui.addAction{ text = "Broken", scope = "launcher", run = function() error("nope") end }
+        )");
+
+        QList<PrismApi::UiActionInfo> actions;
+        QCOMPARE(PrismApi::uiActions(state, actions), std::nullopt);
+        QCOMPARE(actions.size(), 3);
+        QCOMPARE(actions[0].text, "Back up");
+        QCOMPARE(actions[0].scope, PrismApi::ActionScope::Instance);
+        QCOMPARE(actions[1].scope, PrismApi::ActionScope::Launcher);
+
+        const PrismApi::InstanceInfo instance{ "a", "Alpha", "", false, 0, 0 };
+        QCOMPARE(PrismApi::runUiAction(state, actions[0].index, &instance), std::nullopt);
+        runOk(state, "assert(last == 'instance:Alpha', last)");
+        QCOMPARE(PrismApi::runUiAction(state, actions[1].index, nullptr), std::nullopt);
+        runOk(state, "assert(last == 'launcher:nil', last)");
+
+        auto error = PrismApi::runUiAction(state, actions[2].index, nullptr);
+        QVERIFY(error && error->contains("nope") && error->contains("stack traceback:"));
+        QVERIFY(PrismApi::runUiAction(state, 99, nullptr));
+    }
+
+    void test_uiActionErrors()
+    {
+        LuaState denied;
+        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path()), std::nullopt);
+        auto error = denied.run("prism.ui.addAction{ text = 'x', scope = 'launcher', run = function() end }", "test");
+        QVERIFY(error && error->contains("prism.ui.addAction requires the 'ui' permission"));
+
+        auto withPermission = manifest();
+        withPermission.permissions = { "ui" };
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path()), std::nullopt);
+        runOk(state, R"(
+            local function check(spec, expected)
+                local ok, err = pcall(prism.ui.addAction, spec)
+                assert(not ok and err:find(expected, 1, true), tostring(err))
+            end
+            check({ scope = "launcher", run = function() end }, "'text' must be a non-empty string")
+            check({ text = "", scope = "launcher", run = function() end }, "'text' must be a non-empty string")
+            check({ text = string.rep("x", 101), scope = "launcher", run = function() end }, "'text' is longer than 100 bytes")
+            check({ text = "x", scope = "window", run = function() end }, "'scope' must be")
+            check({ text = "x", scope = "launcher" }, "'run' must be a function")
+            for i = 1, 16 do prism.ui.addAction{ text = "a" .. i, scope = "launcher", run = function() end } end
+            check({ text = "x", scope = "launcher", run = function() end }, "too many actions, the maximum is 16")
+        )");
+    }
+
     void test_pluginLoadsWithApi()
     {
         QTemporaryDir root;

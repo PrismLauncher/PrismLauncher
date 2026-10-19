@@ -426,6 +426,92 @@ int getInstance(lua_State* L)
     return 1;
 }
 
+// Registry key of the array of actions registered with prism.ui.addAction
+constexpr const char* s_uiActionsKey = "prism.uiActions";
+
+// prism.ui.addAction{ text = string, scope = "instance" | "launcher", run = function(ctx) }: upvalue 1 tells whether
+// the plugin has the ui permission
+int addUiAction(lua_State* L)
+{
+    if (!lua_toboolean(L, lua_upvalueindex(1))) {
+        return luaL_error(L, "prism.ui.addAction requires the 'ui' permission");
+    }
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_settop(L, 1);
+
+    if (lua_getfield(L, 1, "text") != LUA_TSTRING || lua_rawlen(L, 2) == 0) {
+        return luaL_error(L, "'text' must be a non-empty string");
+    }
+    if (lua_rawlen(L, 2) > static_cast<size_t>(PrismApi::s_maxUiActionTextLength)) {
+        return luaL_error(L, "'text' is longer than %d bytes", int(PrismApi::s_maxUiActionTextLength));
+    }
+    if (lua_getfield(L, 1, "scope") != LUA_TSTRING ||
+        (std::strcmp(lua_tostring(L, 3), "instance") != 0 && std::strcmp(lua_tostring(L, 3), "launcher") != 0)) {
+        return luaL_error(L, "'scope' must be \"instance\" or \"launcher\"");
+    }
+    if (lua_getfield(L, 1, "run") != LUA_TFUNCTION) {
+        return luaL_error(L, "'run' must be a function");
+    }
+    // Stack: spec, text, scope, run
+
+    lua_getfield(L, LUA_REGISTRYINDEX, s_uiActionsKey);
+    const auto count = static_cast<lua_Integer>(lua_rawlen(L, -1));
+    if (count >= PrismApi::s_maxUiActions) {
+        return luaL_error(L, "too many actions, the maximum is %d", PrismApi::s_maxUiActions);
+    }
+    lua_createtable(L, 0, 3);
+    lua_pushvalue(L, 2);
+    lua_setfield(L, -2, "text");
+    lua_pushvalue(L, 3);
+    lua_setfield(L, -2, "scope");
+    lua_pushvalue(L, 4);
+    lua_setfield(L, -2, "run");
+    lua_rawseti(L, -2, count + 1);
+    return 0;
+}
+
+// Argument 1 is a light userdata pointing to the QList<UiActionInfo> to fill
+int collectUiActions(lua_State* L)
+{
+    auto* actions = static_cast<QList<PrismApi::UiActionInfo>*>(lua_touserdata(L, 1));
+    lua_getfield(L, LUA_REGISTRYINDEX, s_uiActionsKey);
+    const auto count = static_cast<int>(lua_rawlen(L, -1));
+    for (int i = 1; i <= count; i++) {
+        lua_rawgeti(L, -1, i);
+        lua_getfield(L, -1, "scope");
+        lua_getfield(L, -2, "text");
+        // Only non-raising accessors while C++ temporaries exist
+        const auto scope =
+            std::strcmp(lua_tostring(L, -2), "instance") == 0 ? PrismApi::ActionScope::Instance : PrismApi::ActionScope::Launcher;
+        actions->append({ i, scope, QString::fromUtf8(lua_tostring(L, -1)) });
+        lua_pop(L, 3);
+    }
+    return 0;
+}
+
+struct RunActionArgs {
+    int index;
+    const PrismApi::InstanceInfo* instance;
+};
+
+// Argument 1 is a light userdata pointing to the RunActionArgs
+int runAction(lua_State* L)
+{
+    const auto* args = static_cast<const RunActionArgs*>(lua_touserdata(L, 1));
+    lua_getfield(L, LUA_REGISTRYINDEX, s_uiActionsKey);
+    if (lua_rawgeti(L, -1, args->index) != LUA_TTABLE) {
+        return luaL_error(L, "unknown action %d", args->index);
+    }
+    lua_getfield(L, -1, "run");
+    lua_createtable(L, 0, 1);  // ctx
+    if (args->instance) {
+        pushInstance(L, *args->instance);
+        lua_setfield(L, -2, "instance");
+    }
+    lua_call(L, 1, 0);
+    return 0;
+}
+
 struct InstallArgs {
     QByteArray id;
     QByteArray settingsPath;
@@ -433,6 +519,7 @@ struct InstallArgs {
     QList<QByteArray> permissions;
     bool instancesRead;
     PrismApi::InstanceSource* instances;
+    bool ui;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -487,6 +574,14 @@ int openPrism(lua_State* L)
     lua_setfield(L, -2, "get");
     lua_setfield(L, -2, "instances");
 
+    lua_newtable(L);
+    lua_setfield(L, LUA_REGISTRYINDEX, s_uiActionsKey);
+    lua_createtable(L, 0, 1);  // prism.ui
+    lua_pushboolean(L, args->ui);
+    lua_pushcclosure(L, addUiAction, 1);
+    lua_setfield(L, -2, "addAction");
+    lua_setfield(L, -2, "ui");
+
     lua_setglobal(L, "prism");
     return 0;
 }
@@ -503,7 +598,8 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
                       manifest.hasPermission("launch.hooks"),
                       {},
                       manifest.hasPermission("instances.read"),
-                      instances };
+                      instances,
+                      manifest.hasPermission("ui") };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }
@@ -540,6 +636,23 @@ std::optional<QString> runLaunchStep(LuaState& state, int index, LaunchContext& 
     }
     lua_pop(L, 1);
     return error;
+}
+
+std::optional<QString> uiActions(LuaState& state, QList<UiActionInfo>& actions)
+{
+    lua_State* L = state.get();
+    lua_pushcfunction(L, collectUiActions);
+    lua_pushlightuserdata(L, &actions);
+    return state.call(1);
+}
+
+std::optional<QString> runUiAction(LuaState& state, int index, const InstanceInfo* instance)
+{
+    lua_State* L = state.get();
+    RunActionArgs args{ index, instance };
+    lua_pushcfunction(L, runAction);
+    lua_pushlightuserdata(L, &args);
+    return state.call(1);
 }
 
 std::optional<QString> emitEvent(LuaState& state, const char* event, const EventFields& fields)

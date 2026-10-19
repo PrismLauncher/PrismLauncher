@@ -26,6 +26,14 @@ class PluginManager : public QObject {
     Q_OBJECT
 
    public:
+    // An action a loaded plugin registered with prism.ui.addAction
+    struct Action {
+        QString pluginId;
+        QString pluginName;
+        int index;
+        QString text;
+    };
+
     PluginManager(const QString& pluginsDir, std::shared_ptr<Setting> enabledPlugins, QObject* parent = nullptr);
     ~PluginManager() override;
 
@@ -58,6 +66,13 @@ class PluginManager : public QObject {
     void watchLaunch(LaunchTask* task);
     // Both of the above, for a launch being created
     void prepareLaunch(LaunchTask* task);
+
+    // Whether any loaded plugin has the ui permission, i.e. may add actions
+    bool hasUiPlugins() const;
+    // The actions of the loaded plugins for the scope, in plugin order
+    QList<Action> actions(PrismApi::ActionScope scope) const;
+    // Runs an action; instanceId selects the instance for instance actions. Returns the error message on failure.
+    std::optional<QString> runAction(const Action& action, const QString& instanceId = {});
 
     // Makes the list available to prism.instances and sends instance.created, instance.removed and instance.status for
     // its instances

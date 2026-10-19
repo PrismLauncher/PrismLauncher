@@ -179,6 +179,61 @@ void PluginManager::prepareLaunch(LaunchTask* task)
     watchLaunch(task);
 }
 
+bool PluginManager::hasUiPlugins() const
+{
+    return std::any_of(m_plugins.begin(), m_plugins.end(), [](const auto& plugin) {
+        return plugin->state() == Plugin::State::Loaded && plugin->manifest()->hasPermission("ui");
+    });
+}
+
+QList<PluginManager::Action> PluginManager::actions(PrismApi::ActionScope scope) const
+{
+    QList<Action> result;
+    for (const auto& plugin : m_plugins) {
+        if (plugin->state() != Plugin::State::Loaded || !plugin->manifest()->hasPermission("ui")) {
+            continue;
+        }
+        QList<PrismApi::UiActionInfo> actions;
+        if (auto error = PrismApi::uiActions(*plugin->lua(), actions)) {
+            qCWarning(pluginLogC).noquote() << QString("[%1] could not read actions: %2").arg(plugin->id(), *error);
+            continue;
+        }
+        for (const auto& action : actions) {
+            if (action.scope == scope) {
+                result.append({ plugin->id(), plugin->manifest()->name, action.index, action.text });
+            }
+        }
+    }
+    return result;
+}
+
+std::optional<QString> PluginManager::runAction(const Action& action, const QString& instanceId)
+{
+    Plugin* plugin = this->plugin(action.pluginId);
+    if (!plugin || plugin->state() != Plugin::State::Loaded) {
+        return tr("The plugin %1 is not running.").arg(action.pluginId);
+    }
+
+    std::optional<PrismApi::InstanceInfo> instance;
+    if (!instanceId.isEmpty()) {
+        const QByteArray id = instanceId.toUtf8();
+        for (const auto& info : m_instanceSource->instances()) {
+            if (info.id == id) {
+                instance = info;
+            }
+        }
+        if (!instance) {
+            return tr("The instance %1 does not exist.").arg(instanceId);
+        }
+    }
+
+    auto error = PrismApi::runUiAction(*plugin->lua(), action.index, instance ? &*instance : nullptr);
+    if (error) {
+        qCWarning(pluginLogC).noquote() << QString("[%1] action \"%2\" failed: %3").arg(plugin->id(), action.text, *error);
+    }
+    return error;
+}
+
 void PluginManager::watchInstances(InstanceList* instances)
 {
     static_cast<InstanceListSource*>(m_instanceSource.get())->list = instances;
