@@ -13,6 +13,9 @@
 
 namespace {
 
+// Instructions between two calls to the instruction hook
+constexpr int s_hookInterval = 1000;
+
 // Wraps the original `load` (upvalue 1) forcing mode "t", so bytecode can never be loaded.
 int textOnlyLoad(lua_State* L)
 {
@@ -27,6 +30,24 @@ int textOnlyLoad(lua_State* L)
     return lua_gettop(L);
 }
 
+// Wraps the original `setmetatable` (upvalue 1) rejecting __gc: finalizers run with hooks disabled, so the instruction
+// limit could not stop them. Objects are only marked for finalization here, adding __gc later has no effect.
+int setmetatableWithoutGc(lua_State* L)
+{
+    if (lua_type(L, 2) == LUA_TTABLE) {
+        lua_pushliteral(L, "__gc");
+        if (lua_rawget(L, 2) != LUA_TNIL) {
+            return luaL_error(L, "__gc metamethods are not allowed");
+        }
+        lua_pop(L, 1);
+    }
+    const int nargs = lua_gettop(L);
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_insert(L, 1);
+    lua_call(L, nargs, 1);
+    return 1;
+}
+
 int openSafeLibs(lua_State* L)
 {
     luaL_openselectedlibs(L, LUA_GLIBK | LUA_COLIBK | LUA_MATHLIBK | LUA_STRLIBK | LUA_TABLIBK | LUA_UTF8LIBK, 0);
@@ -39,6 +60,10 @@ int openSafeLibs(lua_State* L)
     lua_getglobal(L, "load");
     lua_pushcclosure(L, textOnlyLoad, 1);
     lua_setglobal(L, "load");
+
+    lua_getglobal(L, "setmetatable");
+    lua_pushcclosure(L, setmetatableWithoutGc, 1);
+    lua_setglobal(L, "setmetatable");
     return 0;
 }
 
@@ -72,6 +97,8 @@ LuaState::LuaState(std::size_t memoryLimit) : m_memory{ 0, memoryLimit }
         qWarning() << "Failed to create Lua state";
         return;
     }
+    // Coroutines copy the main thread's extra space, so the hook can always find this object
+    *static_cast<LuaState**>(lua_getextraspace(m_state)) = this;
     lua_atpanic(m_state, panic);
 
     lua_pushcfunction(m_state, openSafeLibs);
@@ -114,12 +141,31 @@ void* LuaState::allocate(void* ud, void* ptr, std::size_t osize, std::size_t nsi
     return newPtr;
 }
 
+void LuaState::instructionHook(lua_State* L, lua_Debug*)
+{
+    auto* self = *static_cast<LuaState**>(lua_getextraspace(L));
+    self->m_instructionsUsed += lua_gethookcount(L);
+    if (self->m_instructionsUsed > self->m_instructionLimit) {
+        // From now on fail on every instruction, so a pcall in the script cannot catch the error and keep looping
+        lua_sethook(L, instructionHook, LUA_MASKCOUNT, 1);
+        luaL_error(L, "instruction limit exceeded");
+    }
+}
+
+void LuaState::resetInstructionBudget()
+{
+    m_instructionsUsed = 0;
+    // Coroutines inherit the hook when created, so only the main thread needs it
+    lua_sethook(m_state, instructionHook, LUA_MASKCOUNT, s_hookInterval);
+}
+
 std::optional<QString> LuaState::run(const QByteArray& code, const QString& chunkName)
 {
     if (!m_state) {
         return QStringLiteral("Lua state is not initialized");
     }
 
+    resetInstructionBudget();
     const int base = lua_gettop(m_state);
     lua_pushcfunction(m_state, messageHandler);
 

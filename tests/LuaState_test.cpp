@@ -150,6 +150,85 @@ class LuaStateTest : public QObject {
                  std::nullopt);
     }
 
+    void test_infiniteLoopIsStopped()
+    {
+        LuaState state;
+        QCOMPARE(state.instructionLimit(), LuaState::s_defaultInstructionLimit);
+
+        auto error = state.run("while true do end", "loop");
+        QVERIFY(error);
+        QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
+
+        // The state is still usable, with a fresh budget
+        QCOMPARE(state.run("ok = 'yes'", "after"), std::nullopt);
+        QCOMPARE(globalString(state, "ok"), "yes");
+    }
+
+    void test_pcallCannotEscapeLimit()
+    {
+        LuaState state;
+        auto error = state.run(R"(
+            while true do
+                pcall(function() while true do end end)
+            end
+        )",
+                               "pcall");
+        QVERIFY(error);
+        QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
+    }
+
+    void test_coroutinesShareLimit()
+    {
+        LuaState state;
+        auto error = state.run("coroutine.wrap(function() while true do end end)()", "wrap");
+        QVERIFY(error);
+        QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
+
+        // resume catches errors like pcall does
+        error = state.run(R"(
+            while true do
+                coroutine.resume(coroutine.create(function() while true do end end))
+            end
+        )",
+                          "resume");
+        QVERIFY(error);
+        QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
+    }
+
+    void test_limitIsPerCall()
+    {
+        LuaState state;
+        state.setInstructionLimit(100'000);
+        // Each run stays under the limit, all of them together do not
+        for (int i = 0; i < 20; i++) {
+            QCOMPARE(state.run("for i = 1, 10000 do end", "loop"), std::nullopt);
+        }
+
+        auto error = state.run("for i = 1, 1000000 do end", "big");
+        QVERIFY(error);
+        QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
+    }
+
+    void test_finalizersAreRejected()
+    {
+        LuaState state;
+        auto error = state.run("setmetatable({}, { __gc = function() while true do end end })", "gc");
+        QVERIFY(error);
+        QVERIFY2(error->contains("__gc metamethods are not allowed"), qPrintable(*error));
+
+        // Adding __gc after setmetatable does not mark the object, so the finalizer never runs
+        QCOMPARE(state.run(R"(
+            local mt = {}
+            setmetatable({}, mt)
+            mt.__gc = function() while true do end end
+            collectgarbage()
+            assert(getmetatable(setmetatable({}, { __index = {} })) ~= nil)
+        )",
+                           "late gc"),
+                 std::nullopt);
+        // Closing the state must not hang either
+    }
+
     void test_tooSmallLimit()
     {
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("^Failed to (create Lua state|open Lua libraries)"));

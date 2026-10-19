@@ -8,16 +8,20 @@
 #include <QString>
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 
 struct lua_State;
+struct lua_Debug;
 
-// Owns a sandboxed lua_State: only base (without dofile/loadfile, and load restricted to text chunks), coroutine,
-// math, string, table and utf8 are available.
+// Owns a sandboxed lua_State: only base (without dofile/loadfile, load restricted to text chunks and setmetatable
+// rejecting __gc), coroutine, math, string, table and utf8 are available.
 // Allocations beyond the memory limit fail, which Lua reports as a "not enough memory" error.
+// Each call into Lua may run up to the instruction limit; past it, Lua raises "instruction limit exceeded".
 class LuaState {
    public:
     static constexpr std::size_t s_defaultMemoryLimit = 32 * 1024 * 1024;
+    static constexpr std::uint64_t s_defaultInstructionLimit = 10'000'000;
 
     explicit LuaState(std::size_t memoryLimit = s_defaultMemoryLimit);
     ~LuaState();
@@ -31,6 +35,9 @@ class LuaState {
     std::size_t memoryUsed() const { return m_memory.used; }
     std::size_t memoryLimit() const { return m_memory.limit; }
 
+    std::uint64_t instructionLimit() const { return m_instructionLimit; }
+    void setInstructionLimit(std::uint64_t limit) { m_instructionLimit = limit; }
+
     // Runs a text chunk. Returns the error message on failure.
     std::optional<QString> run(const QByteArray& code, const QString& chunkName);
 
@@ -41,8 +48,14 @@ class LuaState {
     };
 
     static void* allocate(void* ud, void* ptr, std::size_t osize, std::size_t nsize);
+    static void instructionHook(lua_State* L, lua_Debug* ar);
+
+    // Starts a new instruction budget for the next call into Lua.
+    void resetInstructionBudget();
 
     // Must outlive m_state: the allocator keeps a pointer to it.
     Memory m_memory;
+    std::uint64_t m_instructionLimit = s_defaultInstructionLimit;
+    std::uint64_t m_instructionsUsed = 0;
     lua_State* m_state = nullptr;
 };
