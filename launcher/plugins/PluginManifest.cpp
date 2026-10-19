@@ -9,8 +9,8 @@
 
 #include <toml++/toml.h>
 
-const QStringList PluginManifest::s_knownPermissions = { "fs.instance", "game.log", "instances.read", "launch.hooks",
-                                                         "net",         "ui",       "unrestricted" };
+const QStringList PluginManifest::s_knownPermissions = { "fs.instance",  "fs.plugins", "game.log", "instances.read",
+                                                         "launch.hooks", "net",        "ui",       "unrestricted" };
 
 namespace {
 

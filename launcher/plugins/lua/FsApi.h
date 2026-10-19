@@ -18,8 +18,14 @@ constexpr qint64 s_maxFileReadSize = 16 * 1024 * 1024;
 // not even through symlinks:
 // - prism.fs.data(): the plugin's own data folder (dataDir, UTF-8), created on demand. Always available.
 // - prism.fs.instance(id): the game folder of an instance. Needs instanceAccess (the fs.instance permission).
+// - prism.fs.plugins(): the folder with every plugin (pluginsDir, UTF-8). Needs pluginsAccess (fs.plugins).
 // Handles have read, write, append, list, exists, isDir, mkdir and remove; prism.fs.copy and prism.fs.move work across
 // handles. Failures raise errors.
-void pushFsTable(lua_State* L, const QByteArray& dataDir, bool instanceAccess, InstanceSource* instances);
+void pushFsTable(lua_State* L,
+                 const QByteArray& dataDir,
+                 bool instanceAccess,
+                 InstanceSource* instances,
+                 const QByteArray& pluginsDir,
+                 bool pluginsAccess);
 
 }  // namespace PrismApi

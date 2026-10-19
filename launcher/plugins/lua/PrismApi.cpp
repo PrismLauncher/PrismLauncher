@@ -8,6 +8,7 @@
 #include "PrismApi.h"
 
 #include <QDir>
+#include <QFileInfo>
 
 #include <algorithm>
 #include <array>
@@ -568,6 +569,8 @@ struct InstallArgs {
     QByteArray packagePath;
     QByteArray packageCPath;
     QByteArray pluginDir;
+    QByteArray pluginsDir;
+    bool fsPlugins;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -622,7 +625,7 @@ int openPrism(lua_State* L)
     lua_setfield(L, -2, "get");
     lua_setfield(L, -2, "instances");
 
-    PrismApi::pushFsTable(L, args->dataDir, args->fsInstance, args->instances);
+    PrismApi::pushFsTable(L, args->dataDir, args->fsInstance, args->instances, args->pluginsDir, args->fsPlugins);
     lua_setfield(L, -2, "fs");
 
     PrismApi::setUpTasks(L, args->id);
@@ -680,7 +683,10 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
                       host.http,
                       (QDir(directory).filePath("?.lua") + ';' + QDir(directory).filePath("?/init.lua")).toUtf8(),
                       (QDir(directory).filePath("?.so") + ';' + QDir(directory).filePath("?.dll")).toUtf8(),
-                      directory.toUtf8() };
+                      directory.toUtf8(),
+                      // Each plugin is a folder inside the plugins folder
+                      QFileInfo(directory).absolutePath().toUtf8(),
+                      manifest.hasPermission("fs.plugins") };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

@@ -161,6 +161,9 @@ QString PluginsPage::describePermission(const QString& permission)
     if (permission == "fs.instance") {
         return tr("Read and change the files in your instances' game folders (worlds, mods, options).");
     }
+    if (permission == "fs.plugins") {
+        return tr("Read and change the files of every plugin, including their code.");
+    }
     if (permission == "game.log") {
         return tr("Read the game's log while it runs. It may include chat messages and server addresses.");
     }

@@ -201,6 +201,20 @@ class FsApiTest : public QObject {
         QVERIFY(error && error->contains("prism.fs.instance requires the 'fs.instance' permission"));
     }
 
+    void test_pluginsFolder()
+    {
+        // The plugin's folder is "<tmp>/plugin", so the plugins folder is the temporary folder itself
+        auto state = newState({ "fs.plugins" });
+        runOk(*state, "local plugins = prism.fs.plugins() plugins:write(\"other/main.lua\", \"print(1)\")");
+        QVERIFY(QFile::exists(m_dir->filePath("other/main.lua")));
+        auto error = state->run("prism.fs.plugins():read(\"../escape\")", "test");
+        QVERIFY(error && error->contains("outside of the folder"));
+
+        auto denied = newState({});
+        error = denied->run("prism.fs.plugins()", "test");
+        QVERIFY(error && error->contains("prism.fs.plugins requires the 'fs.plugins' permission"));
+    }
+
     void test_readLimit()
     {
         writeFile(pluginDir() + "/data/big.bin", QByteArray(PrismApi::s_maxFileReadSize + 1, 'x'));

@@ -106,4 +106,8 @@ if(Launcher_ENABLE_LUA_PLUGINS)
 
     ecm_add_test(UiApi_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
         TEST_NAME UiApi)
+
+    ecm_add_test(LuaEditorPlugin_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+        TEST_NAME LuaEditorPlugin)
+    target_compile_definitions(LuaEditorPlugin PRIVATE EXAMPLES_DIR="${CMAKE_SOURCE_DIR}/examples/plugins")
 endif()

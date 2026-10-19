@@ -419,11 +419,27 @@ int fsInstance(lua_State* L)
     return 1;
 }
 
+// prism.fs.plugins(): upvalue 1 tells whether the plugin has the fs.plugins permission, upvalue 2 is the folder
+int fsPlugins(lua_State* L)
+{
+    if (!lua_toboolean(L, lua_upvalueindex(1))) {
+        return luaL_error(L, "prism.fs.plugins requires the 'fs.plugins' permission");
+    }
+    lua_pushvalue(L, lua_upvalueindex(2));
+    pushHandle(L);
+    return 1;
+}
+
 }  // namespace
 
 namespace PrismApi {
 
-void pushFsTable(lua_State* L, const QByteArray& dataDir, bool instanceAccess, InstanceSource* instances)
+void pushFsTable(lua_State* L,
+                 const QByteArray& dataDir,
+                 bool instanceAccess,
+                 InstanceSource* instances,
+                 const QByteArray& pluginsDir,
+                 bool pluginsAccess)
 {
     if (luaL_newmetatable(L, s_handleMetatable)) {
         const luaL_Reg methods[] = {
@@ -446,6 +462,10 @@ void pushFsTable(lua_State* L, const QByteArray& dataDir, bool instanceAccess, I
     lua_pushlightuserdata(L, instances);
     lua_pushcclosure(L, fsInstance, 2);
     lua_setfield(L, -2, "instance");
+    lua_pushboolean(L, pluginsAccess);
+    lua_pushlstring(L, pluginsDir.constData(), pluginsDir.size());
+    lua_pushcclosure(L, fsPlugins, 2);
+    lua_setfield(L, -2, "plugins");
     lua_pushcfunction(L, fsCopy);
     lua_setfield(L, -2, "copy");
     lua_pushcfunction(L, fsMove);
