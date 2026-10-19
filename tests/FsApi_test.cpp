@@ -36,7 +36,7 @@ class FsApiTest : public QObject {
         manifest.id = "com.example.fs";
         manifest.permissions = permissions;
         auto state = std::make_unique<LuaState>();
-        if (auto error = PrismApi::install(*state, manifest, pluginDir(), &m_source)) {
+        if (auto error = PrismApi::install(*state, manifest, pluginDir(), { .instances = &m_source })) {
             qFatal("install failed: %s", qPrintable(*error));
         }
         return state;

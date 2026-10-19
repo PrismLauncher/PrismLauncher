@@ -218,7 +218,7 @@ class PrismApiTest : public QObject {
         auto withPermission = manifest();
         withPermission.permissions = { "instances.read" };
         LuaState state;
-        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path(), &source), std::nullopt);
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path(), { .instances = &source }), std::nullopt);
         runOk(state, R"(
             local list = prism.instances.list()
             assert(#list == 2)
@@ -242,7 +242,7 @@ class PrismApiTest : public QObject {
 
         // Without the permission
         LuaState denied;
-        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), &source), std::nullopt);
+        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), { .instances = &source }), std::nullopt);
         auto error = denied.run("prism.instances.list()", "test");
         QVERIFY(error && error->contains("prism.instances requires the 'instances.read' permission"));
         error = denied.run("prism.instances.get('a')", "test");
@@ -323,7 +323,7 @@ class PrismApiTest : public QObject {
         auto withPermission = manifest();
         withPermission.permissions = { "ui" };
         LuaState state;
-        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path(), nullptr, &notifier), std::nullopt);
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path(), { .notifier = &notifier }), std::nullopt);
         runOk(state, R"(
             prism.ui.notify("Backup done")
             prism.ui.notify("Disk almost full", "warning")
@@ -346,7 +346,7 @@ class PrismApiTest : public QObject {
         runOk(logged, "prism.ui.notify('only logged')");
 
         LuaState denied;
-        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), nullptr, &notifier), std::nullopt);
+        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), { .notifier = &notifier }), std::nullopt);
         auto error = denied.run("prism.ui.notify('x')", "test");
         QVERIFY(error && error->contains("prism.ui.notify requires the 'ui' permission"));
     }

@@ -82,6 +82,9 @@ class PluginManager : public QObject, public PrismApi::Notifier {
     // s_maxNotificationsPerMinute in the last minute
     void notify(const QString& pluginId, const QString& text, PrismApi::NotifyLevel level) override;
 
+    // Sends the requests made with prism.http; without it they fail. Takes effect for plugins loaded afterwards.
+    void setHttpClient(std::unique_ptr<PrismApi::HttpClient> http) { m_http = std::move(http); }
+
     // Makes the list available to prism.instances and sends instance.created, instance.removed and instance.status for
     // its instances
     void watchInstances(InstanceList* instances);
@@ -101,8 +104,9 @@ class PluginManager : public QObject, public PrismApi::Notifier {
 
     QString m_pluginsDir;
     std::shared_ptr<Setting> m_enabledPlugins;
-    // Declared before the plugins, which use it until they are destroyed
+    // Declared before the plugins, which use them until they are destroyed
     std::unique_ptr<PrismApi::InstanceSource> m_instanceSource;
+    std::unique_ptr<PrismApi::HttpClient> m_http;
     std::vector<std::unique_ptr<Plugin>> m_plugins;
     bool m_launcherReady = false;
     QElapsedTimer m_clock;

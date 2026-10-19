@@ -22,8 +22,8 @@ class Plugin {
 
     static constexpr qint64 s_maxEntrySize = 1024 * 1024;
 
-    // instances backs prism.instances and notifier receives prism.ui.notify; both must outlive the plugin
-    explicit Plugin(const QString& directory, PrismApi::InstanceSource* instances = nullptr, PrismApi::Notifier* notifier = nullptr);
+    // host provides what the API offers (instances, notifications, network) and must outlive the plugin
+    explicit Plugin(const QString& directory, const PrismApi::Host& host = {});
     ~Plugin();
 
     Plugin(const Plugin&) = delete;
@@ -58,8 +58,7 @@ class Plugin {
     Result<PluginManifest> m_manifest;
     State m_state = State::Disabled;
     QString m_error;
-    PrismApi::InstanceSource* m_instances;
-    PrismApi::Notifier* m_notifier;
+    PrismApi::Host m_host;
     std::unique_ptr<LuaState> m_lua;
     int m_loadCount = 0;
 };

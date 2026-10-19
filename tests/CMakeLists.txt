@@ -100,4 +100,7 @@ if(Launcher_ENABLE_LUA_PLUGINS)
 
     ecm_add_test(FsApi_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
         TEST_NAME FsApi)
+
+    ecm_add_test(HttpApi_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Network
+        TEST_NAME HttpApi)
 endif()

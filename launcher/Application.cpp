@@ -110,6 +110,7 @@
 
 #include "InstanceList.h"
 #ifdef ENABLE_LUA_PLUGINS
+#include "plugins/NetworkHttpClient.h"
 #include "plugins/PluginManager.h"
 #endif
 #include "MTPixmapCache.h"
@@ -1040,6 +1041,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // after the instances, which plugins may use
     {
         m_plugins.reset(new PluginManager(FS::PathCombine(m_dataPath, "plugins"), m_settings->getSetting("EnabledPlugins")));
+        m_plugins->setHttpClient(std::make_unique<NetworkHttpClient>(m_network.get(), getUserAgent().toUtf8()));
         qInfo() << "Loading plugins...";
         m_plugins->discover();
         m_plugins->watchInstances(m_instances.get());

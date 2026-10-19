@@ -19,6 +19,7 @@
 #include "plugins/Logging.h"
 #include "plugins/PluginManifest.h"
 #include "plugins/lua/FsApi.h"
+#include "plugins/lua/HttpApi.h"
 #include "plugins/lua/LuaState.h"
 #include "plugins/lua/SettingsApi.h"
 
@@ -559,6 +560,8 @@ struct InstallArgs {
     PrismApi::Notifier* notifier;
     QByteArray dataDir;
     bool fsInstance;
+    bool net;
+    PrismApi::HttpClient* http;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -616,6 +619,12 @@ int openPrism(lua_State* L)
     PrismApi::pushFsTable(L, args->dataDir, args->fsInstance, args->instances);
     lua_setfield(L, -2, "fs");
 
+    PrismApi::setUpTasks(L, args->id);
+    PrismApi::pushAsyncFunction(L);
+    lua_setfield(L, -2, "async");
+    PrismApi::pushHttpTable(L, args->net, args->http);
+    lua_setfield(L, -2, "http");
+
     lua_newtable(L);
     lua_setfield(L, LUA_REGISTRYINDEX, s_uiActionsKey);
     lua_createtable(L, 0, 1);  // prism.ui
@@ -637,11 +646,7 @@ int openPrism(lua_State* L)
 
 namespace PrismApi {
 
-std::optional<QString> install(LuaState& state,
-                               const PluginManifest& manifest,
-                               const QString& directory,
-                               InstanceSource* instances,
-                               Notifier* notifier)
+std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory, const Host& host)
 {
     // Everything that allocates Lua memory happens inside the protected call, so running out of memory cannot panic
     InstallArgs args{ manifest.id.toUtf8(),
@@ -649,11 +654,13 @@ std::optional<QString> install(LuaState& state,
                       manifest.hasPermission("launch.hooks"),
                       {},
                       manifest.hasPermission("instances.read"),
-                      instances,
+                      host.instances,
                       manifest.hasPermission("ui"),
-                      notifier,
+                      host.notifier,
                       QDir(directory).filePath("data").toUtf8(),
-                      manifest.hasPermission("fs.instance") };
+                      manifest.hasPermission("fs.instance"),
+                      manifest.hasPermission("net"),
+                      host.http };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

@@ -73,7 +73,7 @@ void PluginManager::discover()
     // A plugin's id is always its folder name, so this also sorts by id.
     const QStringList folders = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     for (const QString& folder : folders) {
-        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder), m_instanceSource.get(), this));
+        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder), PrismApi::Host{ m_instanceSource.get(), this, m_http.get() }));
     }
 
     const QStringList enabled = enabledIds();

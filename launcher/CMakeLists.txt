@@ -585,6 +585,8 @@ set(PLUGINS_SOURCES
     plugins/Logging.cpp
     plugins/LuaLaunchStep.h
     plugins/LuaLaunchStep.cpp
+    plugins/NetworkHttpClient.h
+    plugins/NetworkHttpClient.cpp
     plugins/Plugin.h
     plugins/Plugin.cpp
     plugins/PluginManager.h
@@ -595,6 +597,8 @@ set(PLUGINS_SOURCES
     plugins/lua/LuaState.cpp
     plugins/lua/FsApi.h
     plugins/lua/FsApi.cpp
+    plugins/lua/HttpApi.h
+    plugins/lua/HttpApi.cpp
     plugins/lua/PrismApi.h
     plugins/lua/PrismApi.cpp
     plugins/lua/SettingsApi.h

@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 
 struct lua_State;
@@ -45,6 +46,11 @@ class LuaState {
     // on failure.
     std::optional<QString> call(int nargs);
 
+    // The LuaState owning L, which may be one of its coroutines
+    static LuaState* fromLua(lua_State* L);
+    // Expires when this state is destroyed, so callbacks that outlive it can tell
+    std::weak_ptr<void> lifetime() const { return m_lifetime; }
+
    private:
     struct Memory {
         std::size_t used = 0;
@@ -63,5 +69,6 @@ class LuaState {
     std::uint64_t m_instructionsUsed = 0;
     // Calls into Lua made while another one runs (e.g. from a C function) share its budget
     int m_callDepth = 0;
+    std::shared_ptr<void> m_lifetime = std::make_shared<int>(0);
     lua_State* m_state = nullptr;
 };

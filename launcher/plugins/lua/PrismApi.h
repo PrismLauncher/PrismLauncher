@@ -6,7 +6,9 @@
 
 #include <QByteArray>
 #include <QList>
+#include <QPair>
 #include <QString>
+#include <QUrl>
 
 #include <functional>
 #include <optional>
@@ -56,15 +58,46 @@ class Notifier {
 // Longer notifications are truncated
 constexpr qsizetype s_maxNotificationLength = 300;
 
+struct HttpRequest {
+    QByteArray method;
+    QUrl url;
+    QList<QPair<QByteArray, QByteArray>> headers;
+    QByteArray body;
+    int timeoutMs = 30'000;
+};
+
+struct HttpResponse {
+    // 0 when no response arrived
+    int status = 0;
+    QByteArray body;
+    QList<QPair<QByteArray, QByteArray>> headers;
+    // Why the request failed, empty if a response arrived (whatever its status)
+    QString error;
+};
+
+// Sends the requests made with prism.http
+class HttpClient {
+   public:
+    virtual ~HttpClient() = default;
+    // Calls done exactly once, later, from the event loop
+    virtual void send(const HttpRequest& request, std::function<void(const HttpResponse&)> done) = 0;
+};
+
+constexpr qint64 s_maxHttpResponseSize = 16 * 1024 * 1024;
+constexpr int s_maxPendingHttpRequests = 8;
+constexpr int s_maxHttpTimeoutSeconds = 120;
+
+// What the launcher offers to the API. Everything must outlive the plugin's state; whatever is missing behaves as if
+// there was nothing: no instances, notifications only logged, requests that fail.
+struct Host {
+    InstanceSource* instances = nullptr;
+    Notifier* notifier = nullptr;
+    HttpClient* http = nullptr;
+};
+
 // Creates the global `prism` table for the plugin described by the manifest, whose folder is directory, and routes
-// `print` to prism.log.info. prism.instances reads from instances and prism.ui.notify sends to notifier; both must
-// outlive the state. Without them there are no instances and notifications are only logged. Returns the error message
-// on failure.
-std::optional<QString> install(LuaState& state,
-                               const PluginManifest& manifest,
-                               const QString& directory,
-                               InstanceSource* instances = nullptr,
-                               Notifier* notifier = nullptr);
+// `print` to prism.log.info. Returns the error message on failure.
+std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory, const Host& host = {});
 
 // A step registered with prism.launch.addStep
 struct LaunchStepInfo {

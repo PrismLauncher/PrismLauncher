@@ -117,6 +117,11 @@ LuaState::~LuaState()
     Q_ASSERT(m_memory.used == 0);
 }
 
+LuaState* LuaState::fromLua(lua_State* L)
+{
+    return *static_cast<LuaState**>(lua_getextraspace(L));
+}
+
 void* LuaState::allocate(void* ud, void* ptr, std::size_t osize, std::size_t nsize)
 {
     auto* memory = static_cast<Memory*>(ud);
