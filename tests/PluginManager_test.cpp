@@ -9,6 +9,7 @@
 #include <plugins/PluginManager.h>
 #include <settings/INISettingsObject.h>
 #include <settings/Setting.h>
+#include <memory>
 
 class PluginManagerTest : public QObject {
     Q_OBJECT

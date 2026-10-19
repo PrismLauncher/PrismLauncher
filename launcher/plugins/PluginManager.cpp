@@ -13,6 +13,7 @@
 #include <QPointer>
 
 #include <algorithm>
+#include <memory>
 
 #include "BaseInstance.h"
 #include "InstanceList.h"

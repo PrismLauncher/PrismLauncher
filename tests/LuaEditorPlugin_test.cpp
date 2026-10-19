@@ -13,6 +13,8 @@
 #include <settings/INISettingsObject.h>
 #include <settings/Setting.h>
 #include <ui/widgets/LuaCodeEditor.h>
+#include <algorithm>
+#include <memory>
 
 // Drives the example editor plugin (examples/plugins/prism.luaeditor) through its window
 class LuaEditorPluginTest : public QObject {

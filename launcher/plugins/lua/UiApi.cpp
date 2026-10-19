@@ -19,6 +19,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+#include <cstring>
+#include <memory>
 #include <variant>
 
 #include <lua.hpp>

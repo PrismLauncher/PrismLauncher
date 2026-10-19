@@ -11,6 +11,7 @@
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
 #include <QToolTip>
+#include <algorithm>
 
 namespace {
 

@@ -9,6 +9,8 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
+#include <functional>
+#include <memory>
 
 NetworkHttpClient::NetworkHttpClient(QNetworkAccessManager* network, const QByteArray& userAgent)
     : m_network(network), m_userAgent(userAgent)

@@ -10,6 +10,7 @@
 
 #include <QRegularExpression>
 #include <QTimer>
+#include <memory>
 
 #include <lua.hpp>
 

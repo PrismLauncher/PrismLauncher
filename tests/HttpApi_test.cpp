@@ -10,6 +10,7 @@
 #include <plugins/lua/LuaState.h>
 #include <plugins/lua/PrismApi.h>
 
+#include <functional>
 #include <memory>
 
 namespace {

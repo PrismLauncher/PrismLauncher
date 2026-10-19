@@ -6,6 +6,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <memory>
 
 #include "plugins/Logging.h"
 #include "plugins/lua/LuaState.h"

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QPointer>
+#include <functional>
 
 #include "plugins/lua/PrismApi.h"
 
