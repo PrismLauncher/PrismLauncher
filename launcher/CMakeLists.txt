@@ -582,6 +582,8 @@ set(ATLAUNCHER_SOURCES
 set(PLUGINS_SOURCES
     plugins/Plugin.h
     plugins/Plugin.cpp
+    plugins/PluginManager.h
+    plugins/PluginManager.cpp
     plugins/PluginManifest.h
     plugins/PluginManifest.cpp
     plugins/lua/LuaState.h

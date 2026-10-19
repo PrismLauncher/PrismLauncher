@@ -1,0 +1,105 @@
+// SPDX-FileCopyrightText: 2026 Alberto Valls Ortiz <24375270+albvalort@users.noreply.github.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
+#include "PluginManager.h"
+
+#include <QDebug>
+#include <QDir>
+
+#include <algorithm>
+
+#include "plugins/Plugin.h"
+#include "settings/Setting.h"
+
+PluginManager::PluginManager(const QString& pluginsDir, std::shared_ptr<Setting> enabledPlugins, QObject* parent)
+    : QObject(parent), m_pluginsDir(pluginsDir), m_enabledPlugins(std::move(enabledPlugins))
+{}
+
+PluginManager::~PluginManager() = default;
+
+void PluginManager::discover()
+{
+    m_plugins.clear();
+
+    QDir dir(m_pluginsDir);
+    if (!dir.mkpath(".")) {
+        qWarning() << "Could not create the plugins folder" << m_pluginsDir;
+    }
+    // Hidden folders are skipped, so they can hold launcher data in the future.
+    // A plugin's id is always its folder name, so this also sorts by id.
+    const QStringList folders = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    for (const QString& folder : folders) {
+        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder)));
+    }
+
+    const QStringList enabled = enabledIds();
+    for (const auto& plugin : m_plugins) {
+        if (enabled.contains(plugin->id())) {
+            loadPlugin(plugin.get());
+        }
+    }
+    emit pluginsChanged();
+}
+
+QList<Plugin*> PluginManager::plugins() const
+{
+    QList<Plugin*> plugins;
+    plugins.reserve(m_plugins.size());
+    for (const auto& plugin : m_plugins) {
+        plugins.append(plugin.get());
+    }
+    return plugins;
+}
+
+Plugin* PluginManager::plugin(const QString& id) const
+{
+    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&id](const auto& plugin) { return plugin->id() == id; });
+    return it != m_plugins.end() ? it->get() : nullptr;
+}
+
+bool PluginManager::isEnabled(const QString& id) const
+{
+    return enabledIds().contains(id);
+}
+
+bool PluginManager::setEnabled(const QString& id, bool enabled)
+{
+    Plugin* plugin = this->plugin(id);
+    if (!plugin) {
+        return false;
+    }
+
+    // Ids of plugins that are not installed right now are kept, so removing a folder temporarily keeps its choice
+    QStringList ids = enabledIds();
+    ids.removeAll(id);
+    if (enabled) {
+        ids.append(id);
+        ids.sort();
+    }
+    m_enabledPlugins->set(ids);
+
+    bool ok = true;
+    if (enabled) {
+        ok = loadPlugin(plugin);
+    } else {
+        plugin->unload();
+    }
+    emit pluginChanged(id);
+    return ok;
+}
+
+QStringList PluginManager::enabledIds() const
+{
+    return m_enabledPlugins->get().toStringList();
+}
+
+bool PluginManager::loadPlugin(Plugin* plugin)
+{
+    if (!plugin->load()) {
+        qWarning() << "Failed to load plugin" << plugin->id() << ":" << plugin->error();
+        return false;
+    }
+    qInfo() << "Loaded plugin" << plugin->id();
+    return true;
+}
