@@ -22,7 +22,8 @@ class Plugin {
 
     static constexpr qint64 s_maxEntrySize = 1024 * 1024;
 
-    explicit Plugin(const QString& directory);
+    // instances backs prism.instances and must outlive the plugin
+    explicit Plugin(const QString& directory, PrismApi::InstanceSource* instances = nullptr);
     ~Plugin();
 
     Plugin(const Plugin&) = delete;
@@ -57,6 +58,7 @@ class Plugin {
     Result<PluginManifest> m_manifest;
     State m_state = State::Disabled;
     QString m_error;
+    PrismApi::InstanceSource* m_instances;
     std::unique_ptr<LuaState> m_lua;
     int m_loadCount = 0;
 };

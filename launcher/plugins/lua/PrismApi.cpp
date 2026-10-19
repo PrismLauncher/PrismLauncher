@@ -357,11 +357,81 @@ int runStep(lua_State* L)
     return 0;
 }
 
+void pushInstance(lua_State* L, const PrismApi::InstanceInfo& info)
+{
+    lua_createtable(L, 0, 6);
+    lua_pushlstring(L, info.id.constData(), info.id.size());
+    lua_setfield(L, -2, "id");
+    lua_pushlstring(L, info.name.constData(), info.name.size());
+    lua_setfield(L, -2, "name");
+    lua_pushlstring(L, info.group.constData(), info.group.size());
+    lua_setfield(L, -2, "group");
+    lua_pushboolean(L, info.running);
+    lua_setfield(L, -2, "running");
+    lua_pushinteger(L, info.lastLaunch);
+    lua_setfield(L, -2, "lastLaunch");
+    lua_pushinteger(L, info.playTime);
+    lua_setfield(L, -2, "playTime");
+}
+
+// Upvalue 1 tells whether the plugin has the instances.read permission, upvalue 2 is a light userdata pointing to
+// the InstanceSource (or null)
+PrismApi::InstanceSource* checkInstanceSource(lua_State* L)
+{
+    if (!lua_toboolean(L, lua_upvalueindex(1))) {
+        luaL_error(L, "prism.instances requires the 'instances.read' permission");
+    }
+    return static_cast<PrismApi::InstanceSource*>(lua_touserdata(L, lua_upvalueindex(2)));
+}
+
+// prism.instances.list()
+int listInstances(lua_State* L)
+{
+    PrismApi::InstanceSource* source = checkInstanceSource(L);
+    if (!source) {
+        lua_newtable(L);
+        return 1;
+    }
+    source->scratch = source->instances();
+    lua_createtable(L, static_cast<int>(source->scratch.size()), 0);
+    for (qsizetype i = 0; i < source->scratch.size(); i++) {
+        pushInstance(L, source->scratch.at(i));
+        lua_rawseti(L, -2, i + 1);
+    }
+    source->scratch.clear();
+    return 1;
+}
+
+// prism.instances.get(id): nil if there is no such instance
+int getInstance(lua_State* L)
+{
+    PrismApi::InstanceSource* source = checkInstanceSource(L);
+    size_t length = 0;
+    const char* id = luaL_checklstring(L, 1, &length);
+    if (!source) {
+        lua_pushnil(L);
+        return 1;
+    }
+    source->scratch = source->instances();
+    // A view has no destructor, so it may stay alive while Lua calls raise errors
+    const QByteArrayView wanted(id, static_cast<qsizetype>(length));
+    source->scratch.removeIf([&wanted](const PrismApi::InstanceInfo& info) { return info.id != wanted; });
+    if (source->scratch.isEmpty()) {
+        lua_pushnil(L);
+    } else {
+        pushInstance(L, source->scratch.first());
+    }
+    source->scratch.clear();
+    return 1;
+}
+
 struct InstallArgs {
     QByteArray id;
     QByteArray settingsPath;
     bool launchHooks;
     QList<QByteArray> permissions;
+    bool instancesRead;
+    PrismApi::InstanceSource* instances;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -405,6 +475,17 @@ int openPrism(lua_State* L)
     lua_setfield(L, -2, "addStep");
     lua_setfield(L, -2, "launch");
 
+    lua_createtable(L, 0, 2);  // prism.instances
+    lua_pushboolean(L, args->instancesRead);
+    lua_pushlightuserdata(L, args->instances);
+    lua_pushcclosure(L, listInstances, 2);
+    lua_setfield(L, -2, "list");
+    lua_pushboolean(L, args->instancesRead);
+    lua_pushlightuserdata(L, args->instances);
+    lua_pushcclosure(L, getInstance, 2);
+    lua_setfield(L, -2, "get");
+    lua_setfield(L, -2, "instances");
+
     lua_setglobal(L, "prism");
     return 0;
 }
@@ -413,10 +494,15 @@ int openPrism(lua_State* L)
 
 namespace PrismApi {
 
-std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory)
+std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory, InstanceSource* instances)
 {
     // Everything that allocates Lua memory happens inside the protected call, so running out of memory cannot panic
-    InstallArgs args{ manifest.id.toUtf8(), QDir(directory).filePath("settings.ini").toUtf8(), manifest.hasPermission("launch.hooks"), {} };
+    InstallArgs args{ manifest.id.toUtf8(),
+                      QDir(directory).filePath("settings.ini").toUtf8(),
+                      manifest.hasPermission("launch.hooks"),
+                      {},
+                      manifest.hasPermission("instances.read"),
+                      instances };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

@@ -55,7 +55,8 @@ class PluginManager : public QObject {
     // Both of the above, for a launch being created
     void prepareLaunch(LaunchTask* task);
 
-    // Sends instance.created, instance.removed and instance.status for the instances in the list
+    // Makes the list available to prism.instances and sends instance.created, instance.removed and instance.status for
+    // its instances
     void watchInstances(InstanceList* instances);
 
    signals:
@@ -71,6 +72,8 @@ class PluginManager : public QObject {
 
     QString m_pluginsDir;
     std::shared_ptr<Setting> m_enabledPlugins;
+    // Declared before the plugins, which use it until they are destroyed
+    std::unique_ptr<PrismApi::InstanceSource> m_instanceSource;
     std::vector<std::unique_ptr<Plugin>> m_plugins;
     bool m_launcherReady = false;
 };

@@ -20,9 +20,35 @@ namespace PrismApi {
 // Longer log messages are truncated
 constexpr qsizetype s_maxLogMessageLength = 4096;
 
+// What plugins can see of an instance
+struct InstanceInfo {
+    QByteArray id;
+    QByteArray name;
+    QByteArray group;
+    bool running = false;
+    // Seconds since the epoch, 0 if never launched
+    qint64 lastLaunch = 0;
+    // Seconds
+    qint64 playTime = 0;
+};
+
+// Where prism.instances gets its data from
+class InstanceSource {
+   public:
+    virtual ~InstanceSource() = default;
+    virtual QList<InstanceInfo> instances() const = 0;
+
+    // Holds the results while they are pushed to Lua, which may raise errors that skip C++ destructors
+    QList<InstanceInfo> scratch;
+};
+
 // Creates the global `prism` table for the plugin described by the manifest, whose folder is directory, and routes
-// `print` to prism.log.info. Returns the error message on failure.
-std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory);
+// `print` to prism.log.info. prism.instances reads from instances, which must outlive the state; without it there are
+// no instances. Returns the error message on failure.
+std::optional<QString> install(LuaState& state,
+                               const PluginManifest& manifest,
+                               const QString& directory,
+                               InstanceSource* instances = nullptr);
 
 // A step registered with prism.launch.addStep
 struct LaunchStepInfo {

@@ -205,6 +205,49 @@ class PrismApiTest : public QObject {
         QVERIFY(error && error->contains("function expected"));
     }
 
+    void test_instances()
+    {
+        struct FakeSource : PrismApi::InstanceSource {
+            QList<PrismApi::InstanceInfo> instances() const override
+            {
+                return { { "a", "Alpha", "Modded", true, 1700000000, 3600 }, { "b", "Beta ñ", "", false, 0, 0 } };
+            }
+        } source;
+
+        auto withPermission = manifest();
+        withPermission.permissions = { "instances.read" };
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path(), &source), std::nullopt);
+        runOk(state, R"(
+            local list = prism.instances.list()
+            assert(#list == 2)
+            assert(list[1].id == "a" and list[1].name == "Alpha" and list[1].group == "Modded")
+            assert(list[1].running == true and list[1].lastLaunch == 1700000000 and list[1].playTime == 3600)
+            assert(list[2].name == "Beta ñ" and list[2].running == false)
+
+            local b = prism.instances.get("b")
+            assert(b and b.id == "b")
+            assert(prism.instances.get("missing") == nil)
+            -- Results are copies
+            list[1].name = "changed"
+            assert(prism.instances.get("a").name == "Alpha")
+        )");
+        QVERIFY(source.scratch.isEmpty());
+
+        // Without a source there are no instances
+        LuaState empty;
+        QCOMPARE(PrismApi::install(empty, withPermission, m_dir.path()), std::nullopt);
+        runOk(empty, "assert(#prism.instances.list() == 0 and prism.instances.get('a') == nil)");
+
+        // Without the permission
+        LuaState denied;
+        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), &source), std::nullopt);
+        auto error = denied.run("prism.instances.list()", "test");
+        QVERIFY(error && error->contains("prism.instances requires the 'instances.read' permission"));
+        error = denied.run("prism.instances.get('a')", "test");
+        QVERIFY(error && error->contains("requires the 'instances.read' permission"));
+    }
+
     void test_pluginLoadsWithApi()
     {
         QTemporaryDir root;

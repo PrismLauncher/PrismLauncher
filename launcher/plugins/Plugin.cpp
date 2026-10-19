@@ -27,7 +27,8 @@ Result<PluginManifest> readManifest(const QString& directory)
 
 }  // namespace
 
-Plugin::Plugin(const QString& directory) : m_directory(directory), m_manifest(readManifest(directory))
+Plugin::Plugin(const QString& directory, PrismApi::InstanceSource* instances)
+    : m_directory(directory), m_manifest(readManifest(directory)), m_instances(instances)
 {
     if (!m_manifest) {
         fail(m_manifest.error());
@@ -70,7 +71,7 @@ bool Plugin::load()
         fail("could not create the Lua state");
         return false;
     }
-    if (auto error = PrismApi::install(*lua, *m_manifest, m_directory)) {
+    if (auto error = PrismApi::install(*lua, *m_manifest, m_directory, m_instances)) {
         fail(*error);
         return false;
     }

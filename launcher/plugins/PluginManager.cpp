@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QPointer>
 
 #include <algorithm>
 
@@ -18,8 +19,34 @@
 #include "plugins/lua/PrismApi.h"
 #include "settings/Setting.h"
 
+namespace {
+
+class InstanceListSource : public PrismApi::InstanceSource {
+   public:
+    QList<PrismApi::InstanceInfo> instances() const override
+    {
+        QList<PrismApi::InstanceInfo> result;
+        if (!list) {
+            return result;
+        }
+        for (int i = 0; i < list->count(); i++) {
+            const BaseInstance* instance = list->at(i);
+            result.append({ instance->id().toUtf8(), instance->name().toUtf8(), list->getInstanceGroup(instance->id()).toUtf8(),
+                            instance->isRunning(), instance->lastLaunch() / 1000, instance->totalTimePlayed() });
+        }
+        return result;
+    }
+
+    QPointer<InstanceList> list;
+};
+
+}  // namespace
+
 PluginManager::PluginManager(const QString& pluginsDir, std::shared_ptr<Setting> enabledPlugins, QObject* parent)
-    : QObject(parent), m_pluginsDir(pluginsDir), m_enabledPlugins(std::move(enabledPlugins))
+    : QObject(parent)
+    , m_pluginsDir(pluginsDir)
+    , m_enabledPlugins(std::move(enabledPlugins))
+    , m_instanceSource(std::make_unique<InstanceListSource>())
 {}
 
 PluginManager::~PluginManager() = default;
@@ -36,7 +63,7 @@ void PluginManager::discover()
     // A plugin's id is always its folder name, so this also sorts by id.
     const QStringList folders = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     for (const QString& folder : folders) {
-        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder)));
+        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder), m_instanceSource.get()));
     }
 
     const QStringList enabled = enabledIds();
@@ -121,6 +148,7 @@ void PluginManager::prepareLaunch(LaunchTask* task)
 
 void PluginManager::watchInstances(InstanceList* instances)
 {
+    static_cast<InstanceListSource*>(m_instanceSource.get())->list = instances;
     for (int i = 0; i < instances->count(); i++) {
         watchInstance(instances->at(i));
     }
