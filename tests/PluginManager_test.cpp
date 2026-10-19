@@ -1,6 +1,7 @@
 #include <QDir>
 #include <QRegularExpression>
 #include <QSignalSpy>
+#include <QString>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -240,6 +241,27 @@ class PluginManagerTest : public QObject {
         QVERIFY(!manager.hasUiPlugins());
         error = manager.runAction(launcherActions[0]);
         QVERIFY(error && error->contains("is not running"));
+    }
+
+    void test_notificationRateLimit()
+    {
+        addPlugin("com.example.noisy", "for i = 1, 7 do prism.ui.notify('message ' .. i) end");
+        writeFile(QDir(pluginsDir()).filePath("com.example.noisy/plugin.toml"),
+                  "id = \"com.example.noisy\"\nname = \"Noisy\"\nversion = \"1\"\napi = 1\npermissions = [\"ui\"]\n");
+        m_enabled->set(QStringList({ "com.example.noisy" }));
+        PluginManager manager(pluginsDir(), m_enabled);
+        QSignalSpy notifications(&manager, &PluginManager::notificationRequested);
+
+        for (int i = 1; i <= PluginManager::s_maxNotificationsPerMinute; i++) {
+            QTest::ignoreMessage(QtInfoMsg, qPrintable(QString("[com.example.noisy] notification: message %1").arg(i)));
+        }
+        QTest::ignoreMessage(QtWarningMsg, "[com.example.noisy] notification dropped, too many in the last minute: message 6");
+        QTest::ignoreMessage(QtWarningMsg, "[com.example.noisy] notification dropped, too many in the last minute: message 7");
+        manager.discover();
+
+        QCOMPARE(notifications.size(), PluginManager::s_maxNotificationsPerMinute);
+        QCOMPARE(notifications.first().at(1).toString(), "Noisy");
+        QCOMPARE(notifications.first().at(2).toString(), "message 1");
     }
 
     void test_rediscover()

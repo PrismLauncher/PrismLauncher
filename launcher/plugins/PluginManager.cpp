@@ -49,7 +49,9 @@ PluginManager::PluginManager(const QString& pluginsDir, std::shared_ptr<Setting>
     , m_pluginsDir(pluginsDir)
     , m_enabledPlugins(std::move(enabledPlugins))
     , m_instanceSource(std::make_unique<InstanceListSource>())
-{}
+{
+    m_clock.start();
+}
 
 PluginManager::~PluginManager() = default;
 
@@ -65,7 +67,7 @@ void PluginManager::discover()
     // A plugin's id is always its folder name, so this also sorts by id.
     const QStringList folders = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     for (const QString& folder : folders) {
-        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder), m_instanceSource.get()));
+        m_plugins.push_back(std::make_unique<Plugin>(dir.filePath(folder), m_instanceSource.get(), this));
     }
 
     const QStringList enabled = enabledIds();
@@ -177,6 +179,23 @@ void PluginManager::prepareLaunch(LaunchTask* task)
 {
     contributeLaunchSteps(task);
     watchLaunch(task);
+}
+
+void PluginManager::notify(const QString& pluginId, const QString& text, PrismApi::NotifyLevel level)
+{
+    auto& times = m_notificationTimes[pluginId];
+    const qint64 now = m_clock.elapsed();
+    times.removeIf([now](qint64 time) { return now - time >= 60'000; });
+    if (times.size() >= s_maxNotificationsPerMinute) {
+        qCWarning(pluginLogC).noquote() << QString("[%1] notification dropped, too many in the last minute: %2").arg(pluginId, text);
+        return;
+    }
+    times.append(now);
+
+    qCInfo(pluginLogC).noquote() << QString("[%1] notification: %2").arg(pluginId, text);
+    const Plugin* plugin = this->plugin(pluginId);
+    const QString name = plugin && plugin->manifest() ? plugin->manifest()->name : pluginId;
+    emit notificationRequested(pluginId, name, text, level);
 }
 
 bool PluginManager::hasUiPlugins() const

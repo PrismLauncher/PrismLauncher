@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <QElapsedTimer>
+#include <QHash>
 #include <QList>
 #include <QObject>
 #include <QString>
@@ -22,7 +24,7 @@ class Setting;
 
 // Discovers the plugin folders in a directory and loads the enabled ones. Which plugins are enabled is stored as a
 // list of ids in a setting; new plugins start disabled, so dropping a folder in is never enough to run its code.
-class PluginManager : public QObject {
+class PluginManager : public QObject, public PrismApi::Notifier {
     Q_OBJECT
 
    public:
@@ -74,6 +76,12 @@ class PluginManager : public QObject {
     // Runs an action; instanceId selects the instance for instance actions. Returns the error message on failure.
     std::optional<QString> runAction(const Action& action, const QString& instanceId = {});
 
+    static constexpr int s_maxNotificationsPerMinute = 5;
+
+    // Logs the notification and emits notificationRequested, unless the plugin sent more than
+    // s_maxNotificationsPerMinute in the last minute
+    void notify(const QString& pluginId, const QString& text, PrismApi::NotifyLevel level) override;
+
     // Makes the list available to prism.instances and sends instance.created, instance.removed and instance.status for
     // its instances
     void watchInstances(InstanceList* instances);
@@ -83,6 +91,8 @@ class PluginManager : public QObject {
     void pluginsChanged();
     // The state of one plugin changed
     void pluginChanged(const QString& id);
+    // A plugin sent a notification with prism.ui.notify, within the rate limit
+    void notificationRequested(const QString& pluginId, const QString& pluginName, const QString& text, PrismApi::NotifyLevel level);
 
    private:
     void watchInstance(BaseInstance* instance);
@@ -95,4 +105,7 @@ class PluginManager : public QObject {
     std::unique_ptr<PrismApi::InstanceSource> m_instanceSource;
     std::vector<std::unique_ptr<Plugin>> m_plugins;
     bool m_launcherReady = false;
+    QElapsedTimer m_clock;
+    // When each plugin's recent notifications were sent, in m_clock milliseconds
+    QHash<QString, QList<qint64>> m_notificationTimes;
 };

@@ -1199,6 +1199,8 @@ if(Launcher_ENABLE_LUA_PLUGINS)
         ${LAUNCHER_SOURCES}
         ui/pages/global/PluginsPage.h
         ui/pages/global/PluginsPage.cpp
+        ui/widgets/PluginNotifications.h
+        ui/widgets/PluginNotifications.cpp
     )
 endif()
 

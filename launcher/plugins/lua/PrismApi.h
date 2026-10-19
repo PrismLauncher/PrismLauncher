@@ -42,13 +42,27 @@ class InstanceSource {
     QList<InstanceInfo> scratch;
 };
 
+enum class NotifyLevel { Info, Warning, Error };
+
+// Receives the notifications sent with prism.ui.notify
+class Notifier {
+   public:
+    virtual ~Notifier() = default;
+    virtual void notify(const QString& pluginId, const QString& text, NotifyLevel level) = 0;
+};
+
+// Longer notifications are truncated
+constexpr qsizetype s_maxNotificationLength = 300;
+
 // Creates the global `prism` table for the plugin described by the manifest, whose folder is directory, and routes
-// `print` to prism.log.info. prism.instances reads from instances, which must outlive the state; without it there are
-// no instances. Returns the error message on failure.
+// `print` to prism.log.info. prism.instances reads from instances and prism.ui.notify sends to notifier; both must
+// outlive the state. Without them there are no instances and notifications are only logged. Returns the error message
+// on failure.
 std::optional<QString> install(LuaState& state,
                                const PluginManifest& manifest,
                                const QString& directory,
-                               InstanceSource* instances = nullptr);
+                               InstanceSource* instances = nullptr,
+                               Notifier* notifier = nullptr);
 
 // A step registered with prism.launch.addStep
 struct LaunchStepInfo {

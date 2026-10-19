@@ -304,6 +304,52 @@ class PrismApiTest : public QObject {
         )");
     }
 
+    void test_notify()
+    {
+        struct FakeNotifier : PrismApi::Notifier {
+            void notify(const QString& pluginId, const QString& text, PrismApi::NotifyLevel level) override
+            {
+                received.append({ pluginId, text, level });
+            }
+            struct Received {
+                QString pluginId;
+                QString text;
+                PrismApi::NotifyLevel level;
+            };
+            QList<Received> received;
+        } notifier;
+
+        auto withPermission = manifest();
+        withPermission.permissions = { "ui" };
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path(), nullptr, &notifier), std::nullopt);
+        runOk(state, R"(
+            prism.ui.notify("Backup done")
+            prism.ui.notify("Disk almost full", "warning")
+            prism.ui.notify(string.rep("x", 1000), "error")
+            local ok, err = pcall(prism.ui.notify, "x", "loud")
+            assert(not ok and err:find('level must be "info", "warning" or "error"', 1, true), err)
+            assert(not pcall(prism.ui.notify))
+        )");
+        QCOMPARE(notifier.received.size(), 3);
+        QCOMPARE(notifier.received[0].pluginId, "com.example.log");
+        QCOMPARE(notifier.received[0].text, "Backup done");
+        QCOMPARE(notifier.received[0].level, PrismApi::NotifyLevel::Info);
+        QCOMPARE(notifier.received[1].level, PrismApi::NotifyLevel::Warning);
+        QCOMPARE(notifier.received[2].text.size(), PrismApi::s_maxNotificationLength);
+
+        // Without a notifier it is only logged
+        LuaState logged;
+        QCOMPARE(PrismApi::install(logged, withPermission, m_dir.path()), std::nullopt);
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.log] notification: only logged");
+        runOk(logged, "prism.ui.notify('only logged')");
+
+        LuaState denied;
+        QCOMPARE(PrismApi::install(denied, manifest(), m_dir.path(), nullptr, &notifier), std::nullopt);
+        auto error = denied.run("prism.ui.notify('x')", "test");
+        QVERIFY(error && error->contains("prism.ui.notify requires the 'ui' permission"));
+    }
+
     void test_pluginLoadsWithApi()
     {
         QTemporaryDir root;

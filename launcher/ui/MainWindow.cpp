@@ -97,6 +97,7 @@
 
 #ifdef ENABLE_LUA_PLUGINS
 #include "plugins/PluginManager.h"
+#include "ui/widgets/PluginNotifications.h"
 #endif
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
@@ -635,6 +636,12 @@ void MainWindow::setupPluginActions()
     connect(plugins, &PluginManager::pluginsChanged, this, &MainWindow::updatePluginActions);
     connect(plugins, &PluginManager::pluginChanged, this, &MainWindow::updatePluginActions);
     updatePluginActions();
+
+    m_pluginNotifications = new PluginNotifications(this);
+    connect(plugins, &PluginManager::notificationRequested, m_pluginNotifications,
+            [this](const QString&, const QString& pluginName, const QString& text, PrismApi::NotifyLevel level) {
+                m_pluginNotifications->show(pluginName, text, level);
+            });
 }
 
 void MainWindow::updatePluginActions()

@@ -512,6 +512,41 @@ int runAction(lua_State* L)
     return 0;
 }
 
+// prism.ui.notify(text, [level]): upvalue 1 tells whether the plugin has the ui permission, upvalue 2 is a light
+// userdata pointing to the Notifier (or null), upvalue 3 is the plugin id
+int notify(lua_State* L)
+{
+    if (!lua_toboolean(L, lua_upvalueindex(1))) {
+        return luaL_error(L, "prism.ui.notify requires the 'ui' permission");
+    }
+    size_t length = 0;
+    const char* text = luaL_checklstring(L, 1, &length);
+    const char* levelName = luaL_optstring(L, 2, "info");
+    PrismApi::NotifyLevel level;
+    if (std::strcmp(levelName, "info") == 0) {
+        level = PrismApi::NotifyLevel::Info;
+    } else if (std::strcmp(levelName, "warning") == 0) {
+        level = PrismApi::NotifyLevel::Warning;
+    } else if (std::strcmp(levelName, "error") == 0) {
+        level = PrismApi::NotifyLevel::Error;
+    } else {
+        return luaL_error(L, "level must be \"info\", \"warning\" or \"error\"");
+    }
+    length = std::min<size_t>(length, PrismApi::s_maxNotificationLength);
+
+    size_t idLength = 0;
+    const char* id = lua_tolstring(L, lua_upvalueindex(3), &idLength);
+    const QString pluginId = QString::fromUtf8(id, static_cast<qsizetype>(idLength));
+    const QString message = QString::fromUtf8(text, static_cast<qsizetype>(length));
+    // No Lua calls from here on, so the strings above are always destroyed
+    if (auto* notifier = static_cast<PrismApi::Notifier*>(lua_touserdata(L, lua_upvalueindex(2)))) {
+        notifier->notify(pluginId, message, level);
+    } else {
+        qCInfo(pluginLogC).noquote() << QString("[%1] notification: %2").arg(pluginId, message);
+    }
+    return 0;
+}
+
 struct InstallArgs {
     QByteArray id;
     QByteArray settingsPath;
@@ -520,6 +555,7 @@ struct InstallArgs {
     bool instancesRead;
     PrismApi::InstanceSource* instances;
     bool ui;
+    PrismApi::Notifier* notifier;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -580,6 +616,11 @@ int openPrism(lua_State* L)
     lua_pushboolean(L, args->ui);
     lua_pushcclosure(L, addUiAction, 1);
     lua_setfield(L, -2, "addAction");
+    lua_pushboolean(L, args->ui);
+    lua_pushlightuserdata(L, args->notifier);
+    lua_pushlstring(L, args->id.constData(), args->id.size());
+    lua_pushcclosure(L, notify, 3);
+    lua_setfield(L, -2, "notify");
     lua_setfield(L, -2, "ui");
 
     lua_setglobal(L, "prism");
@@ -590,7 +631,11 @@ int openPrism(lua_State* L)
 
 namespace PrismApi {
 
-std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory, InstanceSource* instances)
+std::optional<QString> install(LuaState& state,
+                               const PluginManifest& manifest,
+                               const QString& directory,
+                               InstanceSource* instances,
+                               Notifier* notifier)
 {
     // Everything that allocates Lua memory happens inside the protected call, so running out of memory cannot panic
     InstallArgs args{ manifest.id.toUtf8(),
@@ -599,7 +644,8 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
                       {},
                       manifest.hasPermission("instances.read"),
                       instances,
-                      manifest.hasPermission("ui") };
+                      manifest.hasPermission("ui"),
+                      notifier };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

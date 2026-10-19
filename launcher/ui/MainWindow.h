@@ -256,6 +256,7 @@ class MainWindow : public QMainWindow {
     QMenu* m_pluginsMenu = nullptr;
     QAction* m_pluginsButton = nullptr;
     QAction* m_instancePluginsAction = nullptr;
+    class PluginNotifications* m_pluginNotifications = nullptr;
 #endif
     KonamiCode* secretEventFilter = nullptr;
 
