@@ -203,9 +203,10 @@ Needs `ui`.
 
   Methods: `text()`, `setText(text)`, `setEnabled(on)`, `setVisible(on)`, `setItems(items)`, `selected()`,
   `select(index)` (`select(id)` in trees, which also opens their folders), `size()` (width and height, also of windows), `sizes()` and `setSizes({ ... })` (panes of a split),
-  `setProblems({ { line, message } })` and `setCompletions({ { name, signature, doc } })` (code
+  `addShortcut(keys, fn)` (windows: `keys` like `"Ctrl+S"`), `setProblems({ { line, message } })` and `setCompletions({ { name, signature, doc } })` (code
   editors: offered while typing or with Ctrl+Space, with the names used in the text), and `show()` and `close()`
-  (windows). A plugin
+  (windows). Code editors copy (Ctrl+C) and cut (Ctrl+X) the whole line when nothing is selected, and paste such a
+  line below the current one (Ctrl+V). A plugin
   can have up to 8 windows open; they close when it is disabled.
 
 ### Helpers

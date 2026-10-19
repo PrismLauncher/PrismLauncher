@@ -1,5 +1,7 @@
 #include <QAbstractItemView>
 #include <QApplication>
+#include <QClipboard>
+#include <QTextBlock>
 #include <QComboBox>
 #include <QCompleter>
 #include <QDialog>
@@ -244,6 +246,66 @@ class UiApiTest : public QObject {
         expectError(*state, "tree:setItems({ { id = \"x\" } })", "tree items need a text");
         expectError(*state, "tree:setItems({ { text = \"x\", id = 1 } })", "'id' must be a string");
         expectError(*state, "win:add(\"label\"):select(1)", "a label has no method 'select'");
+    }
+
+    void test_lineClipboard()
+    {
+        auto state = newState();
+        runOk(*state, "win = prism.ui.window{ title = \"Lines\" } code = win:add(\"code\", { text = \"one\\ntwo\\nthree\" }) win:show()");
+        auto* editor = findWindow("Lines")->findChild<LuaCodeEditor*>();
+        auto moveTo = [editor](int line, int column) {
+            QTextCursor cursor(editor->document()->findBlockByNumber(line));
+            cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
+            editor->setTextCursor(cursor);
+        };
+
+        // Copy without a selection takes the whole line; pasting it goes below the current one
+        moveTo(1, 1);
+        QTest::keyClick(editor, Qt::Key_C, Qt::ControlModifier);
+        QCOMPARE(QApplication::clipboard()->text(), "two\n");
+        moveTo(0, 1);
+        QTest::keyClick(editor, Qt::Key_V, Qt::ControlModifier);
+        QCOMPARE(editor->toPlainText(), "one\ntwo\ntwo\nthree");
+
+        // Cut without a selection removes the whole line
+        moveTo(0, 2);
+        QTest::keyClick(editor, Qt::Key_X, Qt::ControlModifier);
+        QCOMPARE(editor->toPlainText(), "two\ntwo\nthree");
+        QCOMPARE(QApplication::clipboard()->text(), "one\n");
+        // Also the last one, with the line break before it
+        moveTo(2, 0);
+        QTest::keyClick(editor, Qt::Key_X, Qt::ControlModifier);
+        QCOMPARE(editor->toPlainText(), "two\ntwo");
+
+        // With a selection, copy and paste work as usual
+        QTextCursor cursor(editor->document()->findBlockByNumber(0));
+        cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 2);
+        editor->setTextCursor(cursor);
+        QTest::keyClick(editor, Qt::Key_C, Qt::ControlModifier);
+        QCOMPARE(QApplication::clipboard()->text(), "tw");
+        moveTo(1, 3);
+        QTest::keyClick(editor, Qt::Key_V, Qt::ControlModifier);
+        QCOMPARE(editor->toPlainText(), "two\ntwotw");
+    }
+
+    void test_shortcuts()
+    {
+        auto state = newState();
+        runOk(*state, R"lua(
+            win = prism.ui.window{ title = "Shortcuts" }
+            win:add("code")
+            win:addShortcut("Ctrl+S", function() saves = (saves or 0) + 1 end)
+            win:show()
+        )lua");
+        QDialog* window = findWindow("Shortcuts");
+        window->activateWindow();
+        QVERIFY(QTest::qWaitForWindowActive(window));
+        QTest::keyClick(window->findChild<LuaCodeEditor*>(), Qt::Key_S, Qt::ControlModifier);
+        runOk(*state, "assert(saves == 1, saves)");
+
+        expectError(*state, "win:addShortcut(\"Ctrl+Nope+Q\", function() end)", "invalid shortcut");
+        expectError(*state, "win:addShortcut(\"Ctrl+S\")", "function expected");
+        expectError(*state, "win:add(\"label\"):addShortcut(\"Ctrl+S\", function() end)", "a label has no method 'addShortcut'");
     }
 
     void test_closeAndUnload()

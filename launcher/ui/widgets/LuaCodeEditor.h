@@ -58,6 +58,10 @@ class LuaCodeEditor : public QPlainTextEdit {
     void updateMarkers();
     void rebuildCompletionModel();
     void insertCompletion(const QString& completion);
+    // Without a selection, copy and cut take the whole line, and pasting a whole line puts it below the current one
+    bool handleLineClipboard(QKeyEvent* event);
+    void copyLine(bool cut);
+    void pasteLineBelow();
     void setFocusedName(const QString& name);
     QString prefixAtCursor() const;
     QString nameAtCursor() const;

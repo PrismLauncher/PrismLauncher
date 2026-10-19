@@ -12,12 +12,14 @@
 #include <QComboBox>
 #include <QDialog>
 #include <QHBoxLayout>
+#include <QKeySequence>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QPushButton>
+#include <QShortcut>
 #include <QSplitter>
 #include <QTreeWidget>
 #include <QTreeWidgetItemIterator>
@@ -673,6 +675,32 @@ int widgetSetProblems(lua_State* L)
     return 0;
 }
 
+bool isValidKeySequence(const char* keys)
+{
+    const QKeySequence sequence = QKeySequence::fromString(QString::fromUtf8(keys), QKeySequence::PortableText);
+    return !sequence.isEmpty() && sequence[0].key() != Qt::Key_unknown;
+}
+
+// window:addShortcut(keys, fn): calls fn when the keys (e.g. "Ctrl+S") are pressed in the window
+int widgetAddShortcut(lua_State* L)
+{
+    auto* dialog = checkKind<QDialog>(L, 1, "addShortcut");
+    const char* keys = luaL_checkstring(L, 2);
+    luaL_checktype(L, 3, LUA_TFUNCTION);
+    if (!isValidKeySequence(keys)) {
+        return luaL_error(L, "invalid shortcut '%s', write it like \"Ctrl+S\"", keys);
+    }
+    lua_pushvalue(L, 3);
+    const int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    LuaState* state = LuaState::fromLua(L);
+    // Belongs to the window, which deletes it
+    auto* shortcut = new QShortcut(QKeySequence::fromString(QString::fromUtf8(keys), QKeySequence::PortableText), dialog);
+    QObject::connect(shortcut, &QShortcut::activated, shortcut,
+                     [state, lifetime = state->lifetime(), ref] { callBack(state, lifetime, ref); });
+    return 0;
+}
+
 int widgetShow(lua_State* L)
 {
     auto* dialog = checkKind<QDialog>(L, 1, "show");
@@ -782,6 +810,7 @@ void addWindowFunction(lua_State* L, bool allowed)
             { "setProblems", widgetSetProblems },
             { "setCompletions", widgetSetCompletions },
             { "show", widgetShow },
+            { "addShortcut", widgetAddShortcut },
             { "close", widgetClose },
             { nullptr, nullptr },
         };

@@ -5,10 +5,13 @@
 #include "LuaCodeEditor.h"
 
 #include <QAbstractItemView>
+#include <QApplication>
+#include <QClipboard>
 #include <QCompleter>
 #include <QFontDatabase>
 #include <QHelpEvent>
 #include <QKeyEvent>
+#include <QMimeData>
 #include <QPainter>
 #include <QRegularExpression>
 #include <QScrollBar>
@@ -225,8 +228,80 @@ void LuaCodeEditor::rebuildCompletionModel()
     m_completionModel->sort(0);
 }
 
+namespace {
+
+// Marks clipboard contents copied as whole lines
+constexpr const char* s_wholeLineMime = "application/x-prismlauncher-whole-line";
+
+}  // namespace
+
+bool LuaCodeEditor::handleLineClipboard(QKeyEvent* event)
+{
+    const bool selection = textCursor().hasSelection();
+    if (event->matches(QKeySequence::Copy) && !selection) {
+        copyLine(false);
+        return true;
+    }
+    if (event->matches(QKeySequence::Cut) && !selection && !isReadOnly()) {
+        copyLine(true);
+        return true;
+    }
+    const QMimeData* clipboard = QApplication::clipboard()->mimeData();
+    if (event->matches(QKeySequence::Paste) && !isReadOnly() && clipboard && clipboard->hasFormat(s_wholeLineMime)) {
+        pasteLineBelow();
+        return true;
+    }
+    return false;
+}
+
+void LuaCodeEditor::copyLine(bool cut)
+{
+    QTextCursor cursor = textCursor();
+    auto* data = new QMimeData;
+    data->setText(cursor.block().text() + '\n');
+    data->setData(s_wholeLineMime, "1");
+    QApplication::clipboard()->setMimeData(data);
+    if (!cut) {
+        return;
+    }
+
+    // Removes the line with its line break: the following one, or the previous one for the last line
+    const QTextBlock block = cursor.block();
+    int from = block.position();
+    int to = block.position() + block.length();
+    if (!block.next().isValid()) {
+        to = block.position() + static_cast<int>(block.text().size());
+        if (block.previous().isValid()) {
+            from--;
+        }
+    }
+    cursor.beginEditBlock();
+    cursor.setPosition(from);
+    cursor.setPosition(to, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.endEditBlock();
+    setTextCursor(cursor);
+}
+
+void LuaCodeEditor::pasteLineBelow()
+{
+    QString text = QApplication::clipboard()->text();
+    if (text.endsWith('\n')) {
+        text.chop(1);
+    }
+    QTextCursor cursor = textCursor();
+    cursor.beginEditBlock();
+    cursor.movePosition(QTextCursor::EndOfBlock);
+    cursor.insertText('\n' + text);
+    cursor.endEditBlock();
+    setTextCursor(cursor);
+}
+
 void LuaCodeEditor::keyPressEvent(QKeyEvent* event)
 {
+    if (handleLineClipboard(event)) {
+        return;
+    }
     QAbstractItemView* popup = m_completer->popup();
     if (popup->isVisible()) {
         switch (event->key()) {
