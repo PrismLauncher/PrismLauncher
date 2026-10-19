@@ -7,6 +7,7 @@
 #include <QPointer>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <QSplitter>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -157,6 +158,43 @@ class UiApiTest : public QObject {
         expectError(*state, "code:setCompletions({ { doc = \"x\" } })", "completions need a name");
         expectError(*state, "code:setCompletions({ { name = 1 } })", "'name' must be a string");
         expectError(*state, "win:add(\"label\"):setCompletions({})", "a label has no method 'setCompletions'");
+    }
+
+    void test_split()
+    {
+        auto state = newState();
+        runOk(*state, R"lua(
+            win = prism.ui.window{ title = "Split", width = 900, height = 500 }
+            split = win:add("split", { stretch = 1 })
+            left = split:add("list")
+            middle = split:add("code", { stretch = 2 })
+            right = split:add("column")
+            right:add("label", { text = "help" })
+            win:show()
+            split:setSizes({ 200, 500, 200 })
+        )lua");
+        QDialog* window = findWindow("Split");
+        auto* splitter = window->findChild<QSplitter*>();
+        QVERIFY(splitter);
+        QCOMPARE(splitter->count(), 3);
+        QCOMPARE(splitter->orientation(), Qt::Horizontal);
+        runOk(*state, R"lua(
+            local sizes = split:sizes()
+            assert(#sizes == 3 and sizes[1] > 0 and sizes[2] > sizes[1], table.concat(sizes, ","))
+            local w, h = win:size()
+            assert(w > 0 and h > 0)
+            right:setVisible(false)
+        )lua");
+        QVERIFY(splitter->widget(2)->isHidden());
+        runOk(*state, R"lua(
+            right:setVisible(true)
+            local vertical = win:add("split", { vertical = true })
+            vertical:add("label", { text = "top" })
+        )lua");
+        QVERIFY(!splitter->widget(2)->isHidden());
+        QCOMPARE(window->findChildren<QSplitter*>().last()->orientation(), Qt::Vertical);
+        expectError(*state, "left:sizes()", "a list has no method 'sizes'");
+        expectError(*state, "split:setSizes(5)", "table expected");
     }
 
     void test_closeAndUnload()

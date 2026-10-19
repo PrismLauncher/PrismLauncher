@@ -17,8 +17,10 @@
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QPushButton>
+#include <QSplitter>
 #include <QVBoxLayout>
 
+#include <algorithm>
 #include <cstring>
 #include <memory>
 #include <variant>
@@ -231,11 +233,12 @@ struct WidgetOptions {
     int onChange;
     int onSelect;
     int onFocus;
+    bool vertical;
 };
 
 bool isKnownKind(const char* kind)
 {
-    for (const char* known : { "label", "button", "input", "text", "code", "list", "row", "column" }) {
+    for (const char* known : { "label", "button", "input", "text", "code", "list", "row", "column", "split" }) {
         if (std::strcmp(kind, known) == 0) {
             return true;
         }
@@ -289,6 +292,11 @@ QWidget* createWidget(LuaState* state, const WidgetOptions& options)
             }
         });
         widget = list;
+    } else if (std::strcmp(kind, "split") == 0) {
+        // Panes the user resizes by dragging the handles between them; hidden panes give their space to the others
+        auto* splitter = new QSplitter(options.vertical ? Qt::Vertical : Qt::Horizontal);
+        splitter->setChildrenCollapsible(false);
+        widget = splitter;
     } else {
         widget = new QWidget;
         QBoxLayout* layout = std::strcmp(kind, "row") == 0 ? static_cast<QBoxLayout*>(new QHBoxLayout(widget)) : new QVBoxLayout(widget);
@@ -303,7 +311,8 @@ QWidget* createWidget(LuaState* state, const WidgetOptions& options)
 int addWidget(lua_State* L)
 {
     QWidget* container = checkWidget(L, 1);
-    if (!container->layout()) {
+    auto* splitter = qobject_cast<QSplitter*>(container);
+    if (!container->layout() && !splitter) {
         s_text = kindOf(container);
         return luaL_error(L, "a %s cannot contain widgets", s_text.constData());
     }
@@ -323,9 +332,15 @@ int addWidget(lua_State* L)
     options.onChange = callbackRef(L, 3, "onChange");
     options.onSelect = callbackRef(L, 3, "onSelect");
     options.onFocus = callbackRef(L, 3, "onFocus");
+    options.vertical = optBoolField(L, 3, "vertical");
 
     QWidget* widget = createWidget(LuaState::fromLua(L), options);
-    static_cast<QBoxLayout*>(container->layout())->addWidget(widget, static_cast<int>(stretch));
+    if (splitter) {
+        splitter->addWidget(widget);
+        splitter->setStretchFactor(splitter->count() - 1, static_cast<int>(stretch));
+    } else {
+        static_cast<QBoxLayout*>(container->layout())->addWidget(widget, static_cast<int>(stretch));
+    }
 
     pushHandle(L, widget);
     if (auto* list = qobject_cast<QListWidget*>(widget); list && lua_istable(L, 3)) {
@@ -386,6 +401,57 @@ int widgetSetText(lua_State* L)
 int widgetSetEnabled(lua_State* L)
 {
     checkWidget(L, 1)->setEnabled(lua_toboolean(L, 2));
+    return 0;
+}
+
+// widget:size() -> width, height
+int widgetSize(lua_State* L)
+{
+    QWidget* widget = checkWidget(L, 1);
+    lua_pushinteger(L, widget->width());
+    lua_pushinteger(L, widget->height());
+    return 2;
+}
+
+// split:sizes() -> { size of each pane }
+int widgetSizes(lua_State* L)
+{
+    auto* splitter = checkKind<QSplitter>(L, 1, "sizes");
+    // Copied to plain ints, so no C++ object is alive during the Lua calls below
+    int values[64];
+    int count = 0;
+    {
+        const QList<int> sizes = splitter->sizes();
+        count = static_cast<int>(std::min<qsizetype>(sizes.size(), 64));
+        for (int i = 0; i < count; i++) {
+            values[i] = sizes.at(i);
+        }
+    }
+    lua_createtable(L, count, 0);
+    for (int i = 0; i < count; i++) {
+        lua_pushinteger(L, values[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
+// split:setSizes({ sizes }): the panes keep their proportions when the space differs
+int widgetSetSizes(lua_State* L)
+{
+    auto* splitter = checkKind<QSplitter>(L, 1, "setSizes");
+    luaL_checktype(L, 2, LUA_TTABLE);
+    const auto count = std::min<lua_Integer>(static_cast<lua_Integer>(lua_rawlen(L, 2)), 64);
+    int values[64];
+    for (lua_Integer i = 1; i <= count; i++) {
+        lua_rawgeti(L, 2, i);
+        values[i - 1] = static_cast<int>(std::max<lua_Integer>(0, luaL_checkinteger(L, -1)));
+        lua_pop(L, 1);
+    }
+    QList<int> sizes;
+    for (lua_Integer i = 0; i < count; i++) {
+        sizes.append(values[i]);
+    }
+    splitter->setSizes(sizes);
     return 0;
 }
 
@@ -579,6 +645,9 @@ void addWindowFunction(lua_State* L, bool allowed)
             { "setText", widgetSetText },
             { "setEnabled", widgetSetEnabled },
             { "setVisible", widgetSetVisible },
+            { "size", widgetSize },
+            { "sizes", widgetSizes },
+            { "setSizes", widgetSetSizes },
             { "setItems", widgetSetItems },
             { "selected", widgetSelected },
             { "select", widgetSelect },

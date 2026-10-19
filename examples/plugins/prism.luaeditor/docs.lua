@@ -75,11 +75,14 @@ api("prism.ui.notify", "prism.ui.notify(text, [level])", "Shows a notification; 
 api("prism.ui.window", "prism.ui.window{ title, width, height, onClose } -> window",
     "Creates a window. Add widgets with window:add(kind, options) and show it with window:show().", "ui")
 method("widget:add", "container:add(kind, [options]) -> widget",
-    "Adds a widget to a window, row or column. Kinds: label, button, input, text, code, list, row, column. Options: text, placeholder, readOnly, stretch, items, onClick, onChange, onSelect, onFocus.")
+    "Adds a widget to a window, row, column or split. Kinds: label, button, input, text, code, list, row, column, split (resizable panes; vertical = true stacks them). Options: text, placeholder, readOnly, stretch, items, vertical, onClick, onChange, onSelect, onFocus.")
 method("widget:text", "widget:text() -> text", "The text of a label, button, input, text or code widget, or the selected item of a list.")
 method("widget:setText", "widget:setText(text)", "Changes the text; for a window, its title.")
 method("widget:setEnabled", "widget:setEnabled(on)", "Enables or disables the widget.")
-method("widget:setVisible", "widget:setVisible(on)", "Shows or hides the widget.")
+method("widget:setVisible", "widget:setVisible(on)", "Shows or hides the widget; in a split, the other panes take its space.")
+method("widget:size", "widget:size() -> width, height", "The current size of a widget or window.")
+method("widget:sizes", "split:sizes() -> { sizes }", "The size of each pane of a split.")
+method("widget:setSizes", "split:setSizes({ sizes })", "Resizes the panes of a split; proportions are kept if the space differs.")
 method("widget:setItems", "list:setItems(items)", "Replaces the items of a list.")
 method("widget:selected", "list:selected() -> index | nil", "The selected item of a list.")
 method("widget:select", "list:select(index)", "Selects an item of a list.")
