@@ -562,6 +562,9 @@ struct InstallArgs {
     bool fsInstance;
     bool net;
     PrismApi::HttpClient* http;
+    // Where require looks for modules, when package is available
+    QByteArray packagePath;
+    QByteArray packageCPath;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -639,6 +642,15 @@ int openPrism(lua_State* L)
     lua_setfield(L, -2, "ui");
 
     lua_setglobal(L, "prism");
+
+    // Only unrestricted plugins have package: let require load the plugin's own modules
+    if (lua_getglobal(L, "package") == LUA_TTABLE) {
+        lua_pushlstring(L, args->packagePath.constData(), args->packagePath.size());
+        lua_setfield(L, -2, "path");
+        lua_pushlstring(L, args->packageCPath.constData(), args->packageCPath.size());
+        lua_setfield(L, -2, "cpath");
+    }
+    lua_pop(L, 1);
     return 0;
 }
 
@@ -660,7 +672,9 @@ std::optional<QString> install(LuaState& state, const PluginManifest& manifest, 
                       QDir(directory).filePath("data").toUtf8(),
                       manifest.hasPermission("fs.instance"),
                       manifest.hasPermission("net"),
-                      host.http };
+                      host.http,
+                      (QDir(directory).filePath("?.lua") + ';' + QDir(directory).filePath("?/init.lua")).toUtf8(),
+                      (QDir(directory).filePath("?.so") + ';' + QDir(directory).filePath("?.dll")).toUtf8() };
     for (const QString& permission : manifest.permissions) {
         args.permissions.append(permission.toUtf8());
     }

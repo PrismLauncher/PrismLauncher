@@ -67,6 +67,13 @@ int openSafeLibs(lua_State* L)
     return 0;
 }
 
+int openUnrestrictedLibs(lua_State* L)
+{
+    // Not debug: debug.sethook would turn the instruction watchdog off
+    luaL_openselectedlibs(L, LUA_IOLIBK | LUA_OSLIBK | LUA_LOADLIBK, 0);
+    return 0;
+}
+
 // Same as the standalone interpreter: stringify the error object and append a traceback.
 int messageHandler(lua_State* L)
 {
@@ -115,6 +122,21 @@ LuaState::~LuaState()
         lua_close(m_state);
     }
     Q_ASSERT(m_memory.used == 0);
+}
+
+std::optional<QString> LuaState::openUnrestrictedLibraries()
+{
+    if (!m_state) {
+        return QStringLiteral("Lua state is not initialized");
+    }
+    lua_pushcfunction(m_state, openUnrestrictedLibs);
+    if (lua_pcall(m_state, 0, 0, 0) != LUA_OK) {
+        const char* msg = lua_tostring(m_state, -1);
+        std::optional<QString> error = msg ? QString::fromUtf8(msg) : QStringLiteral("unknown Lua error");
+        lua_pop(m_state, 1);
+        return error;
+    }
+    return std::nullopt;
 }
 
 LuaState* LuaState::fromLua(lua_State* L)

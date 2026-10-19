@@ -71,6 +71,12 @@ bool Plugin::load()
         fail("could not create the Lua state");
         return false;
     }
+    if (m_manifest->hasPermission("unrestricted")) {
+        if (auto error = lua->openUnrestrictedLibraries()) {
+            fail(*error);
+            return false;
+        }
+    }
     if (auto error = PrismApi::install(*lua, *m_manifest, m_directory, m_host)) {
         fail(*error);
         return false;

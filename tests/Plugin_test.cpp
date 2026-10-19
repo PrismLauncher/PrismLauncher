@@ -158,6 +158,41 @@ class PluginTest : public QObject {
         QVERIFY2(plugin.error().contains("does not match its folder name 'folder'"), qPrintable(plugin.error()));
     }
 
+    void test_unrestricted()
+    {
+        const QString outside = m_root.filePath("outside.txt");
+        Plugin plugin(makePlugin("free", { { "plugin.toml", manifest("free", "permissions = [\"unrestricted\"]") },
+                                           { "helpers.lua", "return { double = function(x) return x * 2 end }" },
+                                           { "main.lua", QString("local helpers = require('helpers')\n"
+                                                                 "doubled = helpers.double(21)\n"
+                                                                 "local f = assert(io.open('%1', 'w'))\n"
+                                                                 "f:write('written by a plugin')\n"
+                                                                 "f:close()\n"
+                                                                 "clock = type(os.time())\n"
+                                                                 "hasDebug = tostring(debug ~= nil)\n")
+                                                             .arg(outside)
+                                                             .toUtf8() } }));
+        QVERIFY2(plugin.load(), qPrintable(plugin.error()));
+        QCOMPARE(globalString(plugin, "doubled"), "42");
+        QCOMPARE(globalString(plugin, "clock"), "number");
+        QCOMPARE(globalString(plugin, "hasDebug"), "false");
+        QFile file(outside);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QCOMPARE(file.readAll(), "written by a plugin");
+
+        // The watchdog still applies
+        QCOMPARE(plugin.lua()->run("while true do end", "loop").value_or("").contains("instruction limit exceeded"), true);
+    }
+
+    void test_sandboxedByDefault()
+    {
+        Plugin plugin(
+            makePlugin("boxed", { { "plugin.toml", manifest("boxed") },
+                                  { "main.lua", "names = tostring(io) .. tostring(os) .. tostring(package) .. tostring(require)" } }));
+        QVERIFY2(plugin.load(), qPrintable(plugin.error()));
+        QCOMPARE(globalString(plugin, "names"), "nilnilnilnil");
+    }
+
     void test_trailingSlash()
     {
         Plugin plugin(makePlugin("slash", { { "plugin.toml", manifest("slash") }, { "main.lua", "" } }) + "/");

@@ -39,6 +39,10 @@ class LuaState {
     std::uint64_t instructionLimit() const { return m_instructionLimit; }
     void setInstructionLimit(std::uint64_t limit) { m_instructionLimit = limit; }
 
+    // Also opens io, os and package (not debug, which could turn the watchdog off), for trusted plugins. Returns the
+    // error message on failure.
+    std::optional<QString> openUnrestrictedLibraries();
+
     // Runs a text chunk. Returns the error message on failure.
     std::optional<QString> run(const QByteArray& code, const QString& chunkName);
     // Calls the function below the nargs arguments at the top of the stack with a fresh instruction budget (unless it
