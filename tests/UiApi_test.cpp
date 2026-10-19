@@ -1,4 +1,6 @@
+#include <QAbstractItemView>
 #include <QApplication>
+#include <QCompleter>
 #include <QDialog>
 #include <QLineEdit>
 #include <QListWidget>
@@ -108,6 +110,53 @@ class UiApiTest : public QObject {
         auto editors = window->findChildren<LuaCodeEditor*>();
         QTest::keyClicks(editors.last(), "abc");
         runOk(*state, "assert(changes == 3, changes)");
+    }
+
+    void test_completion()
+    {
+        auto state = newState();
+        runOk(*state, R"lua(
+            win = prism.ui.window{ title = "Completion" }
+            code = win:add("code", { onFocus = function(name) focused = name end })
+            code:setCompletions({
+                { name = "prism.log.info", signature = "prism.log.info(...)", doc = "Writes to the log." },
+                { name = "prism.log.warn", signature = "prism.log.warn(...)" },
+                { name = "string.format" },
+            })
+            code:setText("local counter = 1\n")
+            win:show()
+        )lua");
+        auto* editor = findWindow("Completion")->findChild<LuaCodeEditor*>();
+        QCOMPARE(editor->completionsFor("prism.log."), QStringList({ "prism.log.info", "prism.log.warn" }));
+        // Names used in the text and keywords are offered too
+        QVERIFY(editor->completionsFor("cou").contains("counter"));
+        QVERIFY(editor->completionsFor("loc").contains("local"));
+
+        // Typing shows the popup; Enter inserts the highlighted completion
+        editor->moveCursor(QTextCursor::End);
+        QTest::keyClicks(editor, "prism.log.i");
+        QVERIFY(editor->completer()->popup()->isVisible());
+        QTest::keyClick(editor->completer()->popup(), Qt::Key_Return);
+        QVERIFY2(editor->toPlainText().endsWith("prism.log.info"), qPrintable(editor->toPlainText()));
+        runOk(*state, "assert(focused == \"prism.log.info\", focused)");
+
+        // Ctrl+Space shows it without typing two characters
+        QTest::keyClick(editor, Qt::Key_Return);
+        QTest::keyClicks(editor, "s");
+        QTest::keyClick(editor, Qt::Key_Space, Qt::ControlModifier);
+        QVERIFY(editor->completer()->popup()->isVisible());
+        QTest::keyClick(editor->completer()->popup(), Qt::Key_Escape);
+        QVERIFY(!editor->completer()->popup()->isVisible());
+
+        // Moving the cursor reports the name under it
+        QTextCursor cursor = editor->textCursor();
+        cursor.setPosition(8);
+        editor->setTextCursor(cursor);
+        runOk(*state, "assert(focused == \"counter\", focused)");
+
+        expectError(*state, "code:setCompletions({ { doc = \"x\" } })", "completions need a name");
+        expectError(*state, "code:setCompletions({ { name = 1 } })", "'name' must be a string");
+        expectError(*state, "win:add(\"label\"):setCompletions({})", "a label has no method 'setCompletions'");
     }
 
     void test_closeAndUnload()

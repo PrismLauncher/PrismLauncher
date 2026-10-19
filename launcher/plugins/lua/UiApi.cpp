@@ -41,6 +41,8 @@ constexpr int s_maxWindows = 8;
 
 QByteArray s_text;
 QList<LuaCodeEditor::Problem> s_problems;
+QList<LuaCodeEditor::Completion> s_completions;
+constexpr lua_Integer s_maxCompletions = 5000;
 
 struct WidgetHandle {
     QPointer<QWidget>* widget;
@@ -228,6 +230,7 @@ struct WidgetOptions {
     int onClick;
     int onChange;
     int onSelect;
+    int onFocus;
 };
 
 bool isKnownKind(const char* kind)
@@ -272,6 +275,11 @@ QWidget* createWidget(LuaState* state, const WidgetOptions& options)
         edit->setReadOnly(options.readOnly);
         QObject::connect(edit, &QPlainTextEdit::textChanged, edit,
                          [state, lifetime, ref = options.onChange] { callBack(state, lifetime, ref); });
+        if (auto* code = qobject_cast<LuaCodeEditor*>(edit)) {
+            QObject::connect(code, &LuaCodeEditor::focusedNameChanged, code, [state, lifetime, ref = options.onFocus](const QString& name) {
+                callBack(state, lifetime, ref, { name.toUtf8() });
+            });
+        }
         widget = edit;
     } else if (std::strcmp(kind, "list") == 0) {
         auto* list = new QListWidget;
@@ -314,6 +322,7 @@ int addWidget(lua_State* L)
     options.onClick = callbackRef(L, 3, "onClick");
     options.onChange = callbackRef(L, 3, "onChange");
     options.onSelect = callbackRef(L, 3, "onSelect");
+    options.onFocus = callbackRef(L, 3, "onFocus");
 
     QWidget* widget = createWidget(LuaState::fromLua(L), options);
     static_cast<QBoxLayout*>(container->layout())->addWidget(widget, static_cast<int>(stretch));
@@ -413,6 +422,54 @@ int widgetSelect(lua_State* L)
     auto* list = checkKind<QListWidget>(L, 1, "select");
     const lua_Integer row = luaL_checkinteger(L, 2);
     list->setCurrentRow(static_cast<int>(row - 1));
+    return 0;
+}
+
+// The string in field name of the table at index, or an empty string; raises an error for other types
+const char* stringField(lua_State* L, int index, const char* name, size_t* length)
+{
+    const int type = lua_getfield(L, index, name);
+    if (type != LUA_TNIL && type != LUA_TSTRING) {
+        luaL_error(L, "'%s' must be a string", name);
+    }
+    const char* value = type == LUA_TNIL ? "" : lua_tolstring(L, -1, length);
+    if (type == LUA_TNIL) {
+        *length = 0;
+    }
+    lua_pop(L, 1);  // still referenced by the table
+    return value;
+}
+
+int widgetSetCompletions(lua_State* L)
+{
+    auto* editor = checkKind<LuaCodeEditor>(L, 1, "setCompletions");
+    luaL_checktype(L, 2, LUA_TTABLE);
+    const auto count = static_cast<lua_Integer>(lua_rawlen(L, 2));
+    if (count > s_maxCompletions) {
+        return luaL_error(L, "too many completions, the maximum is %d", int(s_maxCompletions));
+    }
+    s_completions.clear();
+    for (lua_Integer i = 1; i <= count; i++) {
+        lua_rawgeti(L, 2, i);
+        luaL_checktype(L, -1, LUA_TTABLE);
+        const int item = lua_gettop(L);
+        size_t nameLength = 0;
+        size_t signatureLength = 0;
+        size_t docLength = 0;
+        const char* name = stringField(L, item, "name", &nameLength);
+        const char* signature = stringField(L, item, "signature", &signatureLength);
+        const char* doc = stringField(L, item, "doc", &docLength);
+        if (nameLength == 0) {
+            return luaL_error(L, "completions need a name");
+        }
+        // Only static buffers live across the Lua calls above
+        s_completions.append({ QString::fromUtf8(name, static_cast<qsizetype>(nameLength)),
+                               QString::fromUtf8(signature, static_cast<qsizetype>(signatureLength)),
+                               QString::fromUtf8(doc, static_cast<qsizetype>(docLength)) });
+        lua_pop(L, 1);
+    }
+    editor->setCompletions(s_completions);
+    s_completions.clear();
     return 0;
 }
 
@@ -526,6 +583,7 @@ void addWindowFunction(lua_State* L, bool allowed)
             { "selected", widgetSelected },
             { "select", widgetSelect },
             { "setProblems", widgetSetProblems },
+            { "setCompletions", widgetSetCompletions },
             { "show", widgetShow },
             { "close", widgetClose },
             { nullptr, nullptr },

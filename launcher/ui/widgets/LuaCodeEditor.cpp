@@ -4,10 +4,15 @@
 
 #include "LuaCodeEditor.h"
 
+#include <QAbstractItemView>
+#include <QCompleter>
 #include <QFontDatabase>
 #include <QHelpEvent>
+#include <QKeyEvent>
 #include <QPainter>
 #include <QRegularExpression>
+#include <QScrollBar>
+#include <QStandardItemModel>
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
 #include <QToolTip>
@@ -113,8 +118,40 @@ class LuaHighlighter : public QSyntaxHighlighter {
 
 }  // namespace
 
-LuaCodeEditor::LuaCodeEditor(QWidget* parent) : QPlainTextEdit(parent), m_lineNumberArea(new LineNumberArea(this))
+namespace {
+
+const QRegularExpression s_namePattern("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*");
+const QStringList s_keywords = { "and", "break", "do",  "else", "elseif", "end",    "false",  "for",  "function", "goto",  "if",
+                                 "in",  "local", "nil", "not",  "or",     "repeat", "return", "then", "true",     "until", "while" };
+
+bool isNameChar(QChar c)
 {
+    return c.isLetterOrNumber() || c == '_' || c == '.';
+}
+
+}  // namespace
+
+LuaCodeEditor::LuaCodeEditor(QWidget* parent)
+    : QPlainTextEdit(parent)
+    , m_lineNumberArea(new LineNumberArea(this))
+    , m_completer(new QCompleter(this))
+    , m_completionModel(new QStandardItemModel(this))
+{
+    m_completer->setModel(m_completionModel);
+    m_completer->setWidget(this);
+    m_completer->setCompletionMode(QCompleter::PopupCompletion);
+    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+    m_completer->setFilterMode(Qt::MatchStartsWith);
+    m_completer->setMaxVisibleItems(12);
+    connect(m_completer, qOverload<const QString&>(&QCompleter::activated), this, &LuaCodeEditor::insertCompletion);
+    connect(m_completer, qOverload<const QString&>(&QCompleter::highlighted), this, &LuaCodeEditor::setFocusedName);
+    connect(this, &QPlainTextEdit::textChanged, this, [this] { m_completionModelDirty = true; });
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, [this] {
+        if (!m_completer->popup()->isVisible()) {
+            setFocusedName(nameAtCursor());
+        }
+    });
+
     setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     setTabStopDistance(fontMetrics().horizontalAdvance(' ') * 4);
     setLineWrapMode(QPlainTextEdit::NoWrap);
@@ -130,6 +167,154 @@ void LuaCodeEditor::setProblems(const QList<Problem>& problems)
     m_problems = problems;
     updateMarkers();
     m_lineNumberArea->update();
+}
+
+void LuaCodeEditor::setCompletions(const QList<Completion>& completions)
+{
+    m_completions = completions;
+    m_completionModelDirty = true;
+}
+
+QStringList LuaCodeEditor::completionsFor(const QString& prefix)
+{
+    rebuildCompletionModel();
+    m_completer->setCompletionPrefix(prefix);
+    QStringList names;
+    for (int i = 0; m_completer->setCurrentRow(i); i++) {
+        names.append(m_completer->currentCompletion());
+    }
+    return names;
+}
+
+void LuaCodeEditor::rebuildCompletionModel()
+{
+    if (!m_completionModelDirty) {
+        return;
+    }
+    m_completionModelDirty = false;
+    m_completionModel->clear();
+
+    QSet<QString> seen;
+    auto add = [this, &seen](const QString& name, const QString& tooltip) {
+        if (seen.contains(name)) {
+            return;
+        }
+        seen.insert(name);
+        auto* item = new QStandardItem(name);
+        if (!tooltip.isEmpty()) {
+            item->setToolTip(tooltip);
+        }
+        m_completionModel->appendRow(item);
+    };
+    for (const Completion& completion : m_completions) {
+        add(completion.name, completion.doc.isEmpty() ? completion.signature : completion.signature + "\n\n" + completion.doc);
+    }
+    for (const QString& keyword : s_keywords) {
+        add(keyword, {});
+    }
+    // Names already used in the text, e.g. local variables, except the one being typed
+    const int cursor = textCursor().position();
+    auto matches = s_namePattern.globalMatch(toPlainText());
+    while (matches.hasNext()) {
+        const auto match = matches.next();
+        const bool typing = match.capturedStart() <= cursor && cursor <= match.capturedEnd();
+        if (match.capturedLength() >= 3 && !typing) {
+            add(match.captured(), {});
+        }
+    }
+    m_completionModel->sort(0);
+}
+
+void LuaCodeEditor::keyPressEvent(QKeyEvent* event)
+{
+    QAbstractItemView* popup = m_completer->popup();
+    if (popup->isVisible()) {
+        switch (event->key()) {
+            case Qt::Key_Enter:
+            case Qt::Key_Return:
+            case Qt::Key_Escape:
+            case Qt::Key_Tab:
+            case Qt::Key_Backtab:
+                // The completer handles these
+                event->ignore();
+                return;
+            default:
+                break;
+        }
+    }
+
+    const bool force = (event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_Space;
+    if (!force) {
+        QPlainTextEdit::keyPressEvent(event);
+    }
+
+    const QString prefix = prefixAtCursor();
+    const bool typedName =
+        !event->text().isEmpty() && !(event->modifiers() & (Qt::ControlModifier | Qt::AltModifier)) && isNameChar(event->text().back());
+    if (!force && (!typedName || prefix.size() < 2)) {
+        popup->hide();
+        return;
+    }
+
+    rebuildCompletionModel();
+    m_completer->setCompletionPrefix(prefix);
+    if (m_completer->completionCount() == 0 || (m_completer->completionCount() == 1 && m_completer->currentCompletion() == prefix)) {
+        popup->hide();
+        return;
+    }
+    popup->setCurrentIndex(m_completer->completionModel()->index(0, 0));
+    QRect rect = cursorRect();
+    rect.setWidth(popup->sizeHintForColumn(0) + popup->verticalScrollBar()->sizeHint().width() + 8);
+    m_completer->complete(rect);
+}
+
+void LuaCodeEditor::insertCompletion(const QString& completion)
+{
+    QTextCursor cursor = textCursor();
+    // Matching ignores case, so the typed prefix is replaced as a whole
+    cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, static_cast<int>(m_completer->completionPrefix().size()));
+    cursor.insertText(completion);
+    setTextCursor(cursor);
+    setFocusedName(completion);
+}
+
+void LuaCodeEditor::setFocusedName(const QString& name)
+{
+    if (name != m_focusedName) {
+        m_focusedName = name;
+        emit focusedNameChanged(name);
+    }
+}
+
+QString LuaCodeEditor::prefixAtCursor() const
+{
+    const QTextCursor cursor = textCursor();
+    const QString line = cursor.block().text().left(cursor.positionInBlock());
+    int start = static_cast<int>(line.size());
+    while (start > 0 && isNameChar(line.at(start - 1))) {
+        start--;
+    }
+    return line.mid(start);
+}
+
+QString LuaCodeEditor::nameAtCursor() const
+{
+    const QTextCursor cursor = textCursor();
+    const QString line = cursor.block().text();
+    int start = cursor.positionInBlock();
+    int end = start;
+    while (start > 0 && isNameChar(line.at(start - 1))) {
+        start--;
+    }
+    while (end < line.size() && isNameChar(line.at(end))) {
+        end++;
+    }
+    // Without a trailing dot, e.g. "prism.log." while typing
+    QString name = line.mid(start, end - start);
+    while (name.endsWith('.')) {
+        name.chop(1);
+    }
+    return name;
 }
 
 int LuaCodeEditor::lineNumberAreaWidth() const

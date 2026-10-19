@@ -195,10 +195,13 @@ Needs `ui`.
   Widget kinds for `container:add(kind, options)`: `label`, `button`, `input` (one line), `text` (several lines),
   `code` (Lua editor), `list`, and the containers `row` and `column`. Options: `text`, `placeholder`, `readOnly`,
   `stretch` (share of the space), `items` (lists), `onClick` (buttons, and Enter in inputs), `onChange` (inputs and
-  editors), `onSelect` (lists, `function(index, text)`).
+  editors), `onSelect` (lists, `function(index, text)`), `onFocus` (code editors, `function(name)`: the name under the
+  cursor or highlighted in the completion list).
 
   Methods: `text()`, `setText(text)`, `setEnabled(on)`, `setVisible(on)`, `setItems(items)`, `selected()`,
-  `select(index)`, `setProblems({ { line, message } })` (code editors), and `show()` and `close()` (windows). A plugin
+  `select(index)`, `setProblems({ { line, message } })` and `setCompletions({ { name, signature, doc } })` (code
+  editors: offered while typing or with Ctrl+Space, with the names used in the text), and `show()` and `close()`
+  (windows). A plugin
   can have up to 8 windows open; they close when it is disabled.
 
 ### Helpers
