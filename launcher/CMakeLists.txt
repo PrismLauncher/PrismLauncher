@@ -579,6 +579,11 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
+set(PLUGINS_SOURCES
+    plugins/lua/LuaState.h
+    plugins/lua/LuaState.cpp
+)
+
 set(LINKEXE_SOURCES
     console/WindowsConsole.h
     console/WindowsConsole.cpp
@@ -772,6 +777,10 @@ if(APPLE AND Launcher_ENABLE_UPDATER)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
 else()
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PRISM_UPDATE_SOURCES})
+endif()
+
+if(Launcher_ENABLE_LUA_PLUGINS)
+    set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PLUGINS_SOURCES})
 endif()
 
 SET(LAUNCHER_SOURCES
