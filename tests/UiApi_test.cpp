@@ -1,7 +1,6 @@
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QClipboard>
-#include <QTextBlock>
 #include <QComboBox>
 #include <QCompleter>
 #include <QDialog>
@@ -13,6 +12,7 @@
 #include <QSplitter>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTextBlock>
 #include <QTreeWidget>
 
 #include <plugins/PluginManifest.h>
