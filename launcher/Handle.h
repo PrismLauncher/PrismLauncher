@@ -27,5 +27,6 @@ class Handle : public std::unique_ptr<T, FuncDeleter<TDeleteFunc>> {
    public:
     using std::unique_ptr<T, FuncDeleter<TDeleteFunc>>::unique_ptr;
 
+    // NOLINTNEXTLINE(hicpp-explicit-conversions)
     operator T*() const { return this->get(); }
 };
