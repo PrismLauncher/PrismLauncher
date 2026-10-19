@@ -13,6 +13,7 @@
 
 #include "BaseInstance.h"
 #include "InstanceList.h"
+#include "launch/LaunchStepIds.h"
 #include "launch/LaunchTask.h"
 #include "plugins/Logging.h"
 #include "plugins/LuaLaunchStep.h"
@@ -132,37 +133,43 @@ void PluginManager::emitEvent(const char* event, const PrismApi::EventFields& fi
 
 void PluginManager::watchLaunch(LaunchTask* task)
 {
-    const QByteArray instanceId = task->instance() ? task->instance()->id().toUtf8() : QByteArray();
-    connect(task, &LaunchTask::stepStarted, this,
-            [this, instanceId](const QString& step) { emitEvent("launch.step", { { "id", instanceId }, { "step", step.toUtf8() } }); });
-    connect(task, &Task::finished, this, [this, task, instanceId] {
-        emitEvent("launch.finished",
-                  { { "id", instanceId }, { "success", task->wasSuccessful() }, { "reason", task->failReason().toUtf8() } });
-    });
-
-    struct RateLimit {
+    struct GameLog {
+        // Only the lines logged during the launch phase come from the game
+        bool gameRunning = false;
         QElapsedTimer window;
         int lines = 0;
         qint64 skipped = 0;
     };
-    auto limit = std::make_shared<RateLimit>();
-    connect(task, &LaunchTask::logLineAdded, this, [this, instanceId, limit](const QString& line, MessageLevel level) {
-        if (level == MessageLevel::Launcher) {
+    auto gameLog = std::make_shared<GameLog>();
+
+    const QByteArray instanceId = task->instance() ? task->instance()->id().toUtf8() : QByteArray();
+    connect(task, &LaunchTask::stepStarted, this, [this, instanceId, gameLog](const QString& step) {
+        gameLog->gameRunning = step == LaunchStepIds::Launch;
+        emitEvent("launch.step", { { "id", instanceId }, { "step", step.toUtf8() } });
+    });
+    connect(task, &Task::finished, this, [this, task, instanceId, gameLog] {
+        gameLog->gameRunning = false;
+        emitEvent("launch.finished",
+                  { { "id", instanceId }, { "success", task->wasSuccessful() }, { "reason", task->failReason().toUtf8() } });
+    });
+
+    connect(task, &LaunchTask::logLineAdded, this, [this, instanceId, gameLog](const QString& line, MessageLevel level) {
+        if (!gameLog->gameRunning || level == MessageLevel::Launcher) {
             return;
         }
-        if (!limit->window.isValid() || limit->window.elapsed() >= 1000) {
-            limit->window.start();
-            limit->lines = 0;
+        if (!gameLog->window.isValid() || gameLog->window.elapsed() >= 1000) {
+            gameLog->window.start();
+            gameLog->lines = 0;
         }
-        if (++limit->lines > s_maxGameLogLinesPerSecond) {
-            limit->skipped++;
+        if (++gameLog->lines > s_maxGameLogLinesPerSecond) {
+            gameLog->skipped++;
             return;
         }
         emitEvent("game.log", { { "id", instanceId },
                                 { "line", line.toUtf8() },
                                 { "level", level.toString().toLower().toUtf8() },
-                                { "skipped", limit->skipped } });
-        limit->skipped = 0;
+                                { "skipped", gameLog->skipped } });
+        gameLog->skipped = 0;
     });
 }
 

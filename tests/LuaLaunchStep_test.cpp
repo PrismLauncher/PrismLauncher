@@ -241,6 +241,11 @@ class LuaLaunchStepTest : public QObject {
         m_manager->watchLaunch(task.get());
         task->setCensorFilter({ { "s3cr3t-token", "<ACCESS TOKEN>" } });
 
+        // Lines from before the game runs (e.g. a failing plugin step's warning) are not game output
+        emit task->stepStarted("java");
+        task->onLogLine("a step failed, continuing", MessageLevel::Warning);
+        emit task->stepStarted("launch");
+
         task->onLogLine("[12:00:00] [main/INFO]: hello with s3cr3t-token", MessageLevel::Info);
         task->onLogLine("launcher's own line", MessageLevel::Launcher);
         task->onLogLine("oops", MessageLevel::Error);

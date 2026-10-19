@@ -52,8 +52,9 @@ class PluginManager : public QObject {
     void contributeLaunchSteps(LaunchTask* task);
     static constexpr int s_maxGameLogLinesPerSecond = 200;
 
-    // Sends launch.step, launch.finished and game.log for the task. game.log only carries the game's output (not the
-    // launcher's own lines), already censored, and drops lines beyond s_maxGameLogLinesPerSecond.
+    // Sends launch.step, launch.finished and game.log for the task. game.log only carries the game's output (lines
+    // logged during the launch phase, except the launcher's own), already censored, and drops lines beyond
+    // s_maxGameLogLinesPerSecond.
     void watchLaunch(LaunchTask* task);
     // Both of the above, for a launch being created
     void prepareLaunch(LaunchTask* task);
