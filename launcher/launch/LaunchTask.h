@@ -110,6 +110,9 @@ class LaunchTask : public Task {
 
     void requestLogging();
 
+    // A step is about to start; id is its phase (see LaunchStepIds), empty if it has none
+    void stepStarted(const QString& id);
+
    public slots:
     void onLogLines(const QStringList& lines, MessageLevel defaultLevel = MessageLevel::Launcher);
     void onLogLine(QString line, MessageLevel defaultLevel = MessageLevel::Launcher);

@@ -1042,6 +1042,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_plugins.reset(new PluginManager(FS::PathCombine(m_dataPath, "plugins"), m_settings->getSetting("EnabledPlugins")));
         qInfo() << "Loading plugins...";
         m_plugins->discover();
+        m_plugins->watchInstances(m_instances.get());
         qInfo() << "<> Plugins loaded.";
     }
 #endif

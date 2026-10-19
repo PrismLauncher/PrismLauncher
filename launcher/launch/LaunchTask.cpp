@@ -131,6 +131,7 @@ void LaunchTask::onStepFinished()
     // initial -> just start the first step
     if (currentStep == -1) {
         currentStep++;
+        emit stepStarted(m_steps[currentStep]->id());
         m_steps[currentStep]->start();
         return;
     }
@@ -143,6 +144,7 @@ void LaunchTask::onStepFinished()
         } else {
             currentStep++;
             step = m_steps[currentStep];
+            emit stepStarted(step->id());
             step->start();
         }
     } else {

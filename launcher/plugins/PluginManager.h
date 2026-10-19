@@ -12,6 +12,10 @@
 #include <memory>
 #include <vector>
 
+#include "plugins/lua/PrismApi.h"
+
+class BaseInstance;
+class InstanceList;
 class LaunchTask;
 class Plugin;
 class Setting;
@@ -39,13 +43,20 @@ class PluginManager : public QObject {
     bool setEnabled(const QString& id, bool enabled);
 
     // Sends the event to every loaded plugin
-    void emitEvent(const char* event);
+    void emitEvent(const char* event, const PrismApi::EventFields& fields = {});
     // Sends launcher.ready to the loaded plugins, and from now on to each plugin right after it loads
     void setLauncherReady();
 
     // Inserts the steps the loaded plugins registered with prism.launch.addStep. Steps anchored to a phase that this
     // launch does not have are skipped.
     void contributeLaunchSteps(LaunchTask* task);
+    // Sends launch.step and launch.finished for the task
+    void watchLaunch(LaunchTask* task);
+    // Both of the above, for a launch being created
+    void prepareLaunch(LaunchTask* task);
+
+    // Sends instance.created, instance.removed and instance.status for the instances in the list
+    void watchInstances(InstanceList* instances);
 
    signals:
     // The list of plugins was rebuilt
@@ -54,6 +65,7 @@ class PluginManager : public QObject {
     void pluginChanged(const QString& id);
 
    private:
+    void watchInstance(BaseInstance* instance);
     QStringList enabledIds() const;
     bool loadPlugin(Plugin* plugin);
 

@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "BaseInstance.h"
+#include "InstanceList.h"
 #include "launch/LaunchTask.h"
 #include "plugins/Logging.h"
 #include "plugins/LuaLaunchStep.h"
@@ -93,11 +95,55 @@ bool PluginManager::setEnabled(const QString& id, bool enabled)
     return ok;
 }
 
-void PluginManager::emitEvent(const char* event)
+void PluginManager::emitEvent(const char* event, const PrismApi::EventFields& fields)
 {
     for (const auto& plugin : m_plugins) {
-        plugin->emitEvent(event);
+        plugin->emitEvent(event, fields);
     }
+}
+
+void PluginManager::watchLaunch(LaunchTask* task)
+{
+    const QByteArray instanceId = task->instance() ? task->instance()->id().toUtf8() : QByteArray();
+    connect(task, &LaunchTask::stepStarted, this,
+            [this, instanceId](const QString& step) { emitEvent("launch.step", { { "id", instanceId }, { "step", step.toUtf8() } }); });
+    connect(task, &Task::finished, this, [this, task, instanceId] {
+        emitEvent("launch.finished",
+                  { { "id", instanceId }, { "success", task->wasSuccessful() }, { "reason", task->failReason().toUtf8() } });
+    });
+}
+
+void PluginManager::prepareLaunch(LaunchTask* task)
+{
+    contributeLaunchSteps(task);
+    watchLaunch(task);
+}
+
+void PluginManager::watchInstances(InstanceList* instances)
+{
+    for (int i = 0; i < instances->count(); i++) {
+        watchInstance(instances->at(i));
+    }
+    connect(instances, &QAbstractItemModel::rowsInserted, this, [this, instances](const QModelIndex&, int first, int last) {
+        for (int i = first; i <= last; i++) {
+            BaseInstance* instance = instances->at(i);
+            watchInstance(instance);
+            emitEvent("instance.created", { { "id", instance->id().toUtf8() }, { "name", instance->name().toUtf8() } });
+        }
+    });
+    connect(instances, &QAbstractItemModel::rowsAboutToBeRemoved, this, [this, instances](const QModelIndex&, int first, int last) {
+        for (int i = first; i <= last; i++) {
+            BaseInstance* instance = instances->at(i);
+            emitEvent("instance.removed", { { "id", instance->id().toUtf8() }, { "name", instance->name().toUtf8() } });
+        }
+    });
+}
+
+void PluginManager::watchInstance(BaseInstance* instance)
+{
+    connect(instance, &BaseInstance::runningStatusChanged, this, [this, instance](bool running) {
+        emitEvent("instance.status", { { "id", instance->id().toUtf8() }, { "running", running } });
+    });
 }
 
 void PluginManager::setLauncherReady()

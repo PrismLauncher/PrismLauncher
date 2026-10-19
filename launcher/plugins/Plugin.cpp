@@ -92,12 +92,12 @@ void Plugin::unload()
     m_state = State::Disabled;
 }
 
-void Plugin::emitEvent(const char* event)
+void Plugin::emitEvent(const char* event, const PrismApi::EventFields& fields)
 {
     if (m_state != State::Loaded) {
         return;
     }
-    if (auto error = PrismApi::emitEvent(*m_lua, event)) {
+    if (auto error = PrismApi::emitEvent(*m_lua, event, fields)) {
         qCWarning(pluginLogC).noquote() << QString("[%1] error handling %2: %3").arg(id(), event, *error);
     }
 }

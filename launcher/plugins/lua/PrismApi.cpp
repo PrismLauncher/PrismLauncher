@@ -81,22 +81,60 @@ void pushLogFunction(lua_State* L, LogLevel level)
     lua_pushcclosure(L, log, 2);
 }
 
-// Registry key of the table that maps event names to arrays of handlers
+// Registry key of the table that maps event names to arrays of handler entries ({ fn = function, instance = id })
 constexpr const char* s_handlersKey = "prism.handlers";
-constexpr std::array s_events = { "launcher.ready" };
 
-bool isKnownEvent(const char* event)
+struct EventInfo {
+    const char* name;
+    // Needed to subscribe, or nullptr
+    const char* permission;
+};
+constexpr std::array s_events = {
+    EventInfo{ "launcher.ready", nullptr },
+    EventInfo{ "instance.created", "instances.read" },
+    EventInfo{ "instance.removed", "instances.read" },
+    EventInfo{ "instance.status", "instances.read" },
+    EventInfo{ "launch.step", "instances.read" },
+    EventInfo{ "launch.finished", "instances.read" },
+};
+
+const EventInfo* findEvent(const char* name)
 {
-    return std::any_of(s_events.begin(), s_events.end(), [event](const char* known) { return std::strcmp(event, known) == 0; });
+    auto it = std::find_if(s_events.begin(), s_events.end(), [name](const EventInfo& info) { return std::strcmp(name, info.name) == 0; });
+    return it != s_events.end() ? &*it : nullptr;
 }
 
-// prism.on(event, handler)
+// prism.on(event, [opts], handler): upvalue 1 is the set of the plugin's permissions.
+// opts.instance limits the handler to the events of that instance.
 int on(lua_State* L)
 {
     const char* event = luaL_checkstring(L, 1);
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-    if (!isKnownEvent(event)) {
+    const int opts = lua_istable(L, 2) ? 2 : 0;
+    const int handler = opts ? 3 : 2;
+    luaL_checktype(L, handler, LUA_TFUNCTION);
+
+    const EventInfo* info = findEvent(event);
+    if (!info) {
         return luaL_error(L, "unknown event '%s'", event);
+    }
+    if (info->permission) {
+        lua_getfield(L, lua_upvalueindex(1), info->permission);
+        if (!lua_toboolean(L, -1)) {
+            return luaL_error(L, "event '%s' requires the '%s' permission", event, info->permission);
+        }
+        lua_pop(L, 1);
+    }
+
+    lua_createtable(L, 0, 2);
+    const int entry = lua_gettop(L);
+    lua_pushvalue(L, handler);
+    lua_setfield(L, entry, "fn");
+    if (opts) {
+        const int type = lua_getfield(L, opts, "instance");
+        if (type != LUA_TNIL && type != LUA_TSTRING) {
+            return luaL_error(L, "'instance' must be an instance id");
+        }
+        lua_setfield(L, entry, "instance");
     }
 
     lua_getfield(L, LUA_REGISTRYINDEX, s_handlersKey);
@@ -106,24 +144,66 @@ int on(lua_State* L)
         lua_pushvalue(L, -1);
         lua_setfield(L, -3, event);
     }
-    lua_pushvalue(L, 2);
+    lua_pushvalue(L, entry);
     lua_rawseti(L, -2, static_cast<lua_Integer>(lua_rawlen(L, -2)) + 1);
     return 0;
 }
 
-// Calls the handlers of an event. Argument 1 is a light userdata pointing to the event name.
+struct DispatchArgs {
+    const char* event;
+    const PrismApi::EventFields* fields;
+};
+
+// The "id" field of the event, used to filter handlers by instance
+const QByteArray* eventInstanceId(const PrismApi::EventFields& fields)
+{
+    for (const auto& field : fields) {
+        if (std::strcmp(field.key, "id") == 0) {
+            return std::get_if<QByteArray>(&field.value);
+        }
+    }
+    return nullptr;
+}
+
+void pushEventTable(lua_State* L, const PrismApi::EventFields& fields)
+{
+    lua_createtable(L, 0, static_cast<int>(fields.size()));
+    for (const auto& field : fields) {
+        if (const auto* text = std::get_if<QByteArray>(&field.value)) {
+            lua_pushlstring(L, text->constData(), text->size());
+        } else if (const auto* flag = std::get_if<bool>(&field.value)) {
+            lua_pushboolean(L, *flag);
+        } else {
+            lua_pushinteger(L, std::get<qint64>(field.value));
+        }
+        lua_setfield(L, -2, field.key);
+    }
+}
+
+// Calls the handlers of an event. Argument 1 is a light userdata pointing to the DispatchArgs.
 int dispatch(lua_State* L)
 {
-    const char* event = static_cast<const char*>(lua_touserdata(L, 1));
+    const auto* args = static_cast<const DispatchArgs*>(lua_touserdata(L, 1));
+    const QByteArray* instanceId = eventInstanceId(*args->fields);
     lua_getfield(L, LUA_REGISTRYINDEX, s_handlersKey);
-    if (lua_getfield(L, -1, event) != LUA_TTABLE) {
+    if (lua_getfield(L, -1, args->event) != LUA_TTABLE) {
         return 0;
     }
     // Handlers registered meanwhile only run from the next event on
     const auto count = static_cast<lua_Integer>(lua_rawlen(L, -1));
     for (lua_Integer i = 1; i <= count; i++) {
         lua_rawgeti(L, -1, i);
-        lua_call(L, 0, 0);
+        if (lua_getfield(L, -1, "instance") == LUA_TSTRING &&
+            (!instanceId || std::strcmp(lua_tostring(L, -1), instanceId->constData()) != 0)) {
+            lua_pop(L, 2);
+            continue;
+        }
+        lua_pop(L, 1);
+        lua_getfield(L, -1, "fn");
+        // A fresh table for each handler, so one cannot change what the next one sees
+        pushEventTable(L, *args->fields);
+        lua_call(L, 1, 0);
+        lua_pop(L, 1);
     }
     return 0;
 }
@@ -281,6 +361,7 @@ struct InstallArgs {
     QByteArray id;
     QByteArray settingsPath;
     bool launchHooks;
+    QList<QByteArray> permissions;
 };
 
 // Argument 1 is a light userdata pointing to the InstallArgs
@@ -308,7 +389,12 @@ int openPrism(lua_State* L)
 
     lua_newtable(L);
     lua_setfield(L, LUA_REGISTRYINDEX, s_handlersKey);
-    lua_pushcfunction(L, on);
+    lua_createtable(L, 0, static_cast<int>(args->permissions.size()));
+    for (const QByteArray& permission : args->permissions) {
+        lua_pushboolean(L, true);
+        lua_setfield(L, -2, permission.constData());
+    }
+    lua_pushcclosure(L, on, 1);
     lua_setfield(L, -2, "on");
 
     lua_newtable(L);
@@ -330,11 +416,13 @@ namespace PrismApi {
 std::optional<QString> install(LuaState& state, const PluginManifest& manifest, const QString& directory)
 {
     // Everything that allocates Lua memory happens inside the protected call, so running out of memory cannot panic
-    const InstallArgs args{ manifest.id.toUtf8(), QDir(directory).filePath("settings.ini").toUtf8(),
-                            manifest.hasPermission("launch.hooks") };
+    InstallArgs args{ manifest.id.toUtf8(), QDir(directory).filePath("settings.ini").toUtf8(), manifest.hasPermission("launch.hooks"), {} };
+    for (const QString& permission : manifest.permissions) {
+        args.permissions.append(permission.toUtf8());
+    }
     lua_State* L = state.get();
     lua_pushcfunction(L, openPrism);
-    lua_pushlightuserdata(L, const_cast<InstallArgs*>(&args));
+    lua_pushlightuserdata(L, &args);
     if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
         const QString error = QString::fromUtf8(lua_tostring(L, -1));
         lua_pop(L, 1);
@@ -367,11 +455,12 @@ std::optional<QString> runLaunchStep(LuaState& state, int index, LaunchContext& 
     return error;
 }
 
-std::optional<QString> emitEvent(LuaState& state, const char* event)
+std::optional<QString> emitEvent(LuaState& state, const char* event, const EventFields& fields)
 {
     lua_State* L = state.get();
+    DispatchArgs args{ event, &fields };
     lua_pushcfunction(L, dispatch);
-    lua_pushlightuserdata(L, const_cast<char*>(event));
+    lua_pushlightuserdata(L, &args);
     return state.call(1);
 }
 

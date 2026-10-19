@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <optional>
+#include <variant>
 
 class LuaState;
 struct PluginManifest;
@@ -50,8 +51,16 @@ struct LaunchContext {
 // if the step failed; context.aborted tells whether it asked to abort the launch.
 std::optional<QString> runLaunchStep(LuaState& state, int index, LaunchContext& context);
 
-// Calls the handlers registered with prism.on for the event, in registration order. The first failing handler stops
-// the others. Returns its error message.
-std::optional<QString> emitEvent(LuaState& state, const char* event);
+// A field of the table passed to event handlers
+struct EventField {
+    const char* key;
+    std::variant<QByteArray, bool, qint64> value;
+};
+using EventFields = QList<EventField>;
+
+// Calls the handlers registered with prism.on for the event, in registration order, passing each a table with the
+// fields. Handlers limited to an instance only run if the "id" field matches. The first failing handler stops the
+// others. Returns its error message.
+std::optional<QString> emitEvent(LuaState& state, const char* event, const EventFields& fields = {});
 
 }  // namespace PrismApi

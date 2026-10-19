@@ -10,6 +10,7 @@
 
 #include "Result.h"
 #include "plugins/PluginManifest.h"
+#include "plugins/lua/PrismApi.h"
 
 class LuaState;
 
@@ -44,7 +45,7 @@ class Plugin {
     void unload();
 
     // Calls the plugin's handlers for the event if it is loaded. A failing handler is logged, the plugin stays loaded.
-    void emitEvent(const char* event);
+    void emitEvent(const char* event, const PrismApi::EventFields& fields = {});
 
     // Increases every time the plugin loads, so work prepared for one run can tell if it is still valid
     int loadCount() const { return m_loadCount; }

@@ -206,6 +206,23 @@ class LuaLaunchStepTest : public QObject {
         QVERIFY2(lines.last().contains("was unloaded or reloaded"), qPrintable(lines.join('\n')));
     }
 
+    void test_launchEvents()
+    {
+        addPlugin("com.example.watch", R"(
+            prism.on("launch.step", function(e) prism.log.info("step " .. e.step) end)
+            prism.on("launch.finished", function(e) prism.log.info("finished " .. tostring(e.success) .. " '" .. e.reason .. "'") end)
+        )",
+                  "[\"instances.read\"]");
+        startManager({ "com.example.watch" });
+        auto task = phases();
+        m_manager->watchLaunch(task.get());
+
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.watch] step java");
+        emit task->stepStarted("java");
+        QTest::ignoreMessage(QtInfoMsg, "[com.example.watch] finished false ''");
+        emit task->finished();
+    }
+
     void test_registrationErrors()
     {
         addPlugin("com.example.noperm", "prism.launch.addStep{ before = 'launch', run = function() end }", "[]");

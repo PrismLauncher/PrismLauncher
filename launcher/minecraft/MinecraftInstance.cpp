@@ -1287,7 +1287,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 #ifdef ENABLE_LUA_PLUGINS
     if (auto* plugins = APPLICATION->plugins()) {
-        plugins->contributeLaunchSteps(pptr);
+        plugins->prepareLaunch(pptr);
     }
 #endif
     m_launchProcess = std::move(process);

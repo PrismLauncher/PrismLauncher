@@ -161,6 +161,50 @@ class PrismApiTest : public QObject {
         QVERIFY2(error->contains("instruction limit exceeded"), qPrintable(*error));
     }
 
+    void test_eventPermissions()
+    {
+        LuaState state;
+        QCOMPARE(PrismApi::install(state, manifest(), m_dir.path()), std::nullopt);
+        auto error = state.run("prism.on('instance.created', function() end)", "test");
+        QVERIFY(error);
+        QVERIFY2(error->contains("event 'instance.created' requires the 'instances.read' permission"), qPrintable(*error));
+
+        LuaState allowed;
+        auto withPermission = manifest();
+        withPermission.permissions = { "instances.read" };
+        QCOMPARE(PrismApi::install(allowed, withPermission, m_dir.path()), std::nullopt);
+        runOk(allowed, R"(
+            for _, event in ipairs({ "instance.created", "instance.removed", "instance.status", "launch.step", "launch.finished" }) do
+                prism.on(event, function() end)
+            end
+        )");
+    }
+
+    void test_eventPayloadAndFilter()
+    {
+        LuaState state;
+        auto withPermission = manifest();
+        withPermission.permissions = { "instances.read" };
+        QCOMPARE(PrismApi::install(state, withPermission, m_dir.path()), std::nullopt);
+        runOk(state, R"(
+            seen = {}
+            prism.on("instance.status", function(e)
+                table.insert(seen, "all:" .. e.id .. ":" .. tostring(e.running))
+                e.id = "changed"
+            end)
+            prism.on("instance.status", { instance = "b" }, function(e) table.insert(seen, "only b:" .. e.id) end)
+        )");
+        QCOMPARE(PrismApi::emitEvent(state, "instance.status", { { "id", QByteArray("a") }, { "running", true } }), std::nullopt);
+        QCOMPARE(PrismApi::emitEvent(state, "instance.status", { { "id", QByteArray("b") }, { "running", false } }), std::nullopt);
+        // Each handler gets its own table, so the change made by the first one is not seen by the second
+        runOk(state, "assert(table.concat(seen, ',') == 'all:a:true,all:b:false,only b:b', table.concat(seen, ','))");
+
+        auto error = state.run("prism.on('instance.status', { instance = 3 }, function() end)", "test");
+        QVERIFY(error && error->contains("'instance' must be an instance id"));
+        error = state.run("prism.on('instance.status', {})", "test");
+        QVERIFY(error && error->contains("function expected"));
+    }
+
     void test_pluginLoadsWithApi()
     {
         QTemporaryDir root;
