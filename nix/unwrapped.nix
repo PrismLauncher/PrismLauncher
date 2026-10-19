@@ -50,6 +50,7 @@ stdenv.mkDerivation {
 
       ../buildconfig
       ../cmake
+      ../docs
       ../examples
       ../launcher
       ../libraries

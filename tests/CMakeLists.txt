@@ -110,4 +110,8 @@ if(Launcher_ENABLE_LUA_PLUGINS)
     ecm_add_test(LuaEditorPlugin_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
         TEST_NAME LuaEditorPlugin)
     target_compile_definitions(LuaEditorPlugin PRIVATE EXAMPLES_DIR="${CMAKE_SOURCE_DIR}/examples/plugins")
+
+    ecm_add_test(DocExamples_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+        TEST_NAME DocExamples)
+    target_compile_definitions(DocExamples PRIVATE DOCS_FILE="${CMAKE_SOURCE_DIR}/docs/plugins.md")
 endif()
