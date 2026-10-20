@@ -216,7 +216,8 @@ void ModrinthCreationTask::createInstance()
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto confTmp = std::make_unique<InstanceConfigHolder>(configPath, InstanceConfig::loadDefaults());
+    auto confTmp = std::make_unique<InstanceConfigHolder>(
+        configPath, m_oldInstance.has_value() ? *m_oldInstance.value()->config() : InstanceConfig::loadDefaults());
     m_newInstance = std::make_unique<MinecraftInstance>(std::move(confTmp), m_stagingPath);
 
     auto* components = m_newInstance->getPackProfile();
@@ -241,15 +242,18 @@ void ModrinthCreationTask::createInstance()
         loader = ModPlatform::getModLoaderAsString(ModPlatform::ModLoaderType::NeoForge);
     }
 
-    if (m_instIcon != "default") {
-        m_newInstance->setIconKey(m_instIcon);
-    } else if (!m_managedId.isEmpty()) {
-        m_newInstance->setIconKey("modrinth");
+    if (!m_oldInstance.has_value()) {
+        if (m_instIcon != "default") {
+            m_newInstance->setIconKey(m_instIcon);
+        } else if (!m_managedId.isEmpty()) {
+            m_newInstance->setIconKey("modrinth");
+        }
+
+        m_newInstance->setName(name());
     }
 
     setManagedPack(m_newInstance.get());
 
-    m_newInstance->setName(name());
     m_newInstance->saveNow();
 
     auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"), APPLICATION->network());
@@ -546,19 +550,17 @@ void ModrinthCreationTask::finishInstall()
     // Update information of the already installed instance, if any.
     if (m_oldInstance) {
         setAbortable(false);
-        auto* inst = *m_oldInstance;
+        auto* oldInst = *m_oldInstance;
 
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the setManagedPack call!
-        const auto& managedPack = inst->config()->managedPack;
-        if (managedPack.has_value() && inst->name().contains(managedPack->versionName) && inst->name() != name()) {
-            if (askForChangingInstanceName(m_parent, inst->name(), name()) == InstanceNameChange::ShouldChange) {
-                inst->setName(name());
+        const auto& managedPack = oldInst->config()->managedPack;
+        if (managedPack.has_value() && oldInst->name().contains(managedPack->versionName) && oldInst->name() != name()) {
+            if (askForChangingInstanceName(m_parent, oldInst->name(), name()) == InstanceNameChange::ShouldChange) {
+                m_newInstance->setName(name());
             }
         }
-
-        setManagedPack(*m_oldInstance);
     }
 
     if (shouldOverride()) {
@@ -592,6 +594,10 @@ void ModrinthCreationTask::finishInstall()
     if (const auto saveResult = m_newInstance->config().save(); !saveResult) {
         emitFailed(tr("Failed to save instance config: %1").arg(saveResult.error()));
         return;
+    }
+
+    if (m_oldInstance.has_value()) {
+        m_oldInstance.value()->config().reset(*m_newInstance->config());
     }
 
     downloadFiles(m_newInstance.get());

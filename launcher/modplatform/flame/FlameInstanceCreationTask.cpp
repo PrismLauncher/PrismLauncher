@@ -469,7 +469,8 @@ void FlameCreationTask::createInstance()
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    auto confTmp = std::make_unique<InstanceConfigHolder>(configPath, InstanceConfig::loadDefaults());
+    auto confTmp = std::make_unique<InstanceConfigHolder>(
+        configPath, m_oldInstance.has_value() ? *m_oldInstance.value()->config() : InstanceConfig::loadDefaults());
     m_newInstance = std::make_unique<MinecraftInstance>(std::move(confTmp), m_stagingPath);
     auto mcVersion = m_pack.minecraft.version;
 
@@ -491,35 +492,36 @@ void FlameCreationTask::createInstance()
         components->setComponentVersion(loaderUid, version);
     }
 
-    if (m_instIcon != "default") {
-        m_newInstance->setIconKey(m_instIcon);
-    } else {
-        if (m_pack.name.contains("Direwolf20")) {
-            m_newInstance->setIconKey("steve");
-        } else if (m_pack.name.contains("FTB") || m_pack.name.contains("Feed The Beast")) {
-            m_newInstance->setIconKey("ftb_logo");
+    if (!m_oldInstance.has_value()) {
+        if (m_instIcon != "default") {
+            m_newInstance->setIconKey(m_instIcon);
         } else {
-            m_newInstance->setIconKey("flame");
+            if (m_pack.name.contains("Direwolf20")) {
+                m_newInstance->setIconKey("steve");
+            } else if (m_pack.name.contains("FTB") || m_pack.name.contains("Feed The Beast")) {
+                m_newInstance->setIconKey("ftb_logo");
+            } else {
+                m_newInstance->setIconKey("flame");
+            }
         }
-    }
+        m_newInstance->setName(name());
 
-    int recommendedRAM = m_pack.minecraft.recommendedRAM;
+        int recommendedRAM = m_pack.minecraft.recommendedRAM;
+        if (recommendedRAM > 0) {
+            const auto sysMiB = HardwareInfo::totalRamMiB();
+            const auto max = static_cast<double>(sysMiB) * 0.9;
 
-    // only set memory if this is a fresh instance
-    if (!m_oldInstance && recommendedRAM > 0) {
-        const auto sysMiB = HardwareInfo::totalRamMiB();
-        const auto max = static_cast<double>(sysMiB) * 0.9;
+            if (static_cast<double>(recommendedRAM) > max) {
+                logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAM—reducing it from %1 MiB to %2 MiB!")
+                               .arg(recommendedRAM)
+                               .arg(max));
+                recommendedRAM = static_cast<int>(max);
+            }
 
-        if (static_cast<double>(recommendedRAM) > max) {
-            logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAM—reducing it from %1 MiB to %2 MiB!")
-                           .arg(recommendedRAM)
-                           .arg(max));
-            recommendedRAM = static_cast<int>(max);
+            auto& conf = m_newInstance->config().update();
+            conf.memory = APPLICATION->config()->memory;
+            conf.memory->maxAlloc = recommendedRAM;
         }
-
-        auto& conf = m_newInstance->config().update();
-        conf.memory = APPLICATION->config()->memory;
-        conf.memory->maxAlloc = recommendedRAM;
     }
 
     QString jarmodsPath = FS::PathCombine(m_stagingPath, m_rootPath, "jarmods");
@@ -540,8 +542,6 @@ void FlameCreationTask::createInstance()
     }
 
     setManagedPack(m_newInstance.get());
-
-    m_newInstance->setName(name());
 
     m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack));
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, this, &FlameCreationTask::idResolverSucceeded);
@@ -808,7 +808,6 @@ void FlameCreationTask::finishInstall()
     // Update information of the already installed instance, if any.
     if (m_oldInstance) {
         setAbortable(false);
-        setManagedPack(m_oldInstance.value_or(nullptr));
     }
 
     if (shouldOverride()) {
@@ -842,6 +841,10 @@ void FlameCreationTask::finishInstall()
     if (const auto saveResult = m_newInstance->config().save(); !saveResult) {
         emitFailed(tr("Failed to save instance config: %1").arg(saveResult.error()));
         return;
+    }
+
+    if (m_oldInstance.has_value()) {
+        m_oldInstance.value()->config().reset(*m_newInstance->config());
     }
 
     downloadFiles(m_newInstance.get());
