@@ -37,40 +37,6 @@
 
 #include "FileSystem.h"
 
-namespace {
-
-QString fromStdPath(const std::filesystem::path& path)
-{
-    return [&path](const auto& s) -> QString {
-        if constexpr (std::is_same_v<decltype(s), std::string>) {
-            return QString::fromStdString(s);
-        } else if constexpr (std::is_same_v<decltype(s), std::wstring>) {
-            return QString::fromStdWString(s);
-        } else if constexpr (std::is_same_v<decltype(s), std::u16string>) {
-            return QString::fromStdU16String(s);
-        } else if constexpr (std::is_same_v<decltype(s), std::u32string>) {
-            return QString::fromStdU32String(s);
-        } else {
-            return QString::fromStdString(path.string());
-        }
-    }(path.native());
-}
-
-std::filesystem::path toStdPath(const QString& path)
-{
-    if constexpr (std::is_same_v<std::filesystem::path::string_type, std::wstring>) {
-        return path.toStdWString();
-    } else if constexpr (std::is_same_v<std::filesystem::path::string_type, std::u16string>) {
-        return path.toStdU16String();
-    } else if constexpr (std::is_same_v<std::filesystem::path::string_type, std::u32string>) {
-        return path.toStdU32String();
-    } else {
-        return path.toStdString();
-    }
-}
-
-}  // namespace
-
 namespace Startup {
 
 /// only use this to find the app path before setting up a proper QApplication
@@ -88,30 +54,50 @@ std::filesystem::path resolveApplicationFilePath(const char* argv0)
     int qAppArgsC = 1;
     const QCoreApplication app(qAppArgsC, qAppArgs.data());
 
-    return toStdPath(QCoreApplication::applicationFilePath());
+    return FS::toStdPath(QCoreApplication::applicationFilePath());
 }
 
 DataPathResult resolveDataPath(const std::filesystem::path& rootPath)
 {
+    std::filesystem::path origCwdPath;
+    try {
+        origCwdPath = std::filesystem::current_path();
+    } catch (const std::exception&) {
+        // fall back to using relative path I guess,
+        // we either had a bad alloc or a file system error.
+        // neither is really recoverable here
+        origCwdPath = ".";
+    }
     // use qt impl
-    auto origcwdPath = std::filesystem::current_path();
     DataPathSource source = DataPathSource::CurrentWorkingDir;
-    std::filesystem::path dataPath = origcwdPath;
+    std::filesystem::path dataPath = origCwdPath;
     if (auto dataDirEnv = QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
         !dataDirEnv.isEmpty()) {
-        dataPath = toStdPath(dataDirEnv);
+        dataPath = FS::toStdPath(dataDirEnv);
         source = DataPathSource::SystemEnvironment;
     } else if (DesktopServices::isSnap()) {
         if (auto snapPath = qEnvironmentVariable("SNAP_USER_COMMON"); !snapPath.isEmpty()) {
-            dataPath = toStdPath(snapPath);
+            dataPath = FS::toStdPath(snapPath);
             source = DataPathSource::PersistentDataPath;
         }
     } else if (auto standardLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation); !standardLoc.isEmpty()) {
         // make absolute and strip off Qt's auto added org and binary name
-        dataPath = std::filesystem::absolute(toStdPath(standardLoc));
+        try {
+            dataPath = std::filesystem::absolute(FS::toStdPath(standardLoc));
+        } catch (const std::exception&) {
+            // we again either had a bad alloc or a file system error.
+            // neither is really recoverable here so just trust that `standardLoc` is properly absolute
+            // (really it normally is) the old check this replicates was an edge case
+            dataPath = FS::toStdPath(standardLoc);
+        }
 
+        // strip off any "org" or "appname" parts added by qt.
+        // we can't be sure which are added or what form they actually take
+        // because the QApplication hand;t been proerly set up yet.
+        // safest to strip back to the bare standard loc and explicitly add
+        // our desired path.
         auto endsWithLauncherOrOrg = [](const std::filesystem::path& path) -> bool {
-            auto fileName = fromStdPath(path.filename()).toLower();
+            auto fileName = FS::fromStdPath(path.filename()).toLower();
             return fileName == BuildConfig.LAUNCHER_NAME.toLower() || fileName == QCoreApplication::applicationName().toLower() ||
                    fileName == QCoreApplication::organizationName().toLower();
         };
@@ -125,7 +111,7 @@ DataPathResult resolveDataPath(const std::filesystem::path& rootPath)
     }
 
 #ifndef Q_OS_MACOS
-    auto root = QString::fromStdWString(rootPath.wstring());
+    auto root = FS::fromStdPath(rootPath);
     if (auto portableUserData = FS::PathCombine(root, "UserData"); QDir(portableUserData).exists()) {
         dataPath = portableUserData.toStdU16String();
         source = DataPathSource::PortableUserData;

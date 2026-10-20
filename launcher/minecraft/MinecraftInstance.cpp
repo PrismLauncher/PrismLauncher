@@ -766,10 +766,10 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
     }
 
     if (settings()->get("UseZink").toBool()) {
-        // taken from https://wiki.archlinux.org/title/OpenGL#OpenGL_over_Vulkan_(Zinc)
+        // taken from https://wiki.archlinux.org/title/OpenGL#OpenGL_over_Vulkan_(Zink)
         env.insert("__GLX_VENDOR_LIBRARY_NAME", "mesa");
-        env.insert("MESA_LOADER_DRIVER_OVERRIDE", "zinc");
-        env.insert("GALLIUM_DRIVER", "zinc");
+        env.insert("MESA_LOADER_DRIVER_OVERRIDE", "zink");
+        env.insert("GALLIUM_DRIVER", "zink");
         env.insert("LIBGL_KOPPER_DRI2", "1");
     }
 #endif

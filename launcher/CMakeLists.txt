@@ -793,8 +793,8 @@ SET(LAUNCHER_SOURCES
     # application start utilities
     startup/Startup.h
     startup/Startup.cpp
-    logging/Debug.cpp
-    logging/Debug.h
+    logging/Qt.cpp
+    logging/Qt.h
 
     # CLI commands and parsing
     cli/Commands.h
@@ -1334,7 +1334,7 @@ if(${Launcher_USE_PCH})
 endif()
 
 target_link_libraries(${Launcher_Name}
-  Launcher_logic
+    Launcher_logic
 )
 
 if(DEFINED Launcher_APP_BINARY_NAME)

@@ -191,7 +191,7 @@
 #include <QStyleHints>
 #endif
 
-#include "logging/Debug.h"
+#include "logging/Qt.h"
 
 #include "cli/Commands.h"
 
@@ -272,7 +272,7 @@ Application::Application(int& argc, char** argv, const Cli::Args& args) : QAppli
 #endif
     }
 
-    auto dataPath = QDir::cleanPath(QString::fromStdU16String(args.dataPath.dataPath.u16string()));
+    auto dataPath = QDir::cleanPath(FS::fromStdPath(args.dataPath.dataPath));
 
     if (!FS::ensureFolderPathExists(dataPath)) {
         showFatalErrorMessage(
@@ -1295,9 +1295,9 @@ void Application::processCommands(const std::vector<Cli::Command>& cmds)
                         auto name = QString::fromStdString(profile.name);
                         auto account = app->accounts()->getAccountByProfileName(name);
                         if (!account) {
-                            qDebug().nospace() << "   Can't find account " << name << ", using default account";
+                            qDebug().nospace() << "    Can't find account" << name << ", using default account";
                         }
-                        qDebug() << "   Launching with account " << name;
+                        qDebug() << "    Launching with account" << name;
                         return { LaunchMode::Normal, account, {} };
                     }
                     std::tuple<LaunchMode, MinecraftAccountPtr, QString> operator()(const Cli::Cmd::Launch::AccountOffline& offline) const
@@ -2252,7 +2252,7 @@ void Application::addInstance(const QString& url, const QString& groupName, cons
         group = settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, extraInfo, m_mainWindow);
+    NewInstanceDialog newInstDlg(group, url, extraInfo, m_mainWindow);
     if (newInstDlg.exec() == 0) {
         return;
     }

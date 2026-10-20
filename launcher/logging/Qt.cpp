@@ -19,7 +19,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "logging/Debug.h"
+#include "logging/Qt.h"
 
 #include <atomic>
 #include <mutex>

@@ -34,6 +34,7 @@
  */
 
 #include <exception>
+#include <iostream>
 
 #include <BuildConfig.h>
 
