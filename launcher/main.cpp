@@ -33,7 +33,13 @@
  *      limitations under the License.
  */
 
+#include <exception>
 #include <iostream>
+
+#include <BuildConfig.h>
+
+#include <QObject>
+#include <QString>
 
 #include "Application.h"
 
@@ -41,15 +47,38 @@
 #include "console/WindowsConsole.h"
 #endif
 
+#include "cli/Commands.h"
+#include "cli/Parser.h"
+
+#include "startup/Startup.h"
+
 int main(int argc, char* argv[])
 {
-#if defined Q_OS_WIN32
+#ifdef Q_OS_WIN32
     // used on Windows to attach the standard IO streams
-    console::WindowsConsoleGuard _consoleGuard;
+    const Console::WindowsConsoleGuard consoleGuard;
 #endif
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const auto exePath = Startup::resolveApplicationFilePath(argv[0]);
+    // get default dataPath before cli alterations
+    const auto dataPathResult = Startup::resolveDataPath(exePath.parent_path());
+
+    Cli::Args args{
+        .dataPath = dataPathResult,
+        .commands = {},
+    };
+
+    try {
+        Cli::parseArgs(argc, argv, args);
+    } catch (const std::exception& err) {
+        /// we did a bad job setting up the cli parser
+        std::cerr << "BUG! " << err.what();
+        return 1;
+    }
+
     // initialize Qt
-    Application app(argc, argv);
+    const Application app(argc, argv, args);
     switch (app.status()) {
         case Application::StartingUp:
         case Application::Initialized: {
@@ -68,7 +97,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(flat_white);
 
             Q_INIT_RESOURCE(shaders);
-            return app.exec();
+            return Application::exec();
         }
         case Application::Failed:
             return 1;

@@ -40,7 +40,9 @@
 #include "Filter.h"
 #include "Result.h"
 
+#include <filesystem>
 #include <system_error>
+#include <utility>
 
 #include <QDir>
 #include <QFlags>
@@ -48,7 +50,6 @@
 #include <QObject>
 #include <QPair>
 #include <QThread>
-#include <utility>
 
 namespace FS {
 
@@ -324,6 +325,9 @@ QString PathCombine(const QString& path1, const QString& path2, const QString& p
 QString PathCombine(const QString& path1, const QString& path2, const QString& path3, const QString& path4);
 
 QString AbsolutePath(const QString& path);
+
+QString fromStdPath(const std::filesystem::path& path);
+std::filesystem::path toStdPath(const QString& path);
 
 /**
  * @brief depth of path. "foo.txt" -> 0 , "bar/foo.txt" -> 1, /baz/bar/foo.txt -> 2, etc.
