@@ -114,16 +114,19 @@ class ConfigHolder : public ConfigHolderSignals {
     [[nodiscard]] Result<> reload()
     {
         TRY_INTO(const auto& newConfig, T::load(m_path));
+        reset(newConfig);
+        return {};
+    }
 
+    void reset(T config)
+    {
         // NOTE: we want the changed signal to be emitted but a save not to be queued unless further changes are made
         m_saveTimer.stop();
         markDirty();
 
-        m_config = std::move(newConfig);
+        m_config = std::move(config);
         // NOTE: avoids a save being queued
         m_update->onDisk = m_config;
-
-        return {};
     }
 
     /// Saves immediately, and supresses pending saves.
