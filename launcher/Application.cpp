@@ -101,6 +101,7 @@
 #include <QStringList>
 #include <QStringLiteral>
 #include <QStyleFactory>
+#include <QStyleHints>
 #include <QTranslator>
 #include <QWindow>
 #include <utility>
@@ -161,10 +162,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-#endif
-
-#if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
-#include <QStyleHints>
 #endif
 
 #include "console/Console.h"
@@ -1276,16 +1273,24 @@ bool Application::createSetupWizard()
     bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
+        const bool darkMode = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
         // set default theme after going into theme wizard
         if (!validIcons) {
-            settings()->set("IconTheme", QString("pe_colored"));
+            QString defaultIconTheme;
+            if (QApplication::style()->name() == "breeze") {
+                defaultIconTheme = darkMode ? "breeze_dark" : "breeze_light";
+            } else {
+                defaultIconTheme = darkMode ? "flat_white" : "flat";
+            }
+
+            settings()->set("IconTheme", defaultIconTheme);
         }
         if (!validWidgets) {
-#if defined(Q_OS_WIN32) || defined(Q_OS_MACOS)
-            const QString style =
-                QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark ? QStringLiteral("dark") : QStringLiteral("bright");
+#if defined(Q_OS_LINUX)
+            const QString style = "system";
 #else
-            const QString style = QStringLiteral("system");
+            const QString style = darkMode ? QStringLiteral("dark") : QStringLiteral("bright");
+
 #endif
 
             settings()->set("ApplicationTheme", style);
