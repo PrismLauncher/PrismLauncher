@@ -936,6 +936,23 @@ QString AbsolutePath(const QString& path)
 {
     return QFileInfo(path).absolutePath();
 }
+QString fromStdPath(const std::filesystem::path& path)
+{
+#ifdef _WIN32
+    return QString::fromStdWString(path.native());
+#else
+    return QString::fromStdString(path.native());
+#endif
+}
+
+std::filesystem::path toStdPath(const QString& path)
+{
+#ifdef _WIN32
+    return path.toStdWString();
+#else
+    return path.toStdString();
+#endif
+}
 
 int pathDepth(const QString& path)
 {

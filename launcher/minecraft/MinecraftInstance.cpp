@@ -103,6 +103,7 @@
 
 #ifdef WITH_QTDBUS
 #include <QtDBus/QtDBus>
+#include <memory>
 #endif
 
 #define IBUS "@im=ibus"
@@ -1153,11 +1154,11 @@ QList<LaunchStep::Ptr> MinecraftInstance::createUpdateTask()
     };
 }
 
-LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
+LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin)
 {
     updateRuntimeContext();
     auto process = LaunchTask::create(this);
-    auto pptr = process.get();
+    auto* pptr = process.get();
 
     APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
 
@@ -1174,11 +1175,11 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     if (!targetToJoin && settings()->get("JoinServerOnLaunch").toBool()) {
         QString fullAddress = settings()->get("JoinServerOnLaunchAddress").toString();
         if (!fullAddress.isEmpty()) {
-            targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(fullAddress, false)));
+            targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::fromServerAddress(fullAddress));
         } else {
             QString world = settings()->get("JoinWorldOnLaunch").toString();
             if (!world.isEmpty()) {
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(world, true)));
+                targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::fromWorldName(world));
             }
         }
     }
@@ -1200,7 +1201,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 
     // load meta
     {
-        auto mode = session->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
+        auto mode = account->launchMode != LaunchMode::Offline ? Net::Mode::Online : Net::Mode::Offline;
         process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode)));
     }
 
@@ -1220,9 +1221,9 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     }
 
     // if we aren't in offline mode
-    if (session->launchMode != LaunchMode::Offline) {
-        process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        for (auto t : createUpdateTask()) {
+    if (account->launchMode != LaunchMode::Offline) {
+        process->appendStep(makeShared<ClaimAccount>(pptr, account));
+        for (const auto& t : createUpdateTask()) {
             process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
         }
     } else {
@@ -1246,7 +1247,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
 
     // print some instance info here...
     {
-        process->appendStep(makeShared<PrintInstanceInfo>(pptr, session, targetToJoin));
+        process->appendStep(makeShared<PrintInstanceInfo>(pptr, account, targetToJoin));
     }
 
     // extract native jars if needed
@@ -1263,7 +1264,7 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         // actually launch the game
         auto step = makeShared<LauncherPartLaunch>(pptr);
         step->setWorkingDirectory(gameRoot());
-        step->setAuthSession(session);
+        step->setAuthSession(account);
         step->setTargetToJoin(targetToJoin);
         process->appendStep(step);
     }
@@ -1274,8 +1275,8 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
-    if (session) {
-        process->setCensorFilter(createCensorFilterFromSession(session));
+    if (account) {
+        process->setCensorFilter(createCensorFilterFromSession(account));
     }
     if (m_settings->get("QuitAfterGameStop").toBool()) {
         process->appendStep(makeShared<QuitAfterGameStop>(pptr));
