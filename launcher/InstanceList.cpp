@@ -1005,7 +1005,7 @@ class InstanceStaging : public Task {
 
         m_child->start();
     }
-    QStringList warnings() const override { return m_child->warnings(); }
+    QStringList warnings() const override { return m_child->warnings() + m_Warnings; }
 
    private slots:
     void childSucceeded()
@@ -1020,7 +1020,7 @@ class InstanceStaging : public Task {
 
                 if (!folderCopy()) {
                     logWarning(
-                        tr("Failed to copy instance template. The instance has still been created, but has only partial or no template "
+                        tr("Failed to copy instance template. The instance has still been created, but contains only partial or no template "
                            "files."));
                 }
             }
