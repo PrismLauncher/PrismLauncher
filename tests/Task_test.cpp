@@ -9,6 +9,8 @@
 
 #include <array>
 
+#include "TestHelpers.h"
+
 /* Does nothing. Only used for testing. */
 class BasicTask : public Task {
     Q_OBJECT
@@ -257,6 +259,6 @@ class TaskTest : public QObject {
     }
 };
 
-QTEST_GUILESS_MAIN(TaskTest)
+REGISTER_TEST(Task_test, TaskTest)
 
 #include "Task_test.moc"
