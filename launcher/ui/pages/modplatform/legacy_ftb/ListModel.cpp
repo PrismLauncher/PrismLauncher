@@ -35,10 +35,10 @@
 
 #include "ListModel.h"
 #include "Application.h"
-#include "settings/SettingsObject.h"
 #include "net/ApiRequest.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
+#include "settings/SettingsObject.h"
 
 #include <Version.h>
 #include "StringUtils.h"
@@ -127,20 +127,6 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
 ListModel::ListModel(QObject* parent) : QAbstractListModel(parent) {}
 
 ListModel::~ListModel() {}
-
-QString ListModel::translatePackType(PackType type) const
-{
-    switch (type) {
-        case PackType::Public:
-            return tr("Public Modpack");
-        case PackType::ThirdParty:
-            return tr("Third Party Modpack");
-        case PackType::Private:
-            return tr("Private Modpack");
-    }
-    qWarning() << "Unknown FTB modpack type:" << int(type);
-    return QString();
-}
 
 int ListModel::rowCount(const QModelIndex& parent) const
 {

@@ -70,7 +70,6 @@ class PackInstallTask final : public InstanceTask {
 
     void onManifestDownloadFailed(QString reason);
     void onResolveModsFailed(QString reason);
-    void onCreateInstanceFailed(QString reason);
     void onModDownloadFailed(QString reason);
 
    private:
@@ -89,7 +88,6 @@ class PackInstallTask final : public InstanceTask {
     QString m_versionName;
     Version m_version;
 
-    QMap<QString, QString> m_filesToCopy;
     QList<BlockedMod> m_blockedMods;
 
     std::unique_ptr<MinecraftInstance> m_instance;

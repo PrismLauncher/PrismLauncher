@@ -79,8 +79,6 @@ class ResourceModel : public QAbstractListModel {
 
     virtual ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
 
-    ModPlatform::IndexedPack::Ptr createInfoArguments(const QModelIndex& index) { return m_packs[index.row()]; }
-
     /** Requests the API for more entries. */
     virtual void search();
 

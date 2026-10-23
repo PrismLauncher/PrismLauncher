@@ -55,17 +55,6 @@
 #include <Application.h>
 #include <InstanceList.h>
 
-template <typename T>
-bool listsIntersect(const QList<T>& l1, const QList<T> t2)
-{
-    for (auto& item : l1) {
-        if (t2.contains(item)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 InstanceView::InstanceView(QWidget* parent) : QAbstractItemView(parent)
 {
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

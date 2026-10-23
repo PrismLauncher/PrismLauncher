@@ -47,8 +47,6 @@
 #include "icons/IconUtils.h"
 #include "settings/SettingsObject.h"
 
-#define MAX_SIZE 1024
-
 IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject* parent) : QAbstractListModel(parent)
 {
     QSet<QString> builtinNames;

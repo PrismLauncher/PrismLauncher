@@ -119,8 +119,6 @@ class Application : public QApplication {
     SettingsObject* settings() const { return m_settings.get(); }
     SettingsObject* playtimeSettings() const { return m_playtimeSettings.get(); }
 
-    qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
-
     static QIcon logo();
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
@@ -243,8 +241,6 @@ class Application : public QApplication {
     mutable QMutex m_qsaveResourcesMutex;
 
    private:
-    QDateTime m_startTime;
-
     std::unique_ptr<QNetworkAccessManager> m_network;
 
     std::unique_ptr<ExternalUpdater> m_updater;
@@ -260,7 +256,6 @@ class Application : public QApplication {
     std::unique_ptr<JavaInstallList> m_javalist;
     std::unique_ptr<TranslationsModel> m_translations;
     std::unique_ptr<GenericPageProvider> m_globalSettingsProvider;
-    QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;

@@ -45,8 +45,6 @@ class World {
     QString containerOffsetPath() const { return m_containerOffsetPath; }
     // delete all the files of this world
     bool destroy();
-    // replace this world with a copy of the other
-    bool replace(World& with);
     // change the world's filesystem path (used by world lists for *MAGIC* purposes)
     void repath(const QFileInfo& file);
     void loadMetadata();

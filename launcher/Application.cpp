@@ -166,9 +166,6 @@
 
 #include "console/Console.h"
 
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
 static const QLatin1String g_liveCheckFile("live.check");
 
 PixmapCache* PixmapCache::s_instance = nullptr;
@@ -312,7 +309,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
     setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
     setDesktopFileName(BuildConfig.LAUNCHER_APPID);
-    m_startTime = QDateTime::currentDateTime();
 
     // Don't quit on hiding the last window
     Application::setQuitOnLastWindowClosed(false);

@@ -69,7 +69,6 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     static QString debugName() { return "Modrinth"; }
     static QString metaEntryBase() { return "ModrinthModpacks"; };
 
-    ModPlatform::IndexedPack::Ptr getCurrent() { return m_current; }
     void suggestCurrent();
 
     void updateUI();

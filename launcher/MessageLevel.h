@@ -41,7 +41,6 @@ struct MessageLevel : EnumWrapper<MessageLevel, MessageLevelValue> {
 
     static MessageLevel fromName(const QString& type) { return fromString(type.toUpper()); };
     static MessageLevel fromQtMsgType(const QtMsgType& type);
-    static MessageLevel fromLine(const QString& line);
 
     /* Get message level from a line. Line is modified if it was successful. */
     static MessageLevel takeFromLine(QString& line);

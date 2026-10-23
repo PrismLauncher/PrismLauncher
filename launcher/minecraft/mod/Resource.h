@@ -112,7 +112,6 @@ class Resource {
     auto internalId() const -> QString { return m_internalId; }
     auto type() const -> ResourceType { return m_type; }
     bool enabled() const { return m_enabled; }
-    auto getOriginalFileName() const -> QString;
     QString sizeStr() const { return m_sizeStr; }
     qint64 sizeInfo() const { return m_sizeInfo; }
 

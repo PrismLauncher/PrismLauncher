@@ -358,10 +358,6 @@ void PackInstallTask::onResolveModsFailed(QString reason)
     m_net_job.reset();
     emitFailed(std::move(reason));
 }
-void PackInstallTask::onCreateInstanceFailed(QString reason)
-{
-    emitFailed(std::move(reason));
-}
 void PackInstallTask::onModDownloadFailed(QString reason)
 {
     m_net_job.reset();
