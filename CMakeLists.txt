@@ -228,6 +228,12 @@ set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build agains
 
 option(Launcher_USE_PCH "Use precompiled headers where possible" ON)
 
+option(Launcher_WARNING_AS_ERROR "Treat compiler/linker warnings as errors (-Werror)")
+
+if(Launcher_WARNING_AS_ERROR)
+    message(STATUS "Treating all warnings as errors for launcher targets")
+endif()
+
 # Java downloader
 set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
 
