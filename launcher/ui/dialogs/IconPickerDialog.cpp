@@ -179,8 +179,6 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
         IconPickerCategory category = static_cast<IconPickerCategory>(ui->contextCombo->itemData(index).toInt());
         filterIconsByCategory(category);
     });
-    // Prevent incorrect indices from e.g. filesystem changes
-    connect(APPLICATION->icons(), &IconList::iconUpdated, this, [this]() { proxyModel->invalidate(); });
 }
 
 bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)

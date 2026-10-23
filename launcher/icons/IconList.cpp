@@ -169,8 +169,8 @@ void IconList::directoryChanged(const QString& path)
         if (m_icons[idx].type() == ToBeDeleted) {
             beginRemoveRows(QModelIndex(), idx, idx);
             m_icons.remove(idx);
-            reindex();
             endRemoveRows();
+            reindex();
         } else {
             dataChanged(index(idx), index(idx));
         }
@@ -426,7 +426,6 @@ void IconList::reindex()
     m_nameIndex.clear();
     for (int i = 0; i < m_icons.size(); i++) {
         m_nameIndex[m_icons[i].m_key] = i;
-        emit iconUpdated(m_icons[i].m_key);  // prevents incorrect indices with proxy model
     }
 }
 
