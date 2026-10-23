@@ -7,134 +7,71 @@
     },
     "configurePresets": [
         {
-            "name": "base",
-            "hidden": true,
+            "name": "default",
+            "displayName": "Default",
             "binaryDir": "build",
             "installDir": "install",
             "generator": "Ninja Multi-Config",
             "toolchainFile": "cmake/vcpkg/scripts/buildsystems/vcpkg.cmake",
             "cacheVariables": {
-                "Launcher_BUILD_ARTIFACT": "$penv{ARTIFACT_NAME}",
-                "Launcher_BUILD_PLATFORM": "$penv{BUILD_PLATFORM}",
                 "Launcher_ENABLE_JAVA_DOWNLOADER": "ON",
                 "Launcher_WARNING_AS_ERROR": "ON",
                 "ENABLE_LTO": "ON"
             }
         },
         {
-            "name": "linux",
-            "displayName": "Linux",
+            "name": "ci",
+            "displayName": "CI",
             "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            }
-        },
-        {
-            "name": "macos",
-            "displayName": "macOS",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            }
-        },
-        {
-            "name": "macos_universal",
-            "displayName": "macOS (Universal Binary)",
-            "inherits": [
-                "macos"
+                "default"
             ],
             "cacheVariables": {
-                "CMAKE_OSX_ARCHITECTURES": "x86_64;arm64",
-                "VCPKG_TARGET_TRIPLET": "universal-osx"
+                "Launcher_BUILD_ARTIFACT": "$penv{ARTIFACT_NAME}",
+                "Launcher_BUILD_PLATFORM": "$penv{BUILD_PLATFORM}"
             }
         },
         {
-            "name": "windows_mingw",
-            "displayName": "Windows (MinGW)",
+            "name": "asan-tidy",
+            "displayName": "ASAN+Clang-tidy",
             "inherits": [
-                "base"
+                "default"
             ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
-        },
-        {
-            "name": "windows_msvc",
-            "displayName": "Windows (MSVC)",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
+            "cacheVariables": {
+                "DEBUG_ADDRESS_SANITIZER": "ON",
+                "USE_CLANG_TIDY": "ON"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "linux",
-            "displayName": "Linux",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
-            "configurePreset": "linux"
+            "name": "default",
+            "displayName": "Default",
+            "configurePreset": "default"
         },
         {
-            "name": "macos",
-            "displayName": "macOS",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            },
-            "configurePreset": "macos"
+            "name": "ci",
+            "displayName": "CI",
+            "configurePreset": "ci"
         },
         {
-            "name": "macos_universal",
-            "displayName": "macOS (Universal Binary)",
-            "inherits": [
-                "macos"
-            ],
-            "configurePreset": "macos_universal"
-        },
-        {
-            "name": "windows_mingw",
-            "displayName": "Windows (MinGW)",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "configurePreset": "windows_mingw"
-        },
-        {
-            "name": "windows_msvc",
-            "displayName": "Windows (MSVC)",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "configurePreset": "windows_msvc"
+            "name": "asan-tidy",
+            "displayName": "ASAN+clang-tidy",
+            "configurePreset": "asan-tidy"
         }
     ],
     "testPresets": [
         {
-            "name": "base",
-            "hidden": true,
+            "name": "default",
+            "displayName": "Default",
+            "configurePreset": "default",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ci",
+            "displayName": "CI",
+            "configurePreset": "ci",
             "output": {
                 "outputOnFailure": true,
                 "verbosity": "extra"
@@ -147,71 +84,6 @@
                     "name": "^example64|example$"
                 }
             }
-        },
-        {
-            "name": "linux",
-            "displayName": "Linux",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
-            "configurePreset": "linux"
-        },
-        {
-            "name": "macos",
-            "displayName": "macOS",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            },
-            "configurePreset": "macos"
-        },
-        {
-            "name": "macos_universal",
-            "displayName": "macOS (Universal Binary)",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            },
-            "configurePreset": "macos_universal"
-        },
-        {
-            "name": "windows_mingw",
-            "displayName": "Windows (MinGW)",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "configurePreset": "windows_mingw"
-        },
-        {
-            "name": "windows_msvc",
-            "displayName": "Windows (MSVC)",
-            "inherits": [
-                "base"
-            ],
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            },
-            "configurePreset": "windows_msvc"
         }
     ]
 }
