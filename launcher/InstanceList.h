@@ -151,11 +151,14 @@ class InstanceList : public QAbstractListModel {
     QMimeData* mimeData(const QModelIndexList& indexes) const override;
 
     QStringList getLinkedInstancesById(const QString& id) const;
+    QStringList groupOrder() const;
+    void moveGroup(const QString& group, int toIndex);
 
     QString primaryDir() const { return m_instDirs.isEmpty() ? QString() : m_instDirs.first(); }
     const QStringList& instanceDirs() const { return m_instDirs; }
 
    signals:
+    void groupOrderChanged();
     void dataIsInvalid();
     void instancesChanged();
     void instanceSelectRequest(QString instanceId);
@@ -190,6 +193,7 @@ class InstanceList : public QAbstractListModel {
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
     // id -> refs
     QMap<QString, int> m_groupNameCache;
+    QStringList m_groupOrder;
 
     SettingsObject* m_globalSettings;
     QStringList m_instDirs;
