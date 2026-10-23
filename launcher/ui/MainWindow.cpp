@@ -577,12 +577,12 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
             connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
             actions.append(actionRenameGroup);
 
-            QAction* actionChangeGroupIcon = new QAction(tr("&Change group icon"), this);
+            QAction* actionChangeGroupIcon = new QAction(tr("Change group &icon"), this);
             connect(actionChangeGroupIcon, &QAction::triggered, this, [this, group] { setGroupIcon(group); });
             actions.append(actionChangeGroupIcon);
 
             if (!APPLICATION->instances()->getGroupIconKey(group).isEmpty()) {
-                QAction* actionRemoveGroupIcon = new QAction(tr("&Remove group icon"), this);
+                QAction* actionRemoveGroupIcon = new QAction(tr("Delete &group icon"), this);
                 connect(actionRemoveGroupIcon, &QAction::triggered, this, [this, group] { removeGroupIcon(group); });
                 actions.append(actionRemoveGroupIcon);
             }
