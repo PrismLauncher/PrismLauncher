@@ -181,6 +181,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         m_nameLabel = new EditableLabel(infoWidget);
         m_nameLabel->setObjectName(QStringLiteral("nameLabel"));
+        m_nameLabel->setText(tr("No Instance Selected"));
         connect(m_nameLabel, &EditableLabel::textChanged, this, [this](const QString& newName) {
             if (m_selectedInstance == nullptr) {
                 return;
@@ -450,6 +451,7 @@ void MainWindow::retranslateUi()
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
     } else {
         m_statusLeft->setText(tr("No instance selected"));
+        m_nameLabel->setText(tr("No Instance Selected"));
     }
 
     ui->retranslateUi(this);
