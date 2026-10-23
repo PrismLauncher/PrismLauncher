@@ -440,7 +440,7 @@ void FlameManagedPackPage::update()
     }
     auto version = m_pack.versions.at(index);
 
-    updatePack(version.downloadUrl, true, version.fileId.toString());
+    updatePack(version.downloadUrl, true, version.fileId.toString(), version.version);
 }
 
 void FlameManagedPackPage::updateFromFile()
@@ -456,7 +456,7 @@ void FlameManagedPackPage::updateFromFile()
 void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& versionID, const QString& versionName)
 {
     QString confirmMessage;
-    if (versionID.isEmpty()) {
+    if (versionName.isEmpty()) {
         confirmMessage =
             tr("You are about to update the modpack to a new version.\n"
                "Irreversible changes may be made to the instance's files.\n"
@@ -467,7 +467,7 @@ void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& v
                             "Irreversible changes may be made to the instance's files.\n"
                             "As such, it is strongly recommended to create a backup copy of the instance.\n\n"
                             "Are you sure?")
-                             .arg(versionName);
+                             .arg(!versionName.isEmpty() ? versionName : versionID);
     }
 
     auto response = CustomMessageBox::selectable(this, tr("Confirm Update"), confirmMessage, QMessageBox::Warning,
