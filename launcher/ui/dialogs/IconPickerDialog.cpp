@@ -198,7 +198,17 @@ void IconPickerDialog::addNewIcon()
     //: The type of icon files
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
-    APPLICATION->icons()->installIcons(fileNames);
+    auto* list = APPLICATION->icons();
+    list->installIcons(fileNames);
+    if (fileNames.isEmpty()) {
+        return;
+    }
+
+    auto key = QFileInfo(fileNames.first()).completeBaseName();
+    connect(
+        list, &IconList::iconUpdated, this,
+        [this, list, key] { ui->iconView->setCurrentIndex(proxyModel->mapFromSource(list->index(list->getIconIndex(key)))); },
+        static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
 }
 
 void IconPickerDialog::removeSelectedIcon()
