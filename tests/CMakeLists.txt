@@ -1,71 +1,65 @@
 project(tests)
+include(ECMMarkAsTest)
+include(ECMMarkNonGuiExecutable)
 
-ecm_add_test(FileSystem_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME FileSystem)
+set(TEST_SOURCES
+    FileSystem_test.cpp
+    GZip_test.cpp
+    GradleSpecifier_test.cpp
+    MojangVersionFormat_test.cpp
+    Library_test.cpp
+    ResourceFolderModel_test.cpp
+    ResourcePackParse_test.cpp
+    TexturePackParse_test.cpp
+    DataPackParse_test.cpp
+    ShaderPackParse_test.cpp
+    WorldSaveParse_test.cpp
+    ParseUtils_test.cpp
+    Task_test.cpp
+    INIFile_test.cpp
+    JavaVersion_test.cpp
+    Packwiz_test.cpp
+    Index_test.cpp
+    Version_test.cpp
+    ModrinthUrl_test.cpp
+    MetaComponentParse_test.cpp
+    CatPack_test.cpp
+    XmlLogs_test.cpp
+    Commandline_test.cpp
+)
 
-ecm_add_test(GZip_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME GZip)
+# NOTE(@getchoo): Very funny way of aliasing the Qt generated `main` test functions to respective filenames
+# This is required for any test file passed to `create_test_sourcelist()`
+foreach(src ${TEST_SOURCES})
+    cmake_path(GET src STEM funcName)
+    set_source_files_properties(${src} PROPERTIES COMPILE_DEFINITIONS main=${funcName})
+    list(APPEND TEST_NAMES ${funcName})
+endforeach()
 
-ecm_add_test(GradleSpecifier_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME GradleSpecifier)
+create_test_sourcelist(DRIVER_SOURCES LauncherTests.cpp ${TEST_SOURCES})
+add_executable(LauncherTests ${DRIVER_SOURCES})
+target_link_libraries(LauncherTests PRIVATE Launcher_logic Qt${QT_VERSION_MAJOR}::Test)
 
-ecm_add_test(MojangVersionFormat_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME MojangVersionFormat)
+# Add back some stuff ECMAddTests would (https://api.kde.org/ecm/module/ECMAddTests.html)
+ecm_mark_as_test(LauncherTests)
+# NOTE(@getchoo): This is only for parity with our previous configurations, which all had no GUI
+# In the future this might change....and I don't know how to handle it right now. Have fun!
+ecm_mark_nongui_executable(LauncherTests)
+# "The tests will be build with -DQT_FORCE_ASSERTS to enable assertions in the test executable even for release builds"
+target_compile_definitions(LauncherTests PRIVATE QT_FORCE_ASSERTS)
 
-ecm_add_test(Library_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME Library)
+foreach(test ${TEST_NAMES})
+    string(REPLACE "_test" "" display_name ${test})
+    add_test(NAME ${display_name} COMMAND LauncherTests ${test})
+endforeach()
 
-ecm_add_test(ResourceFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ResourceFolderModel)
-
-ecm_add_test(ResourcePackParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ResourcePackParse)
-
-ecm_add_test(TexturePackParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME TexturePackParse)
-
-ecm_add_test(DataPackParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME DataPackParse)
-
-ecm_add_test(ShaderPackParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ShaderPackParse)
-
-ecm_add_test(WorldSaveParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME WorldSaveParse)
-
-ecm_add_test(ParseUtils_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ParseUtils)
-
-ecm_add_test(Task_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME Task)
-
-ecm_add_test(INIFile_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME INIFile)
-
-ecm_add_test(JavaVersion_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME JavaVersion)
-
-ecm_add_test(Packwiz_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME Packwiz)
-
-ecm_add_test(Index_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME Index)
-
-ecm_add_test(Version_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME Version)
-
-ecm_add_test(ModrinthUrl_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ModrinthUrl)
-
-ecm_add_test(MetaComponentParse_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME MetaComponentParse)
-
-ecm_add_test(CatPack_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME CatPack)
-
-
-ecm_add_test(XmlLogs_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME XmlLogs)
-
-ecm_add_test(Commandline_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME Commandline)
+#[[
+# TODO(@getchoo): Use this when we can use CMake 4.4 as our minimum version....one day
+discover_tests(
+    COMMAND LauncherTests
+    DISCOVERY_ARGS -N
+    DISCOVERY_MATCH "^(.+)$"
+    TEST_NAME "\\1"
+    TEST_ARGS "\\1"
+)
+]]#

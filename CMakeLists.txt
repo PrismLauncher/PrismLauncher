@@ -172,10 +172,6 @@ find_package(ECM NO_MODULE REQUIRED)
 set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
 
 include(CTest)
-include(ECMAddTests)
-if(BUILD_TESTING)
-    enable_testing()
-endif()
 
 ##################################### Set Application options #####################################
 
