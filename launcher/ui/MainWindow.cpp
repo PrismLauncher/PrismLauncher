@@ -181,6 +181,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         m_nameLabel = new EditableLabel(infoWidget);
         m_nameLabel->setObjectName(QStringLiteral("nameLabel"));
+        connect(m_nameLabel, &EditableLabel::textChanged, this, [this](const QString& newName) {
+            if (m_selectedInstance == nullptr) {
+                return;
+            }
+            auto* instances = APPLICATION->instances();
+            const auto oldName = m_selectedInstance->name();
+            const bool ok = instances->setData(instances->index(instances->getInstIndex(m_selectedInstance)), newName, Qt::EditRole);
+            if (!ok) {
+                m_nameLabel->setText(m_selectedInstance->name());
+                return;
+            }
+
+            handleInstanceRename(oldName, m_selectedInstance->name());
+            m_nameLabel->setText(m_selectedInstance->name());
+        });
 
         infoLayout->addWidget(m_nameLabel);
 
@@ -1685,21 +1700,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         m_nameLabel->setText(m_selectedInstance->name());
-        connect(m_nameLabel, &EditableLabel::textChanged, this, [this](const QString& newName) {
-            if (m_selectedInstance == nullptr) {
-                return;
-            }
-            auto* instances = APPLICATION->instances();
-            const auto oldName = m_selectedInstance->name();
-            const bool ok = instances->setData(instances->index(instances->getInstIndex(m_selectedInstance)), newName, Qt::EditRole);
-            if (!ok) {
-                m_nameLabel->setText(m_selectedInstance->name());
-                return;
-            }
-
-            handleInstanceRename(oldName, m_selectedInstance->name());
-            m_nameLabel->setText(m_selectedInstance->name());
-        });
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());

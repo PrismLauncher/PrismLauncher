@@ -33,11 +33,10 @@ class EditableLabel : public QWidget {
 
     void setText(const QString& text);
 
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
    signals:
     void textChanged(const QString& text);
-
-   protected:
-    bool eventFilter(QObject* watched, QEvent* event) override;
 
    private:
     void updatePalette();
