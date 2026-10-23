@@ -15,9 +15,7 @@
 
 #include <QFileDialog>
 #include <QKeyEvent>
-#include <QLineEdit>
 #include <QPushButton>
-#include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 
 #include "Application.h"
@@ -110,6 +108,19 @@ class IconProxyModel : public QSortFilterProxyModel {
         }
     }
 
+    bool lessThan(const QModelIndex& sourceLeft, const QModelIndex& sourceRight) const override
+    {
+        const auto keyLeft = sourceModel()->data(sourceLeft, Qt::UserRole).toString();
+        const auto keyRight = sourceModel()->data(sourceRight, Qt::UserRole).toString();
+        const bool leftIsSubdir = keyLeft.contains(QDir::separator());
+        const bool rightIsSubdir = keyRight.contains(QDir::separator());
+
+        if (leftIsSubdir != rightIsSubdir) {
+            return !leftIsSubdir;  // root-level icons come first
+        }
+        return keyLeft.localeAwareCompare(keyRight) < 0;
+    }
+
    private:
     IconPickerDialog::IconPickerCategory m_category = IconPickerDialog::Any;
 };
@@ -136,7 +147,9 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
     proxyModel = new IconProxyModel(this);
     proxyModel->setSourceModel(APPLICATION->icons());
+    proxyModel->setDynamicSortFilter(true);
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    proxyModel->sort(0);
     ui->iconView->setModel(proxyModel);
 
     auto contentsWidget = ui->iconView;
@@ -234,7 +247,7 @@ int IconPickerDialog::execWithSelection(QString selection)
     selectedIconKey = selection;
 
     int index_nr = list->getIconIndex(selection);
-    auto model_index = list->index(index_nr);
+    auto model_index = proxyModel->mapFromSource(list->index(index_nr));
     contentsWidget->selectionModel()->select(model_index, QItemSelectionModel::Current | QItemSelectionModel::Select);
 
     QMetaObject::invokeMethod(this, "delayed_scroll", Qt::QueuedConnection, Q_ARG(QModelIndex, model_index));

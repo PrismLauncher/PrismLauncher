@@ -79,20 +79,6 @@ IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject
     emit iconUpdated({});
 }
 
-void IconList::sortIconList()
-{
-    qDebug() << "Sorting icon list...";
-    std::sort(m_icons.begin(), m_icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
-        bool aIsSubdir = a.m_key.contains(QDir::separator());
-        bool bIsSubdir = b.m_key.contains(QDir::separator());
-        if (aIsSubdir != bIsSubdir) {
-            return !aIsSubdir;  // root-level icons come first
-        }
-        return a.m_key.localeAwareCompare(b.m_key) < 0;
-    });
-    reindex();
-}
-
 bool IconList::addPath(const QString& path)
 {
     QDir dir(path);
@@ -205,8 +191,6 @@ void IconList::directoryChanged(const QString& path)
             emit iconUpdated(key);
         }
     }
-
-    sortIconList();
 }
 
 void IconList::fileChanged(const QString& path)
