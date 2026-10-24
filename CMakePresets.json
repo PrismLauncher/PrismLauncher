@@ -32,7 +32,7 @@
         },
         {
             "name": "asan-tidy",
-            "displayName": "ASAN+Clang-tidy",
+            "displayName": "ASan+clang-tidy",
             "inherits": [
                 "default"
             ],
@@ -55,7 +55,7 @@
         },
         {
             "name": "asan-tidy",
-            "displayName": "ASAN+clang-tidy",
+            "displayName": "ASan+clang-tidy",
             "configurePreset": "asan-tidy"
         }
     ],
