@@ -473,6 +473,16 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </spacer>
               </item>
+              <item row="2" column="0" colspan="2">
+               <widget class="QCheckBox" name="serverJoinPreResolveSrv">
+                <property name="toolTip">
+                 <string>Resolve Minecraft SRV records before launch. This may change the server address visible to Minecraft and mods.</string>
+                </property>
+                <property name="text">
+                 <string>Pre-resolve SRV records</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
