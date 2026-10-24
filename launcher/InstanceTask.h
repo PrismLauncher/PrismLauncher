@@ -2,10 +2,10 @@
 
 #include <QDir>
 #include <cstdint>
-#include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
 class MinecraftInstance;
+struct GlobalConfig;
 
 /* Helpers */
 enum class InstanceNameChange : std::uint8_t { ShouldChange, ShouldKeep };
@@ -20,8 +20,6 @@ class InstanceTask : public Task {
    public:
     InstanceTask() = default;
     ~InstanceTask() override = default;
-
-    void setParentSettings(SettingsObject* settings) { m_globalSettings = settings; }
 
     void setStagingPath(const QString& stagingPath) { m_stagingPath = stagingPath; }
 
@@ -58,7 +56,6 @@ class InstanceTask : public Task {
     bool abort() override;
 
    protected: /* data */
-    SettingsObject* m_globalSettings{};
     QString m_instIcon;
     QString m_instGroup;
     QString m_targetDir;
