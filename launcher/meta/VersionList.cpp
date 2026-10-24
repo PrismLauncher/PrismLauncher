@@ -315,7 +315,8 @@ Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& 
     return latestCompat;
 }
 
-static const Meta::Version::Ptr& getLatestVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
+namespace {
+Version::Ptr getLatestVersion(const Version::Ptr& a, const Version::Ptr& b)
 {
     if (!a) {
         return b;
@@ -325,6 +326,7 @@ static const Meta::Version::Ptr& getLatestVersion(const Meta::Version::Ptr& a, c
     }
     return (a->rawTime() > b->rawTime() ? a : b);
 }
+}  // namespace
 
 Version::Ptr VersionList::getLatest(bool onlyRelease)
 {
