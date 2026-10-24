@@ -126,6 +126,8 @@ if (DEBUG_ADDRESS_SANITIZER)
                 $<${USE_ASAN_COMPILE_OPTIONS}:/fsanitize=address>
                 $<${USE_ASAN_COMPILE_OPTIONS}:/Oy->
         )
+        # NOTE: /INCREMENTAL emits warnings when used on asan'd objects
+        add_link_options($<${USE_ASAN_COMPILE_OPTIONS}:/INCREMENTAL:NO>)
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         message(STATUS "Using Address Sanitizer compile options for GCC/Clang")
         add_compile_options(

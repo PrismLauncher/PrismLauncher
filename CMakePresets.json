@@ -39,6 +39,9 @@
             "cacheVariables": {
                 "DEBUG_ADDRESS_SANITIZER": "ON",
                 "USE_CLANG_TIDY": "ON"
+            },
+            "environment": {
+                "DEBUG_ADDRESS_SANITIZER": "1"
             }
         }
     ],
