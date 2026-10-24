@@ -62,6 +62,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     , m_candidates(searchFor)
     , m_secondTryMetadata(new ConcurrentTask("Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
+    , m_dependencyChangelogJobs(new ConcurrentTask("Flame Changelog", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_includeDeps(includeDeps)
     , m_loadersList(std::move(loadersList))
     , m_releaseTypes(std::move(releaseTypes))
@@ -254,10 +255,20 @@ void ResourceUpdateDialog::checkCandidates()
 
             auto dependencyExtraInfo = depTask->getExtraInfo();
 
+            bool flameChangelog = false;
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = FlameAPI::getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    // Fetch the changelog asynchronously, updating the dialog once it's available.
+                    auto [changelogJob, changelogResponse] =
+                        FlameAPI::getChangelogTask(dep->version.addonId.toString(), dep->version.fileId.toString());
+                    m_dependencyChangelogJobs->addTask(changelogJob);
+                    flameChangelog = true;
+                    connect(changelogJob.get(), &Task::succeeded, this, [this, dep, changelogResponse] {
+                        if (auto* changelogArea = m_changelogAreas.value(dep->pack->name, nullptr); changelogArea) {
+                            changelogArea->setHtml(StringUtils::htmlListPatch(*changelogResponse));
+                        }
+                    });
                 }
 
                 auto [maybeInstalled, requiredByNames, requiredByIds] = dependencyExtraInfo.value(dep->version.addonId.toString());
@@ -270,6 +281,9 @@ void ResourceUpdateDialog::checkCandidates()
 
                 appendResource(updatable, requiredByNames);
                 m_tasks.insert(updatable.name, updatable.download);
+            }
+            if (flameChangelog) {
+                m_dependencyChangelogJobs->start();
             }
         }
     }
@@ -523,6 +537,9 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     changelogArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelogArea);
+
+    // Keep track of the changelog display so it can be updated once the changelog is fetched (e.g. for Flame dependencies).
+    m_changelogAreas.insert(info.name, changelogArea);
 }
 
 auto ResourceUpdateDialog::getTasks() const -> QList<ResourceDownloadTask::Ptr>
