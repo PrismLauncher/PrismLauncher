@@ -53,9 +53,7 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 
     add_link_options(
         # /LTCG allows for linking wholy optimizated programs
-        # /MANIFEST:NO disables generating a manifest file, we instead provide our own
-        # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
-        "$<$<COMPILE_LANGUAGE:C,CXX>:/LTCG;/MANIFEST:NO;/STACK:8388608>"
+        $<$<AND:$<CONFIG:Release,RelWithDebInfo>,$<COMPILE_LANGUAGE:C,CXX>>:/LTCG>
     )
 
     # /GL enables whole program optimizations
@@ -227,6 +225,12 @@ set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL 
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
 option(Launcher_USE_PCH "Use precompiled headers where possible" ON)
+
+option(Launcher_WARNING_AS_ERROR "Treat compiler/linker warnings as errors (-Werror)")
+
+if(Launcher_WARNING_AS_ERROR)
+    message(STATUS "Treating all warnings as errors for launcher targets")
+endif()
 
 # Java downloader
 set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
