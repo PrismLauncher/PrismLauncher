@@ -523,9 +523,11 @@ void MainWindow::konamiTriggered()
 
 void MainWindow::showInstanceContextMenu(const QPoint& pos)
 {
+    auto* menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
     QList<QAction*> actions;
 
-    QAction* actionSep = new QAction("", this);
+    auto* actionSep = new QAction("", menu);
     actionSep->setSeparator(true);
 
     bool onInstance = view->indexAt(pos).isValid();
@@ -543,21 +545,21 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 
         // add header
         actions.prepend(actionSep);
-        QAction* actionVoid = new QAction(m_selectedInstance->name(), this);
+        auto* actionVoid = new QAction(m_selectedInstance->name(), menu);
         actionVoid->setEnabled(false);
         actions.prepend(actionVoid);
     } else {
         auto group = view->groupNameAt(pos);
 
-        QAction* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
+        auto* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, menu);
         actionVoid->setEnabled(false);
 
-        QAction* actionCreateInstance = new QAction(tr("&Create instance"), this);
+        auto* actionCreateInstance = new QAction(tr("&Create instance"), menu);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
-            QVariantMap instance_action_data;
-            instance_action_data["group"] = group;
-            actionCreateInstance->setData(instance_action_data);
+            QVariantMap instanceActionData;
+            instanceActionData["group"] = group;
+            actionCreateInstance->setData(instanceActionData);
         }
 
         connect(actionCreateInstance, &QAction::triggered, this, &MainWindow::on_actionAddInstance_triggered);
@@ -566,22 +568,17 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.prepend(actionVoid);
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
-            QAction* actionDeleteGroup = new QAction(tr("&Delete group"), this);
+            auto* actionDeleteGroup = new QAction(tr("&Delete group"), menu);
             connect(actionDeleteGroup, &QAction::triggered, this, [this, group] { deleteGroup(group); });
             actions.append(actionDeleteGroup);
 
-            QAction* actionRenameGroup = new QAction(tr("&Rename group"), this);
+            auto* actionRenameGroup = new QAction(tr("&Rename group"), menu);
             connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
             actions.append(actionRenameGroup);
         }
     }
-    QMenu myMenu;
-    myMenu.addActions(actions);
-    /*
-    if (onInstance)
-        myMenu.setEnabled(m_selectedInstance->canLaunch());
-    */
-    myMenu.exec(view->mapToGlobal(pos));
+    menu->addActions(actions);
+    menu->popup(view->mapToGlobal(pos));
 }
 
 void MainWindow::updateMainToolBar()
