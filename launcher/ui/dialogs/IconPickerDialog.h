@@ -14,9 +14,10 @@
  */
 
 #pragma once
+#include <cstdint>
+
 #include <QDialog>
 #include <QItemSelection>
-#include <QLineEdit>
 #include <QSortFilterProxyModel>
 
 namespace Ui {
@@ -27,12 +28,12 @@ class IconPickerDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit IconPickerDialog(QWidget* parent = 0);
-    ~IconPickerDialog();
-    int execWithSelection(QString selection);
+    explicit IconPickerDialog(QWidget* parent = nullptr);
+    ~IconPickerDialog() override;
+    int execWithSelection(const QString& selection);
     QString selectedIconKey;
 
-    enum IconPickerCategory {
+    enum class IconPickerCategory : std::uint8_t {
         Any,
         Modern,
         Legacy,
@@ -42,21 +43,20 @@ class IconPickerDialog : public QDialog {
     Q_ENUM(IconPickerCategory)
 
    protected:
-    virtual bool eventFilter(QObject*, QEvent*);
+    bool eventFilter(QObject* /*unused*/, QEvent* /*unused*/) override;
 
    private:
-    Ui::IconPickerDialog* ui;
-    QPushButton* buttonRemove;
-    QLineEdit* searchBar;
-    QSortFilterProxyModel* proxyModel;
+    Ui::IconPickerDialog* m_ui;
+    QPushButton* m_buttonRemove;
+    QSortFilterProxyModel* m_proxyModel;
 
    private slots:
-    void selectionChanged(QItemSelection, QItemSelection);
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);
     void addNewIcon();
-    void removeSelectedIcon();
-    void openFolder();
+    void removeSelectedIcon() const;
+    void openFolder() const;
     void filterIcons(const QString& text);
     void filterIconsByCategory(IconPickerCategory);
 };
