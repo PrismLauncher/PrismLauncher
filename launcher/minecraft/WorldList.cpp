@@ -162,7 +162,7 @@ bool WorldList::resetIcon(int row)
 
 int WorldList::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : 5;
+    return parent.isValid() ? 0 : ColumnCount;
 }
 
 QVariant WorldList::data(const QModelIndex& index, int role) const
@@ -196,14 +196,6 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
                 case SizeColumn:
                     return locale.formattedDataSize(world.bytes());
 
-                case InfoColumn:
-                    if (world.isSymLinkUnder(instDirPath())) {
-                        return tr("This world is symbolically linked from elsewhere.");
-                    }
-                    if (world.isMoreThanOneHardLink()) {
-                        return tr("\nThis world is hard linked elsewhere.");
-                    }
-                    return "";
                 default:
                     return {};
             }
@@ -215,14 +207,14 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
             return data(index, Qt::DisplayRole);
 
         case Qt::ToolTipRole: {
-            if (column == InfoColumn) {
+            if (column == NameColumn) {
                 if (world.isSymLinkUnder(instDirPath())) {
-                    return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
+                    return tr("This world is symbolically linked from elsewhere. Editing it will also change the original."
                               "\nCanonical Path: %1")
                         .arg(world.canonicalFilePath());
                 }
                 if (world.isMoreThanOneHardLink()) {
-                    return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
+                    return tr("This world is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
             return world.folderName();
@@ -248,6 +240,8 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
         case IconFileRole: {
             return world.iconFile();
         }
+        case LinkedRole:
+            return world.isSymLinkUnder(instDirPath());
         default:
             return QVariant();
     }
@@ -267,9 +261,6 @@ QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation ori
                 case SizeColumn:
                     //: World size on disk
                     return tr("Size");
-                case InfoColumn:
-                    //: special warnings?
-                    return tr("Info");
                 default:
                     return QVariant();
             }
@@ -284,8 +275,6 @@ QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation ori
                     return tr("Date and time the world was last played.");
                 case SizeColumn:
                     return tr("Size of the world on disk.");
-                case InfoColumn:
-                    return tr("Information and warnings about the world.");
                 default:
                     return QVariant();
             }

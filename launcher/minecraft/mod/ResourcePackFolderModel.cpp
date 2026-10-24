@@ -50,14 +50,14 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir,
                                                  QObject* parent)
     : ResourceFolderModel(dir, instance, isIndexed, createDir, parent)
 {
-    m_columnNames = QStringList({ "Enable", "Name", "Version", "Pack Format", "Last Modified", "Provider", "Size", "File Name", "Update" });
-    m_columnNamesTranslated = QStringList({ "", tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"), tr("Provider"),
-                                            tr("Size"), tr("File Name"), tr("Update") });
-    m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version,  SortType::PackFormat, SortType::Date,
-                         SortType::Provider, SortType::Size, SortType::Filename, SortType::LockUpdate };
+    m_columnNames = QStringList({ "Enable", "Name", "Version", "Pack Format", "Last Modified", "Provider", "Size", "File Name" });
+    m_columnNamesTranslated =
+        QStringList({ "", tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") });
+    m_columnSortKeys = { SortType::Enabled, SortType::Name,     SortType::Version, SortType::PackFormat,
+                         SortType::Date,    SortType::Provider, SortType::Size,    SortType::Filename };
     m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,          QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::ResizeToContents, QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::Interactive,      QHeaderView::Interactive };
+                            QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, false, true, true, true, true, true, true, true };
 }
 
@@ -90,11 +90,6 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             if (column == ActiveColumn) {
                 return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
-            }
-            return {};
-        case Qt::UserRole:
-            if (column == LockUpdateColumn) {
-                return at(row).lockUpdate();
             }
             return {};
         default:
@@ -169,7 +164,6 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
                 case ProviderColumn:
                 case SizeColumn:
                 case FileNameColumn:
-                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -194,8 +188,6 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
                     return tr("The size of the resource pack.");
                 case FileNameColumn:
                     return tr("The file name of the resource pack.");
-                case LockUpdateColumn:
-                    return tr("Should this mod be updated?");
                 default:
                     return {};
             }

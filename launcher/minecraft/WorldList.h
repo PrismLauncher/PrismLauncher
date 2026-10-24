@@ -30,7 +30,7 @@ class Task;
 class WorldList : public QAbstractListModel {
     Q_OBJECT
    public:
-    enum Columns : std::uint8_t { NameColumn, GameModeColumn, LastPlayedColumn, SizeColumn, InfoColumn };
+    enum Columns : std::uint8_t { NameColumn, GameModeColumn, LastPlayedColumn, SizeColumn, ColumnCount };
 
     enum Roles : std::uint16_t {
         ObjectRole = Qt::UserRole + 1,
@@ -40,7 +40,8 @@ class WorldList : public QAbstractListModel {
         GameModeRole,
         LastPlayedRole,
         SizeRole,
-        IconFileRole
+        IconFileRole,
+        LinkedRole,
     };
 
     WorldList(const QString& dir, BaseInstance* instance);
