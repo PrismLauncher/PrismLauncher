@@ -1315,6 +1315,10 @@ if(APPLE)
 endif()
 
 add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
+target_link_options(${Launcher_Name} PRIVATE
+    # /MANIFEST:NO disables generating a manifest file, we instead provide our own
+    $<$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>:/MANIFEST:NO>
+)
 
 if(${Launcher_USE_PCH})
     target_precompile_headers(${Launcher_Name} REUSE_FROM Launcher_logic)
@@ -1468,6 +1472,8 @@ foreach(target ${Launcher_TARGETS})
     target_compile_options(${target} PRIVATE
         $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W4 /permissive- /wd4100,-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers>
     )
+    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+    target_link_options(${target} PRIVATE $<$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>:/STACK:8388608>)
 endforeach()
 
 set_target_properties(${Launcher_TARGETS} PROPERTIES
