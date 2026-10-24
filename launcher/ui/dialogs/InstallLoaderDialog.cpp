@@ -34,14 +34,18 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
-    InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
+    InstallLoaderPage(const QString& id,
+                      const QString& iconName,
+                      const QString& name,
+                      const std::optional<Version>& oldestVersion,
+                      PackProfile* profile)
         : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
         setExactIfPresentFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
 
-        if (oldestVersion != Version() && Version(minecraftVersion) < oldestVersion)
+        if (oldestVersion.has_value() && Version(minecraftVersion) < oldestVersion.value())
             setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
 
         if (const QString currentVersion = profile->getComponentVersion(id); !currentVersion.isNull())
@@ -89,18 +93,18 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
     : QDialog(parent), profile(profile), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     layout->setContentsMargins(0, 0, 0, 0);
-    #endif
+#endif
     container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     layout->addWidget(container);
 
     auto buttonLayout = new QHBoxLayout(this);
-    // small margins look ugly on macOS on modal windows
-    #ifndef Q_OS_MACOS
+// small margins look ugly on macOS on modal windows
+#ifndef Q_OS_MACOS
     buttonLayout->setContentsMargins(0, 0, 6, 6);
-    #endif
+#endif
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(true); });
     buttonLayout->addWidget(refreshButton);
@@ -135,17 +139,19 @@ InstallLoaderDialog::InstallLoaderDialog(PackProfile* profile, const QString& ui
 
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
-    return { // NeoForge
-             new InstallLoaderPage("net.neoforged", "neoforged", tr("NeoForge"), {}, profile),
-             // Forge
-             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), {}, profile),
-             // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), Version("1.14"), profile),
-             // Quilt
-             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), Version("1.14"), profile),
-             // LiteLoader
-             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), {}, profile)
-    };
+    QList<BasePage*> result;
+    for (const auto loader : ModLoaderType::all()) {
+        const auto componentId = loader.componentId();
+        if (!componentId.has_value()) {
+            continue;
+        }
+
+        auto* page = new InstallLoaderPage(componentId.value(), loader.icon().value_or("loadermods"), loader.displayName(),
+                                           loader.minGameVersion(), profile);
+        result.append(page);
+    }
+
+    return result;
 }
 
 QString InstallLoaderDialog::dialogTitle()
@@ -161,12 +167,12 @@ void InstallLoaderDialog::validate(BasePage* page)
 bool InstallLoaderDialog::resolveLoaderConflicts(InstallLoaderPage* page)
 {
     QList<ComponentPtr> conflicts;
-    auto knownLoader = Component::KNOWN_MODLOADERS.find(page->id());
-    if (knownLoader != Component::KNOWN_MODLOADERS.cend()) {
-        for (const QString& conflictId : knownLoader->knownConflictingComponents) {
-            const ComponentPtr conflictComponent = profile->getComponent(conflictId);
-            if (conflictComponent && conflictComponent->isEnabled() && !conflictComponent->isCustom())
-                conflicts.append(conflictComponent);
+    auto* version = dynamic_cast<Meta::Version*>(page->selectedVersion().get());
+    Q_ASSERT(version != nullptr);
+    for (const auto& conflict : version->conflictsSet()) {
+        const ComponentPtr conflictComponent = profile->getComponent(conflict.uid);
+        if (conflictComponent && conflictComponent->isEnabled() && !conflictComponent->isCustom()) {
+            conflicts.append(conflictComponent);
         }
     }
 
@@ -209,8 +215,9 @@ void InstallLoaderDialog::done(int result)
     if (result == Accepted) {
         auto* page = pageCast(container->selectedPage());
         if (page->selectedVersion()) {
-            if (!resolveLoaderConflicts(page))
+            if (!resolveLoaderConflicts(page)) {
                 return;
+            }
 
             if (const ComponentPtr component = profile->getComponent(page->id()); component && !component->isEnabled())
                 component->setEnabled(true);

@@ -212,8 +212,10 @@ auto Mod::loaders() const -> QString
     if (metadata()) {
         QStringList loaders;
         auto modLoaders = metadata()->loaders;
-        for (auto loader : ModPlatform::modLoaderTypesToList(modLoaders)) {
-            loaders << getModLoaderAsString(loader);
+        for (const auto loader : ModLoaderType::all()) {
+            if (modLoaders.contains(loader)) {
+                loaders << loader.toString();
+            }
         }
         return loaders.join(", ");
     }
@@ -295,8 +297,7 @@ QPixmap Mod::setIcon(const QImage& newImage) const
     }
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap =
-        QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    auto pixmap = QPixmap::fromImage(newImage.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     m_packImageCacheKey.key = PixmapCache::insert(pixmap);
     m_packImageCacheKey.wasEverUsed = true;

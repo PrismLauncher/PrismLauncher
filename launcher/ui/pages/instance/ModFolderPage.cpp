@@ -186,7 +186,7 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
 void ModFolderPage::downloadMods()
 {
     auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (profile->getModLoaders().isEmpty() && handleNoModLoader()) {
         return;
     }
 
@@ -232,7 +232,7 @@ void ModFolderPage::downloadDialogFinished(int result)
 void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::IndexedVersionType> releaseTypes)
 {
     auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (profile->getModLoaders().isEmpty() && handleNoModLoader()) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -261,7 +261,7 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), std::move(releaseTypes));
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoaders(), std::move(releaseTypes));
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
@@ -343,7 +343,7 @@ void ModFolderPage::changeModVersion()
     }
 
     auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (profile->getModLoaders().isEmpty() && handleNoModLoader()) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -440,7 +440,7 @@ inline bool ModFolderPage::handleNoModLoader()
         if (!dialogAccepted) {
             return true;
         }
-        if (!profile->getModLoaders().has_value()) {
+        if (profile->getModLoaders().isEmpty()) {
             CustomMessageBox::selectable(this, tr("Error"), tr("No mod loader was installed. Please try again."), QMessageBox::Warning)
                 ->show();
             return true;

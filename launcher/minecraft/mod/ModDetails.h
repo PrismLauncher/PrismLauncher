@@ -39,6 +39,7 @@
 #include <QStringList>
 #include <QUrl>
 
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ModIndex.h"
 
 struct ModLicense {
@@ -142,5 +143,5 @@ struct ModDetails {
 
     QStringList dependencies = {};
 
-    ModPlatform::ModLoaderType loader = {};
+    ModLoaderType loader = {};
 };

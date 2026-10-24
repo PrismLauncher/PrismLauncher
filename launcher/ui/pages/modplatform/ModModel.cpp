@@ -48,7 +48,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     if (!m_filter->versions.empty()) {
         versions = m_filter->versions;
     }
-    if (m_filter->loaders != 0U) {
+    if (!m_filter->loaders.isEmpty()) {
         loaders = m_filter->loaders;
     }
     if (!m_filter->categoryIds.empty()) {
@@ -85,7 +85,7 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
     if (!m_filter->versions.empty()) {
         versions = m_filter->versions;
     }
-    if (m_filter->loaders != 0U) {
+    if (!m_filter->loaders.isEmpty()) {
         loaders = m_filter->loaders;
     }
 
@@ -127,11 +127,11 @@ bool ModModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
         return true;
     }
     auto loaders = static_cast<MinecraftInstance&>(m_baseInstance).getPackProfile()->getSupportedModLoaders();
-    if (m_filter->loaders != 0U) {
+    if (!m_filter->loaders.isEmpty()) {
         loaders = m_filter->loaders;
     }
     return (!optedOut(v) &&                                                                   // is opted out(aka curseforge download link)
-            (!loaders.has_value() || !v.loaders || ((loaders.value() & v.loaders) != 0U)) &&  // loaders
+            (loaders.isEmpty() || v.loaders.isEmpty() || std::ranges::any_of(loaders, [v](const ModLoaderType loader) { return v.loaders.contains(loader); })) &&  // loaders)
             checkSide(m_filter->side, v.side) &&                                              // side
             (m_filter->releases.empty() ||                                                    // releases
              std::find(m_filter->releases.cbegin(), m_filter->releases.cend(), v.versionType) != m_filter->releases.cend()) &&
