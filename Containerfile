@@ -22,7 +22,7 @@ RUN apt-get update
 # Install base dependencies
 RUN apt-get --assume-yes --no-install-recommends install \
   # Compilers
-  clang lld llvm temurin-17-jdk scdoc \
+  clang-22 lld-22 llvm-22 temurin-17-jdk scdoc \
   # Build system
   cmake ninja-build pkg-config \
   # Dependencies
