@@ -310,6 +310,8 @@ set(MINECRAFT_SOURCES
     minecraft/World.cpp
     minecraft/WorldList.h
     minecraft/WorldList.cpp
+    minecraft/Realms.h
+    minecraft/Realms.cpp
     minecraft/WorldTasks.h
     minecraft/WorldTasks.cpp
 
@@ -1041,6 +1043,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/CopyInstanceDialog.h
     ui/dialogs/CreateShortcutDialog.cpp
     ui/dialogs/CreateShortcutDialog.h
+    ui/dialogs/JoinRealmDialog.cpp
+    ui/dialogs/JoinRealmDialog.h
     ui/dialogs/CustomMessageBox.cpp
     ui/dialogs/CustomMessageBox.h
     ui/dialogs/ExportInstanceDialog.cpp
