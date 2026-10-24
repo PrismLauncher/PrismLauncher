@@ -1476,10 +1476,14 @@ foreach(target ${Launcher_TARGETS})
     target_link_options(${target} PRIVATE $<$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>:/STACK:8388608>)
 endforeach()
 
-set_target_properties(${Launcher_TARGETS} PROPERTIES
-    COMPILE_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR}
-    LINK_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR}
-)
+set_target_properties(${Launcher_TARGETS} PROPERTIES COMPILE_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
+
+# NOTE: Universal macOS builds (i.e., `CMAKE_OSX_ARCHITECTURES="x86_64;arm64") emit benign warnings for duplicate libraries
+# TODO: Maybe fix this...?
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set_target_properties(${Launcher_TARGETS} PROPERTIES LINK_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
+endif()
+
 
 #### The bundle mess! ####
 # Bundle utilities are used to complete packages for different platforms - they add all the libraries that would otherwise be missing on the target system.
