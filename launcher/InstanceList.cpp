@@ -273,12 +273,42 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
 
 QStringList InstanceList::getGroups()
 {
-    return m_groupNameCache.keys();
+    return m_groupDataCache.keys();
+}
+
+QString InstanceList::getGroupIconKey(const GroupId& groupName) const
+{
+    auto iter = m_groupDataCache.find(groupName);
+    if (iter != m_groupDataCache.end()) {
+        return iter.value().iconKey;
+    }
+    return {};
+}
+
+void InstanceList::setGroupIconKey(const GroupId& groupName, const QString& iconKey)
+{
+    if (groupName.isEmpty())
+        return;
+
+    bool modified = false;
+    if (m_groupDataCache.contains(groupName)) {
+        if (m_groupDataCache[groupName].iconKey != iconKey) {
+            m_groupDataCache[groupName].iconKey = iconKey;
+            modified = true;
+        }
+    } else {
+        m_groupDataCache[groupName].iconKey = iconKey;
+        modified = true;
+    }
+
+    if (modified) {
+        saveGroupList();
+    }
 }
 
 void InstanceList::deleteGroup(const GroupId& name)
 {
-    m_groupNameCache.remove(name);
+    m_groupDataCache.remove(name);
     m_collapsedGroups.remove(name);
 
     bool removed = false;
@@ -303,7 +333,9 @@ void InstanceList::deleteGroup(const GroupId& name)
 
 void InstanceList::renameGroup(const QString& src, const QString& dst)
 {
-    m_groupNameCache.remove(src);
+    m_groupDataCache[dst].iconKey = m_groupDataCache[src].iconKey;
+    m_groupDataCache.remove(src);
+
     if (m_collapsedGroups.remove(src)) {
         m_collapsedGroups.insert(dst);
     }
@@ -708,7 +740,7 @@ void InstanceList::increaseGroupCount(const QString& group)
         return;
     }
 
-    ++m_groupNameCache[group];
+    ++m_groupDataCache[group].refs;
 }
 
 void InstanceList::decreaseGroupCount(const QString& group)
@@ -717,8 +749,8 @@ void InstanceList::decreaseGroupCount(const QString& group)
         return;
     }
 
-    if (--m_groupNameCache[group] < 1) {
-        m_groupNameCache.remove(group);
+    if (--m_groupDataCache[group].refs < 1) {
+        m_groupDataCache.remove(group);
         m_collapsedGroups.remove(group);
     }
 }
@@ -752,6 +784,7 @@ void InstanceList::saveGroupList()
         QJsonObject groupObj;
         QJsonArray instanceArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
+        groupObj.insert("icon", QJsonValue(m_groupDataCache.value(name, {}).iconKey));
         for (const auto& item : list) {
             instanceArr.append(QJsonValue(item));
         }
@@ -781,7 +814,7 @@ void InstanceList::loadGroupList()
     QString groupFileName = QDir::current().filePath("instgroups.json");
 
     m_instanceGroupIndex.clear();
-    m_groupNameCache.clear();
+    m_groupDataCache.clear();
     m_collapsedGroups.clear();
 
     bool migratingLegacyGroups = false;
@@ -850,6 +883,9 @@ void InstanceList::loadGroupList()
         if (hidden) {
             m_collapsedGroups.insert(groupName);
         }
+
+        auto icon = groupObj.value("icon").toString("");
+        m_groupDataCache[groupName].iconKey = icon;
 
         QJsonArray instancesArray = groupObj.value("instances").toArray();
         for (auto value : instancesArray) {
