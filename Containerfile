@@ -10,9 +10,7 @@ ARG QT_VERSION=6.10.3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update \
-  && apt-get --assume-yes upgrade \
-  && apt-get --assume-yes autopurge
+RUN apt-get update && apt-get --assume-yes upgrade
 
 # Use Adoptium for Java 17
 RUN apt-get --assume-yes --no-install-recommends install \
@@ -24,13 +22,13 @@ RUN apt-get update
 # Install base dependencies
 RUN apt-get --assume-yes --no-install-recommends install \
   # Compilers
-  clang lld llvm temurin-17-jdk \
+  clang-22 lld-22 llvm-22 temurin-17-jdk scdoc \
   # Build system
-  cmake ninja-build extra-cmake-modules pkg-config \
+  cmake ninja-build pkg-config \
   # Dependencies
-  cmark gamemode-dev libarchive-dev libcmark-dev libgamemode0 libgl1-mesa-dev libqrencode-dev libtomlplusplus-dev scdoc zlib1g-dev \
+  gamemode-dev libgamemode0 libgl1-mesa-dev \
   # Tooling
-  clang-format clang-tidy git
+  clang-format clang-tidy git unzip zip
 
 # Use LLD by default for faster linking
 ENV CMAKE_LINKER_TYPE=lld
@@ -65,6 +63,9 @@ RUN rm -rf \
   "$QT_PLUGIN_PATH"/qmlls \
   "$QT_PLUGIN_PATH"/qmltooling \
   "$QT_PLUGIN_PATH"/sqldrivers
+
+# Cleanup
+RUN apt-get --assume-yes autopurge
 
 # Setup workspace
 RUN mkdir /work
