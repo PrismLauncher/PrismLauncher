@@ -305,7 +305,7 @@
        <item>
         <widget class="QGroupBox" name="disclosureGroup">
          <property name="toolTip">
-          <string>This filters are saved globally</string>
+          <string>These filters are saved globally</string>
          </property>
          <property name="title">
           <string>Advanced exclusions</string>
