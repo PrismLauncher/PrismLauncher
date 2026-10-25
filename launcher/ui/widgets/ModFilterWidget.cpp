@@ -263,6 +263,63 @@ void ModFilterWidget::prepareBasicFilter()
     } else {
         m_ui->hideInstalled->hide();
     }
+
+    {
+        auto exclude = Json::toStringList(APPLICATION->settings()->get("DisclosureFilter").toString());
+        for (const auto& d : exclude) {
+            auto dis = ModPlatform::DisclosureType::fromString(d);
+            m_filter->excludeDisclosureTypes.push_back(dis);
+            switch (dis.value()) {
+                case ModPlatform::DisclosureType::AIContent:
+                    m_ui->aiContent->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::AIContentCode:
+                    m_ui->aiContentCode->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::AIContentAssets:
+                    m_ui->aiContentAssets->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::AIContentText:
+                    m_ui->aiContentText->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::AIContentFunctionality:
+                    m_ui->aiContentFunctionality->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::Advertisements:
+                    m_ui->advertisements->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::EpilepsyTriggers:
+                    m_ui->epilepsyTriggers->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::SystemInteractions:
+                    m_ui->systemInteractions->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::Telemetry:
+                    m_ui->telemetry->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::TelemetryOptIn:
+                    m_ui->telemetryOptIn->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::TelemetryOptOut:
+                    m_ui->telemetryOptOut->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::TelemetryAlwaysActive:
+                    m_ui->telemetryAlwaysActive->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::DerivativeWork:
+                    m_ui->derivativeWork->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::PaidFeatures:
+                    m_ui->paidFeatures->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureType::Archived:
+                    m_ui->archived->setChecked(true);
+                    break;
+                case ModPlatform::DisclosureTypeValue::Unknown:
+                    break;
+            }
+        }
+    }
 }
 
 void ModFilterWidget::onShowAllVersionsChanged()
@@ -286,7 +343,7 @@ void ModFilterWidget::onVersionFilterChanged(int /*unused*/)
 
     m_filterChanged = m_filter->versions.size() != currentList.size() ||
                       !std::equal(m_filter->versions.begin(), m_filter->versions.end(), currentList.begin(), currentList.end());
-    m_filter->versions = currentList;
+    m_filter->versions = std::move(currentList);
     if (m_filterChanged) {
         emit filterChanged();
     }
@@ -445,7 +502,7 @@ void ModFilterWidget::onReleaseFilterChanged()
         releases.emplace_back(ModPlatform::IndexedVersionType::Unknown);
     }
     m_filterChanged = releases != m_filter->releases;
-    m_filter->releases = releases;
+    m_filter->releases = std::move(releases);
     if (m_filterChanged) {
         emit filterChanged();
     }
@@ -477,8 +534,17 @@ void ModFilterWidget::onDisclosureFilterChanged()
     collect(m_ui->paidFeatures, ModPlatform::DisclosureType::PaidFeatures);
     collect(m_ui->archived, ModPlatform::DisclosureType::Archived);
 
+    {
+        QStringList setting;
+        for (auto dis : exclude) {
+            setting << dis.toString();
+        }
+
+        APPLICATION->settings()->set("DisclosureFilter", Json::fromStringList(setting));
+    }
+
     m_filterChanged = exclude != m_filter->excludeDisclosureTypes;
-    m_filter->excludeDisclosureTypes = exclude;
+    m_filter->excludeDisclosureTypes = std::move(exclude);
     if (m_filterChanged) {
         emit filterChanged();
     }
