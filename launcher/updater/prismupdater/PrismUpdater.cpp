@@ -85,21 +85,23 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     QCommandLineParser parser;
     parser.setApplicationDescription(QObject::tr("An auto-updater for Prism Launcher"));
 
-    parser.addOptions(
-        { { { "d", "dir" }, tr("Use a custom path as application root (use '.' for current directory)."), tr("directory") },
-          { { "V", "prism-version" },
-            tr("Use this version as the installed launcher version. (provided because stdout can not be reliably captured on windows)"),
-            tr("installed launcher version") },
-          { { "I", "install-version" }, "Install a specific version.", tr("version name") },
-          { { "U", "update-url" }, tr("Update from the specified repo."), tr("github repo url") },
-          { { "c", "check-only" },
-            tr("Only check if an update is needed. Exit status 100 if true, 0 if false (or non 0 if there was an error).") },
-          { { "p", "pre-release" }, tr("Allow updating to pre-release releases") },
-          { { "F", "force" }, tr("Force an update, even if one is not needed.") },
-          { { "l", "list" }, tr("List available releases.") },
-          { "debug", tr("Log debug to console.") },
-          { { "S", "select-ui" }, tr("Select the version to install with a GUI.") },
-          { { "D", "allow-downgrade" }, tr("Allow the updater to downgrade to previous versions.") } });
+    parser.addOptions({
+        { { "d", "dir" }, tr("Use a custom path as application root (use '.' for current directory)."), tr("directory") },
+        { { "V", "prism-version" },
+          tr("Use this version as the installed launcher version. (provided because stdout can not be reliably captured on windows)"),
+          tr("installed launcher version") },
+        { { "I", "install-version" }, "Install a specific version.", tr("version name") },
+        { { "U", "update-url" }, tr("Update from the specified repo."), tr("github repo url") },
+        { { "c", "check-only" },
+          tr("Only check if an update is needed. Exit status 100 if true, 0 if false (or non 0 if there was an error).") },
+        { { "p", "pre-release" }, tr("Allow updating to pre-release releases") },
+        { { "F", "force" }, tr("Force an update, even if one is not needed.") },
+        { { "l", "list" }, tr("List available releases.") },
+        { "debug", tr("Log debug to console.") },
+        { { "S", "select-ui" }, tr("Select the version to install with a GUI.") },
+        { { "G", "github-token" }, tr("The token to be used for Github API requests.") },
+        { { "D", "allow-downgrade" }, tr("Allow the updater to downgrade to previous versions.") },
+    });
 
     parser.addHelpOption();
     parser.addVersionOption();
@@ -308,7 +310,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         showFatalErrorMessage(tr("Unsupported Installation"), tr("The updater can not find the main executable."));
     }
 
-    m_prismExecutable = prismExecutable;
+    m_prismExecutable = std::move(prismExecutable);
 
     auto prismUpdateUrl = parser.value("update-url");
     if (prismUpdateUrl.isEmpty()) {
@@ -347,6 +349,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     }
 
     m_allowPreRelease = parser.isSet("pre-release");
+    m_githubToken = parser.value("github-token");
 
     auto markerFilePath = QDir(m_rootPath).absoluteFilePath(".prism_launcher_updater_unpack.marker");
     auto markerFile = QFileInfo(markerFilePath);
@@ -1207,13 +1210,16 @@ void PrismUpdaterApp::downloadReleasePage(const QString& apiUrl, int page)
     auto pageUrl = QString("%1?per_page=%2&page=%3").arg(apiUrl).arg(QString::number(perPage)).arg(QString::number(page));
     auto [download, response] = Net::Request::makeByteArray(pageUrl);
     download->setNetwork(m_network.get());
-    m_currentUrl = pageUrl;
+    m_currentUrl = std::move(pageUrl);
 
     auto githubApiHeaders = std::make_unique<Net::RawHeaderProxy>();
     githubApiHeaders->addHeaders({
         { .headerName = "Accept", .headerValue = "application/vnd.github+json" },
         { .headerName = "X-GitHub-Api-Version", .headerValue = "2022-11-28" },
     });
+    if (!m_githubToken.isEmpty()) {
+        githubApiHeaders->addHeader("Authorization", QString("Bearer %1").arg(m_githubToken).toUtf8());
+    }
     download->addHeaderProxy(std::move(githubApiHeaders));
 
     connect(download.get(), &Net::Request::succeeded, this, [this, response, perPage, apiUrl, page]() {
