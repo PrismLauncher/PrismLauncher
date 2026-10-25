@@ -87,10 +87,6 @@ set(CORE_SOURCES
     Version.h
     Version.cpp
 
-    # A Recursive file system watcher
-    RecursiveFileSystemWatcher.h
-    RecursiveFileSystemWatcher.cpp
-
     # Time
     MMCTime.h
     MMCTime.cpp
