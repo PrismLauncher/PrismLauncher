@@ -46,8 +46,6 @@ namespace Ui {
 class OtherLogsPage;
 }
 
-class RecursiveFileSystemWatcher;
-
 class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
