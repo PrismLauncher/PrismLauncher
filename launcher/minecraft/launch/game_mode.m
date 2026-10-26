@@ -104,8 +104,7 @@ static int runBeacon(pid_t parentPid)
 
         if (kq >= 0) {
             struct kevent out;
-            struct timespec timeout = { .tv_sec = 5, .tv_nsec = 0 };
-            kevent(kq, NULL, 0, &out, 1, &timeout);
+            kevent(kq, NULL, 0, &out, 1, NULL);
             close(kq);
         }
     }
