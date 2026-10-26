@@ -155,7 +155,7 @@ void Technic::ListModel::performSearch()
     }
     auto clientId = APPLICATION->settings()->get("TechnicClientID").toString();
     if (!clientId.isEmpty()) {
-        searchUrl += "?cid=" + clientId;
+        searchUrl += "&cid=" + clientId;
     }
     auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
     netJob->addNetAction(action);
