@@ -176,9 +176,10 @@ auto HttpMetaCache::evictAll() -> bool
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
         qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
-        for (MetaEntryPtr entry : map.entry_list) {
-            if (!evictEntry(entry))
+        for (const auto& entry : map.entry_list) {
+            if (!evictEntry(entry)) {
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
+            }
         }
         map.entry_list.clear();
         // AND all return codes together so the result is true iff all runs of deletePath() are true
