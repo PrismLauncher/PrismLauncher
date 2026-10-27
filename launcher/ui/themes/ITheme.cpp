@@ -34,18 +34,18 @@
  *      limitations under the License.
  */
 #include "ITheme.h"
+#include <QApplication>
 #include <QDir>
 #include <QStyleFactory>
-#include "Application.h"
 #include "HintOverrideProxyStyle.h"
 #include "rainbow.h"
 
 void ITheme::apply(bool)
 {
-    APPLICATION->setStyleSheet(QString());
+    qApp->setStyleSheet(QString());
     QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
     QApplication::setPalette(colorScheme());
-    APPLICATION->setStyleSheet(appStyleSheet());
+    qApp->setStyleSheet(appStyleSheet());
     QDir::setSearchPaths("theme", searchPaths());
 }
 
