@@ -39,6 +39,7 @@
 #include "BuildConfig.h"
 #include "PageContainer_p.h"
 
+#include <QApplication>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
@@ -55,7 +56,6 @@
 
 #include "ui/widgets/IconLabel.h"
 
-#include "Application.h"
 #include "DesktopServices.h"
 
 class PageEntryFilterModel : public QSortFilterProxyModel {
@@ -174,7 +174,7 @@ void PageContainer::createUI()
     m_header->setFont(headerLabelFont);
 
     auto* headerHLayout = new QHBoxLayout;
-    const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
+    const int leftMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
     headerHLayout->setContentsMargins(0, 6, 0, 0);
