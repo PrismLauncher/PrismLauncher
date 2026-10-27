@@ -1569,30 +1569,27 @@ bool Application::launch(MinecraftInstance* instance,
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     } else if (instance->canLaunch()) {
-        QMutexLocker locker(&m_instanceExtrasMutex);
-        auto& extras = m_instanceExtras[instance->id()];
-        auto* window = extras.window;
-        if (window) {
-            if (!window->saveAll()) {
+        if (instance->window() != nullptr) {
+            if (!instance->window()->saveAll()) {
                 return false;
             }
         }
-        auto& controller = extras.controller;
-        controller = std::make_unique<LaunchController>();
+        instance->setLaunchController(std::make_unique<LaunchController>());
+        auto* controller = instance->launchController();
         controller->setInstance(instance);
         controller->setLaunchMode(mode);
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setTargetToJoin(std::move(targetToJoin));
         controller->setAccountToUse(std::move(accountToUse));
         controller->setOfflineName(offlineName);
-        if (window) {
-            controller->setParentWidget(window);
-        } else if (m_mainWindow) {
+        if (instance->window() != nullptr) {
+            controller->setParentWidget(instance->window());
+        } else if (m_mainWindow != nullptr) {
             controller->setParentWidget(m_mainWindow);
         }
-        connect(controller.get(), &LaunchController::finished, this, &Application::controllerFinished);
+        connect(controller, &LaunchController::finished, this, &Application::controllerFinished);
         addRunningInstance();
-        QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(controller, &Task::start, Qt::QueuedConnection);
         return true;
     } else if (instance->isRunning()) {
         showInstanceWindow(instance, "console");
@@ -1610,13 +1607,8 @@ bool Application::kill(BaseInstance* instance)
         qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
         return false;
     }
-    QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[instance->id()];
-    // NOTE: copy of the shared pointer keeps it alive
-    auto& controller = extras.controller;
-    locker.unlock();
-    if (controller) {
-        return controller->abort();
+    if (instance->launchController() != nullptr) {
+        return instance->launchController()->abort();
     }
     return true;
 }
@@ -1669,19 +1661,17 @@ void Application::controllerFinished()
     if (!controller) {
         return;
     }
-    auto id = controller->id();
 
-    QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras.at(id);
+    auto* instance = controller->instance();
 
     const bool wasSuccessful = controller->wasSuccessful();
     // on success, do...
-    if (wasSuccessful && controller->instance()->settings()->get("AutoCloseConsole").toBool()) {
-        if (extras.window) {
-            QMetaObject::invokeMethod(extras.window, &QWidget::close, Qt::QueuedConnection);
+    if (wasSuccessful && instance->settings()->get("AutoCloseConsole").toBool()) {
+        if (instance->window() != nullptr) {
+            QMetaObject::invokeMethod(instance->window(), &QWidget::close, Qt::QueuedConnection);
         }
     }
-    extras.controller.reset();
+    instance->setLaunchController(nullptr);
     subRunningInstance();
 
     // quit when there are no more windows.
@@ -1724,7 +1714,10 @@ MainWindow* Application::showMainWindow(bool minimized)
 
         m_mainWindow->checkInstancePathForProblems();
         connect(this, &Application::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
-        connect(m_mainWindow, &MainWindow::isClosing, this, &Application::on_windowClose);
+        connect(m_mainWindow, &MainWindow::isClosing, this, [this] {
+            m_mainWindow = nullptr;
+            on_windowClose();
+        });
         m_openWindows++;
     }
     return m_mainWindow;
@@ -1738,7 +1731,10 @@ ViewLogWindow* Application::showLogWindow()
         m_viewLogWindow->activateWindow();
     } else {
         m_viewLogWindow = new ViewLogWindow();
-        connect(m_viewLogWindow, &ViewLogWindow::isClosing, this, &Application::on_windowClose);
+        connect(m_viewLogWindow, &ViewLogWindow::isClosing, this, [this] {
+            m_viewLogWindow = nullptr;
+            on_windowClose();
+        });
         m_openWindows++;
     }
     return m_viewLogWindow;
@@ -1750,11 +1746,9 @@ InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, con
         return nullptr;
     }
     auto id = instance->id();
-    QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[id];
-    auto& window = extras.window;
+    auto* window = instance->window();
 
-    if (window) {
+    if (window != nullptr) {
 // If the window is minimized on macOS or Windows, activate and bring it up
 #ifdef Q_OS_MACOS
         if (window->isMinimized()) {
@@ -1771,14 +1765,21 @@ InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, con
     } else {
         window = new InstanceWindow(instance);
         m_openWindows++;
-        connect(window, &InstanceWindow::isClosing, this, &Application::on_windowClose);
+        connect(window, &InstanceWindow::isClosing, this, [this, instance] {
+            instance->setWindow(nullptr);
+            if (instance->launchController() != nullptr) {
+                instance->launchController()->setParentWidget(m_mainWindow);
+            }
+            on_windowClose();
+        });
+        instance->setWindow(window);
     }
 
     if (!page.isEmpty()) {
         window->selectPage(page);
     }
-    if (extras.controller) {
-        extras.controller->setParentWidget(window);
+    if (instance->launchController() != nullptr) {
+        instance->launchController()->setParentWidget(window);
     }
     return window;
 }
@@ -1786,23 +1787,6 @@ InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, con
 void Application::on_windowClose()
 {
     m_openWindows--;
-    auto* instWindow = qobject_cast<InstanceWindow*>(sender());
-    if (instWindow) {
-        QMutexLocker locker(&m_instanceExtrasMutex);
-        auto& extras = m_instanceExtras[instWindow->instanceId()];
-        extras.window = nullptr;
-        if (extras.controller) {
-            extras.controller->setParentWidget(m_mainWindow);
-        }
-    }
-    auto* mainWindow = qobject_cast<MainWindow*>(sender());
-    if (mainWindow) {
-        m_mainWindow = nullptr;
-    }
-    auto* logWindow = qobject_cast<ViewLogWindow*>(sender());
-    if (logWindow) {
-        m_viewLogWindow = nullptr;
-    }
     // quit when there are no more windows.
     if (shouldExitNow()) {
         exit(0);
