@@ -33,6 +33,11 @@
 
 enum FormatProperties { ImageData = QTextFormat::UserProperty + 1 };
 
+VariableSizedImageObject::~VariableSizedImageObject()
+{
+    flush();
+}
+
 QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocument, const QTextFormat& format)
 {
     Q_UNUSED(posInDocument);
