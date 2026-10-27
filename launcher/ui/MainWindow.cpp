@@ -151,7 +151,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 
     setWindowIcon(APPLICATION->logo());
-    setWindowTitle(APPLICATION->applicationDisplayName());
+    setWindowTitle(QApplication::applicationDisplayName());
 #ifndef QT_NO_ACCESSIBILITY
     setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
 #endif
@@ -276,11 +276,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionUndoTrashInstance->setShortcut(QKeySequence::Undo);
         ui->actionDeleteInstance->setShortcuts({ QKeySequence(tr("Backspace")), QKeySequence::Delete });
         ui->actionCloseWindow->setShortcut(QKeySequence::Close);
-        connect(ui->actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
+        connect(ui->actionCloseWindow, &QAction::triggered, QApplication::instance(), [] {
+            if (QApplication::focusWindow() != nullptr) {
+                QApplication::focusWindow()->close();
+            }
+        });
 
         // FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
         auto q = new QShortcut(QKeySequence::Quit, this);
-        connect(q, &QShortcut::activated, APPLICATION, &Application::quit);
+        connect(q, &QShortcut::activated, QApplication::instance(), &QApplication::quit);
     }
 
     // Konami Code
@@ -1436,7 +1440,7 @@ void MainWindow::on_actionClearMetadata_triggered()
 #ifdef Q_OS_MAC
 void MainWindow::on_actionAddToPATH_triggered()
 {
-    auto binaryPath = APPLICATION->applicationFilePath();
+    auto binaryPath = QApplication::applicationFilePath();
     auto targetPath = QString("/usr/local/bin/%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
     qDebug() << "Symlinking" << binaryPath << "to" << targetPath;
 
@@ -1613,13 +1617,13 @@ void MainWindow::instanceActivated(QModelIndex index)
         }
         return;
     }
-    APPLICATION->launch(inst);
+    APPLICATION->launch(inst, LaunchMode::Normal, nullptr, nullptr);
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
     if (m_selectedInstance && !m_selectedInstance->isRunning()) {
-        APPLICATION->launch(m_selectedInstance);
+        APPLICATION->launch(m_selectedInstance, LaunchMode::Normal, nullptr, nullptr);
     }
 }
 

@@ -36,8 +36,9 @@
 #include "MSAStep.h"
 
 #include <QAbstractOAuth2>
-#include <QNetworkRequest>
+#include <QApplication>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QOAuthHttpServerReplyHandler>
 #include <QOAuthOobReplyHandler>
 
@@ -57,7 +58,7 @@ bool isSchemeHandlerRegistered()
     process.waitForFinished();
     QString output = process.readAllStandardOutput().trimmed();
 
-    return output.contains(APPLICATION->desktopFileName());
+    return output.contains(QApplication::desktopFileName());
 
 #elif defined(Q_OS_WIN)
     QString regPath = QString("HKEY_CURRENT_USER\\Software\\Classes\\%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);

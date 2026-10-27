@@ -35,6 +35,7 @@
 
 #include "LauncherPartLaunch.h"
 
+#include <QApplication>
 #include <QRegularExpression>
 #include <QStandardPaths>
 
@@ -58,7 +59,7 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
             connect(&m_process, &LoggedProcess::log, this, [connection](const QStringList& lines, [[maybe_unused]] MessageLevel level) {
                 qDebug() << lines;
                 if (lines.filter(s_settingUser).length() != 0) {
-                    APPLICATION->closeAllWindows();
+                    QApplication::closeAllWindows();
                     disconnect(*connection);
                 }
             });

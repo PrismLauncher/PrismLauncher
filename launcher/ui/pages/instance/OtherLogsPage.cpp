@@ -66,7 +66,7 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
         m_model = new LogModel(this);
         ui->trackLogCheckbox->hide();
     } else {
-        m_model = APPLICATION->logModel.get();
+        m_model = APPLICATION->logModel();
     }
 
     // set up fonts in the log proxy
@@ -245,7 +245,7 @@ void OtherLogsPage::reload()
             if (m_model && m_model->parent() == this) {
                 m_model->deleteLater();
             }
-            m_model = APPLICATION->logModel.get();
+            m_model = APPLICATION->logModel();
             m_proxy->setSourceModel(m_model);
             ui->text->setModel(m_proxy);
             ui->text->scrollToBottom();

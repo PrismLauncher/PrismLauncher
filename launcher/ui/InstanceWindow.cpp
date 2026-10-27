@@ -92,7 +92,8 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
         m_launchButton->setPopupMode(QToolButton::MenuButtonPopup);
         m_launchButton->setMinimumWidth(80);  // HACK!!
         horizontalLayout->addWidget(m_launchButton);
-        connect(m_launchButton, &QPushButton::clicked, this, [this] { APPLICATION->launch(m_instance); });
+        connect(m_launchButton, &QPushButton::clicked, this,
+                [this] { APPLICATION->launch(m_instance, LaunchMode::Normal, nullptr, nullptr); });
 
         m_restartButton = new QPushButton(this);
         m_restartButton->setText(tr("&Restart"));
@@ -194,7 +195,7 @@ void InstanceWindow::runningStateChanged(bool running)
         m_restartQueued = false;
         // Wait until the current launch controller has handled the stopped instance before launching again.
         QTimer::singleShot(0, this, [this] {
-            APPLICATION->launch(m_instance);
+            APPLICATION->launch(m_instance, LaunchMode::Normal, nullptr, nullptr);
             updateButtons();
         });
     }

@@ -46,6 +46,7 @@
 #include "ui_WorldListPage.h"
 
 #include <ui/widgets/PageContainer.h>
+#include <QApplication>
 #include <QClipboard>
 #include <QCursor>
 #include <QDialogButtonBox>
@@ -345,7 +346,7 @@ void WorldListPage::on_actionCopy_Seed_triggered()
         return;
     }
     int64_t seed = m_worlds->data(index, WorldList::SeedRole).toLongLong();
-    APPLICATION->clipboard()->setText(QString::number(seed));
+    QApplication::clipboard()->setText(QString::number(seed));
 }
 
 void WorldListPage::populateWorldToolsMenu()
@@ -533,7 +534,7 @@ void WorldListPage::on_actionJoin_triggered()
     }
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
     auto* world = static_cast<World*>(worldVariant.value<void*>());
-    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
+    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)), nullptr);
 }
 
 #include "WorldListPage.moc"
