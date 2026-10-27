@@ -43,6 +43,7 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "ui/GuiUtil.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -1507,12 +1508,13 @@ void MainWindow::on_actionDeleteInstance_triggered()
     auto shortcuts = m_selectedInstance->shortcuts();
     if (!shortcuts.isEmpty())
         shortcutStr = tr(" and its %n registered shortcut(s)", "", shortcuts.size());
-    auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
-                                                 tr("You are about to delete \"%1\"%2.\n"
-                                                    "This may be permanent and will completely delete the instance.\n\n"
-                                                    "Are you sure?")
-                                                     .arg(m_selectedInstance->name(), shortcutStr),
-                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+    auto response = CustomMessageBox::selectable(
+                        this, tr("Confirm Deletion"),
+                        tr("You are about to delete \"%1\"%2.\n"
+                           "The instance will be sent to your %3 folder if possible. If this fails the instance will be permanently deleted!\n\n"
+                           "Are you sure?")
+                            .arg(m_selectedInstance->name(), shortcutStr, GuiUtil::trashName()),
+                        QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                         ->exec();
 
     if (response != QMessageBox::Yes)

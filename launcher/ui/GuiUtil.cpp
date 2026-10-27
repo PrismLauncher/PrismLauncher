@@ -42,6 +42,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QtSystemDetection>
 #include <expected>
 #include <utility>
 
@@ -253,4 +254,13 @@ QStringList GuiUtil::browseForFiles(const QString& context,
                                     QWidget* parentWidget)
 {
     return browseForFileInternal(context, caption, filter, defaultPath, parentWidget, false);
+}
+
+QString GuiUtil::trashName()
+{
+#ifdef Q_OS_WIN
+    return QObject::tr("Recycle Bin");
+#else
+    return QObject::tr("Trash");
+#endif
 }

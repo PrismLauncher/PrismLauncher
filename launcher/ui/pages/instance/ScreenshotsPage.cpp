@@ -58,6 +58,7 @@
 #include <Application.h>
 #include "settings/SettingsObject.h"
 
+#include "ui/GuiUtil.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
@@ -534,14 +535,15 @@ void ScreenshotsPage::on_actionDelete_triggered()
     QString text;
     if (count > 1) {
         text = tr("You are about to delete %1 screenshots.\n"
-                  "This may be permanent and they will be gone from the folder.\n\n"
+                  "These screenshots will be sent to your %2 folder if possible - if not they will be permanently deleted!\n\n"
                   "Are you sure?")
-                   .arg(count);
+                   .arg(count)
+                   .arg(GuiUtil::trashName());
     } else {
-        text =
-            tr("You are about to delete the selected screenshot.\n"
-               "This may be permanent and it will be gone from the folder.\n\n"
-               "Are you sure?");
+        text = tr("You are about to delete the selected screenshot.\n"
+                  "This screenshot will be sent to your %2 folder if possible - if not it will be permanently deleted!\n\n"
+                  "Are you sure?")
+                   .arg(GuiUtil::trashName());
     }
 
     const auto response =
