@@ -18,16 +18,22 @@
 
 #pragma once
 
+#include <QHash>
 #include <QObject>
+#include <QRectF>
 #include <QString>
 #include <QTextObjectInterface>
 #include <QUrl>
 #include <memory>
 
+class QMovie;
+
 /** Custom image text object to be used instead of the normal one in ProjectDescriptionPage.
  *
  *  Why? Because we want to re-scale images dynamically based on the document's size, in order to
  *  not have images being weirdly cropped out in different resolutions.
+ *
+ *  Animated images (e.g. GIFs) are played back as well.
  */
 class VariableSizedImageObject final : public QObject, public QTextObjectInterface {
     Q_OBJECT
@@ -66,8 +72,16 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
      */
     void loadImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
 
+    void loadAnimation(QTextDocument* doc, const QString& imageName, const QString& path);
+
    private:
+    struct AnimatedImage {
+        QMovie* movie;
+        QRectF dirtyRect;
+    };
+
     QString m_meta_entry;
 
     QSet<QUrl> m_fetching_images;
+    QHash<QString, AnimatedImage> m_animatedImages;
 };
