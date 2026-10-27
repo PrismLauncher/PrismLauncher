@@ -48,6 +48,8 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
     };
 
    public:
+    ~VariableSizedImageObject() override;
+
     QSizeF intrinsicSize(QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
     void drawObject(QPainter* painter, const QRectF& rect, QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
 
