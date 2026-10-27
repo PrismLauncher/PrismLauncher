@@ -20,6 +20,8 @@
 
 #include <QAbstractTextDocumentLayout>
 #include <QDebug>
+#include <QImageReader>
+#include <QMovie>
 #include <QPainter>
 #include <QTextObject>
 #include <memory>
@@ -100,15 +102,30 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
         return;
     }
 
-    auto image = qvariant_cast<QImage>(format.property(ImageData));
-
     painter->setRenderHint(QPainter::RenderHint::SmoothPixmapTransform);
+
+    auto animated = m_animatedImages.find(format.stringProperty(QTextFormat::ImageName));
+    if (animated != m_animatedImages.end()) {
+        animated->dirtyRect |= rect;
+        if (animated->movie->state() == QMovie::Paused)
+            animated->movie->setPaused(false);
+
+        auto frame = animated->movie->currentPixmap();
+        painter->drawPixmap(rect, frame, frame.rect());
+        return;
+    }
+
+    auto image = qvariant_cast<QImage>(format.property(ImageData));
     painter->drawImage(rect, image);
 }
 
 void VariableSizedImageObject::flush()
 {
     m_fetching_images.clear();
+
+    for (const auto& animated : std::as_const(m_animatedImages))
+        delete animated.movie;
+    m_animatedImages.clear();
 }
 
 void VariableSizedImageObject::parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta)
@@ -159,11 +176,13 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
 
         m_fetching_images.remove(source_url);
     };
-    connect(job, &NetJob::succeeded, this, [this, full_entry_path, source_url, loadImage] {
+    connect(job, &NetJob::succeeded, this, [this, doc, full_entry_path, source_url, loadImage] {
         qDebug() << "Loaded resource at:" << full_entry_path;
         // If we flushed, don't proceed.
         if (!m_fetching_images.contains(source_url))
             return;
+
+        loadAnimation(doc, source_url.toDisplayString(), full_entry_path);
 
         QImage image(full_entry_path);
         loadImage(image);
@@ -179,4 +198,33 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
     connect(job, &NetJob::finished, job, &NetJob::deleteLater);
 
     job->start();
+}
+
+void VariableSizedImageObject::loadAnimation(QTextDocument* doc, const QString& imageName, const QString& path)
+{
+    if (m_animatedImages.contains(imageName))
+        return;
+
+    QImageReader reader(path);
+    if (!reader.supportsAnimation() || reader.imageCount() <= 1)
+        return;
+
+    auto movie = new QMovie(path, QByteArray(), this);
+    m_animatedImages.insert(imageName, { movie, QRectF() });
+
+    connect(movie, &QMovie::frameChanged, doc, [this, doc, movie, imageName] {
+        auto animated = m_animatedImages.find(imageName);
+        if (animated == m_animatedImages.end())
+            return;
+
+        if (animated->dirtyRect.isNull()) {
+            movie->setPaused(true);
+            return;
+        }
+
+        emit doc->documentLayout()->update(animated->dirtyRect);
+        animated->dirtyRect = QRectF();
+    });
+
+    movie->start();
 }
