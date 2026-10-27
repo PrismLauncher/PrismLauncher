@@ -36,7 +36,6 @@
  */
 
 #pragma once
-#include <cassert>
 
 #include <QDataStream>
 #include <QDateTime>
@@ -45,15 +44,15 @@
 #include <QObject>
 #include <QProcess>
 #include <QSet>
+#include <cassert>
 #include <cstdint>
+
 #include "QObjectPtr.h"
-
-#include "settings/SettingsObject.h"
-
-#include "minecraft/auth/MinecraftAccount.h"
-
 #include "RuntimeContext.h"
+#include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftTarget.h"
+#include "settings/SettingsObject.h"
+#include "tasks/Task.h"
 
 class BaseInstance;
 class InstanceWindow;

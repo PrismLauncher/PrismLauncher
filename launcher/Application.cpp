@@ -100,6 +100,7 @@
 #include <QNetworkAccessManager>
 #include <QStringList>
 #include <QStringLiteral>
+#include <QStyle>
 #include <QStyleFactory>
 #include <QStyleHints>
 #include <QTranslator>
