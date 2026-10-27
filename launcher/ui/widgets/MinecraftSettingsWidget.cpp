@@ -216,21 +216,21 @@ void MinecraftSettingsWidget::loadSettings()
     m_ui->useNativeGLFWCheck->setChecked(settings->get("UseNativeGLFW").toBool());
     m_ui->lineEditGLFWPath->setText(settings->get("CustomGLFWPath").toString().trimmed());
 #ifdef Q_OS_LINUX
-    m_ui->lineEditGLFWPath->setPlaceholderText(APPLICATION->m_detectedGLFWPath);
+    m_ui->lineEditGLFWPath->setPlaceholderText(APPLICATION->detectedGLFWPath());
 #else
     m_ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.GLFW_LIBRARY_NAME));
 #endif
     m_ui->useNativeOpenALCheck->setChecked(settings->get("UseNativeOpenAL").toBool());
     m_ui->lineEditOpenALPath->setText(settings->get("CustomOpenALPath").toString().trimmed());
 #ifdef Q_OS_LINUX
-    m_ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
+    m_ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->detectedOpenALPath());
 #else
     m_ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
 #endif
     m_ui->useNativeSDLCheck->setChecked(settings->get("UseNativeSDL").toBool());
     m_ui->lineEditSDLPath->setText(settings->get("CustomSDLPath").toString().trimmed());
 #ifdef Q_OS_LINUX
-    m_ui->lineEditSDLPath->setPlaceholderText(APPLICATION->m_detectedSDLPath);
+    m_ui->lineEditSDLPath->setPlaceholderText(APPLICATION->detectedSDLPath());
 #else
     m_ui->lineEditSDLPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.SDL_LIBRARY_NAME));
 #endif

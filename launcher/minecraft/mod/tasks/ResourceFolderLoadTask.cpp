@@ -73,7 +73,7 @@ void ResourceFolderLoadTask::executeTask()
     m_resource_dir.refresh();
     for (auto entry : m_resource_dir.entryInfoList()) {
         auto filePath = entry.absoluteFilePath();
-        if (auto* app = APPLICATION_DYN; (app != nullptr) && app->checkQSavePath(filePath)) {
+        if (auto* app = APPLICATION; (app != nullptr) && app->checkQSavePath(filePath)) {
             continue;
         }
         auto newFilePath = FS::getUniqueResourceName(filePath);

@@ -18,9 +18,9 @@
 
 #include "QuitAfterGameStop.h"
 #include <launch/LaunchTask.h>
-#include "Application.h"
+#include <QApplication>
 
 void QuitAfterGameStop::executeTask()
 {
-    APPLICATION->quit();
+    QApplication::quit();
 }
