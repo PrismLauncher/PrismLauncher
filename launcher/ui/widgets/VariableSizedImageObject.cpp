@@ -107,6 +107,8 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
         return;
     }
 
+    auto image = qvariant_cast<QImage>(format.property(ImageData));
+
     painter->setRenderHint(QPainter::RenderHint::SmoothPixmapTransform);
 
     auto animated = m_animatedImages.find(format.stringProperty(QTextFormat::ImageName));
@@ -119,7 +121,6 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
         return;
     }
 
-    auto image = qvariant_cast<QImage>(format.property(ImageData));
     painter->drawImage(rect, image);
 }
 
