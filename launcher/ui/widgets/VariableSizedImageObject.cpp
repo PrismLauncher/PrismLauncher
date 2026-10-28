@@ -112,8 +112,7 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
     auto animated = m_animatedImages.find(format.stringProperty(QTextFormat::ImageName));
     if (animated != m_animatedImages.end()) {
         animated->dirtyRect |= rect;
-        if (animated->movie->state() == QMovie::Paused)
-            animated->movie->setPaused(false);
+        animated->movie->start();
 
         auto frame = animated->movie->currentPixmap();
         painter->drawPixmap(rect, frame, frame.rect());
