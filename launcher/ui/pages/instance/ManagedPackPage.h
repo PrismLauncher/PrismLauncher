@@ -63,6 +63,7 @@ class ManagedPackPage : public QWidget, public BasePage {
 
     virtual void update() {};
     virtual void updateFromFile() {};
+    void updateFromUrl();
 
    protected slots:
     /** Does the necessary UI changes for when something failed.
