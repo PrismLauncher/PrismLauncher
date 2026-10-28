@@ -38,7 +38,6 @@
 
 #include <QtNetwork>
 
-#include <QObject>
 #include "net/Request.h"
 #include "tasks/ConcurrentTask.h"
 
@@ -52,13 +51,13 @@ class NetJob : public ConcurrentTask {
     // TODO: delete
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent = -1);
+    explicit NetJob(const QString& jobName, QNetworkAccessManager* network, int maxConcurrent = -1);
     ~NetJob() override = default;
 
     auto size() const -> int;
 
     auto canAbort() const -> bool override;
-    auto addNetAction(Net::Request::Ptr action) -> bool;
+    auto addNetAction(const Net::Request::Ptr& action) -> bool;
 
     auto getFailedActions() -> QList<Net::Request*>;
     auto getFailedFiles() -> QList<QString>;
@@ -67,9 +66,9 @@ class NetJob : public ConcurrentTask {
    public slots:
     // Qt can't handle auto at the start for some reason?
     bool abort() override;
-    void emitFailed(QString reason) override;
 
    protected slots:
+    void emitFailed(QString reason) override;
     void executeNextSubTask() override;
 
    protected:
@@ -81,5 +80,5 @@ class NetJob : public ConcurrentTask {
 
     int m_try = 1;
     int m_maxTries = 3;
-    bool m_ask_retry = true;
+    bool m_askRetry = true;
 };

@@ -39,27 +39,29 @@
 #include <QNetworkReply>
 #include "net/Request.h"
 #include "tasks/ConcurrentTask.h"
-#if defined(LAUNCHER_APPLICATION)
-#include <QApplication>
+
+#ifdef LAUNCHER_APPLICATION
 #include "Application.h"
 #include "settings/SettingsObject.h"
 #include "ui/dialogs/NetworkJobFailedDialog.h"
 #endif
 
-NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent) : ConcurrentTask(job_name), m_network(network)
+NetJob::NetJob(const QString& jobName, QNetworkAccessManager* network, int maxConcurrent) : ConcurrentTask(jobName), m_network(network)
 {
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
     if (APPLICATION_DYN) {
-        if (max_concurrent < 0)
-            max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+        if (maxConcurrent < 0) {
+            maxConcurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+        }
         m_maxTries = APPLICATION->settings()->get("NetworkRetryLimit").toInt();
     }
 #endif
-    if (max_concurrent > 0)
-        setMaxConcurrent(max_concurrent);
+    if (maxConcurrent > 0) {
+        setMaxConcurrent(maxConcurrent);
+    }
 }
 
-auto NetJob::addNetAction(Net::Request::Ptr action) -> bool
+auto NetJob::addNetAction(const Net::Request::Ptr& action) -> bool
 {
     action->setNetwork(m_network);
 
@@ -96,12 +98,14 @@ auto NetJob::canAbort() const -> bool
     bool canFullyAbort = true;
 
     // can abort the downloads on the queue?
-    for (auto part : m_queue)
+    for (const auto& part : m_queue) {
         canFullyAbort &= part->canAbort();
+    }
 
     // can abort the active downloads?
-    for (auto part : m_doing)
+    for (const auto& part : m_doing) {
         canFullyAbort &= part->canAbort();
+    }
 
     return canFullyAbort;
 }
@@ -109,8 +113,9 @@ auto NetJob::canAbort() const -> bool
 auto NetJob::abort() -> bool
 {
     // fail all downloads on the queue
-    for (auto task : m_queue)
+    for (const auto& task : m_queue) {
         m_failed.insert(task.get(), task);
+    }
     m_queue.clear();
 
     if (m_doing.isEmpty()) {
@@ -122,14 +127,15 @@ auto NetJob::abort() -> bool
 
     // abort active downloads
     auto toKill = m_doing.values();
-    for (auto part : toKill) {
+    for (const auto& part : toKill) {
         fullyAborted &= part->abort();
     }
 
-    if (fullyAborted)
+    if (fullyAborted) {
         emitAborted();
-    else
+    } else {
         emitFailed(tr("Failed to abort all tasks in the NetJob!"));
+    }
 
     return fullyAborted;
 }
@@ -137,7 +143,7 @@ auto NetJob::abort() -> bool
 auto NetJob::getFailedActions() -> QList<Net::Request*>
 {
     QList<Net::Request*> failed;
-    for (auto index : m_failed) {
+    for (const auto& index : m_failed) {
         failed.push_back(dynamic_cast<Net::Request*>(index.get()));
     }
     return failed;
@@ -146,7 +152,7 @@ auto NetJob::getFailedActions() -> QList<Net::Request*>
 auto NetJob::getFailedFiles() -> QList<QString>
 {
     QList<QString> failed;
-    for (auto index : m_failed) {
+    for (const auto& index : m_failed) {
         failed.append(static_cast<Net::Request*>(index.get())->url().toString());
     }
     return failed;
@@ -161,24 +167,21 @@ void NetJob::updateState()
 
 bool NetJob::isOnline()
 {
-    // check some errors that are ussually associated with the lack of internet
-    for (auto job : getFailedActions()) {
+    return std::ranges::any_of(getFailedActions(), [](const auto& job) {
         auto err = job->error();
-        if (err != QNetworkReply::HostNotFoundError && err != QNetworkReply::NetworkSessionFailedError) {
-            return true;
-        }
-    }
-    return false;
-};
+        // check some errors that are usually associated with the lack of internet
+        return err != QNetworkReply::HostNotFoundError && err != QNetworkReply::NetworkSessionFailedError;
+    });
+}
 
 void NetJob::emitFailed(QString reason)
 {
-#if defined(LAUNCHER_APPLICATION)
+#ifdef LAUNCHER_APPLICATION
 
-    if (APPLICATION_DYN && m_ask_retry && isOnline()) {
+    if (APPLICATION_DYN && m_askRetry && isOnline()) {
         auto failed = getFailedActions();
         QWidget* activeWindow = QApplication::activeWindow();
-        auto dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), activeWindow);
+        auto* dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), activeWindow);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
 
         for (const auto& request : failed) {
@@ -205,5 +208,5 @@ void NetJob::emitFailed(QString reason)
 
 void NetJob::setAskRetry(bool askRetry)
 {
-    m_ask_retry = askRetry;
+    m_askRetry = askRetry;
 }
