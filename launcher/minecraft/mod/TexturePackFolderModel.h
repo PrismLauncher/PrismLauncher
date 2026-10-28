@@ -47,11 +47,11 @@ class TexturePackFolderModel : public ResourceFolderModel {
     enum Columns : std::uint8_t {
         ActiveColumn = 0,
         NameColumn,
+        VersionColumn,
         DateColumn,
         ProviderColumn,
         SizeColumn,
         FileNameColumn,
-        LockUpdateColumn,
         NumColumns
     };
 
