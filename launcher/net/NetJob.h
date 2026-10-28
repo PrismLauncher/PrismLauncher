@@ -80,6 +80,6 @@ class NetJob : public ConcurrentTask {
     QNetworkAccessManager* m_network;
 
     int m_try = 1;
+    int m_maxTries = 3;
     bool m_ask_retry = true;
-    int m_manual_try = 0;
 };

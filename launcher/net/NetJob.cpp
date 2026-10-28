@@ -49,8 +49,11 @@
 NetJob::NetJob(QString job_name, QNetworkAccessManager* network, int max_concurrent) : ConcurrentTask(job_name), m_network(network)
 {
 #if defined(LAUNCHER_APPLICATION)
-    if (APPLICATION_DYN && max_concurrent < 0)
-        max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+    if (APPLICATION_DYN) {
+        if (max_concurrent < 0)
+            max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
+        m_maxTries = APPLICATION->settings()->get("NetworkRetryLimit").toInt();
+    }
 #endif
     if (max_concurrent > 0)
         setMaxConcurrent(max_concurrent);
@@ -68,7 +71,7 @@ auto NetJob::addNetAction(Net::Request::Ptr action) -> bool
 void NetJob::executeNextSubTask()
 {
     // We're finished, check for failures and retry if we can (up to 3 times)
-    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
+    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try <= m_maxTries) {
         m_try += 1;
         m_failed.removeIf([this](QHash<Task*, Task::Ptr>::iterator task) {
             // there is no point in retying on 404 Not Found
@@ -172,8 +175,7 @@ void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
 
-    if (APPLICATION_DYN && m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
-        m_manual_try++;
+    if (APPLICATION_DYN && m_ask_retry && isOnline()) {
         auto failed = getFailedActions();
         QWidget* activeWindow = QApplication::activeWindow();
         auto dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), activeWindow);
@@ -187,7 +189,7 @@ void NetJob::emitFailed(QString reason)
 
         connect(dialog, &QDialog::finished, this, [this, reason = std::move(reason)](int result) {
             if (result == QDialog::Accepted) {
-                m_try = 0;
+                m_maxTries++;
                 executeNextSubTask();
             } else {
                 ConcurrentTask::emitFailed(reason);
