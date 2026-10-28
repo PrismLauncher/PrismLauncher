@@ -842,6 +842,7 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
                 }
             }
             tree->header()->blockSignals(false);
+            tree->doItemsLayout();
             saveColumns(tree);
         });
 
