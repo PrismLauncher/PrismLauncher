@@ -78,6 +78,8 @@
 
 #include "icons/IconList.h"
 
+#include "mod/DataPackFolderModel.h"
+#include "mod/Mod.h"
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/ShaderPackFolderModel.h"
@@ -319,9 +321,9 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
 
     normalLaunchDemo->setEnabled(supportsDemo());
 
-    connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
-    connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
-    connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
+    connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Normal, nullptr, nullptr); });
+    connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline, nullptr, nullptr); });
+    connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo, nullptr, nullptr); });
 
     auto accounts = APPLICATION->accounts();
     if (accounts->count() > 1) {
@@ -554,19 +556,19 @@ QStringList MinecraftInstance::extraArguments()
         QString sdlPath;
 
         if (settings()->get("UseNativeOpenAL").toBool()) {
-            openALPath = APPLICATION->m_detectedOpenALPath;
+            openALPath = APPLICATION->detectedOpenALPath();
             auto customPath = settings()->get("CustomOpenALPath").toString();
             if (!customPath.isEmpty())
                 openALPath = customPath;
         }
         if (settings()->get("UseNativeGLFW").toBool()) {
-            glfwPath = APPLICATION->m_detectedGLFWPath;
+            glfwPath = APPLICATION->detectedGLFWPath();
             auto customPath = settings()->get("CustomGLFWPath").toString();
             if (!customPath.isEmpty())
                 glfwPath = customPath;
         }
         if (settings()->get("UseNativeSDL").toBool()) {
-            sdlPath = APPLICATION->m_detectedSDLPath;
+            sdlPath = APPLICATION->detectedSDLPath();
             auto customPath = settings()->get("CustomSDLPath").toString();
             if (!customPath.isEmpty())
                 sdlPath = customPath;

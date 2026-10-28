@@ -39,46 +39,36 @@
 
 #include <memory>
 
-#include <QApplication>
-#include <QDateTime>
-#include <QDebug>
 #include <QFlag>
-#include <QIcon>
-#include <QMutex>
-#include <QUrl>
+#include <QMap>
+#include <QObject>
+#include <QVariant>
 
+#include "LaunchMode.h"
 #include "QObjectPtr.h"
 
-#include "minecraft/auth/MinecraftAccount.h"
-
-class LaunchController;
-class LocalPeer;
-class InstanceWindow;
-class MainWindow;
-class ViewLogWindow;
-class GenericPageProvider;
-class QFile;
-class HttpMetaCache;
-class SettingsObject;
-class InstanceList;
 class AccountList;
-class IconList;
-class QNetworkAccessManager;
-class JavaInstallList;
-class ExternalUpdater;
-class BaseProfilerFactory;
-class BaseDetachedToolFactory;
-class TranslationsModel;
-class ITheme;
-class ThemeManager;
-class IconTheme;
 class BaseInstance;
-class MinecraftInstance;
-
+class BaseProfilerFactory;
+class ExternalUpdater;
+class HttpMetaCache;
+class IconList;
+class InstanceList;
+class InstanceWindow;
+class JavaInstallList;
 class LogModel;
-
-struct MinecraftTarget;
+class MainWindow;
 class MinecraftAccount;
+class MinecraftInstance;
+struct MinecraftTarget;
+class QFile;
+class QIcon;
+class QNetworkAccessManager;
+class QUrl;
+class SettingsObject;
+class ThemeManager;
+class TranslationsModel;
+class ViewLogWindow;
 
 namespace Meta {
 class Index;
@@ -87,19 +77,11 @@ class Index;
 #if defined(APPLICATION)
 #undef APPLICATION
 #endif
-#define APPLICATION (static_cast<Application*>(QCoreApplication::instance()))
+#define APPLICATION Application::get()
 
-// Used for checking if is a test
-#if defined(APPLICATION_DYN)
-#undef APPLICATION_DYN
-#endif
-#define APPLICATION_DYN (dynamic_cast<Application*>(QCoreApplication::instance()))
-
-class Application : public QApplication {
+class Application : public QObject {
     Q_OBJECT
    public:
-    enum Status : std::uint8_t { StartingUp, Failed, Succeeded, Initialized };
-
     enum Capability : std::uint8_t {
         None = 0U,
 
@@ -110,20 +92,23 @@ class Application : public QApplication {
     };
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
-   public:
-    Application(int& argc, char** argv);
+    Application();
     ~Application() override;
 
-    bool event(QEvent* event) override;
+    static Application* get() { return s_instance; }
 
-    SettingsObject* settings() const { return m_settings.get(); }
-    SettingsObject* playtimeSettings() const { return m_playtimeSettings.get(); }
+    int exec(int& argc, char** argv);
+
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
+    SettingsObject* settings() const;
+    SettingsObject* playtimeSettings() const;
 
     static QIcon logo();
 
-    ThemeManager* themeManager() { return m_themeManager.get(); }
+    ThemeManager* themeManager();
 
-    ExternalUpdater* updater() { return m_updater.get(); }
+    ExternalUpdater* updater();
 
     void triggerUpdateCheck();
 
@@ -131,15 +116,13 @@ class Application : public QApplication {
 
     JavaInstallList* javalist();
 
-    InstanceList* instances() const { return m_instances.get(); }
+    InstanceList* instances() const;
 
-    IconList* icons() const { return m_icons.get(); }
+    IconList* icons() const;
 
-    AccountList* accounts() const { return m_accounts.get(); }
+    AccountList* accounts() const;
 
-    Status status() const { return m_status; }
-
-    const QMap<QString, std::shared_ptr<BaseProfilerFactory>>& profilers() const { return m_profilers; }
+    const QMap<QString, std::shared_ptr<BaseProfilerFactory>>& profilers() const;
 
     void updateProxySettings(const QString& proxyTypeStr, const QString& addr, int port, const QString& user, const QString& password);
 
@@ -165,17 +148,17 @@ class Application : public QApplication {
     QString getUserAgent();
 
     /// this is the root of the 'installation'. Used for automatic updates
-    const QString& root() { return m_rootPath; }
+    const QString& root() const;
 
     /// the data path the application is using
-    const QString& dataRoot() { return m_dataPath; }
+    const QString& dataRoot() const;
 
     /// the java installed path the application is using
     QString javaPath();
 
-    bool isPortable() const { return m_portable; }
+    bool isPortable() const;
 
-    Capabilities capabilities() const { return m_capabilities; }
+    Capabilities capabilities() const;
 
     /*!
      * Opens a json file using either a system default editor, or, if not empty, the editor
@@ -197,6 +180,27 @@ class Application : public QApplication {
 
     static QUrl normalizeImportUrl(const QString& url);
 
+    bool launch(MinecraftInstance* instance,
+                LaunchMode mode,
+                std::shared_ptr<MinecraftTarget> targetToJoin,
+                shared_qobject_ptr<MinecraftAccount> accountToUse,
+                const QString& offlineName = {});
+    bool kill(BaseInstance* instance);
+
+    void addQSavePath(const QString&);
+    void removeQSavePath(const QString&);
+    bool checkQSavePath(const QString&);
+
+    QFile* logFile();
+
+    LogModel* logModel();
+
+    const QString& detectedGLFWPath() const;
+
+    const QString& detectedOpenALPath() const;
+
+    const QString& detectedSDLPath() const;
+
    signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -209,27 +213,14 @@ class Application : public QApplication {
     void clickedOnDock();
 #endif
 
-   public slots:
-    bool launch(MinecraftInstance* instance,
-                LaunchMode mode = LaunchMode::Normal,
-                std::shared_ptr<MinecraftTarget> targetToJoin = nullptr,
-                shared_qobject_ptr<MinecraftAccount> accountToUse = nullptr,
-                const QString& offlineName = QString());
-    bool kill(BaseInstance* instance);
-    static void closeCurrentWindow();
-
    private slots:
     void on_windowClose();
     void messageReceived(const QByteArray& message);
     void controllerFinished();
 
    private:
-    static bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile);
     bool createSetupWizard();
     void performMainStartupAction();
-
-    // sets the fatal error message and m_status to Failed.
-    void showFatalErrorMessage(const QString& title, const QString& content);
 
    private:
     void addRunningInstance();
@@ -237,80 +228,8 @@ class Application : public QApplication {
     bool shouldExitNow() const;
 
    private:
-    QHash<QString, int> m_qsaveResources;
-    mutable QMutex m_qsaveResourcesMutex;
+    static inline Application* s_instance = nullptr;
 
-   private:
-    std::unique_ptr<QNetworkAccessManager> m_network;
-
-    std::unique_ptr<ExternalUpdater> m_updater;
-    std::unique_ptr<AccountList> m_accounts;
-
-    std::unique_ptr<HttpMetaCache> m_metacache;
-    std::unique_ptr<Meta::Index> m_metadataIndex;
-
-    std::unique_ptr<SettingsObject> m_settings;
-    std::unique_ptr<SettingsObject> m_playtimeSettings;
-    std::unique_ptr<InstanceList> m_instances;
-    std::unique_ptr<IconList> m_icons;
-    std::unique_ptr<JavaInstallList> m_javalist;
-    std::unique_ptr<TranslationsModel> m_translations;
-    std::unique_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::unique_ptr<ThemeManager> m_themeManager;
-
-    QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
-
-    QString m_rootPath;
-    QString m_dataPath;
-    Status m_status = Application::StartingUp;
-    Capabilities m_capabilities;
-    bool m_portable = false;
-
-#ifdef Q_OS_MACOS
-    Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
-#endif
-
-    // FIXME: attach to instances instead.
-    struct InstanceXtras {
-        InstanceWindow* window = nullptr;
-        std::unique_ptr<LaunchController> controller;
-    };
-    std::map<QString, InstanceXtras> m_instanceExtras;
-    mutable QMutex m_instanceExtrasMutex;
-
-    // main state variables
-    size_t m_openWindows = 0;
-    size_t m_runningInstances = 0;
-    bool m_updateRunning = false;
-
-    // main window, if any
-    MainWindow* m_mainWindow = nullptr;
-
-    // log window, if any
-    ViewLogWindow* m_viewLogWindow = nullptr;
-
-    // peer launcher instance connector - used to implement single instance launcher and signalling
-    LocalPeer* m_peerInstance = nullptr;
-
-   public:
-    QString m_detectedGLFWPath;
-    QString m_detectedOpenALPath;
-    QString m_detectedSDLPath;
-    QString m_instanceIdToLaunch;
-    QString m_serverToJoin;
-    QString m_worldToJoin;
-    QString m_profileToUse;
-    bool m_launchOffline = false;
-    QString m_offlineName;
-    bool m_liveCheck = false;
-    QList<QUrl> m_urlsToImport;
-    QString m_instanceIdToShowWindowOf;
-    bool m_showMainWindow = false;
-    std::unique_ptr<QFile> logFile;
-    std::unique_ptr<LogModel> logModel;
-
-   public:
-    void addQSavePath(const QString&);
-    void removeQSavePath(const QString&);
-    bool checkQSavePath(const QString&);
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 };

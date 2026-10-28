@@ -33,7 +33,7 @@ QHash<ResourceModel*, bool> ResourceModel::s_runningModels;
 ResourceModel::ResourceModel(ResourceFolderModel* resourceList, const ResourceAPI* api) : m_resourceList(resourceList), m_api(api)
 {
     s_runningModels.insert(this, true);
-    if (APPLICATION_DYN) {
+    if (APPLICATION) {
         m_currentInfoJob.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
     }
 }
@@ -94,7 +94,7 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
             return pack->description;
         }
         case Qt::DecorationRole: {
-            if (APPLICATION_DYN) {
+            if (APPLICATION) {
                 if (auto iconOrNone = const_cast<ResourceModel*>(this)->getIcon(index, pack->logoUrl); iconOrNone.has_value()) {
                     return iconOrNone.value();
                 }

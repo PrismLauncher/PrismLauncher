@@ -36,6 +36,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QModelIndex>
 
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
