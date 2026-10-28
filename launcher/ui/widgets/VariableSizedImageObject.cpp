@@ -127,8 +127,9 @@ void VariableSizedImageObject::flush()
 {
     m_fetching_images.clear();
 
-    for (const auto& animated : std::as_const(m_animatedImages))
+    for (const auto& animated : std::as_const(m_animatedImages)) {
         delete animated.movie;
+    }
     m_animatedImages.clear();
 }
 
@@ -206,23 +207,26 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
 
 void VariableSizedImageObject::loadAnimation(QTextDocument* doc, const QString& imageName, const QString& path)
 {
-    if (m_animatedImages.contains(imageName))
+    if (m_animatedImages.contains(imageName)) {
         return;
+    }
 
-    QImageReader reader(path);
-    if (!reader.supportsAnimation() || reader.imageCount() <= 1)
+    const QImageReader reader(path);
+    if (!reader.supportsAnimation() || reader.imageCount() <= 1) {
         return;
+    }
 
-    auto movie = new QMovie(path, QByteArray(), this);
-    m_animatedImages.insert(imageName, { movie, QRectF() });
+    auto* movie = new QMovie(path, QByteArray(), this);
+    m_animatedImages.insert(imageName, { .movie = movie, .dirtyRect = QRectF() });
 
     connect(movie, &QMovie::frameChanged, doc, [this, doc, movie, imageName] {
         auto animated = m_animatedImages.find(imageName);
-        if (animated == m_animatedImages.end())
+        if (animated == m_animatedImages.end()) {
             return;
+        }
 
         if (animated->dirtyRect.isNull()) {
-            movie->setPaused(true);
+            movie->stop();
             return;
         }
 
