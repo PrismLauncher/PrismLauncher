@@ -91,7 +91,6 @@ class IconList : public QAbstractListModel {
     // hide assign op
     IconList& operator=(const IconList&) = delete;
     void reindex();
-    void sortIconList();
     bool addPath(const QString& path);
     QStringList getIconFilePaths() const;
 

@@ -45,12 +45,12 @@ TexturePackFolderModel::TexturePackFolderModel(const QDir& dir,
                                                QObject* parent)
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
-    m_columnNames = QStringList({ "Enable", "Name", "Last Modified", "Provider", "Size", "File Name", "Update" });
+    m_columnNames = QStringList({ "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "File Name" });
     m_columnNamesTranslated =
-        QStringList({ "", tr("Name"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name"), tr("Update") });
-    m_columnSortKeys = { SortType::Enabled, SortType::Name,     SortType::Date,      SortType::Provider,
-                         SortType::Size,    SortType::Filename, SortType::LockUpdate };
-    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::ResizeToContents, QHeaderView::Interactive,
+        QStringList({ "", tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") });
+    m_columnSortKeys = { SortType::Enabled,  SortType::Name, SortType::Version, SortType::Date,
+                         SortType::Provider, SortType::Size, SortType::Filename };
+    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::ResizeToContents,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, false, true, true, true, true, true };
 }
@@ -77,11 +77,6 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
             }
             return {};
-        case Qt::UserRole:
-            if (column == LockUpdateColumn) {
-                return at(row).lockUpdate();
-            }
-            return {};
         default:
             break;
     }
@@ -94,6 +89,9 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
             break;
         case NameColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::NameColumn);
+            break;
+        case VersionColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::VersionColumn);
             break;
         case DateColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::DateColumn);
@@ -144,11 +142,11 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
             switch (section) {
                 case ActiveColumn:
                 case NameColumn:
+                case VersionColumn:
                 case DateColumn:
                 case ProviderColumn:
                 case SizeColumn:
                 case FileNameColumn:
-                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -159,6 +157,8 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                     return tr("Is the texture pack enabled?");
                 case NameColumn:
                     return tr("The name of the texture pack.");
+                case VersionColumn:
+                    return tr("The version of the texture pack.");
                 case DateColumn:
                     return tr("The date and time this texture pack was last changed (or added).");
                 case ProviderColumn:
@@ -167,8 +167,6 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                     return tr("The size of the texture pack.");
                 case FileNameColumn:
                     return tr("The file name of the texture pack.");
-                case LockUpdateColumn:
-                    return tr("Should this mod be updated?");
                 default:
                     return {};
             }

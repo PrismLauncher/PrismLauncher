@@ -20,6 +20,8 @@ class MultiDecorationItemDelegate : public QStyledItemDelegate {
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
     struct Icon {
         QIcon icon;
         QSize size;

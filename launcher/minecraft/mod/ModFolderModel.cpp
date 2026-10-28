@@ -63,18 +63,18 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
     : ResourceFolderModel(QDir(dir), instance, isIndexed, createDir, parent)
 {
     m_columnNames = QStringList({ "Enable", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders", "Minecraft Versions",
-                                  "Release Type", "Requires", "Required By", "File Name", "Update" });
+                                  "Release Type", "Requires", "Required By", "File Name" });
     m_columnNamesTranslated =
         QStringList({ "", tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("Side"), tr("Loaders"),
-                      tr("Minecraft Versions"), tr("Release Type"), tr("Requires"), tr("Required By"), tr("File Name"), tr("Update") });
-    m_columnSortKeys = { SortType::Enabled,  SortType::Name,       SortType::Version,  SortType::Date,       SortType::Provider,
-                         SortType::Size,     SortType::Side,       SortType::Loaders,  SortType::McVersions, SortType::ReleaseType,
-                         SortType::Requires, SortType::RequiredBy, SortType::Filename, SortType::LockUpdate };
+                      tr("Minecraft Versions"), tr("Release Type"), tr("Requires"), tr("Required By"), tr("File Name") });
+    m_columnSortKeys = { SortType::Enabled,  SortType::Name,       SortType::Version, SortType::Date,       SortType::Provider,
+                         SortType::Size,     SortType::Side,       SortType::Loaders, SortType::McVersions, SortType::ReleaseType,
+                         SortType::Requires, SortType::RequiredBy, SortType::Filename };
     m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::ResizeToContents,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, false, true, true, true, true, true, true, true, true, true, true, true, true };
+                            QHeaderView::Interactive };
+    m_columnsHideable = { false, false, true, true, true, true, true, true, true, true, true, true, true };
 
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files);
 
@@ -150,11 +150,6 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                 return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
             }
             return {};
-        case Qt::UserRole:
-            if (column == LockUpdateColumn) {
-                return at(row).lockUpdate();
-            }
-            return {};
         default:
             break;
     }
@@ -167,6 +162,9 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             break;
         case NameColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::NameColumn);
+            break;
+        case VersionColumn:
+            mappedIndex = index.siblingAtColumn(ResourceFolderModel::VersionColumn);
             break;
         case DateColumn:
             mappedIndex = index.siblingAtColumn(ResourceFolderModel::DateColumn);
@@ -250,7 +248,6 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case RequiredByColumn:
                 case RequiresColumn:
                 case FileNameColumn:
-                case LockUpdateColumn:
                     return columnNames().at(section);
                 default:
                     return QVariant();
@@ -284,8 +281,6 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("For each mod, the number of other mods it depends on.");
                 case FileNameColumn:
                     return tr("The file name of the mod.");
-                case LockUpdateColumn:
-                    return tr("Should this mod be updated?");
                 default:
                     return QVariant();
             }
