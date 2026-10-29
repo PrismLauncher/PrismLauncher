@@ -234,7 +234,7 @@ void LauncherPage::applySettings()
 
     s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
     s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
-    s->set("NumberOfManualRetries", ui->numberOfManualRetriesSpinBox->value());
+    s->set("NetworkRetryLimit", ui->networkRetryLimitSpinBox->value());
     s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
@@ -317,7 +317,7 @@ void LauncherPage::loadSettings()
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
-    ui->numberOfManualRetriesSpinBox->setValue(s->get("NumberOfManualRetries").toInt());
+    ui->networkRetryLimitSpinBox->setValue(s->get("NetworkRetryLimit").toInt());
     ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
 
     // Console settings
