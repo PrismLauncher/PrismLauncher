@@ -264,24 +264,8 @@ class FilterModel : public QIdentityProxyModel {
     QFileSystemWatcher watcher;
 };
 
-class CenteredEditingDelegate : public QStyledItemDelegate {
-   public:
-    explicit CenteredEditingDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent) {}
-    ~CenteredEditingDelegate() override = default;
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override
-    {
-        auto* widget = QStyledItemDelegate::createEditor(parent, option, index);
-        if (auto* foo = dynamic_cast<QLineEdit*>(widget)) {
-            foo->setAlignment(Qt::AlignHCenter);
-            foo->setFrame(true);
-            foo->setMaximumWidth(192);
-        }
-        return widget;
-    }
-};
-
 ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::ScreenshotsPage), m_folder(std::move(path))
+    : QMainWindow(parent), ui(new Ui::ScreenshotsPage), m_folder(std::move(path)), m_delegate(new ScreenshotItemDelegate(this))
 {
     m_model = std::make_shared<ScreenshotsFSModel>();
     m_filterModel = std::make_shared<FilterModel>();
@@ -309,9 +293,17 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
     ui->listView->installEventFilter(this);
     ui->listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    auto* delegate = new ScreenshotItemDelegate(this);
-    ui->listView->setItemDelegate(delegate);
-    delegate->attachToView(ui->listView);
+    ui->listView->setItemDelegate(m_delegate);
+    m_delegate->attachToView(ui->listView);
+
+    connect(m_delegate, &ScreenshotItemDelegate::renameRequested, this, [this](const QPersistentModelIndex& index, const QString& name) {
+        if (!index.isValid()) {
+            return;
+        }
+        if (!m_filterModel->setData(index, name, Qt::EditRole)) {
+            qWarning() << "Failed to edit screenshot name";
+        }
+    });
 
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::showContextMenu);
@@ -584,15 +576,14 @@ void ScreenshotsPage::on_actionDelete_triggered()
     }
 }
 
-// TODO: inline rename inside card
 void ScreenshotsPage::on_actionRename_triggered() const
 {
     auto selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.isEmpty()) {
         return;
     }
-    // ui->listView->edit(selection.first());
     // TODO: mass renaming
+    m_delegate->startRename(selection.first());
 }
 
 void ScreenshotsPage::openedImpl()

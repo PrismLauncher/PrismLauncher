@@ -22,9 +22,11 @@
 #include "ui/widgets/WidgetDelegate.h"
 
 #include <QFrame>
-#include <QLabel>
 #include <QPixmap>
-#include <QVBoxLayout>
+class QLabel;
+class QLineEdit;
+class QStackedLayout;
+class QVBoxLayout;
 
 class ScreenshotCard : public QFrame {
     Q_OBJECT
@@ -40,17 +42,34 @@ class ScreenshotCard : public QFrame {
     void setHovered(bool hovered);
     void setCurrent(bool current);
 
+    void setIndex(const QModelIndex& index);
+
+    void startRename();
+    void cancelRename() { endRename(false); }
+
    protected:
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
-   private:
-    QLabel m_screenshot, m_label;
+   signals:
+    void renameRequested(const QPersistentModelIndex& index, const QString& newName);
 
-    QVBoxLayout m_layout;
+   private:
+    void endRename(bool commit);
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
+   private:
+    QLabel* m_screenshot;
+    QLabel* m_label;
+    QLineEdit* m_edit;
+    QStackedLayout* m_labelStack;
+    QVBoxLayout* m_layout;
 
     bool m_selected, m_hovered, m_current = false;
+
+    QPersistentModelIndex m_index;
+    bool m_editing = false;
 };
 
 class ScreenshotItemDelegate : public WidgetDelegate {
@@ -59,11 +78,18 @@ class ScreenshotItemDelegate : public WidgetDelegate {
    public:
     explicit ScreenshotItemDelegate(QObject* parent);
 
+   signals:
+    void renameRequested(const QPersistentModelIndex& index, const QString& newName);
+
    public:
+    void destroyEditor(QWidget* editor, const QModelIndex& /*index*/) const override;
+
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
     void setEditorData(QWidget* editor, const QModelIndex& index) const override;
 
     void paintItem(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     void updateEditorState(QWidget* editor, const QModelIndex& index) const override;
+
+    void startRename(const QModelIndex& index);
 };

@@ -50,6 +50,8 @@ class ScreenshotsFSModel;
 struct ScreenShot;
 class ScreenshotList;
 
+class ScreenshotItemDelegate;
+
 class ScreenshotsPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
@@ -90,4 +92,5 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
     QString m_folder;
     bool m_valid = false;
     bool m_uploadActive = false;
+    ScreenshotItemDelegate* m_delegate = nullptr;
 };
