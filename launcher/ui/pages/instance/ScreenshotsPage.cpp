@@ -61,6 +61,8 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
+#include "ScreenshotItemDelegate.h"
+
 #include "net/NetJob.h"
 #include "screenshots/ImgurAPI.h"
 #include "tasks/SequentialTask.h"
@@ -222,7 +224,26 @@ class FilterModel : public QIdentityProxyModel {
         m_thumbnailingPool.start(runnable);
     }
    private slots:
-    void thumbnailReady(const QString& /*path*/) { emit layoutChanged(); }
+    void thumbnailReady(const QString& path)
+    {
+        // map to index in source model
+        auto* fsModel = qobject_cast<QFileSystemModel*>(sourceModel());
+        if (!fsModel) {
+            return;
+        }
+        // make sure the indexes in the source and proxy are still valid
+        const QModelIndex source = fsModel->index(path);
+        if (!source.isValid()) {
+            return;
+        }
+        const QModelIndex proxyIndex = mapFromSource(source);
+        if (!proxyIndex.isValid()) {
+            return;
+        }
+
+        emit dataChanged(proxyIndex, proxyIndex, { Qt::DecorationRole });
+    }
+
     void thumbnailFailed(const QString& path) { m_failed.insert(path); }
     void fileChanged(const QString& filepath)
     {
@@ -279,8 +300,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
     ui->setupUi(this);
     ui->toolBar->insertSpacer(ui->actionView_Folder);
 
-    ui->listView->setIconSize(QSize(128, 128));
-    ui->listView->setGridSize(QSize(192, 160));
+    ui->listView->setGridSize(ScreenshotCard::CardSize);
     ui->listView->setSpacing(9);
     // ui->listView->setUniformItemSizes(true);
     ui->listView->setLayoutMode(QListView::Batched);
@@ -288,7 +308,11 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
     ui->listView->setResizeMode(QListView::Adjust);
     ui->listView->installEventFilter(this);
     ui->listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->listView->setItemDelegate(new CenteredEditingDelegate(this));
+
+    auto* delegate = new ScreenshotItemDelegate(this);
+    ui->listView->setItemDelegate(delegate);
+    delegate->attachToView(ui->listView);
+
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::showContextMenu);
     connect(ui->listView, &QAbstractItemView::activated, this, &ScreenshotsPage::onItemActivated);
@@ -560,13 +584,14 @@ void ScreenshotsPage::on_actionDelete_triggered()
     }
 }
 
+// TODO: inline rename inside card
 void ScreenshotsPage::on_actionRename_triggered() const
 {
     auto selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.isEmpty()) {
         return;
     }
-    ui->listView->edit(selection.first());
+    // ui->listView->edit(selection.first());
     // TODO: mass renaming
 }
 

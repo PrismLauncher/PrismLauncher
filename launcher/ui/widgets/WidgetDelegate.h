@@ -52,6 +52,14 @@ class WidgetDelegate : public QStyledItemDelegate {
     // does the actual paint, implement down the chain
     virtual void paintItem(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const = 0;
 
+    // refresh non modal data (selection, hover, etc) on open editors
+    void refreshEditors() const;
+
+    // set editor state (selected, current)
+    virtual void updateEditorState(QWidget* editor, const QModelIndex& index) const;
+
+    QAbstractItemView* view() const { return m_view; }
+
    private:
     void scheduleReconcile() const;
     // synchronizes the open editors with the visible(painted) indexes

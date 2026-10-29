@@ -56,7 +56,15 @@ void WidgetDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option
 {
     m_painted.insert(index);
     scheduleReconcile();
-    paintItem(painter, option, index); // could skip for `m_open`, check later
+
+    if (m_open.contains(index)) {
+        if (QWidget* editor = m_view ? m_view->indexWidget(index) : nullptr) {
+            updateEditorState(editor, index);
+        }
+        return; // don't call paintItem for this one
+    }
+
+    paintItem(painter, option, index);
 }
 
 void WidgetDelegate::attachToView(QAbstractItemView* view)
@@ -99,15 +107,15 @@ void WidgetDelegate::reconcile() const
         }
     }
 
-
+    // close editors that arn't visible
+    const QRect viewport = m_view->viewport()->rect();
     QList<QPersistentModelIndex> toClose;
-
     for (const auto& index : m_open) {
-        if (!painted.contains(index)) {
+        const QRect rect = m_view->visualRect(index);
+        if (!rect.isValid() || !rect.intersects(viewport)) {
             toClose.append(index);
         }
     }
-
     for (const auto& index : toClose) {
         m_open.remove(index);
         if (m_view && m_view->isPersistentEditorOpen(index)) {
@@ -119,6 +127,21 @@ void WidgetDelegate::reconcile() const
         if (index.isValid() && !m_open.contains(index)) {
             m_open.insert(index);
             m_view->openPersistentEditor(index);
+            updateEditorState(m_view->indexWidget(index), index);
         }
     }
 }
+
+void WidgetDelegate::refreshEditors() const
+{
+    if (!m_view) {
+        return;
+    }
+    for (const auto& index : m_open) {
+        if (auto* editor = m_view->indexWidget(index)) {
+            updateEditorState(editor, index);
+        }
+    }
+}
+
+void WidgetDelegate::updateEditorState(QWidget* editor, const QModelIndex& index) const {}
