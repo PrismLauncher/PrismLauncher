@@ -20,11 +20,14 @@
 #pragma once
 
 #include <QAbstractItemModel>
+#include <QAbstractItemView>
 #include <QList>
 #include <QPointer>
+#include <QSet>
 #include <QStyleOption>
 #include <QStyledItemDelegate>
 #include <QWidget>
+class QPainter;
 
 #include <functional>
 
@@ -40,7 +43,30 @@ class WidgetDelegate : public QStyledItemDelegate {
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const override;
     void destroyEditor(QWidget* editor, const QModelIndex& /*index*/) const override;
 
+    // when called records the index into `m_painted`
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+
+    // stores m_view, MUST be called after creation and before first paint to work correctly
+    void attachToView(QAbstractItemView* view);
+
+    // does the actual paint, implement down the chain
+    virtual void paintItem(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const = 0;
+
+   private:
+    void scheduleReconcile() const;
+    // synchronizes the open editors with the visible(painted) indexes
+    void reconcile() const;
+
    private:
     WidgetFactory m_factory;
     mutable QList<QPointer<QWidget>> m_pool;
+
+    // list of indexes on which a paint was called
+    // effectively the list of visible indexes
+    mutable QSet<QPersistentModelIndex> m_painted;
+    // set of indexes with open editors
+    mutable QSet<QPersistentModelIndex> m_open;
+    mutable bool m_syncRequested = false;
+
+    QPointer<QAbstractItemView> m_view;
 };

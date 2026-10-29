@@ -18,6 +18,8 @@
  */
 
 #include "WidgetDelegate.h"
+#include <QMetaObject>
+#include <utility>
 
 WidgetDelegate::WidgetDelegate(WidgetDelegate::WidgetFactory factory, QObject* parent)
     : QStyledItemDelegate(parent), m_factory(std::move(factory))
@@ -46,6 +48,77 @@ void WidgetDelegate::destroyEditor(QWidget* editor, const QModelIndex& /*index*/
         return;
     }
     editor->hide();
-    // don't re-parent keep editor parented to viewport
+    // don't re-parent keep editor parented to the viewport
     m_pool.append(editor);  // store for later reuse
+}
+
+void WidgetDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    m_painted.insert(index);
+    scheduleReconcile();
+    paintItem(painter, option, index); // could skip for `m_open`, check later
+}
+
+void WidgetDelegate::attachToView(QAbstractItemView* view)
+{
+    m_view = view;
+}
+
+void WidgetDelegate::scheduleReconcile() const
+{
+    if (m_syncRequested) {
+        return;
+    }
+    m_syncRequested = true;
+    // The cast only satisfies invokeMethod's receiver parameter. Everything reconcile()
+    // touches is mutable, and the QObject itself is never modified.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+    QMetaObject::invokeMethod(const_cast<WidgetDelegate*>(this), &WidgetDelegate::reconcile, Qt::QueuedConnection);
+}
+
+void WidgetDelegate::reconcile() const
+{
+    m_syncRequested = false;
+
+    // take the set of painted indexes since last reconcile
+    const auto painted = std::exchange(m_painted, {});
+
+    // no viewport? can't reconcile
+    if (!m_view) {
+        return;
+    }
+
+    // prune m_open of editors that are no longer open and indexes that are no longer valid
+    //
+    // covers the effects of  `rowsRemoved`, `ItemView::reset()`, a delegate swap, etc.
+    for (auto it = m_open.begin(); it != m_open.end();) {
+        if (!it->isValid() || !m_view->isPersistentEditorOpen(*it)) {
+            it = m_open.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+
+    QList<QPersistentModelIndex> toClose;
+
+    for (const auto& index : m_open) {
+        if (!painted.contains(index)) {
+            toClose.append(index);
+        }
+    }
+
+    for (const auto& index : toClose) {
+        m_open.remove(index);
+        if (m_view && m_view->isPersistentEditorOpen(index)) {
+            m_view->closePersistentEditor(index);
+        }
+    }
+
+    for (const auto& index : painted) {
+        if (index.isValid() && !m_open.contains(index)) {
+            m_open.insert(index);
+            m_view->openPersistentEditor(index);
+        }
+    }
 }
