@@ -1142,6 +1142,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/JavaSettingsWidget.cpp
     ui/widgets/EditableLabel.h
     ui/widgets/EditableLabel.cpp
+    ui/widgets/WidgetDelegate.h
+    ui/widgets/WidgetDelegate.cpp
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
