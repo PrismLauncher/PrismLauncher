@@ -10,6 +10,7 @@
 #include "modplatform/ModIndex.h"
 #include "ui_ManagedPackPage.h"
 
+#include <QAbstractItemView>
 #include <QFileDialog>
 #include <memory>
 
