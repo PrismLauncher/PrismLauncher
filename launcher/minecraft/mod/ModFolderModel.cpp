@@ -70,7 +70,7 @@ ModFolderModel::ModFolderModel(const QDir& dir, MinecraftInstance* instance, boo
     m_columnSortKeys = { SortType::Enabled,  SortType::Name,       SortType::Version, SortType::Date,       SortType::Provider,
                          SortType::Size,     SortType::Side,       SortType::Loaders, SortType::McVersions, SortType::ReleaseType,
                          SortType::Requires, SortType::RequiredBy, SortType::Filename };
-    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::ResizeToContents,
+    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                             QHeaderView::Interactive };
