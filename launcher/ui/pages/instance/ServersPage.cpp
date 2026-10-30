@@ -745,7 +745,7 @@ void ServersPage::on_actionRemove_triggered()
                   "Are you sure?")
                    .arg(m_model->at(rows.first())->m_name);
     } else {
-        text = tr("You are about to remove the %n selected servers."
+        text = tr("You are about to remove the %n selected servers.\n"
                   "This is permanent and the servers will be gone from your list forever (A LONG TIME).\n\n"
                   "Are you sure?", "", rows.size());
     }
