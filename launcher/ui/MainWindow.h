@@ -136,7 +136,7 @@ class MainWindow : public QMainWindow {
 
     void on_actionClearMetadata_triggered();
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     void on_actionAddToPATH_triggered();
 #endif
 
@@ -210,7 +210,7 @@ class MainWindow : public QMainWindow {
 
     void lockToolbars(bool);
 
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
     void keyReleaseEvent(QKeyEvent* event) override;
 #endif
 
