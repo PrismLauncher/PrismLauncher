@@ -102,8 +102,11 @@ class Config {
     /// The public key used to sign releases for the Sparkle updater appcast
     QString MAC_SPARKLE_PUB_KEY;
 
-    /// URL for the Sparkle updater's appcast
-    QString MAC_SPARKLE_APPCAST_URL;
+    /// URL for the Sparkle updater's appcast on arm64
+    QString MAC_SPARKLE_APPCAST_URL_ARM64;
+
+    /// URL for the Sparkle updater's appcast on x86_64
+    QString MAC_SPARKLE_APPCAST_URL_X86_64;
 
     /// User-Agent to use.
     QString USER_AGENT;

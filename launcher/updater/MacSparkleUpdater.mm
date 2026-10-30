@@ -19,9 +19,11 @@
 #include "MacSparkleUpdater.h"
 
 #include "Application.h"
+#include "BuildConfig.h"
 
 #include <Cocoa/Cocoa.h>
 #include <Sparkle/Sparkle.h>
+#include <TargetConditionals.h>
 
 @interface UpdaterObserver : NSObject
 
@@ -59,6 +61,7 @@
 @interface UpdaterDelegate : NSObject <SPUUpdaterDelegate>
 
 @property(nonatomic, copy) NSSet<NSString*>* allowedChannels;
+@property(nonatomic, copy) NSString* feedURL;
 
 @end
 
@@ -68,7 +71,26 @@
     return _allowedChannels;
 }
 
+- (NSString*)feedURLStringForUpdater:(SPUUpdater*)updater {
+    return _feedURL;
+}
+
 @end
+
+static NSString* appcastURLForCurrentArchitecture() {
+#if TARGET_CPU_ARM64
+    const QString url = BuildConfig.MAC_SPARKLE_APPCAST_URL_ARM64;
+#elif TARGET_CPU_X86_64
+    const QString url = BuildConfig.MAC_SPARKLE_APPCAST_URL_X86_64;
+#else
+    const QString url;
+#endif
+
+    if (url.isEmpty()) {
+        return nil;
+    }
+    return url.toNSString();
+}
 
 class MacSparkleUpdater::Private {
    public:
@@ -85,8 +107,10 @@ MacSparkleUpdater::MacSparkleUpdater() {
     NSApplicationLoad();
     priv->autoReleasePool = [[NSAutoreleasePool alloc] init];
 
-    // Delegate is used for setting/getting allowed update channels.
+    // Delegate is used for setting/getting allowed update channels and for
+    // selecting the appcast matching the architecture of this binary slice.
     priv->updaterDelegate = [[UpdaterDelegate alloc] init];
+    priv->updaterDelegate.feedURL = appcastURLForCurrentArchitecture();
 
     // Controller is the interface for actually doing the updates.
     priv->updaterController = [[SPUStandardUpdaterController alloc] initWithStartingUpdater:true

@@ -98,7 +98,8 @@ stdenv.mkDerivation {
     # we wrap our binary manually
     (lib.cmakeFeature "INSTALL_BUNDLE" "nodeps")
     # disable built-in updater
-    (lib.cmakeFeature "MACOSX_SPARKLE_UPDATE_FEED_URL" "''")
+    (lib.cmakeFeature "MACOSX_SPARKLE_UPDATE_FEED_URL_ARM64" "''")
+    (lib.cmakeFeature "MACOSX_SPARKLE_UPDATE_FEED_URL_X86_64" "''")
     (lib.cmakeFeature "CMAKE_INSTALL_PREFIX" "${placeholder "out"}/Applications/")
   ];
 
