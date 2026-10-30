@@ -51,6 +51,9 @@ jobs:
           mv PrismLauncher-*.AppImage/PrismLauncher-*-aarch64.AppImage PrismLauncher-Linux-aarch64.AppImage
           mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*-aarch64.AppImage.zsync PrismLauncher-Linux-aarch64.AppImage.zsync
           mv PrismLauncher-macOS*/PrismLauncher.zip PrismLauncher-macOS-${{ env.VERSION }}.zip
+          # copy the macos zip to -arm64 and -x86_64 to ease the transition to the new appcasts
+          cp PrismLauncher-macOS-${{ env.VERSION }}.zip PrismLauncher-macOS-arm64-${{ env.VERSION }}.zip
+          cp PrismLauncher-macOS-${{ env.VERSION }}.zip PrismLauncher-macOS-x86_64-${{ env.VERSION }}.zip
           mv PrismLauncher-macOS*/PrismLauncher.dmg PrismLauncher-macOS-${{ env.VERSION }}.dmg
 
           tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
@@ -122,5 +125,7 @@ jobs:
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
             PrismLauncher-macOS-${{ env.VERSION }}.zip
+            PrismLauncher-macOS-x86_64-${{ env.VERSION }}.zip
+            PrismLauncher-macOS-arm64-${{ env.VERSION }}.zip
             PrismLauncher-macOS-${{ env.VERSION }}.dmg
             PrismLauncher-${{ env.VERSION }}.tar.gz
