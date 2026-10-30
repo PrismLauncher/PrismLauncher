@@ -133,15 +133,7 @@ class ThumbnailRunnable : public QRunnable {
         } else {
             small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
         }
-        const QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
-        QImage square(QSize(256, 256), QImage::Format_ARGB32);
-        square.fill(Qt::transparent);
-
-        QPainter painter(&square);
-        painter.drawImage(offset, small);
-        painter.end();
-
-        const QIcon icon(QPixmap::fromImage(square));
+        const QIcon icon(QPixmap::fromImage(small));
         m_cache->add(m_path, icon);
         m_resultEmitter.emitResultsReady(m_path);
     }
@@ -284,8 +276,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
     ui->setupUi(this);
     ui->toolBar->insertSpacer(ui->actionView_Folder);
 
-    ui->listView->setGridSize(ScreenshotCard::CardSize);
-    ui->listView->setSpacing(9);
+    ui->listView->setGridSize(ScreenshotCard::CardSize + QSize(4, 2));  // use card size + spacing
     // ui->listView->setUniformItemSizes(true);
     ui->listView->setLayoutMode(QListView::Batched);
     ui->listView->setViewMode(QListView::IconMode);
@@ -303,6 +294,12 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
         if (!m_filterModel->setData(index, name, Qt::EditRole)) {
             qWarning() << "Failed to edit screenshot name";
         }
+    });
+
+    connect(m_delegate, &ScreenshotItemDelegate::deleteRequested, this, [this](const QPersistentModelIndex& index) {
+        // select only this item then run delete
+        ui->listView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+        on_actionDelete_triggered();
     });
 
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);

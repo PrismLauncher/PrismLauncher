@@ -27,6 +27,7 @@ class QLabel;
 class QLineEdit;
 class QStackedLayout;
 class QVBoxLayout;
+class QHBoxLayout;
 
 class ScreenshotCard : public QFrame {
     Q_OBJECT
@@ -35,6 +36,8 @@ class ScreenshotCard : public QFrame {
     explicit ScreenshotCard(QWidget* parent = nullptr);
 
     static constexpr QSize CardSize = { 192, 160 };
+    static constexpr int ActionInset = 8;
+    static constexpr int CardMargin = 6;
 
    public:
     void setScreenshot(const QPixmap&, const QString& name);
@@ -51,25 +54,36 @@ class ScreenshotCard : public QFrame {
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
    signals:
     void renameRequested(const QPersistentModelIndex& index, const QString& newName);
+    void deleteRequested(const QPersistentModelIndex& index);
 
    private:
     void endRename(bool commit);
     bool eventFilter(QObject* watched, QEvent* event) override;
+    void updateActionButtons();
+    QSize thumbnailArea() const;
+    void updateThumbnail();
 
    private:
+    QPixmap m_thumbnail;  // unscaled source from the model
     QLabel* m_screenshot;
     QLabel* m_label;
     QLineEdit* m_edit;
-    QStackedLayout* m_labelStack;
-    QVBoxLayout* m_layout;
+    QPointer<QStackedLayout> m_labelStack;
+    QVBoxLayout m_layout;
 
     bool m_selected, m_hovered, m_current = false;
 
     QPersistentModelIndex m_index;
     bool m_editing = false;
+
+    QFrame* m_actions;  // container, overlays the thumbnail
+    QToolButton* m_rename;
+    QToolButton* m_delete;
+    QTimer* m_hoverTimer;
 };
 
 class ScreenshotItemDelegate : public WidgetDelegate {
@@ -80,6 +94,7 @@ class ScreenshotItemDelegate : public WidgetDelegate {
 
    signals:
     void renameRequested(const QPersistentModelIndex& index, const QString& newName);
+    void deleteRequested(const QPersistentModelIndex& index);
 
    public:
     void destroyEditor(QWidget* editor, const QModelIndex& /*index*/) const override;
