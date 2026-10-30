@@ -276,7 +276,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
     ui->setupUi(this);
     ui->toolBar->insertSpacer(ui->actionView_Folder);
 
-    ui->listView->setGridSize(ScreenshotCard::CardSize + QSize(4, 2));  // use card size + spacing
+    ui->listView->setGridSize(ScreenshotCard::CardSize + QSize(4, 4));  // use card size + spacing
     // ui->listView->setUniformItemSizes(true);
     ui->listView->setLayoutMode(QListView::Batched);
     ui->listView->setViewMode(QListView::IconMode);

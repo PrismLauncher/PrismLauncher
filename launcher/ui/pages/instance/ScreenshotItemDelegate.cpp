@@ -193,6 +193,15 @@ void ScreenshotCard::updateThumbnail()
     }
 }
 
+void ScreenshotCard::updateLabelPalette()
+{
+    const QColor color = palette().color(m_selected ? QPalette::HighlightedText : QPalette::WindowText);
+    QPalette p = palette();
+    p.setColor(QPalette::WindowText, color);
+    p.setColor(QPalette::Text, color);
+    m_label->setPalette(p);
+}
+
 void ScreenshotCard::setSelected(bool selected)
 {
     if (m_selected == selected) {
@@ -200,11 +209,7 @@ void ScreenshotCard::setSelected(bool selected)
     }
     m_selected = selected;
 
-    const QColor color = palette().color(selected ? QPalette::HighlightedText : QPalette::WindowText);
-    QPalette label = m_label->palette();
-    label.setColor(QPalette::WindowText, color);
-    label.setColor(QPalette::Text, color);
-    m_label->setPalette(label);
+    updateLabelPalette();
 
     update();
 }
@@ -258,20 +263,31 @@ void ScreenshotCard::paintEvent(QPaintEvent* /*event*/)
     option.initFrom(this);  // palette, font, direction, rect, State_Enabled/Active
     option.widget = this;   // for stylesheet-accurate resolution
     option.rect = rect();
-    option.showDecorationSelected = true;  // make sure highlight works
-
     option.state &= ~(QStyle::State_Selected | QStyle::State_MouseOver | QStyle::State_HasFocus);
-    if (m_selected) {
-        option.state |= QStyle::State_Selected;
-    }
-    if (m_hovered) {
-        option.state |= QStyle::State_MouseOver;
-    }
-    if (m_current) {
-        option.state |= QStyle::State_HasFocus;
-    }
 
-    style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, &painter, this);
+    if (m_selected) {
+        // paint the fill from the palette so it always pairs with HighlightedText,
+        // and matches whatever the style would have drawn for PE_PanelItemViewItem
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(palette().color(QPalette::Highlight));
+        painter.drawRoundedRect(QRectF(rect()), 4, 4);
+
+        if (m_current) {
+            QStyleOptionFocusRect focus;
+            focus.initFrom(this);
+            focus.rect = rect().adjusted(1, 1, -1, -1);
+            style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focus, &painter, this);
+        }
+    } else {
+        if (m_hovered) {
+            option.state |= QStyle::State_MouseOver;
+        }
+        if (m_current) {
+            option.state |= QStyle::State_HasFocus;
+        }
+        style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, &painter, this);
+    }
 }
 
 void ScreenshotCard::resizeEvent(QResizeEvent* event)
@@ -280,6 +296,14 @@ void ScreenshotCard::resizeEvent(QResizeEvent* event)
     const QSize hint = m_actions->sizeHint();
     m_actions->setGeometry(width() - hint.width() - ActionInset, ActionInset, hint.width(), hint.height());
     updateThumbnail();
+}
+
+void ScreenshotCard::changeEvent(QEvent* event)
+{
+    QFrame::changeEvent(event);
+    if (event->type() == QEvent::PaletteChange) {
+        updateLabelPalette();  // extracted from setSelected, uses the new palette
+    }
 }
 
 void ScreenshotCard::setIndex(const QModelIndex& index)
