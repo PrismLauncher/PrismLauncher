@@ -267,7 +267,7 @@ void ExternalResourcesPage::removeItem()
     if (multiple) {
         text = tr("You are about to remove %n items.\n"
                   "This may be permanent and they will be gone from the folder.\n\n"
-                  "Are you sure?", "", count),
+                  "Are you sure?", "", count);
     } else if (folder) {
         text = tr("You are about to remove the folder \"%1\".\n"
                   "This may be permanent and it will be gone from the parent folder.\n\n"
