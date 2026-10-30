@@ -50,8 +50,10 @@ jobs:
           mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*-x86_64.AppImage.zsync PrismLauncher-Linux-x86_64.AppImage.zsync
           mv PrismLauncher-*.AppImage/PrismLauncher-*-aarch64.AppImage PrismLauncher-Linux-aarch64.AppImage
           mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*-aarch64.AppImage.zsync PrismLauncher-Linux-aarch64.AppImage.zsync
-          mv PrismLauncher-macOS*/PrismLauncher.zip PrismLauncher-macOS-${{ env.VERSION }}.zip
-          mv PrismLauncher-macOS*/PrismLauncher.dmg PrismLauncher-macOS-${{ env.VERSION }}.dmg
+          mv PrismLauncher-macOS-arm64*/PrismLauncher.zip PrismLauncher-macOS-arm64-${{ env.VERSION }}.zip
+          mv PrismLauncher-macOS-arm64*/PrismLauncher.dmg PrismLauncher-macOS-arm64-${{ env.VERSION }}.dmg
+          mv PrismLauncher-macOS-x86_64*/PrismLauncher.zip PrismLauncher-macOS-x86_64-${{ env.VERSION }}.zip
+          mv PrismLauncher-macOS-x86_64*/PrismLauncher.dmg PrismLauncher-macOS-x86_64-${{ env.VERSION }}.dmg
 
           tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
@@ -107,6 +109,8 @@ jobs:
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-macOS-${{ env.VERSION }}.zip
-            PrismLauncher-macOS-${{ env.VERSION }}.dmg
+            PrismLauncher-macOS-arm64-${{ env.VERSION }}.zip
+            PrismLauncher-macOS-arm64-${{ env.VERSION }}.dmg
+            PrismLauncher-macOS-x86_64-${{ env.VERSION }}.zip
+            PrismLauncher-macOS-x86_64-${{ env.VERSION }}.dmg
             PrismLauncher-${{ env.VERSION }}.tar.gz
