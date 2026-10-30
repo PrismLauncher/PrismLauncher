@@ -418,27 +418,36 @@ void ScreenshotItemDelegate::paintItem(QPainter* painter, const QStyleOptionView
 
 void ScreenshotItemDelegate::updateEditorState(QWidget* editor, const QModelIndex& index) const
 {
-    if (auto* card = qobject_cast<ScreenshotCard*>(editor)) {
-        if (auto* view = this->view()) {
-            // needed so real size after full layout populates
-            // otherwise the editor fits to contents
-            const QRect rect = view->visualRect(index);
-            if (rect.isValid() && card->geometry() != rect) {
-                card->setGeometry(rect);  // triggers resizeEvent -> rescale
-            }
-            card->setSelected(view->selectionModel()->isSelected(index));
-            card->setCurrent(view->currentIndex() == index);
-        }
+    auto* v = view();
+    if (!v) {
+        return;
     }
+
+    auto* card = qobject_cast<ScreenshotCard*>(editor);
+    if (!card) {
+        return;
+    }
+
+    // needed so real size after full layout populates
+    // otherwise the editor fits to contents
+    const QRect rect = v->visualRect(index);
+    if (rect.isValid() && card->geometry() != rect) {
+        card->setGeometry(rect);  // triggers resizeEvent -> rescale
+    }
+    card->setSelected(v->selectionModel()->isSelected(index));
+    card->setCurrent(v->currentIndex() == index);
 }
 
 void ScreenshotItemDelegate::startRename(const QModelIndex& index)
 {
-    if (auto* v = view()) {
-        if (auto* editor = v->indexWidget(index)) {
-            if (auto* card = qobject_cast<ScreenshotCard*>(editor)) {
-                card->startRename();
-            }
-        }
+    auto* v = view();
+    if (!v) {
+        return;
     }
+
+    auto* card = qobject_cast<ScreenshotCard*>(v->indexWidget(index));
+    if (!card) {
+        return;
+    }
+    card->startRename();
 }
