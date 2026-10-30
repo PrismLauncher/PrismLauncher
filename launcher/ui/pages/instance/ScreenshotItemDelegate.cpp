@@ -23,10 +23,12 @@
 #include <QApplication>
 
 #include <QCursor>
+#include <QGraphicsOpacityEffect>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPropertyAnimation>
 #include <QStackedLayout>
 #include <QTimer>
 #include <QToolButton>
@@ -101,6 +103,22 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
 
     m_actions->hide();
 
+    // the animation targets the effect, so the effect must be installed first
+    // and can't be initialized independently in ctor list
+    // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
+    m_actionsOpacity = new QGraphicsOpacityEffect;
+    m_actionsOpacity->setOpacity(0.0);
+    m_actions->setGraphicsEffect(m_actionsOpacity);  // m_actions takes ownership of the effect
+
+    m_actionsFade = new QPropertyAnimation(m_actionsOpacity, "opacity", this);
+    m_actionsFade->setDuration(120);
+    m_actionsFade->setEasingCurve(QEasingCurve::OutCubic);
+    connect(m_actionsFade, &QPropertyAnimation::finished, this, [this] {
+        if (!m_hovered) {
+            m_actions->hide();
+        }
+    });
+
     // give the actions a background
     m_actions->setObjectName("screenshotCardActions");
     m_actions->setStyleSheet(
@@ -134,8 +152,11 @@ void ScreenshotCard::setScreenshot(const QPixmap& pixmap, const QString& name)
 
     m_label->setText(name);
 
-    setHovered(false);
     m_hoverTimer->stop();
+    m_actionsFade->stop();
+    m_hovered = false;
+    m_actionsOpacity->setOpacity(0.0);
+    m_actions->hide();
 
     endRename(false);
 
@@ -201,7 +222,15 @@ void ScreenshotCard::setHovered(bool hovered)
     }
     m_hovered = hovered;
 
-    m_actions->setVisible(hovered);
+    m_actionsFade->stop();  // retarget mid-fade
+    m_actionsFade->setStartValue(m_actionsOpacity->opacity());
+    m_actionsFade->setEndValue(hovered ? 1.0 : 0.0);
+    if (hovered) {
+        m_actions->show();  // animation finish will hide
+    }
+    m_actionsFade->start();
+    // prevent clicks during fade
+    m_actions->setAttribute(Qt::WA_TransparentForMouseEvents, !hovered);
     update();
 }
 

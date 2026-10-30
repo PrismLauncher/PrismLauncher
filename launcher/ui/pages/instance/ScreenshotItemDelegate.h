@@ -28,6 +28,8 @@ class QLineEdit;
 class QStackedLayout;
 class QVBoxLayout;
 class QHBoxLayout;
+class QGraphicsOpacityEffect;
+class QPropertyAnimation;
 
 class ScreenshotCard : public QFrame {
     Q_OBJECT
@@ -75,12 +77,15 @@ class ScreenshotCard : public QFrame {
     QPointer<QStackedLayout> m_labelStack;
     QVBoxLayout m_layout;
 
-    bool m_selected, m_hovered, m_current = false;
+    bool m_selected = false, m_hovered = false, m_current = false;
 
     QPersistentModelIndex m_index;
     bool m_editing = false;
 
     QFrame* m_actions;  // container, overlays the thumbnail
+    QGraphicsOpacityEffect* m_actionsOpacity = nullptr;
+    QPropertyAnimation* m_actionsFade = nullptr;
+
     QToolButton* m_rename;
     QToolButton* m_delete;
     QTimer* m_hoverTimer;
