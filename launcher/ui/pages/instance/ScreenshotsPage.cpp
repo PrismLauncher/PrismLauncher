@@ -302,6 +302,11 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
         on_actionDelete_triggered();
     });
 
+    connect(m_delegate, &ScreenshotItemDelegate::copyRequested, this, [this](const QPersistentModelIndex& index) {
+        ui->listView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+        on_actionCopy_Image_triggered();
+    });
+
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::showContextMenu);
     connect(ui->listView, &QAbstractItemView::activated, this, &ScreenshotsPage::onItemActivated);

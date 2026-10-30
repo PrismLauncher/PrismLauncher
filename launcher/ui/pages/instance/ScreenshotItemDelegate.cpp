@@ -73,6 +73,7 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
     , m_actions(new ActionPanel(this))
     , m_rename(new QToolButton(this))
     , m_delete(new QToolButton(this))
+    , m_copy(new QToolButton(this))
     , m_hoverTimer(new QTimer(this))
 {
     setFocusPolicy(Qt::NoFocus);
@@ -109,19 +110,27 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
 
     // setup action buttons
     m_rename->setIcon(QIcon::fromTheme("rename"));
-    m_delete->setIcon(QIcon::fromTheme("delete"));
     m_rename->setIconSize({ 16, 16 });
-    m_delete->setIconSize({ 16, 16 });
     m_rename->setToolTip(tr("Rename"));
-    m_delete->setToolTip(tr("Delete"));
     m_rename->setFocusPolicy(Qt::NoFocus);
-    m_delete->setFocusPolicy(Qt::NoFocus);
     m_rename->setAutoRaise(true);
+
+    m_delete->setIcon(QIcon::fromTheme("delete"));
+    m_delete->setIconSize({ 16, 16 });
+    m_delete->setToolTip(tr("Delete"));
+    m_delete->setFocusPolicy(Qt::NoFocus);
     m_delete->setAutoRaise(true);
+
+    m_copy->setIcon(QIcon::fromTheme("copy"));
+    m_copy->setIconSize({ 16, 16 });
+    m_copy->setToolTip(tr("Copy Image"));
+    m_copy->setFocusPolicy(Qt::NoFocus);
+    m_copy->setAutoRaise(true);
 
     auto* actionsLayout = new QHBoxLayout(m_actions);
     actionsLayout->setContentsMargins(2, 2, 2, 2);
     actionsLayout->setSpacing(0);
+    actionsLayout->addWidget(m_copy);
     actionsLayout->addWidget(m_rename);
     actionsLayout->addWidget(m_delete);
 
@@ -157,6 +166,11 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
     connect(m_delete, &QToolButton::clicked, this, [this](bool /*checked*/) {
         if (m_index.isValid()) {
             emit deleteRequested(m_index);
+        }
+    });
+    connect(m_copy, &QToolButton::clicked, this, [this](bool /*checked*/) {
+        if (m_index.isValid()) {
+            emit copyRequested(m_index);
         }
     });
 }
@@ -317,6 +331,9 @@ void ScreenshotCard::updateActionButtons()
     const bool writable = m_index.isValid() && ((m_index.flags() & Qt::ItemIsEditable) != 0);
     m_rename->setEnabled(writable);
     m_delete->setEnabled(writable);
+
+    // copying only reads the file
+    m_copy->setEnabled(m_index.isValid());
 }
 
 void ScreenshotCard::startRename()
@@ -379,6 +396,7 @@ ScreenshotItemDelegate::ScreenshotItemDelegate(QObject* parent)
               auto* card = new ScreenshotCard(parent);
               connect(card, &ScreenshotCard::renameRequested, this, &ScreenshotItemDelegate::renameRequested);
               connect(card, &ScreenshotCard::deleteRequested, this, &ScreenshotItemDelegate::deleteRequested);
+              connect(card, &ScreenshotCard::copyRequested, this, &ScreenshotItemDelegate::copyRequested);
               return card;
           },
           parent)

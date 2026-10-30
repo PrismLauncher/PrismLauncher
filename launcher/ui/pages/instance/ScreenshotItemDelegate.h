@@ -64,6 +64,7 @@ class ScreenshotCard : public QFrame {
    signals:
     void renameRequested(const QPersistentModelIndex& index, const QString& newName);
     void deleteRequested(const QPersistentModelIndex& index);
+    void copyRequested(const QPersistentModelIndex& index);
 
    private:
     void endRename(bool commit);
@@ -92,6 +93,7 @@ class ScreenshotCard : public QFrame {
 
     QToolButton* m_rename;
     QToolButton* m_delete;
+    QToolButton* m_copy;
     QTimer* m_hoverTimer;
 };
 
@@ -104,6 +106,7 @@ class ScreenshotItemDelegate : public WidgetDelegate {
    signals:
     void renameRequested(const QPersistentModelIndex& index, const QString& newName);
     void deleteRequested(const QPersistentModelIndex& index);
+    void copyRequested(const QPersistentModelIndex& index);
 
    public:
     void destroyEditor(QWidget* editor, const QModelIndex& /*index*/) const override;
