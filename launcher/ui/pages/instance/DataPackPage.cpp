@@ -186,7 +186,8 @@ void DataPackPage::deleteDataPackMetadata()
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("You are about to remove the metadata for %n data packs.\n"
-                                                        "Are you sure?", "", selectionCount),
+                                                        "Are you sure?",
+                                                        "", selectionCount),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 

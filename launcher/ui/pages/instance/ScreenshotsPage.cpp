@@ -533,9 +533,11 @@ void ScreenshotsPage::on_actionDelete_triggered()
     const qsizetype count = selected.size();
     QString text;
     if (count > 1) {
-        text = tr("You are about to delete %n screenshots.\n"
-                  "This may be permanent and they will be gone from the folder.\n\n"
-                  "Are you sure?", "", count);
+        text =
+            tr("You are about to delete %n screenshots.\n"
+               "This may be permanent and they will be gone from the folder.\n\n"
+               "Are you sure?",
+               "", count);
     } else {
         text =
             tr("You are about to delete the selected screenshot.\n"

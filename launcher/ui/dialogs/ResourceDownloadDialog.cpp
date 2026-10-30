@@ -114,7 +114,8 @@ void ResourceDownloadDialog::reject()
     if (selected.count() > 0) {
         auto reply = CustomMessageBox::selectable(this, tr("Confirmation Needed"),
                                                   tr("You have %n selected resources.\n"
-                                                     "Are you sure you want to close this dialog?", "", selected.count()),
+                                                     "Are you sure you want to close this dialog?",
+                                                     "", selected.count()),
                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                          ->exec();
         if (reply != QMessageBox::Yes) {
