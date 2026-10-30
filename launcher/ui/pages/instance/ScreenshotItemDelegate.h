@@ -23,10 +23,12 @@
 
 #include <QFrame>
 #include <QPixmap>
+#include <QVBoxLayout>
 class QLabel;
 class QLineEdit;
 class QStackedLayout;
-class QVBoxLayout;
+class QToolButton;
+class QTimer;
 class QHBoxLayout;
 class QGraphicsOpacityEffect;
 class QPropertyAnimation;
