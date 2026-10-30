@@ -747,7 +747,7 @@ void ServersPage::on_actionRemove_triggered()
     } else {
         text = tr("You are about to remove the %n selected servers."
                   "This is permanent and the servers will be gone from your list forever (A LONG TIME).\n\n"
-                  "Are you sure?", "", rows.size()),
+                  "Are you sure?", "", rows.size())
     }
 
     auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"), text, QMessageBox::Warning,
