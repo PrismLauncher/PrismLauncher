@@ -4,14 +4,13 @@
 #include "QObjectPtr.h"
 
 class BaseInstance;
-class SettingsObject;
 class LaunchTask;
 class QProcess;
 
 class BaseProfiler : public BaseExternalTool {
     Q_OBJECT
    public:
-    explicit BaseProfiler(SettingsObject* settings, BaseInstance* instance, QObject* parent = 0);
+    explicit BaseProfiler(QObject* parent = 0);
 
    public slots:
     void beginProfiling(LaunchTask* process);
@@ -30,5 +29,5 @@ class BaseProfiler : public BaseExternalTool {
 
 class BaseProfilerFactory : public BaseExternalToolFactory {
    public:
-    virtual BaseProfiler* createProfiler(BaseInstance* instance, QObject* parent = 0);
+    virtual BaseProfiler* createProfiler(QObject* parent = 0);
 };

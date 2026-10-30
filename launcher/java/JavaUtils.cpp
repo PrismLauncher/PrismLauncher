@@ -38,14 +38,12 @@
 #include <QString>
 #include <QStringList>
 
-#include <settings/Setting.h>
-#include <settings/SettingsObject.h>
-
 #include <QDebug>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "config/GlobalConfig.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
@@ -524,8 +522,7 @@ QString JavaUtils::getJavaCheckPath()
 
 QString JavaUtils::getPinnedPath(int major)
 {
-    auto javas = Json::toMap(APPLICATION->settings()->get("PinnedJavaPaths").toString());
-    return javas.value(QString::number(major)).toString();
+    return APPLICATION->config()->pinnedJavaPaths.value(QString::number(major)).toString();
 }
 
 QStringList getMinecraftJavaBundle()

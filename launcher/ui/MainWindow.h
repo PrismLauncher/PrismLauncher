@@ -221,6 +221,10 @@ class MainWindow : public QMainWindow {
 
     void updateInstanceToolBarOrientation(Qt::Orientation orientation);
 
+    void updateBrokenStatus(const QStringList& problems);
+
+    void showBrokenStatus();
+
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void setCatBackground(bool enabled);
     void updateCatState();
@@ -242,6 +246,7 @@ class MainWindow : public QMainWindow {
     QToolButton* newsLabel = nullptr;
     QLabel* m_statusLeft = nullptr;
     QLabel* m_statusCenter = nullptr;
+    QLabel* m_statusBroken = nullptr;
     QToolButton* m_changeIconButton = nullptr;
     QAction* m_instanceToolBarTopSeparator = nullptr;
     QAction* m_instanceInfoWidget = nullptr;

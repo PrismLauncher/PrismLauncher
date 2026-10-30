@@ -40,6 +40,7 @@
 #include <QWidget>
 #include "JavaCommon.h"
 
+struct GlobalConfig;
 class MinecraftInstance;
 class QLineEdit;
 
@@ -69,6 +70,11 @@ class JavaSettingsWidget : public QWidget {
    private:
     void setupPinnedJavaRows();
     void warnAboutUnresolvablePinnedPaths() const;
+
+    template <typename T>
+    void loadSettingsFrom(const T& conf, const GlobalConfig& global);
+    template <typename T>
+    void saveSettingsTo(T& conf) const;
 
     MinecraftInstance* m_instance;
     Ui::JavaSettingsWidget* m_ui;
