@@ -84,7 +84,7 @@ class ScreenshotCard : public QFrame {
     QPersistentModelIndex m_index;
     bool m_editing = false;
 
-    QFrame* m_actions;  // container, overlays the thumbnail
+    QWidget* m_actions;  // container, overlays the thumbnail
     QGraphicsOpacityEffect* m_actionsOpacity = nullptr;
     QPropertyAnimation* m_actionsFade = nullptr;
 

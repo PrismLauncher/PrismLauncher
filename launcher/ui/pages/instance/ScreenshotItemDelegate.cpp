@@ -37,10 +37,32 @@
 #include <QVBoxLayout>
 
 // ----------------
+
+namespace {
+
+class ActionPanel : public QFrame {
+   public:
+    using QFrame::QFrame;
+
+   protected:
+    void paintEvent(QPaintEvent* /*event*/) override
+    {
+        QColor scrim = palette().color(QPalette::Window);
+        scrim.setAlpha(90);
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(scrim);
+        painter.drawRoundedRect(QRectF(rect()), 4, 4);
+    }
+};
+
+}  // namespace
+
+// ----------------
 // Screenshot Card
 // ----------------
-
-// #region ScreenshotCard
 
 ScreenshotCard::ScreenshotCard(QWidget* parent)
     : QFrame(parent)
@@ -48,7 +70,7 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
     , m_label(new QLabel(this))
     , m_edit(new QLineEdit(this))
     , m_labelStack(new QStackedLayout)
-    , m_actions(new QFrame(this))
+    , m_actions(new ActionPanel(this))
     , m_rename(new QToolButton(this))
     , m_delete(new QToolButton(this))
     , m_hoverTimer(new QTimer(this))
@@ -120,14 +142,6 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
             m_actions->hide();
         }
     });
-
-    // give the actions a background
-    m_actions->setObjectName("screenshotCardActions");
-    m_actions->setStyleSheet(
-        "#screenshotCardActions {"
-        " background-color: rgba(0, 0, 0, 75);"
-        " border-radius: 4px;"
-        "}");
 
     setLayout(&m_layout);
 
@@ -331,13 +345,9 @@ bool ScreenshotCard::eventFilter(QObject* watched, QEvent* event)
     return QFrame::eventFilter(watched, event);
 }
 
-// #endregion
-
 // --------------------
 // Screenshot Delegate
 // --------------------
-
-// #region ScreenshotItemDelegate
 
 ScreenshotItemDelegate::ScreenshotItemDelegate(QObject* parent)
     : WidgetDelegate(
@@ -408,5 +418,3 @@ void ScreenshotItemDelegate::startRename(const QModelIndex& index)
         }
     }
 }
-
-// #endregion
