@@ -381,8 +381,9 @@ if(UNIX AND APPLE)
     set(MACOSX_SPARKLE_UPDATE_FEED_URL_ARM64 "https://prismlauncher.org/feed/appcast-arm64.xml" CACHE STRING "URL for the Sparkle update feed on arm64")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL_X86_64 "https://prismlauncher.org/feed/appcast-x86_64.xml" CACHE STRING "URL for the Sparkle update feed on x86_64")
 
-    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.8.0/Sparkle-2.8.0.tar.xz" CACHE STRING "URL to Sparkle release archive")
-    set(MACOSX_SPARKLE_SHA256 "fd5681ee92bf238aaac2d08214ceaf0cc8976e452d7f882d80bac1e61581f3b1" CACHE STRING "SHA256 checksum for Sparkle release archive")
+    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.10.1/Sparkle-2.10.1.tar.xz" CACHE STRING "URL to Sparkle release archive")
+    set(MACOSX_SPARKLE_SHA256 "1a856d2a9edb8e628de88121d7be04cf0e2167f8641650b78fca00b14244cf27" CACHE STRING "SHA256 checksum for Sparkle release archive")
+
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
     if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND
