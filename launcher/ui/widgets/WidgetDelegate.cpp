@@ -48,22 +48,50 @@ void WidgetDelegate::destroyEditor(QWidget* editor, const QModelIndex& /*index*/
         return;
     }
     editor->hide();
-    // don't re-parent keep editor parented to the viewport
-    m_pool.append(editor);  // store for later reuse
+    // keep the editor parented to the viewport, it is reused from the pool
+    m_pool.append(editor);
+    trimPool();
+}
+
+void WidgetDelegate::trimPool() const
+{
+    // evict the least recently pooled; createEditor() pops from the back
+    while (m_pool.size() > MaxPooledEditors) {
+        if (QWidget* oldest = m_pool.takeFirst()) {
+            oldest->deleteLater();
+        }
+    }
 }
 
 void WidgetDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    m_painted.insert(index);
-    scheduleReconcile();
+    // Why this works: QT composites paint batches after they are finished and
+    // recurses into painting the children of an object *after* an object's own paint event.
+    // So if the editor is opened here it will be present as a child after this paint ends.
+    // Thus it will be painted, composited, and show up in the same frame.
 
-    if (m_open.contains(index)) {
-        if (QWidget* editor = m_view ? m_view->indexWidget(index) : nullptr) {
-            updateEditorState(editor, index);
-        }
-        return; // don't call paintItem for this one
+    if (!m_view) {
+        // we arn't even properly set up, do a reasonable default paint.
+        paintItem(painter, option, index);
+        return;
     }
 
+    if (!m_open.contains(index)) {
+        // open a new editor
+        // insert before open so a nested pass can't double-open
+        m_open.insert(index);
+        m_view->openPersistentEditor(index);
+    }
+
+    scheduleReconcile();
+
+    if (QWidget* editor = m_view->indexWidget(index)) {
+        updateEditorState(editor, index);
+        return;  // don't call paintItem for this one, it will paint itself in this pass
+    }
+
+    // in theory, this is unreachable but opening can fail, e.g. the factory returning a nullptr;
+    // fall back to painting the item
     paintItem(painter, option, index);
 }
 
@@ -87,9 +115,6 @@ void WidgetDelegate::scheduleReconcile() const
 void WidgetDelegate::reconcile() const
 {
     m_syncRequested = false;
-
-    // take the set of painted indexes since last reconcile
-    const auto painted = std::exchange(m_painted, {});
 
     // no viewport? can't reconcile
     if (!m_view) {
@@ -118,18 +143,12 @@ void WidgetDelegate::reconcile() const
     }
     for (const auto& index : toClose) {
         m_open.remove(index);
-        if (m_view && m_view->isPersistentEditorOpen(index)) {
+        if (m_view->isPersistentEditorOpen(index)) {
             m_view->closePersistentEditor(index);
         }
     }
 
-    for (const auto& index : painted) {
-        if (index.isValid() && !m_open.contains(index)) {
-            m_open.insert(index);
-            m_view->openPersistentEditor(index);
-            updateEditorState(m_view->indexWidget(index), index);
-        }
-    }
+    trimPool();
 }
 
 void WidgetDelegate::refreshEditors() const

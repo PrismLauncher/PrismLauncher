@@ -43,7 +43,7 @@ class WidgetDelegate : public QStyledItemDelegate {
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const override;
     void destroyEditor(QWidget* editor, const QModelIndex& /*index*/) const override;
 
-    // when called records the index into `m_painted`
+    // when called opens an editor for that index and schedules a reconcile
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     // stores m_view, MUST be called after creation and before first paint to work correctly
@@ -62,16 +62,19 @@ class WidgetDelegate : public QStyledItemDelegate {
 
    private:
     void scheduleReconcile() const;
-    // synchronizes the open editors with the visible(painted) indexes
+    // closes editors whose index left the viewport and prunes dead open indexes
     void reconcile() const;
+    void trimPool() const;
+
+   private:
+    // open items arn't in the pool, 32 pooled editors shouldn't use more than ~2MB and
+    // lets a lot of scrolling happen before it needs to allocate and construct more
+    static constexpr qsizetype MaxPooledEditors = 32;
 
    private:
     WidgetFactory m_factory;
     mutable QList<QPointer<QWidget>> m_pool;
 
-    // list of indexes on which a paint was called
-    // effectively the list of visible indexes
-    mutable QSet<QPersistentModelIndex> m_painted;
     // set of indexes with open editors
     mutable QSet<QPersistentModelIndex> m_open;
     mutable bool m_syncRequested = false;
