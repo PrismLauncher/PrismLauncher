@@ -45,33 +45,43 @@ jobs:
         include:
           - os: ubuntu-24.04
             artifact-name: Linux
-            qt-version: 6.11.2
+            qt-version: 6.12.0
 
           - os: ubuntu-24.04-arm
             artifact-name: Linux-aarch64
-            qt-version: 6.11.2
+            qt-version: 6.12.0
 
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
             msystem: CLANG64
             vcvars-arch: amd64_x86
-            qt-version: 6.11.2
+            qt-version: 6.12.0
 
           - os: windows-2022
             artifact-name: Windows-MSVC
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
-            qt-version: 6.11.2
+            qt-version: 6.12.0
 
           - os: windows-11-arm
             artifact-name: Windows-MSVC-arm64
             vcvars-arch: arm64
-            qt-version: 6.11.2
+            qt-version: 6.12.0
 
           - os: macos-26
-            artifact-name: macOS
-            macosx-deployment-target: 13.0
-            qt-version: 6.11.2
+            artifact-name: macOS-x86_64
+            arch: x86_64
+            # I hate microsoft why is the vcpkg arch called that when the cmake target is called x86_64...
+            vcpkg_arch: x64
+            macosx-deployment-target: 12.0
+            qt-version: 6.9.3
+
+          - os: macos-26
+            artifact-name: macOS-arm64
+            arch: arm64
+            vcpkg_arch: arm64
+            macosx-deployment-target: 14.0
+            qt-version: 6.12.0
 
     runs-on: ${{ matrix.os }}
 
@@ -84,8 +94,7 @@ jobs:
       BUILD_PLATFORM: official
       BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
       CMAKE_PRESET: ci
-
-      CMAKE_OSX_ARCHITECTURES: x86_64;arm64
+      CMAKE_OSX_ARCHITECTURES: ${{ matrix.arch }}
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx-deployment-target }}
 
     steps:
@@ -105,6 +114,7 @@ jobs:
           build-type: ${{ env.BUILD_TYPE }}
           artifact-name: ${{ matrix.artifact-name }}
           msystem: ${{ matrix.msystem }}
+          vcpkg_arch: ${{ matrix.vcpkg_arch }}
           vcvars-arch: ${{ matrix.vcvars-arch }}
           qt-version: ${{ matrix.qt-version }}
 

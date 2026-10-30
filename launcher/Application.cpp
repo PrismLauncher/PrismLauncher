@@ -149,7 +149,7 @@
 #include <sys/types.h>
 #endif
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
@@ -377,7 +377,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
         m_rootPath = binPath;
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
         QDir foo(FS::PathCombine(binPath, "../.."));
         m_rootPath = foo.absolutePath();
         // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
@@ -668,7 +668,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 #ifdef Q_OS_WIN32
         defaultMonospace = "Courier";
         defaultSize = 10;
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
         defaultMonospace = "Menlo";
 #else
         defaultMonospace = "Monospace";
@@ -1327,7 +1327,7 @@ bool Application::createSetupWizard()
 
 bool Application::updaterEnabled()
 {
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
     return BuildConfig.UPDATER_ENABLED;
 #else
     return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(m_rootPath, updaterBinaryName())).isFile();
@@ -1420,7 +1420,7 @@ void Application::performMainStartupAction()
     // initialize the updater
     if (updaterEnabled()) {
         qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
 #if defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
 #endif
