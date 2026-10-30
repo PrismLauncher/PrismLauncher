@@ -209,8 +209,17 @@ void ScreenshotCard::updateThumbnail()
 
 void ScreenshotCard::updateLabelPalette()
 {
-    const QColor color = palette().color(m_selected ? QPalette::HighlightedText : QPalette::WindowText);
     QPalette p = palette();
+
+    // The Windows styles paint selected item text in the normal text colour
+    // Vista additionally rewrites the highlight itself.
+    const QString styleKey = QApplication::style()->objectName();
+    // a bit fragile if we ever change the theme names but ok
+    const bool lightSelection = styleKey == QLatin1String("windowsvista") || styleKey == QLatin1String("windows11");
+
+    const QColor selectionColor = lightSelection ? p.color(QPalette::Text) : p.color(QPalette::HighlightedText);
+    const QColor color = !m_selected ? p.color(QPalette::WindowText) : selectionColor;
+
     p.setColor(QPalette::WindowText, color);
     p.setColor(QPalette::Text, color);
     m_label->setPalette(p);
@@ -274,34 +283,32 @@ void ScreenshotCard::paintEvent(QPaintEvent* /*event*/)
     QPainter painter(this);
 
     QStyleOptionViewItem option;
-    option.initFrom(this);  // palette, font, direction, rect, State_Enabled/Active
-    option.widget = this;   // for stylesheet-accurate resolution
+    const QWidget* w = m_view ? static_cast<QWidget*>(m_view) : this;
+    option.initFrom(w);
+    option.widget = w;
     option.rect = rect();
+    option.showDecorationSelected = true;
+
+    // clear these, can't have them under the real widget
+    option.text.clear();
+    option.icon = QIcon();
+
     option.state &= ~(QStyle::State_Selected | QStyle::State_MouseOver | QStyle::State_HasFocus);
 
     if (m_selected) {
-        // paint the fill from the palette so it always pairs with HighlightedText,
-        // and matches whatever the style would have drawn for PE_PanelItemViewItem
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(palette().color(QPalette::Highlight));
-        painter.drawRoundedRect(QRectF(rect()), 4, 4);
-
-        if (m_current) {
-            QStyleOptionFocusRect focus;
-            focus.initFrom(this);
-            focus.rect = rect().adjusted(1, 1, -1, -1);
-            style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focus, &painter, this);
-        }
-    } else {
-        if (m_hovered) {
-            option.state |= QStyle::State_MouseOver;
-        }
-        if (m_current) {
-            option.state |= QStyle::State_HasFocus;
-        }
-        style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, &painter, this);
+        option.state |= QStyle::State_Selected;
     }
+    if (m_hovered) {
+        option.state |= QStyle::State_MouseOver;
+    }
+    if (m_current) {
+        option.state |= QStyle::State_HasFocus;
+    }
+
+    // I resisted using drawControl over drawPrimitive because of the need to clear the
+    // text and icon it would draw from its `option` but it appears to be the only real way
+    // to get a correct style across themes.
+    style()->drawControl(QStyle::CE_ItemViewItem, &option, &painter, option.widget);
 }
 
 void ScreenshotCard::resizeEvent(QResizeEvent* event)
@@ -315,7 +322,7 @@ void ScreenshotCard::resizeEvent(QResizeEvent* event)
 void ScreenshotCard::changeEvent(QEvent* event)
 {
     QFrame::changeEvent(event);
-    if (event->type() == QEvent::PaletteChange) {
+    if (event->type() == QEvent::PaletteChange || event->type() == QEvent::StyleChange) {
         updateLabelPalette();  // extracted from setSelected, uses the new palette
     }
 }
@@ -424,6 +431,7 @@ void ScreenshotItemDelegate::setEditorData(QWidget* editor, const QModelIndex& i
 
         card->setScreenshot(screenshot, name);
         card->setIndex(index);
+        card->setView(view());
     }
 }
 

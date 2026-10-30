@@ -54,6 +54,8 @@ class ScreenshotCard : public QFrame {
     void startRename();
     void cancelRename() { endRename(false); }
 
+    void setView(QAbstractItemView* view) { m_view = view; }
+
    protected:
     void enterEvent(QEnterEvent* event) override;
     void leaveEvent(QEvent* event) override;
@@ -95,6 +97,8 @@ class ScreenshotCard : public QFrame {
     QToolButton* m_delete;
     QToolButton* m_copy;
     QTimer* m_hoverTimer;
+
+    QPointer<QAbstractItemView> m_view;
 };
 
 class ScreenshotItemDelegate : public WidgetDelegate {
