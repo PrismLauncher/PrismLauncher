@@ -353,6 +353,24 @@ void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata:
     page->openProject(meta->projectId);
 }
 
+void ResourceDownloadDialog::setResourcePack(const ModPlatform::IndexedPack& pack, ModPlatform::ResourceProvider provider)
+{
+    switch (provider) {
+        case ModPlatform::ResourceProvider::MODRINTH:
+            selectPage(Modrinth::id());
+            break;
+        case ModPlatform::ResourceProvider::FLAME:
+            selectPage(Flame::id());
+            break;
+    }
+
+    setWindowTitle(tr("Download %1").arg(pack.name));
+    m_container->hidePageList();
+    m_buttons.hide();
+    auto* page = selectedPage();
+    page->openProject(pack.addonId, tr("Install"));
+}
+
 GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
 {
     if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies

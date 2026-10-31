@@ -675,7 +675,7 @@ void ResourcePage::openUrl(QUrl url)
     QDesktopServices::openUrl(url);
 }
 
-void ResourcePage::openProject(const QVariant& projectID)
+void ResourcePage::openProject(const QVariant& projectID, const QString& btnTxt)
 {
     m_projectMode = true;
 
@@ -693,7 +693,11 @@ void ResourcePage::openProject(const QVariant& projectID)
     auto* okBtn = buttonBox->button(QDialogButtonBox::Ok);
     okBtn->setDefault(true);
     okBtn->setAutoDefault(true);
-    okBtn->setText(tr("Reinstall"));
+    if (btnTxt.isEmpty()) {
+        okBtn->setText(tr("Reinstall"));
+    } else {
+        okBtn->setText(btnTxt);
+    }
     okBtn->setShortcut(tr("Ctrl+Return"));
     okBtn->setEnabled(false);
 
