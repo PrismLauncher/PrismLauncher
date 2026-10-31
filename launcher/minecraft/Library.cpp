@@ -132,7 +132,7 @@ QList<Net::Request::Ptr> Library::getDownloads(const RuntimeContext& runtimeCont
         if (local) {
             return check_local_file(storage);
         }
-        auto entry = cache->resolveEntry("libraries", storage);
+        auto entry = cache->resolveEntry("libraries", storage, true);
         if (stale) {
             entry->setStale(true);
         }
