@@ -388,14 +388,15 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
         }
     }
 
-    auto loaders = instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    auto loaders = instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderType::None);
 
-    if (ModrinthAPI::validateModLoaders(loaders)) {
+    if (loaders == ModPlatform::ModLoaderType::None || ModrinthAPI::validateModLoaders(loaders)) {
         auto* page = Modrinth::createModPage(dialog, *instance);
         page->setSuppressInitialSearch(suppressInitialSearch);
         pages.append(page);
     }
-    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders)) {
+    if (APPLICATION->capabilities() & Application::SupportsFlame &&
+        (loaders == ModPlatform::ModLoaderType::None || FlameAPI::validateModLoaders(loaders))) {
         auto* flamePage = Flame::createModPage(dialog, *instance);
         flamePage->setSuppressInitialSearch(suppressInitialSearch);
         pages.append(flamePage);
