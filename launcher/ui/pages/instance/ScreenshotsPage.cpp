@@ -296,16 +296,8 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent)
         }
     });
 
-    connect(m_delegate, &ScreenshotItemDelegate::deleteRequested, this, [this](const QPersistentModelIndex& index) {
-        // select only this item then run delete
-        ui->listView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-        on_actionDelete_triggered();
-    });
-
-    connect(m_delegate, &ScreenshotItemDelegate::copyRequested, this, [this](const QPersistentModelIndex& index) {
-        ui->listView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-        on_actionCopy_Image_triggered();
-    });
+    connect(m_delegate, &ScreenshotItemDelegate::deleteRequested, this, [this](const auto& index) { deleteScreenshots({ index }); });
+    connect(m_delegate, &ScreenshotItemDelegate::copyRequested, this, [this](const auto& index) { copyImage({ index }); });
 
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::showContextMenu);
@@ -403,6 +395,17 @@ void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& /*selected
     ui->actionCopy_File_s->setEnabled(allReadable);
     ui->actionDelete->setEnabled(allWritable);
     ui->actionRename->setEnabled(allWritable);
+}
+
+QList<QPersistentModelIndex> ScreenshotsPage::selectedIndexes() const
+{
+    QList<QPersistentModelIndex> out;
+    const auto selection = ui->listView->selectionModel()->selectedIndexes();
+    out.reserve(selection.size());
+    for (const auto& index : selection) {
+        out.append(index);
+    }
+    return out;
 }
 
 void ScreenshotsPage::on_actionView_Folder_triggered() const
@@ -513,29 +516,40 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
 void ScreenshotsPage::on_actionCopy_Image_triggered() const
 {
-    auto selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() < 1) {
+    copyImage(selectedIndexes());
+}
+
+void ScreenshotsPage::copyImage(const QList<QPersistentModelIndex>& indexes) const
+{
+    if (indexes.size() < 1) {
         return;
     }
 
     // You can only copy one image to the clipboard. In the case of multiple selected files, only the first one gets copied.
-    const auto item = selection.first();
+    const auto& item = indexes.first();
     const auto info = m_model->fileInfo(item);
     const QImage image(info.absoluteFilePath());
-    Q_ASSERT(!image.isNull());
+    if (image.isNull()) {
+        qWarning() << "Failed to load screenshot" << info.absoluteFilePath();
+        return;
+    }
     QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
 }
 
 void ScreenshotsPage::on_actionCopy_File_s_triggered() const
 {
-    auto selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() < 1) {
+    copyFiles(selectedIndexes());
+}
+
+void ScreenshotsPage::copyFiles(const QList<QPersistentModelIndex>& indexes) const
+{
+    if (indexes.size() < 1) {
         // Don't do anything so we don't empty the users clipboard
         return;
     }
 
     QString buf = "";
-    for (auto item : selection) {
+    for (const auto& item : indexes) {
         auto info = m_model->fileInfo(item);
         buf += "file:///" + info.absoluteFilePath() + "\r\n";
     }
@@ -546,9 +560,16 @@ void ScreenshotsPage::on_actionCopy_File_s_triggered() const
 
 void ScreenshotsPage::on_actionDelete_triggered()
 {
-    auto selected = ui->listView->selectionModel()->selectedIndexes();
+    deleteScreenshots(selectedIndexes());
+}
 
-    const qsizetype count = selected.size();
+void ScreenshotsPage::deleteScreenshots(const QList<QPersistentModelIndex>& indexes)
+{
+    if (indexes.size() < 1) {
+        return;
+    }
+
+    const qsizetype count = indexes.size();
     QString text;
     if (count > 1) {
         text = tr("You are about to delete %1 screenshots.\n"
@@ -557,25 +578,30 @@ void ScreenshotsPage::on_actionDelete_triggered()
                    .arg(count);
     } else {
         text =
-            tr("You are about to delete the selected screenshot.\n"
+            tr("You are about to delete this screenshot.\n"
                "This may be permanent and it will be gone from the folder.\n\n"
                "Are you sure?");
     }
 
-    const auto response =
-        CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
-
-    if (response != QMessageBox::Yes) {
-        return;
-    }
-
-    for (auto item : selected) {
-        if (FS::trash(m_model->filePath(item))) {
-            continue;
+    auto* box = CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    connect(box, &QMessageBox::finished, this, [this, indexes](int response) {
+        if (response != QMessageBox::Yes) {
+            return;
         }
 
-        m_model->remove(item);
-    }
+        for (const auto& item : indexes) {
+            if (!item.isValid()) {  // the model can move under us while the box is up
+                continue;
+            }
+            if (FS::trash(m_model->filePath(item))) {
+                continue;
+            }
+
+            m_model->remove(item);
+        }
+    });
+    box->open();
 }
 
 void ScreenshotsPage::on_actionRename_triggered() const
