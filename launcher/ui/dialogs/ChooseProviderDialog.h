@@ -34,6 +34,7 @@ class ChooseProviderDialog : public QDialog {
     auto getResponse() const -> Response { return m_response; }
 
     void setDescription(QString desc);
+    void setSkipButtonText(const QString& text);
 
    private slots:
     void skipOne();

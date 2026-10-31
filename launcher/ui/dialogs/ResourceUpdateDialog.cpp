@@ -92,7 +92,7 @@ void ResourceUpdateDialog::checkCandidates()
         for (const auto& failed : m_failedMetadata) {
             const auto& mod = std::get<0>(failed);
             const auto& reason = std::get<1>(failed);
-            text += tr("Mod name: %1<br>File name: %2<br>Reason: %3<br><br>").arg(mod->name(), mod->fileinfo().fileName(), reason);
+            text += tr("Name: %1<br>File name: %2<br>Reason: %3<br><br>").arg(mod->name(), mod->fileinfo().fileName(), reason);
         }
 
         ScrollMessageBox messageDialog(m_parent, tr("Metadata generation failed"),
@@ -188,7 +188,7 @@ void ResourceUpdateDialog::checkCandidates()
 
             qDebug() << mod->name() << "failed to check for updates!";
 
-            text += tr("Mod name: %1").arg(mod->name()) + "<br>";
+            text += tr("Name: %1").arg(mod->name()) + "<br>";
             if (!reason.isEmpty()) {
                 text += tr("Reason: %1").arg(reason) + "<br>";
             }
@@ -203,7 +203,7 @@ void ResourceUpdateDialog::checkCandidates()
         ScrollMessageBox messageDialog(m_parent, tr("Failed to check for updates"),
                                        tr("Could not check or get the following resources for updates:<br>"
                                           "Do you wish to proceed without those resources?"),
-                                       text, tr("Disable unavailable mods"));
+                                       text, disableUnavailableText());
         messageDialog.setModal(true);
         if (messageDialog.exec() == QDialog::Rejected) {
             m_aborted = true;
@@ -347,10 +347,9 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
         }
 
         ChooseProviderDialog chooser(this);
-        chooser.setDescription(tr("The resource '%1' does not have a metadata yet. We need to generate it in order to track relevant "
-                                  "information on how to update this mod. "
-                                  "To do this, please select a mod provider which we can use to check for updates for this mod.")
-                                   .arg(candidate->name()));
+        chooser.setWindowTitle(chooseProviderTitle());
+        chooser.setDescription(chooseProviderDescription(candidate->name()));
+        chooser.setSkipButtonText(skipResourceText());
         auto confirmed = chooser.exec() == QDialog::DialogCode::Accepted;
 
         auto response = chooser.getResponse();
@@ -464,7 +463,7 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     auto* itemTop = new QTreeWidgetItem(ui->modTreeWidget->topLevelItem(0));
     itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     if (!info.enabled) {
-        itemTop->setToolTip(0, tr("Mod was disabled as it may be already installed."));
+        itemTop->setToolTip(0, alreadyInstalledTooltip());
     }
     itemTop->setText(0, info.name);
     itemTop->setExpanded(true);
@@ -540,4 +539,119 @@ auto ResourceUpdateDialog::getTasks() const -> QList<ResourceDownloadTask::Ptr>
     }
 
     return list;
+}
+
+QString ResourceUpdateDialog::disableUnavailableText() const
+{
+    if (m_resourceModel) {
+        const auto id = m_resourceModel->id();
+        if (id == "resourcepacks") {
+            return tr("Disable unavailable resource packs");
+        }
+        if (id == "shaderpacks") {
+            return tr("Disable unavailable shader packs");
+        }
+        if (id == "datapacks") {
+            return tr("Disable unavailable data packs");
+        }
+        if (id == "texturepacks") {
+            return tr("Disable unavailable texture packs");
+        }
+    }
+    return tr("Disable unavailable mods");
+}
+
+QString ResourceUpdateDialog::chooseProviderTitle() const
+{
+    if (m_resourceModel) {
+        const auto id = m_resourceModel->id();
+        if (id == "resourcepacks") {
+            return tr("Choose a resource pack provider");
+        }
+        if (id == "shaderpacks") {
+            return tr("Choose a shader pack provider");
+        }
+        if (id == "datapacks") {
+            return tr("Choose a data pack provider");
+        }
+        if (id == "texturepacks") {
+            return tr("Choose a texture pack provider");
+        }
+    }
+    return tr("Choose a mod provider");
+}
+
+QString ResourceUpdateDialog::chooseProviderDescription(const QString& name) const
+{
+    if (m_resourceModel) {
+        const auto id = m_resourceModel->id();
+        if (id == "resourcepacks") {
+            return tr("The resource pack '%1' does not have metadata yet. We need to generate it in order to track relevant "
+                      "information on how to update this resource pack. "
+                      "To do this, please select a provider which we can use to check for updates for this resource pack.")
+                .arg(name);
+        }
+        if (id == "shaderpacks") {
+            return tr("The shader pack '%1' does not have metadata yet. We need to generate it in order to track relevant "
+                      "information on how to update this shader pack. "
+                      "To do this, please select a provider which we can use to check for updates for this shader pack.")
+                .arg(name);
+        }
+        if (id == "datapacks") {
+            return tr("The data pack '%1' does not have metadata yet. We need to generate it in order to track relevant "
+                      "information on how to update this data pack. "
+                      "To do this, please select a provider which we can use to check for updates for this data pack.")
+                .arg(name);
+        }
+        if (id == "texturepacks") {
+            return tr("The texture pack '%1' does not have metadata yet. We need to generate it in order to track relevant "
+                      "information on how to update this texture pack. "
+                      "To do this, please select a provider which we can use to check for updates for this texture pack.")
+                .arg(name);
+        }
+    }
+    return tr("The mod '%1' does not have metadata yet. We need to generate it in order to track relevant "
+              "information on how to update this mod. "
+              "To do this, please select a mod provider which we can use to check for updates for this mod.")
+        .arg(name);
+}
+
+QString ResourceUpdateDialog::skipResourceText() const
+{
+    if (m_resourceModel) {
+        const auto id = m_resourceModel->id();
+        if (id == "resourcepacks") {
+            return tr("Skip this resource pack");
+        }
+        if (id == "shaderpacks") {
+            return tr("Skip this shader pack");
+        }
+        if (id == "datapacks") {
+            return tr("Skip this data pack");
+        }
+        if (id == "texturepacks") {
+            return tr("Skip this texture pack");
+        }
+    }
+    return tr("Skip this mod");
+}
+
+QString ResourceUpdateDialog::alreadyInstalledTooltip() const
+{
+    if (m_resourceModel) {
+        const auto id = m_resourceModel->id();
+        if (id == "resourcepacks") {
+            return tr("Resource pack was disabled as it may be already installed.");
+        }
+        if (id == "shaderpacks") {
+            return tr("Shader pack was disabled as it may be already installed.");
+        }
+        if (id == "datapacks") {
+            return tr("Data pack was disabled as it may be already installed.");
+        }
+        if (id == "texturepacks") {
+            return tr("Texture pack was disabled as it may be already installed.");
+        }
+    }
+    return tr("Mod was disabled as it may be already installed.");
 }

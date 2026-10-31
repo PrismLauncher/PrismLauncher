@@ -36,6 +36,11 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
 
    private:
     auto ensureMetadata() -> bool;
+    QString disableUnavailableText() const;
+    QString chooseProviderTitle() const;
+    QString chooseProviderDescription(const QString& name) const;
+    QString skipResourceText() const;
+    QString alreadyInstalledTooltip() const;
 
    private slots:
     void onMetadataEnsured(Resource* resource);
