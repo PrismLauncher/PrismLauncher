@@ -21,42 +21,21 @@
 
 #include <QList>
 #include <QMetaType>
+#include <QSet>
 #include <QString>
 #include <QVariant>
 #include <array>
 #include <cstdint>
 #include <memory>
 #include <utility>
+
 #include "EnumWrapper.h"
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ResourceType.h"
 
 class QIODevice;
 
 namespace ModPlatform {
-
-enum class ModLoaderType : std::uint16_t {
-    None = 0U,
-    NeoForge = 1U << 0U,
-    Forge = 1U << 1U,
-    Cauldron = 1U << 2U,
-    LiteLoader = 1U << 3U,
-    Fabric = 1U << 4U,
-    Quilt = 1U << 5U,
-    DataPack = 1U << 6U,
-    Babric = 1U << 7U,
-    BTA = 1U << 8U,
-    LegacyFabric = 1U << 9U,
-    Ornithe = 1U << 10U,
-    Rift = 1U << 11U
-};
-
-ModLoaderType operator|(ModLoaderType lhs, ModLoaderType rhs);
-
-using enum ModLoaderType;
-
-Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
-QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
-
 enum class ResourceProvider : std::uint8_t { MODRINTH, FLAME };
 
 enum class DependencyTypeValue : std::uint8_t { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
@@ -247,7 +226,7 @@ struct IndexedVersion {
     QString downloadUrl;
     QString date;
     QString fileName;
-    ModLoaderTypes loaders;
+    QSet<ModLoaderType> loaders;
     QString hashType;
     QString hash;
     bool isPreferred = true;
@@ -350,15 +329,6 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
-
-auto getModLoaderAsString(ModLoaderType type) -> const QString;
-auto getModLoaderFromString(QString type) -> ModLoaderType;
-
-constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
-{
-    auto x = static_cast<std::uint16_t>(l);
-    return (x != 0U) && ((x & (x - 1U)) == 0U);
-}
 
 struct Category {
     QString name;

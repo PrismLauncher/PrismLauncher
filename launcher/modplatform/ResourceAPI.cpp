@@ -129,9 +129,10 @@ Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, co
                 file.addonId = args.dependency.addonId;
             }
 
-            if (file.fileId.isValid() &&
-                (!file.loaders || args.loader & file.loaders)) {  // Heuristic to check if the returned value is valid
-                versions.append(file);
+            if (file.fileId.isValid()) {  // Heuristic to check if the returned value is valid
+                if (file.loaders.isEmpty() || args.loader.intersects(file.loaders)) {
+                    versions.append(file);
+                }
             }
         }
 

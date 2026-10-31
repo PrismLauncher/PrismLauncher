@@ -1,5 +1,6 @@
 #pragma once
 
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/CheckUpdateTask.h"
 
 class FlameCheckUpdate : public CheckUpdateTask {
@@ -8,7 +9,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
    public:
     FlameCheckUpdate(QList<Resource*>& resources,
                      std::vector<Version>& mcVersions,
-                     QList<ModPlatform::ModLoaderType> loadersList,
+                     QSet<ModLoaderType> loadersList,
                      ResourceFolderModel* resourceModel,
                      std::vector<ModPlatform::IndexedVersionType> releaseTypes = {})
         : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel, std::move(releaseTypes))

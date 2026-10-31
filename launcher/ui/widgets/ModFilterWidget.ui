@@ -62,9 +62,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-636</y>
-        <width>294</width>
-        <height>1234</height>
+        <y>0</y>
+        <width>291</width>
+        <height>938</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -94,101 +94,19 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QCheckBox" name="neoForge">
-            <property name="text">
-             <string>NeoForge</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="forge">
-            <property name="text">
-             <string>Forge</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="fabric">
-            <property name="text">
-             <string>Fabric</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="quilt">
-            <property name="text">
-             <string>Quilt</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="loadersLayout"/>
           </item>
           <item>
            <widget class="QPushButton" name="showMoreButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Show More</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="extendedModLoadersWidget" native="true">
-            <property name="visible">
-             <bool>false</bool>
-            </property>
-            <layout class="QVBoxLayout" name="extendedModLoadersLayout">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QCheckBox" name="liteLoader">
-               <property name="text">
-                <string>LiteLoader</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="babric">
-               <property name="text">
-                <string>Babric</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="btaBabric">
-               <property name="text">
-                <string>BTA (Babric)</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="legacyFabric">
-               <property name="text">
-                <string>Legacy Fabric</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="ornithe">
-               <property name="text">
-                <string>Ornithe</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="rift">
-               <property name="text">
-                <string>Rift</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
            </widget>
           </item>
          </layout>

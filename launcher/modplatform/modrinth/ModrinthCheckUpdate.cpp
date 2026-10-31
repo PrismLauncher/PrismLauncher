@@ -8,6 +8,7 @@
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 
@@ -15,22 +16,26 @@
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          std::vector<Version>& mcVersions,
-                                         QList<ModPlatform::ModLoaderType> loadersList,
+                                         QSet<ModLoaderType> loadersList,
                                          ResourceFolderModel* resourceModel,
                                          std::vector<ModPlatform::IndexedVersionType> releaseTypes)
     : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel, std::move(releaseTypes))
     , m_hashType(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
 {
     if (!m_loadersList.isEmpty()) {  // this is for mods so append all the other posible loaders to the initial list
-        m_initialSize = m_loadersList.length();
-        ModPlatform::ModLoaderTypes modLoaders;
-        for (auto* m : resources) {
-            modLoaders |= m->metadata()->loaders;
+        for (const auto loader : ModLoaderType::all()) {
+            if (m_loadersList.contains(loader)) {
+                m_tryList.append(loader);
+            }
         }
-        for (auto l : m_loadersList) {
-            modLoaders &= ~static_cast<std::uint16_t>(l);
+        m_initialSize = m_tryList.size();
+        for (const auto* res : resources) {
+            for (const auto loader : ModLoaderType::all()) {
+                if (res->metadata()->loaders.contains(loader) && !m_tryList.contains(loader)) {
+                    m_tryList.append(loader);
+                }
+            }
         }
-        m_loadersList.append(ModPlatform::modLoaderTypesToList(modLoaders));
     }
 }
 
@@ -50,7 +55,7 @@ bool ModrinthCheckUpdate::abort()
 void ModrinthCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing resources for Modrinth..."));
-    setProgress(0, ((m_loadersList.isEmpty() ? 1 : m_loadersList.length()) * 2) + 1);
+    setProgress(0, ((m_tryList.isEmpty() ? 1 : m_tryList.length()) * 2) + 1);
 
     auto hashingTask =
         makeShared<ConcurrentTask>("MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
@@ -82,7 +87,7 @@ void ModrinthCheckUpdate::executeTask()
     }
 }
 
-void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader, bool forceModLoaderCheck)
+void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModLoaderType> loader, bool forceModLoaderCheck)
 {
     m_loaderIdx++;
 
@@ -92,7 +97,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     QStringList hashes;
     if (forceModLoaderCheck && loader.has_value()) {
         for (const auto& hash : m_mappings.keys()) {
-            if ((m_mappings.value(hash)->metadata()->loaders & loader.value()) != 0) {
+            if (m_mappings.value(hash)->metadata()->loaders.contains(loader.value())) {
                 hashes.append(hash);
             }
         }
@@ -105,7 +110,8 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader, m_releaseTypes);
+    const auto loaderList = loader.has_value() ? QSet{ loader.value() } : QSet<ModLoaderType>();
+    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loaderList, m_releaseTypes);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
@@ -115,7 +121,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     job->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optional<ModLoaderType> loader)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
@@ -147,13 +153,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
 
         // Sometimes a version may have multiple files, one with "forge" and one with "fabric",
         // so we may want to filter it
-        QString loaderFilter;
-        if (loader.has_value() && loader != 0) {
-            auto modLoaders = ModPlatform::modLoaderTypesToList(*loader);
-            if (!modLoaders.isEmpty()) {
-                loaderFilter = ModPlatform::getModLoaderAsString(modLoaders.first());
-            }
-        }
+        const auto loaderFilter = loader.has_value() ? loader.value().toString() : QString();
 
         // Currently, we rely on a couple heuristics to determine whether an update is actually available or not:
         // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the
@@ -207,11 +207,11 @@ void ModrinthCheckUpdate::checkNextLoader()
         emitSucceeded();
         return;
     }
-    if (m_loaderIdx < m_loadersList.size()) {  // this are mods so check with loades
-        getUpdateModsForLoader(m_loadersList.at(m_loaderIdx), m_loaderIdx > m_initialSize);
+    if (m_loaderIdx < m_tryList.size()) {  // this are mods so check with loades
+        getUpdateModsForLoader(m_tryList.at(m_loaderIdx), m_loaderIdx > m_initialSize);
         return;
     }
-    if (m_loadersList.isEmpty() && m_loaderIdx == 0) {  // this are other resources no need to check more than once with empty loader
+    if (m_tryList.isEmpty()) {  // this are other resources no need to check more than once with empty loader
         getUpdateModsForLoader();
         return;
     }

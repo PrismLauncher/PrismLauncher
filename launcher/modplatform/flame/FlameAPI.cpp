@@ -8,6 +8,7 @@
 #include "BuildConfig.h"
 
 #include "Application.h"
+#include "FlamePackIndex.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "net/ApiRequest.h"
@@ -135,7 +136,6 @@ QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
              { .index = 7, .name = "Category", .readableName = QObject::tr("Sort by Category") },
              { .index = 8, .name = "GameVersion", .readableName = QObject::tr("Sort by Game Version") } };
 }
-
 namespace {
 const auto g_classIDMappings = std::array{
     std::pair{ ModPlatform::ResourceType::Mod, 6 },        std::pair{ ModPlatform::ResourceType::ResourcePack, 12 },
@@ -153,55 +153,47 @@ int getClassId(ModPlatform::ResourceType type)
     return 0;
 }
 
-int getMappedModLoader(ModPlatform::ModLoaderType loaders)
+int getMappedModLoader(ModLoaderType loader)
 {
-    // https://docs.curseforge.com/?http#tocS_ModLoaderType
-    switch (loaders) {
-        case ModPlatform::Forge:
+    // https://docs.curseforge.com/rest-api/#tocS_ModLoaderType
+    // NOTE: Cauldron and LiteLoader filters don't seem to be of any use
+    switch (loader.value()) {
+        case ModLoaderType::Forge:
             return 1;
-        case ModPlatform::Cauldron:
-            return 2;
-        case ModPlatform::LiteLoader:
-            return 3;
-        case ModPlatform::Fabric:
+        case ModLoaderType::Fabric:
             return 4;
-        case ModPlatform::Quilt:
+        case ModLoaderType::Quilt:
             return 5;
-        case ModPlatform::NeoForge:
+        case ModLoaderType::NeoForge:
             return 6;
-        case ModPlatform::DataPack:
-        case ModPlatform::Babric:
-        case ModPlatform::BTA:
-        case ModPlatform::LegacyFabric:
-        case ModPlatform::Ornithe:
-        case ModPlatform::Rift:
-        case ModPlatform::None:
+        default:
             break;  // not supported
     }
     return 0;
 }
 
-QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
+QStringList getModLoaderStrings(const QSet<ModLoaderType>& types)
 {
     QStringList l;
-    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
-        if (types.testAnyFlag(loader)) {
-            l << QString::number(getMappedModLoader(loader));
+    for (const auto& type : types) {
+        const int no = getMappedModLoader(type);
+        if (no != 0) {
+            l.append(QString::number(no));
         }
     }
     return l;
 }
 
-QString getModLoaderFilters(ModPlatform::ModLoaderTypes types)
+QString getModLoaderFilters(const QSet<ModLoaderType>& types)
 {
     return "[" + getModLoaderStrings(types).join(',') + "]";
 }
 
 }  // namespace
 
-bool FlameAPI::validateModLoaders(ModPlatform::ModLoaderTypes loaders)
+bool FlameAPI::supportsModLoader(ModLoaderType type) const
 {
-    return loaders.testAnyFlags(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
+    return getMappedModLoader(type) != 0;
 }
 
 Net::RPC::Spec<ModPlatform::IndexedPack> FlameAPI::getProject(const QString& id) const
@@ -257,8 +249,8 @@ std::optional<QString> FlameAPI::getDependencyURL(const DependencySearchArgs& ar
 {
     auto addonId = args.dependency.addonId.toString();
     auto url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
-    if ((args.loader != 0U) && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
-        int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
+    if (args.loader.size() == 1) {
+        int mappedModLoader = getMappedModLoader(*args.loader.begin());
         url += QString("&modLoaderType=%1").arg(mappedModLoader);
     }
     return url;
@@ -277,10 +269,10 @@ QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)
         getArguments.append(QString("sortField=%1").arg(args.sorting.value().index));
     }
     getArguments.append("sortOrder=desc");
-    if (args.loaders.has_value()) {
-        ModPlatform::ModLoaderTypes loaders = args.loaders.value();
-        loaders &= ~static_cast<std::uint16_t>(ModPlatform::ModLoaderType::DataPack);
-        if (loaders != 0) {
+    if (!args.loaders.isEmpty()) {
+        auto loaders = args.loaders;
+        loaders.remove(ModLoaderType::DataPack);
+        if (!loaders.isEmpty()) {
             getArguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(loaders)));
         }
     }
@@ -314,9 +306,8 @@ std::optional<QString> FlameAPI::getVersionsURL(const VersionSearchArgs& args) c
         url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
     }
 
-    if (args.loaders.has_value() && args.loaders.value() != ModPlatform::ModLoaderType::DataPack &&
-        ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {
-        int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loaders.value())));
+    if (args.loaders.size() == 1 && *args.loaders.begin() != ModLoaderType::DataPack) {
+        int mappedModLoader = getMappedModLoader(*args.loaders.begin());
         url += QString("&modLoaderType=%1").arg(mappedModLoader);
     }
     return url;
@@ -360,12 +351,11 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(const QByteArray& respo
 };
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QList<ModPlatform::IndexedVersion>& versions,
-                                                                      const QList<ModPlatform::ModLoaderType>& instanceLoaders,
-                                                                      ModPlatform::ModLoaderTypes fallback,
+                                                                      const QSet<ModLoaderType>& instanceLoaders,
+                                                                      const QSet<ModLoaderType>& fallback,
                                                                       bool checkLoaders,
                                                                       std::vector<ModPlatform::IndexedVersionType> releaseTypes)
 {
-    static const auto s_noLoader = ModPlatform::ModLoaderType(0);
     if (!checkLoaders) {
         std::optional<ModPlatform::IndexedVersion> ver;
         for (const auto& fileTmp : versions) {
@@ -378,8 +368,8 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QLis
         }
         return ver;
     }
-    QHash<ModPlatform::ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
-    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModPlatform::ModLoaderType& loader) {
+    QHash<ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
+    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModLoaderType& loader) {
         if (bestMatch.contains(loader)) {
             auto best = bestMatch.value(loader);
             if (version.date > best.date) {
@@ -393,31 +383,47 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QLis
         if (!releaseTypes.empty() && !std::ranges::contains(releaseTypes, fileTmp.versionType)) {
             continue;
         }
-        auto loaders = ModPlatform::modLoaderTypesToList(fileTmp.loaders);
-        if (loaders.isEmpty()) {
-            checkVersion(fileTmp, s_noLoader);
+        if (fileTmp.loaders.isEmpty()) {
+            checkVersion(fileTmp, ModLoaderType::Invalid);
         } else {
-            for (auto loader : loaders) {
+            for (auto loader : fileTmp.loaders) {
                 checkVersion(fileTmp, loader);
             }
         }
     }
     // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
-    auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(fallback);
-    currentLoaders.append(s_noLoader);  // add a fallback in case the versions do not define a loader
-
-    for (auto loader : currentLoaders) {
-        if (bestMatch.contains(loader)) {
-            auto bestForLoader = bestMatch.value(loader);
-            // awkward case where the mod has only two loaders and one of them is not specified
-            if (loader != s_noLoader && bestMatch.contains(s_noLoader) && bestMatch.size() == 2) {
-                auto bestForNoLoader = bestMatch.value(s_noLoader);
-                if (bestForNoLoader.date > bestForLoader.date) {
-                    return bestForNoLoader;
-                }
-            }
-            return bestForLoader;
+    QList<ModLoaderType> currentLoaders;
+    for (const auto loader : ModLoaderType::all()) {
+        if (instanceLoaders.contains(loader)) {
+            currentLoaders.append(loader);
         }
     }
+    for (const auto loader : ModLoaderType::all()) {
+        if (fallback.contains(loader)) {
+            currentLoaders.append(loader);
+        }
+    }
+    currentLoaders.append(ModLoaderType::Invalid);  // add a fallback in case the versions do not define a loader
+
+    for (const auto loader : currentLoaders) {
+        if (!bestMatch.contains(loader)) {
+            continue;
+        }
+
+        auto bestForLoader = bestMatch.value(loader);
+        // awkward case where the mod has only two loaders and one of them is not specified
+        if (loader.isValid() && bestMatch.contains(ModLoaderType::Invalid) && bestMatch.size() == 2) {
+            auto bestForNoLoader = bestMatch.value(ModLoaderType::Invalid);
+            if (bestForNoLoader.date > bestForLoader.date) {
+                return bestForNoLoader;
+            }
+        }
+        return bestForLoader;
+    }
+
+    if (bestMatch.contains(ModLoaderType::Invalid)) {
+        return bestMatch.value(ModLoaderType::Invalid);
+    }
+
     return {};
 }

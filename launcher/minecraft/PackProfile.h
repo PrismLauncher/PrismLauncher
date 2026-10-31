@@ -41,13 +41,14 @@
 
 #include <QAbstractListModel>
 
-#include <QList>
+#include <QSet>
 #include <QString>
 #include <memory>
 #include <optional>
 
 #include "Component.h"
 #include "LaunchProfile.h"
+#include "ModLoaderType.h"
 #include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "net/Mode.h"
@@ -144,10 +145,10 @@ class PackProfile : public QAbstractListModel {
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
+    QSet<ModLoaderType> getModLoaders() const;
     // this returns aditional loaders(Quilt supports fabric and NeoForge supports Forge)
-    std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
-    QList<ModPlatform::ModLoaderType> getModLoadersList();
+    QSet<ModLoaderType> getSupportedModLoaders() const;
+    QSet<ModLoaderType> getSupportedModLoadersOrOverride() const;
 
     /// apply the component patches. Catches all the errors and returns true/false for success/failure
     void invalidateLaunchProfile();

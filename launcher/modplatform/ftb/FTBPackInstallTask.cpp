@@ -253,15 +253,19 @@ void PackInstallTask::createInstance()
             continue;
         }
 
-        if (target.name == "forge") {
-            components->setComponentVersion("net.minecraftforge", target.version);
-        } else if (target.name == "fabric") {
-            components->setComponentVersion("net.fabricmc.fabric-loader", target.version);
-        } else if (target.name == "neoforge") {
-            components->setComponentVersion("net.neoforged", target.version);
-        } else if (target.name == "quilt") {
-            components->setComponentVersion("org.quiltmc.quilt-loader", target.version);
+        const auto loader = ModLoaderType::fromString(target.name);
+        if (!loader.isValid()) {
+            logWarning(tr("Unknown loader: %1").arg(target.name));
+            continue;
         }
+
+        const auto componentId = loader.componentId();
+        if (!componentId.has_value()) {
+            logWarning(tr("Cannot install loader: %1").arg(loader.displayName()));
+            continue;
+        }
+
+        components->setComponentVersion(componentId.value(), target.version);
     }
 
     // install any jar mods

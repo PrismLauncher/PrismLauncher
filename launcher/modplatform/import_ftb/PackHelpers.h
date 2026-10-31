@@ -22,7 +22,8 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
-#include "modplatform/ResourceAPI.h"
+
+#include "minecraft/ModLoaderType.h"
 
 namespace FTBImportAPP {
 
@@ -40,7 +41,7 @@ struct Modpack {
     // not needed for instance creation
     QVariant jvmArgs;
 
-    std::optional<ModPlatform::ModLoaderType> loaderType;
+    std::optional<ModLoaderType> loaderType;
     QString loaderVersion;
 
     QIcon icon;
@@ -49,7 +50,7 @@ struct Modpack {
 using ModpackList = QList<Modpack>;
 
 Result<Modpack> parseDirectory(const QString& path);
-Result<> legacyInstanceParsing(const QString& path, std::optional<ModPlatform::ModLoaderType>* loaderType, QString* loaderVersion);
+Result<> legacyInstanceParsing(const QString& path, std::optional<ModLoaderType>* loaderType, QString* loaderVersion);
 }  // namespace FTBImportAPP
 
 // We need it for the proxy model

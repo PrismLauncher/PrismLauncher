@@ -73,7 +73,7 @@ enum class ModType {
 enum class DownloadType { Server, Browser, Direct, Unknown };
 
 struct VersionLoader {
-    ModPlatform::ModLoaderType type;
+    ModLoaderType type;
     bool latest;
     bool recommended;
     bool choose;

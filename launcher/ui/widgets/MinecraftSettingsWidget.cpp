@@ -43,6 +43,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
+#include "minecraft/ModLoaderType.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
@@ -120,10 +121,35 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
             }
         });
 
-        for (auto* c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
-                         m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
-            connect(c, &QCheckBox::checkStateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+        auto* loaderGrid = qobject_cast<QGridLayout*>(m_ui->loaderGroup->layout());
+        Q_ASSERT(loaderGrid != nullptr);
+
+        int loaderRow = 0;
+        int loaderCol = 0;
+
+        for (const auto loader : ModLoaderType::all()) {
+            if (loader == ModLoaderType::DataPack) {
+                continue;
+            }
+
+            auto* checkBox = new QCheckBox(loader.displayName(), m_ui->loaderGroup);
+            if (const auto icon = loader.icon(); icon.has_value()) {
+                checkBox->setIcon(QIcon::fromTheme(icon.value()));
+            }
+
+            loaderGrid->addWidget(checkBox, loaderRow, loaderCol);
+            connect(checkBox, &QCheckBox::toggled, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+            m_loaderCheckBoxes.append({ loader, checkBox });
+
+            ++loaderCol;
+            if (loaderCol > 1) {
+                loaderCol = 0;
+                ++loaderRow;
+            }
         }
+
+        loaderGrid->setColumnStretch(2, 1);
+
         auto latestVersion = m_instance->settings()->getSetting("UseLatestMinecraftVersion");
         connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
             m_ui->latestMCVersionGroupBox->setChecked(m_instance->settings()->get("UseLatestMinecraftVersion").toBool());
@@ -270,47 +296,16 @@ void MinecraftSettingsWidget::loadSettings()
         m_ui->instanceAccountGroupBox->setChecked(settings->get("UseAccountForInstance").toBool());
         updateAccountsMenu(*settings);
 
-        auto blockSignalsCheckBoxes = { m_ui->neoForge, m_ui->forge,     m_ui->fabric,       m_ui->quilt,   m_ui->liteLoader,
-                                        m_ui->babric,   m_ui->btaBabric, m_ui->legacyFabric, m_ui->ornithe, m_ui->rift };
+        const auto loaders = m_instance->getPackProfile()->getSupportedModLoadersOrOverride();
+
         m_ui->loaderGroup->blockSignals(true);
-        for (auto* c : blockSignalsCheckBoxes) {
-            c->blockSignals(true);
-        }
-
-        const bool overrideLoaders = settings->get("OverrideModDownloadLoaders").toBool();
-        const QStringList loaders = Json::toStringList(settings->get("ModDownloadLoaders").toString());
-
-        m_ui->loaderGroup->setChecked(overrideLoaders);
-
-        if (overrideLoaders) {
-            m_ui->neoForge->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::NeoForge)));
-            m_ui->forge->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Forge)));
-            m_ui->fabric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Fabric)));
-            m_ui->quilt->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Quilt)));
-            m_ui->liteLoader->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::LiteLoader)));
-            m_ui->babric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Babric)));
-            m_ui->btaBabric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::BTA)));
-            m_ui->legacyFabric->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::LegacyFabric)));
-            m_ui->ornithe->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Ornithe)));
-            m_ui->rift->setChecked(loaders.contains(getModLoaderAsString(ModPlatform::Rift)));
-        } else {
-            auto instLoaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
-
-            m_ui->neoForge->setChecked(instLoaders.testAnyFlags(ModPlatform::NeoForge));
-            m_ui->forge->setChecked(instLoaders.testAnyFlags(ModPlatform::Forge));
-            m_ui->fabric->setChecked(instLoaders.testAnyFlags(ModPlatform::Fabric));
-            m_ui->quilt->setChecked(instLoaders.testAnyFlags(ModPlatform::Quilt));
-            m_ui->liteLoader->setChecked(instLoaders.testAnyFlags(ModPlatform::LiteLoader));
-            m_ui->babric->setChecked(instLoaders.testAnyFlags(ModPlatform::Babric));
-            m_ui->btaBabric->setChecked(instLoaders.testAnyFlags(ModPlatform::BTA));
-            m_ui->legacyFabric->setChecked(instLoaders.testAnyFlags(ModPlatform::LegacyFabric));
-            m_ui->ornithe->setChecked(instLoaders.testAnyFlags(ModPlatform::Ornithe));
-            m_ui->rift->setChecked(instLoaders.testAnyFlags(ModPlatform::Rift));
-        }
-
+        m_ui->loaderGroup->setChecked(settings->get("OverrideModDownloadLoaders").toBool());
         m_ui->loaderGroup->blockSignals(false);
-        for (auto* c : blockSignalsCheckBoxes) {
-            c->blockSignals(false);
+
+        for (const auto& [loader, checkBox] : m_loaderCheckBoxes) {
+            checkBox->blockSignals(true);
+            checkBox->setChecked(loaders.contains(loader));
+            checkBox->blockSignals(false);
         }
 
         m_ui->latestMCVersionGroupBox->setChecked(settings->get("UseLatestMinecraftVersion").toBool());
@@ -577,35 +572,10 @@ void MinecraftSettingsWidget::saveSelectedLoaders()
 {
     QStringList loaders;
 
-    if (m_ui->neoForge->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::NeoForge);
-    }
-    if (m_ui->forge->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::Forge);
-    }
-    if (m_ui->fabric->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::Fabric);
-    }
-    if (m_ui->quilt->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::Quilt);
-    }
-    if (m_ui->liteLoader->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::LiteLoader);
-    }
-    if (m_ui->babric->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::Babric);
-    }
-    if (m_ui->btaBabric->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::BTA);
-    }
-    if (m_ui->legacyFabric->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::LegacyFabric);
-    }
-    if (m_ui->ornithe->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::Ornithe);
-    }
-    if (m_ui->rift->isChecked()) {
-        loaders << getModLoaderAsString(ModPlatform::Rift);
+    for (const auto& [loader, checkBox] : m_loaderCheckBoxes) {
+        if (checkBox->isChecked()) {
+            loaders.append(loader.toString());
+        }
     }
 
     m_instance->settings()->set("ModDownloadLoaders", Json::fromStringList(loaders));

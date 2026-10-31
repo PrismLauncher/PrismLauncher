@@ -53,7 +53,7 @@ void PackInstallTask::copySettings()
         std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
 
     {
-        SettingsObject::Lock const lock(m_instance->settings());
+        const SettingsObject::Lock lock(m_instance->settings());
         m_instance->settings()->set("InstanceType", "OneSix");
         m_instance->settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
 
@@ -68,25 +68,11 @@ void PackInstallTask::copySettings()
 
         auto modloader = m_pack.loaderType;
         if (modloader.has_value()) {
-            switch (modloader.value()) {
-                case ModPlatform::NeoForge: {
-                    components->setComponentVersion("net.neoforged", m_pack.loaderVersion, true);
-                    break;
-                }
-                case ModPlatform::Forge: {
-                    components->setComponentVersion("net.minecraftforge", m_pack.loaderVersion, true);
-                    break;
-                }
-                case ModPlatform::Fabric: {
-                    components->setComponentVersion("net.fabricmc.fabric-loader", m_pack.loaderVersion, true);
-                    break;
-                }
-                case ModPlatform::Quilt: {
-                    components->setComponentVersion("org.quiltmc.quilt-loader", m_pack.loaderVersion, true);
-                    break;
-                }
-                default:
-                    break;
+            const auto componentId = modloader->componentId();
+            if (componentId.has_value()) {
+                components->setComponentVersion(componentId.value(), m_pack.loaderVersion, true);
+            } else {
+                logWarning(tr("Cannot install loader: %1").arg(modloader->displayName()));
             }
         }
         components->saveNow();

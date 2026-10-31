@@ -49,14 +49,6 @@
 
 #include <assert.h>
 
-const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
-    { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
-    { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
-    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
-    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
-    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
-};
-
 Component::Component(PackProfile* parent, const QString& uid)
 {
     assert(parent);
@@ -229,22 +221,6 @@ bool Component::isVersionChangeable() const
         return list->count() != 0;
     }
     return false;
-}
-
-bool Component::isKnownModloader()
-{
-    auto iter = KNOWN_MODLOADERS.find(m_uid);
-    return iter != KNOWN_MODLOADERS.cend();
-}
-
-QStringList Component::knownConflictingComponents()
-{
-    auto iter = KNOWN_MODLOADERS.find(m_uid);
-    if (iter != KNOWN_MODLOADERS.cend()) {
-        return (*iter).knownConflictingComponents;
-    } else {
-        return {};
-    }
 }
 
 void Component::setImportant(bool state)

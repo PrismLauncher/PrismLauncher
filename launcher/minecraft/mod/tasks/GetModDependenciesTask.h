@@ -20,10 +20,12 @@
 
 #include <QDir>
 #include <QList>
+#include <QSet>
 #include <QVariant>
 #include <memory>
 #include <utility>
 
+#include "minecraft/ModLoaderType.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
@@ -86,5 +88,5 @@ class GetModDependenciesTask : public SequentialTask {
     QStringList m_modsFileNames;
 
     Version m_version;
-    ModPlatform::ModLoaderTypes m_loaderType;
+    QSet<ModLoaderType> m_loaderType;
 };

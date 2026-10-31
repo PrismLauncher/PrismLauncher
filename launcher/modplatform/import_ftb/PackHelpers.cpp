@@ -84,7 +84,7 @@ Result<Modpack> parseDirectory(const QString& path)
         if (parts.size() >= 2) {
             const auto loader = parts.first().toLower();
             modpack.loaderVersion = parts.at(1).trimmed();
-            modpack.loaderType = ModPlatform::getModLoaderFromString(loader);
+            modpack.loaderType = ModLoaderType::fromString(loader);
         }
     }
     if (!modpack.loaderType.has_value()) {
@@ -102,7 +102,7 @@ Result<Modpack> parseDirectory(const QString& path)
     return modpack;
 }
 
-Result<> legacyInstanceParsing(const QString& path, std::optional<ModPlatform::ModLoaderType>* loaderType, QString* loaderVersion)
+Result<> legacyInstanceParsing(const QString& path, std::optional<ModLoaderType>* loaderType, QString* loaderVersion)
 {
     auto versionsFile = QFileInfo(FS::PathCombine(path, ".ftbapp", "version.json"));
     if (!versionsFile.exists() || !versionsFile.isFile()) {
@@ -117,13 +117,13 @@ Result<> legacyInstanceParsing(const QString& path, std::optional<ModPlatform::M
                  return Json::requireArray(root, "targets", "targets");
              }))
 
-    static auto s_supportedLoaders = { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt };
+    static auto s_supportedLoaders = { ModLoaderType::NeoForge, ModLoaderType::Forge, ModLoaderType::Fabric, ModLoaderType::Quilt };
     for (auto target : targets) {
         TRY_INTO(const auto& obj, Json::requireObject(target, "target"))
         TRY_INTO(const auto& name, Json::requireString(obj, "name", "name"))
         TRY_INTO(const auto& version, Json::requireString(obj, "version", "version"))
-        const auto& loader = ModPlatform::getModLoaderFromString(name);
-        if (std::ranges::contains(s_supportedLoaders, loader)) {
+        const auto& loader = ModLoaderType::fromString(name);
+        if (std::ranges::contains(s_supportedLoaders, loader.value())) {
             *loaderType = loader;
             *loaderVersion = version;
             break;

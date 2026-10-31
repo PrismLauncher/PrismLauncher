@@ -41,17 +41,12 @@ Version mcVersion(MinecraftInstance* inst)
     return inst->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-ModPlatform::ModLoaderTypes mcLoaders(MinecraftInstance* inst)
-{
-    return inst->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
-}
-
 bool checkDependencies(const std::shared_ptr<GetModDependenciesTask::PackDependency>& sel,
                        const Version& mcVersion,
-                       ModPlatform::ModLoaderTypes loaders)
+                       const QSet<ModLoaderType>& loaders)
 {
     return (sel->pack->versions.isEmpty() || sel->version.mcVersion.contains(mcVersion.toString())) &&
-           (!loaders || !sel->version.loaders || sel->version.loaders.testAnyFlags(loaders));
+           (loaders.isEmpty() || sel->version.loaders.isEmpty() || loaders.intersects(sel->version.loaders));
 }
 
 // super lax compare (but not fuzzy)
@@ -91,7 +86,7 @@ GetModDependenciesTask::GetModDependenciesTask(MinecraftInstance* instance,
     : SequentialTask(tr("Get dependencies"))
     , m_selected(std::move(selected))
     , m_version(mcVersion(instance))
-    , m_loaderType(mcLoaders(instance))
+    , m_loaderType(instance->getPackProfile()->getSupportedModLoaders())
 {
     for (auto* mod : folder->allMods()) {
         m_modsFileNames << mod->fileinfo().fileName();
@@ -127,7 +122,7 @@ void GetModDependenciesTask::prepare()
 ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep,
                                                             const ModPlatform::ResourceProvider providerName)
 {
-    if (auto isQuilt = (m_loaderType & ModPlatform::Quilt) != 0U; isQuilt || (m_loaderType & ModPlatform::Fabric) != 0U) {
+    if (auto isQuilt = m_loaderType.contains(ModLoaderType::Quilt); isQuilt || m_loaderType.contains(ModLoaderType::Fabric)) {
         auto overide = ModPlatform::getOverrideDeps();
         auto isOverrideForProvider = [dep, providerName, isQuilt](const auto& o) {
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
@@ -224,7 +219,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     callbacks.onSucceed = [dep, provider, pDep, level, this](auto& pack) {
         pDep->version = pack;
         if (!pDep->version.addonId.isValid()) {
-            if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
+            if (m_loaderType.contains(ModLoaderType::Quilt)) {  // falback for quilt
                 auto overide = ModPlatform::getOverrideDeps();
                 auto isQuiltFallback = [dep, provider](const auto& o) { return o.provider == provider && dep.addonId == o.quilt; };
                 auto over = std::ranges::find_if(overide, isQuiltFallback);

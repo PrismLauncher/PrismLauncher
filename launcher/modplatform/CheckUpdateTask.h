@@ -1,5 +1,6 @@
 #pragma once
 
+#include "minecraft/ModLoaderType.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
@@ -13,7 +14,7 @@ class CheckUpdateTask : public Task {
    public:
     CheckUpdateTask(QList<Resource*>& resources,
                     std::vector<Version>& mcVersions,
-                    QList<ModPlatform::ModLoaderType> loadersList,
+                    QSet<ModLoaderType> loadersList,
                     ResourceFolderModel* resourceModel,
                     std::vector<ModPlatform::IndexedVersionType> releaseTypes = {})
         : m_resources(resources)
@@ -68,7 +69,7 @@ class CheckUpdateTask : public Task {
    protected:
     QList<Resource*>& m_resources;
     std::vector<Version>& m_gameVersions;
-    QList<ModPlatform::ModLoaderType> m_loadersList;
+    QSet<ModLoaderType> m_loadersList;
     ResourceFolderModel* m_resourceModel;
 
     std::vector<Update> m_updates;

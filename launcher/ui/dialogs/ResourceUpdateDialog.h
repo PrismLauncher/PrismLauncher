@@ -2,9 +2,8 @@
 
 #include "ResourceDownloadTask.h"
 #include "ReviewMessageBox.h"
-
+#include "minecraft/ModLoaderType.h"
 #include "minecraft/mod/ModFolderModel.h"
-
 #include "modplatform/CheckUpdateTask.h"
 
 class Minecraft;
@@ -21,7 +20,7 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   ResourceFolderModel* resourceModel,
                                   QList<Resource*>& searchFor,
                                   bool includeDeps,
-                                  QList<ModPlatform::ModLoaderType> loadersList = {},
+                                  QSet<ModLoaderType> loadersList = {},
                                   std::vector<ModPlatform::IndexedVersionType> releaseTypes = {});
 
     void checkCandidates();
@@ -65,6 +64,6 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     bool m_noUpdates = false;
     bool m_aborted = false;
     bool m_includeDeps = false;
-    QList<ModPlatform::ModLoaderType> m_loadersList;
+    QSet<ModLoaderType> m_loadersList;
     std::vector<ModPlatform::IndexedVersionType> m_releaseTypes;
 };
