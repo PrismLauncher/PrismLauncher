@@ -36,6 +36,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QPointer>
 
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
@@ -81,7 +82,7 @@ class WorldListPage : public QMainWindow, public BasePage {
 
    private:
     Ui::WorldListPage* m_ui;
-    WorldList* m_worlds;
+    QPointer<WorldList> m_worlds;
     QMenu* m_worldToolsMenu = nullptr;
 
     std::unique_ptr<DataPackFolderModel> m_datapackModel;
