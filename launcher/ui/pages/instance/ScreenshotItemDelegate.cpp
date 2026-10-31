@@ -18,7 +18,8 @@
  */
 
 #include "ScreenshotItemDelegate.h"
-#include <qnamespace.h>
+
+#include "ui/GuiUtil.h"
 #include "ui/widgets/WidgetDelegate.h"
 
 #include <QApplication>
@@ -203,14 +204,7 @@ void ScreenshotCard::updateLabelPalette()
 {
     QPalette p = palette();
 
-    // The Windows styles paint selected item text in the normal text colour
-    // Vista additionally rewrites the highlight itself.
-    const QString styleKey = QApplication::style()->objectName();
-    // a bit fragile if we ever change the theme names but ok
-    const bool lightSelection = styleKey == QLatin1String("windowsvista") || styleKey == QLatin1String("windows11");
-
-    const QColor selectionColor = lightSelection ? p.color(QPalette::Text) : p.color(QPalette::HighlightedText);
-    const QColor color = !m_selected ? p.color(QPalette::WindowText) : selectionColor;
+    const QColor color = m_selected ? GuiUtil::selectedItemFg(p, style()) : p.color(QPalette::WindowText);
 
     p.setColor(QPalette::WindowText, color);
     p.setColor(QPalette::Text, color);
@@ -454,7 +448,7 @@ void ScreenshotItemDelegate::setEditorData(QWidget* editor, const QModelIndex& i
 void ScreenshotItemDelegate::paintItem(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
 {
     // draw background, for selected and non selected
-    QStyle* style = option.widget ? option.widget->style() : QApplication::style();
+    const QStyle* style = option.widget ? option.widget->style() : QApplication::style();
     style->drawPrimitive(QStyle::PE_PanelItemViewItem, &option, painter, option.widget);
 }
 
