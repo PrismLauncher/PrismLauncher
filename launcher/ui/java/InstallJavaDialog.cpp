@@ -42,7 +42,7 @@
 #include "ui/widgets/PageContainer.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
 #include "java/download/SymlinkTask.h"
 #include "tasks/SequentialTask.h"
 #endif
@@ -221,7 +221,7 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
 
     auto* recommendedCheckBox = new QCheckBox("Recommended", this);
     recommendedCheckBox->setCheckState(Qt::CheckState::Checked);
-    connect(recommendedCheckBox, &QCheckBox::checkStateChanged, this, [this](int state) {
+    connect(recommendedCheckBox, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
         for (BasePage* page : m_container->getPages()) {
             pageCast(page)->setRecommend(state == Qt::Checked);
         }
@@ -346,7 +346,7 @@ void InstallDialog::done(int result)
                         deletePath();
                         return;
                 }
-#if defined(Q_OS_MACOS)
+#ifdef Q_OS_MACOS
                 auto seq = makeShared<SequentialTask>(tr("Install Java"));
                 seq->addTask(task);
                 seq->addTask(makeShared<Java::SymlinkTask>(finalPath));

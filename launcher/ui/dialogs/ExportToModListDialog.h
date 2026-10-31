@@ -39,7 +39,7 @@ class ExportToModListDialog : public QDialog {
    protected slots:
     void formatChanged(int index);
     void triggerImp();
-    void trigger(int /*unused*/) { triggerImp(); };
+    void trigger(Qt::CheckState /*unused*/) { triggerImp(); };
     void addExtra(ExportToModList::OptionalData option);
 
    private:
@@ -51,5 +51,5 @@ class ExportToModListDialog : public QDialog {
     QString m_name;
     ExportToModList::Formats m_format = ExportToModList::Formats::HTML;
     Ui::ExportToModListDialog* m_ui;
-    static const QHash<ExportToModList::Formats, QString> exampleLines;
+    static const QHash<ExportToModList::Formats, QString>& exampleLines();
 };

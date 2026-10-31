@@ -134,7 +134,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray& data, PackType packType, Modpac
 
     auto result = doc.setContent(data);
     if (!result) {
-        const QString fullErrMsg =
+        const auto fullErrMsg =
             QString("Failed to fetch modpack data: %1 %2:%3!").arg(result.errorMessage).arg(result.errorLine).arg(result.errorColumn);
         qWarning() << fullErrMsg;
         return false;
