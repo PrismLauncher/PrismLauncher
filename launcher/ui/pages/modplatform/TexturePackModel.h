@@ -15,13 +15,11 @@ class TexturePackResourceModel : public ResourcePackResourceModel {
    public:
     TexturePackResourceModel(ResourceFolderModel* inst, const ResourceAPI* api, const QString& debugName, QString metaEntryBase);
 
-    inline ::Version maximumTexturePackVersion() const { return { "1.6" }; }
-
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex& /*unused*/) override;
 
    protected:
-    Meta::VersionList::Ptr m_version_list;
+    Meta::VersionList::Ptr m_versionList;
     Task::Ptr m_task;
 };
 
