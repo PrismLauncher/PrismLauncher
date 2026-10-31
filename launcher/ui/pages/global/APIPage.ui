@@ -34,7 +34,7 @@
         <x>0</x>
         <y>0</y>
         <width>825</width>
-        <height>1236</height>
+        <height>1340</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -430,6 +430,46 @@
            <widget class="QLabel" name="label_11">
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: you only need to set this to access private data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>6</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="ghLabel">
+            <property name="text">
+             <string>&amp;Github</string>
+            </property>
+            <property name="buddy">
+             <cstring>githubClientID</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="githubClientID">
+            <property name="placeholderText">
+             <string>None</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="ghNoteLabel">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: you only need to set this in case you have issues with the updater.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
