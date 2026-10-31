@@ -1158,9 +1158,33 @@ SET(LAUNCHER_SOURCES
 )
 
 if (APPLE)
+    set(MAC_GAME_MODE_BIN "${CMAKE_CURRENT_BINARY_DIR}/gamemode")
+    set(MAC_GAME_MODE_HDR "${CMAKE_CURRENT_BINARY_DIR}/MacGameModeBin.h")
+    add_custom_command(
+        OUTPUT "${MAC_GAME_MODE_HDR}"
+        COMMAND xcrun --sdk macosx clang
+            -arch arm64 -arch x86_64
+            -mmacosx-version-min=11.0
+            -Os -fobjc-arc -Wl,-export_dynamic
+            -Wall -Wextra -Werror
+            -framework Foundation -framework CoreServices
+            "${CMAKE_CURRENT_SOURCE_DIR}/minecraft/launch/game_mode.m"
+            -o "${MAC_GAME_MODE_BIN}"
+        COMMAND codesign -f -s - "${MAC_GAME_MODE_BIN}"
+        COMMAND /usr/bin/xxd -i -n kMacGameMode "${MAC_GAME_MODE_BIN}" "${MAC_GAME_MODE_HDR}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/minecraft/launch/game_mode.m"
+        COMMENT "Building macOS Game Mode helper"
+        VERBATIM
+    )
+    set_source_files_properties(
+        minecraft/launch/MacGameMode.cpp
+        PROPERTIES OBJECT_DEPENDS "${MAC_GAME_MODE_HDR}"
+    )
+
     set(LAUNCHER_SOURCES
         ${LAUNCHER_SOURCES}
         ui/themes/ThemeManager.mm
+        minecraft/launch/MacGameMode.cpp
     )
 endif()
 

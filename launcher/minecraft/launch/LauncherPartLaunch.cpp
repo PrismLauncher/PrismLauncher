@@ -47,6 +47,11 @@
 #include "gamemode_client.h"
 #endif
 
+#ifdef Q_OS_MACOS
+#include <QOperatingSystemVersion>
+QString prepareMacGameMode(const QString& rootDir);
+#endif
+
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
     : LaunchStep(parent)
     , m_process(parent->instance()->getJavaVersion().defaultsToUtf8() ? QStringConverter::Utf8 : QStringConverter::System)
@@ -97,6 +102,17 @@ void LauncherPartLaunch::executeTask()
     emit logLine("Java arguments:\n  " + m_parent->censorPrivateInfo(allArgs) + "\n", MessageLevel::Launcher);
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
+    auto executable = javaPath;
+#ifdef Q_OS_MACOS
+    if (QOperatingSystemVersion::current() >= QOperatingSystemVersion(QOperatingSystemVersion::MacOS, 14)) {
+        auto gameMode = prepareMacGameMode(APPLICATION->dataRoot());
+        if (gameMode.isEmpty()) {
+            emit logLine("Could not prepare macOS Game Mode helper; using the original Java executable.", MessageLevel::Warning);
+        } else {
+            executable = gameMode;
+        }
+    }
+#endif
 
     m_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
@@ -130,6 +146,10 @@ void LauncherPartLaunch::executeTask()
 
     qDebug() << args.join(' ');
 
+    if (executable != javaPath) {
+        args.prepend(javaPath);
+    }
+
     QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
     if (!wrapperCommandStr.isEmpty()) {
         auto wrapperArgs = m_parent->substituteVariables(wrapperCommandStr);
@@ -142,10 +162,10 @@ void LauncherPartLaunch::executeTask()
             return;
         }
         emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::Launcher);
-        args.prepend(javaPath);
+        args.prepend(executable);
         m_process.start(wrapperCommand, wrapperArgs + args);
     } else {
-        m_process.start(javaPath, args);
+        m_process.start(executable, args);
     }
 
 #if defined(Q_OS_LINUX) && defined(ENABLE_GAMEMODE)
