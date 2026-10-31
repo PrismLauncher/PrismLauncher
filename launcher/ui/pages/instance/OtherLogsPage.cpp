@@ -394,9 +394,9 @@ void OtherLogsPage::on_btnDelete_clicked()
     }
     if (QMessageBox::question(this, tr("Confirm Deletion"),
                               tr("You are about to delete \"%1\".\n"
-                                 "This may be permanent and it will be gone from the logs folder.\n\n"
+                                 "This log will be sent to your %2 folder if possible - if not it will be permanently gone!\n\n"
                                  "Are you sure?")
-                                  .arg(m_currentFile),
+                                  .arg(m_currentFile).arg(GuiUtil::trashName()),
                               QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
         return;
     }

@@ -20,4 +20,6 @@ QString browseForFile(const QString& context,
                       const QString& filter,
                       const QString& defaultPath,
                       QWidget* parentWidget);
+
+QString trashName();
 }  // namespace GuiUtil
