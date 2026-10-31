@@ -352,7 +352,7 @@ void ModpackListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Pt
 {
     m_jobPtr.reset();
 
-    beginInsertRows(QModelIndex(), static_cast<int>(m_modpacks.size()), static_cast<int>(m_modpacks.size() + 1));
+    beginInsertRows(QModelIndex(), static_cast<int>(m_modpacks.size()), static_cast<int>(m_modpacks.size()));
     m_modpacks.append(pack);
     endInsertRows();
 }
