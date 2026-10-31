@@ -76,10 +76,12 @@ class Mod : public Resource {
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_localDetails.icon_file; }
-    /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
-    QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
-    /** Thread-safe. */
-    QPixmap setIcon(const QImage& newImage) const;
+
+    void loadIcon() override;
+
+    QPixmap icon(QSize size) const override { return m_iconCache.icon(size); }
+
+    QIcon fallbackIcon() const override;
 
     void setDetails(const ModDetails& details);
 
@@ -97,14 +99,7 @@ class Mod : public Resource {
 
    protected:
     ModDetails m_localDetails;
-
-    mutable QMutex m_dataLock;
-
-    struct {
-        QPixmapCache::Key key;
-        bool wasEverUsed = false;
-        bool wasReadAttempt = false;
-    } mutable m_packImageCacheKey;
+    ResourceIconCache m_iconCache;
 
     int m_requiredByCount = 0;
     int m_requiresCount = 0;

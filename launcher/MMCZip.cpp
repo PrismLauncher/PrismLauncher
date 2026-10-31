@@ -39,6 +39,7 @@
 #include "FileSystem.h"
 #include "archive/ArchiveReader.h"
 #include "archive/ArchiveWriter.h"
+#include "minecraft/mod/Mod.h"
 
 #include <QCoreApplication>
 #include <QDebug>

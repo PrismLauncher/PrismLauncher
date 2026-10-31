@@ -43,7 +43,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
    public slots:
     virtual void updateActions();
-    virtual void updateFrame(const QModelIndex& current, const QModelIndex& previous);
+    virtual void updateFrame(const QModelIndex& current);
 
    protected slots:
     void itemActivated(const QModelIndex& index);

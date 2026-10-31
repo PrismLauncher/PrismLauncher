@@ -565,11 +565,11 @@ ModDetails ReadNilModInfo(const QByteArray& contents, QString fname)
     return details;
 }
 
-bool process(Mod& mod, ProcessingLevel level)
+bool process(Mod& mod)
 {
     switch (mod.type()) {
         case ResourceType::ZIPFILE:
-            return processZIP(mod, level);
+            return processZIP(mod);
         case ResourceType::LITEMOD:
             return processLitemod(mod);
         default:
@@ -578,7 +578,7 @@ bool process(Mod& mod, ProcessingLevel level)
     }
 }
 
-bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
+bool processZIP(Mod& mod)
 {
     ModDetails details;
 
@@ -591,8 +591,8 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
     QByteArray nilData = {};
     QString nilFilePath = {};
 
-    if (const auto result = zip.parse([&details, &baseForgePopulated, &manifestVersion, &isValid, &nilData, &isNilMod, &nilFilePath](
-                       MMCZip::ArchiveReader::File* file) -> Result<bool> {
+    if (const auto result = zip.parse([&details, &baseForgePopulated, &manifestVersion, &isValid, &nilData, &isNilMod,
+                                       &nilFilePath](MMCZip::ArchiveReader::File* file) -> Result<bool> {
             auto filePath = file->filename();
 
             if (filePath == "META-INF/mods.toml" || filePath == "META-INF/neoforge.mods.toml") {
@@ -664,7 +664,8 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
             }
             TRY(file->skip());
             return false;
-        }); !result) {
+        });
+        !result) {
         qWarning() << "Could not parse mod zip:" << result.error();
         return false;
     }
@@ -679,7 +680,7 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
     return false;  // no valid mod found in archive
 }
 
-bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
+bool processLitemod(Mod& mod)
 {
     ModDetails details;
 
@@ -699,52 +700,33 @@ bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 bool validate(QFileInfo file)
 {
     Mod mod{ file };
-    return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();
+    return ModUtils::process(mod) && mod.valid();
 }
 
-bool processIconPNG(const Mod& mod, QByteArray&& raw_data, QPixmap* pixmap)
+QPixmap loadIconFile(ResourceType type, const QString& path, const QString& iconPath)
 {
-    auto img = QImage::fromData(raw_data);
-    if (!img.isNull()) {
-        *pixmap = mod.setIcon(img);
-    } else {
-        qWarning() << "Failed to parse mod logo:" << mod.iconPath() << "from" << mod.name();
-        return false;
-    }
-    return true;
-}
-
-bool loadIconFile(const Mod& mod, QPixmap* pixmap)
-{
-    if (mod.iconPath().isEmpty()) {
-        qWarning() << "No Iconfile set, be sure to parse the mod first";
-        return false;
-    }
-
-    auto png_invalid = [&mod](const QString& reason) {
-        qWarning() << "Mod at" << mod.fileinfo().filePath() << "does not have a valid icon:" << reason;
-        return false;
+    auto pngInvalid = [&path](const QString& reason) {
+        qWarning() << "Mod at" << path << "does not have a valid icon:" << reason;
+        return QPixmap();
     };
 
-    switch (mod.type()) {
+    switch (type) {
         case ResourceType::ZIPFILE: {
-            MMCZip::ArchiveReader zip(mod.fileinfo().filePath());
-            if (auto dataRes = zip.readFile(mod.iconPath()); dataRes) {
-                bool icon_result = ModUtils::processIconPNG(mod, std::move(dataRes.value()), pixmap);
-
-                if (!icon_result) {
-                    return png_invalid("invalid png image");  // icon png invalid
+            MMCZip::ArchiveReader zip(path);
+            if (auto dataRes = zip.readFile(iconPath); dataRes) {
+                QPixmap result;
+                if (!result.loadFromData(dataRes.value())) {
+                    return pngInvalid("invalid png image");  // icon png invalid
                 }
-                return true;
+                return result;
             }
-            return png_invalid("Failed to set '" + mod.iconPath() +
-                               "' as current file in zip archive");  // could not set icon as current file.
+            return pngInvalid("Failed to set '" + iconPath + "' as current file in zip archive");  // could not set icon as current file.
         }
         case ResourceType::LITEMOD: {
-            return png_invalid("litemods do not have icons");  // can lightmods even have icons?
+            return pngInvalid("litemods do not have icons");  // can lightmods even have icons?
         }
         default:
-            return png_invalid("Invalid type for mod, can not load icon.");
+            return pngInvalid("Invalid type for mod, can not load icon.");
     }
 }
 
@@ -763,7 +745,7 @@ bool LocalModParseTask::abort()
 void LocalModParseTask::executeTask()
 {
     Mod mod{ m_modFile };
-    ModUtils::process(mod, ModUtils::ProcessingLevel::Full);
+    ModUtils::process(mod);
 
     m_result->details = mod.details();
 

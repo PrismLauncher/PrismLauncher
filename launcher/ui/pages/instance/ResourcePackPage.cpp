@@ -74,12 +74,12 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, ResourcePackFold
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
-void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ResourcePackPage::updateFrame(const QModelIndex& current)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     auto& rp = m_model->at(row);
-    m_ui->frame->updateWithResourcePack(rp);
+    m_ui->frame->updateWithDataPack(rp);
 }
 
 void ResourcePackPage::downloadResourcePacks()

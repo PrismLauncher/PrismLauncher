@@ -49,7 +49,7 @@ class TexturePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "test_texturefolder");
         TexturePack pack{ QFileInfo(folder_rp) };
 
-        bool valid = TexturePackUtils::processFolder(pack, TexturePackUtils::ProcessingLevel::BasicInfoOnly);
+        bool valid = TexturePackUtils::processFolder(pack);
 
         QVERIFY(pack.description() == "Some texture pack surely");
         QVERIFY(valid == true);
@@ -62,7 +62,7 @@ class TexturePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "another_test_texturefolder");
         TexturePack pack{ QFileInfo(folder_rp) };
 
-        bool valid = TexturePackUtils::process(pack, TexturePackUtils::ProcessingLevel::BasicInfoOnly);
+        bool valid = TexturePackUtils::process(pack);
 
         QVERIFY(pack.description() == "quieres\nfor real");
         QVERIFY(valid == true);

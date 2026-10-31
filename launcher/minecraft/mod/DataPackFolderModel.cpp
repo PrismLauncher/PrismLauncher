@@ -37,7 +37,6 @@
 
 #include "DataPackFolderModel.h"
 
-#include <QIcon>
 #include <QStyle>
 
 #include "minecraft/mod/tasks/LocalDataPackParseTask.h"
@@ -121,25 +120,6 @@ QVariant DataPackFolderModel::data(const QModelIndex& index, int role) const
     }
 
     return {};
-}
-
-QList<MultiDecorationItemDelegate::Icon> DataPackFolderModel::icons(int row) const
-{
-    auto result = ResourceFolderModel::icons(row);
-    static const QSize s_iconSize = { 32, 32 };
-
-    if (m_showImages) {
-        QIcon icon;
-        if (const auto pixmap = at(row).image(s_iconSize, Qt::KeepAspectRatio); !pixmap.isNull()) {
-            icon = pixmap;
-        } else {
-            icon = QIcon::fromTheme("datapacks");
-        }
-
-        result.prepend({ .icon = icon, .size = s_iconSize });
-    }
-
-    return result;
 }
 
 QVariant DataPackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
