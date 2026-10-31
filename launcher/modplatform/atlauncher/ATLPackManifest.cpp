@@ -40,59 +40,80 @@
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 
-static ATLauncher::DownloadType parseDownloadType(QString rawType)
+namespace {
+ATLauncher::DownloadType parseDownloadType(const QString& rawType)
 {
     if (rawType == QString("server")) {
         return ATLauncher::DownloadType::Server;
-    } else if (rawType == QString("browser")) {
+    }
+    if (rawType == QString("browser")) {
         return ATLauncher::DownloadType::Browser;
-    } else if (rawType == QString("direct")) {
+    }
+    if (rawType == QString("direct")) {
         return ATLauncher::DownloadType::Direct;
     }
 
     return ATLauncher::DownloadType::Unknown;
 }
 
-static ATLauncher::ModType parseModType(QString rawType)
+ATLauncher::ModType parseModType(const QString& rawType)
 {
     // See https://wiki.atlauncher.com/mod_types
     if (rawType == QString("root")) {
         return ATLauncher::ModType::Root;
-    } else if (rawType == QString("forge")) {
+    }
+    if (rawType == QString("forge")) {
         return ATLauncher::ModType::Forge;
-    } else if (rawType == QString("jar")) {
+    }
+    if (rawType == QString("jar")) {
         return ATLauncher::ModType::Jar;
-    } else if (rawType == QString("mods")) {
+    }
+    if (rawType == QString("mods")) {
         return ATLauncher::ModType::Mods;
-    } else if (rawType == QString("flan")) {
+    }
+    if (rawType == QString("flan")) {
         return ATLauncher::ModType::Flan;
-    } else if (rawType == QString("dependency") || rawType == QString("depandency")) {
+    }
+    if (rawType == QString("dependency") || rawType == QString("depandency")) {
         return ATLauncher::ModType::Dependency;
-    } else if (rawType == QString("ic2lib")) {
+    }
+    if (rawType == QString("ic2lib")) {
         return ATLauncher::ModType::Ic2Lib;
-    } else if (rawType == QString("denlib")) {
+    }
+    if (rawType == QString("denlib")) {
         return ATLauncher::ModType::DenLib;
-    } else if (rawType == QString("coremods")) {
+    }
+    if (rawType == QString("coremods")) {
         return ATLauncher::ModType::Coremods;
-    } else if (rawType == QString("mcpc")) {
+    }
+    if (rawType == QString("mcpc")) {
         return ATLauncher::ModType::MCPC;
-    } else if (rawType == QString("plugins")) {
+    }
+    if (rawType == QString("plugins")) {
         return ATLauncher::ModType::Plugins;
-    } else if (rawType == QString("extract")) {
+    }
+    if (rawType == QString("extract")) {
         return ATLauncher::ModType::Extract;
-    } else if (rawType == QString("decomp")) {
+    }
+    if (rawType == QString("decomp")) {
         return ATLauncher::ModType::Decomp;
-    } else if (rawType == QString("texturepack")) {
+    }
+    if (rawType == QString("texturepack")) {
         return ATLauncher::ModType::TexturePack;
-    } else if (rawType == QString("resourcepack")) {
+    }
+    if (rawType == QString("resourcepack")) {
         return ATLauncher::ModType::ResourcePack;
-    } else if (rawType == QString("shaderpack")) {
+    }
+    if (rawType == QString("shaderpack")) {
         return ATLauncher::ModType::ShaderPack;
-    } else if (rawType == QString("texturepackextract")) {
+    }
+    if (rawType == QString("texturepackextract")) {
         return ATLauncher::ModType::TexturePackExtract;
-    } else if (rawType == QString("resourcepackextract")) {
+    }
+    if (rawType == QString("resourcepackextract")) {
         return ATLauncher::ModType::ResourcePackExtract;
-    } else if (rawType == QString("millenaire")) {
+    }
+    if (rawType == QString("millenaire")) {
         return ATLauncher::ModType::Millenaire;
     }
 
@@ -101,7 +122,7 @@ static ATLauncher::ModType parseModType(QString rawType)
 
 Result<> loadVersionLoader(ATLauncher::VersionLoader& p, const QJsonObject& obj)
 {
-    p.choose = obj["choose"].toBool();
+    p.choose = obj.value("choose").toBool();
 
     TRY_INTO(const auto& metadata, Json::requireObject(obj, "metadata"))
     p.latest = metadata.value("latest").toBool();
@@ -138,7 +159,7 @@ Result<> loadVersionLibrary(ATLauncher::VersionLibrary& p, const QJsonObject& ob
     TRY_INTO(p.download_raw, Json::requireString(obj, "download"))
     p.download = parseDownloadType(p.download_raw);
 
-    p.server = obj["server"].toString("");
+    p.server = obj.value("server").toString("");
     return {};
 }
 
@@ -155,7 +176,7 @@ Result<> loadVersionMod(ATLauncher::VersionMod& p, const QJsonObject& obj)
     TRY_INTO(p.version, Json::requireString(obj, "version"))
     TRY_INTO(p.url, Json::requireString(obj, "url"))
     TRY_INTO(p.file, Json::requireString(obj, "file"))
-    p.md5 = obj["md5"].toString("");
+    p.md5 = obj.value("md5").toString("");
 
     TRY_INTO(p.download_raw, Json::requireString(obj, "download"))
     p.download = parseDownloadType(p.download_raw);
@@ -175,7 +196,7 @@ Result<> loadVersionMod(ATLauncher::VersionMod& p, const QJsonObject& obj)
     if (obj.contains("extractTo")) {
         TRY_INTO(p.extractTo_raw, Json::requireString(obj, "extractTo"))
         p.extractTo = parseModType(p.extractTo_raw);
-        p.extractFolder = obj["extractFolder"].toString("").replace("%s%", "/");
+        p.extractFolder = obj.value("extractFolder").toString("").replace("%s%", "/");
     }
 
     if (obj.contains("decompType")) {
@@ -184,13 +205,13 @@ Result<> loadVersionMod(ATLauncher::VersionMod& p, const QJsonObject& obj)
         TRY_INTO(p.decompFile, Json::requireString(obj, "decompFile"))
     }
 
-    p.description = obj["description"].toString("");
-    p.optional = obj["optional"].toBool();
-    p.recommended = obj["recommended"].toBool();
-    p.selected = obj["selected"].toBool();
-    p.hidden = obj["hidden"].toBool();
-    p.library = obj["library"].toBool();
-    p.group = obj["group"].toString("");
+    p.description = obj.value("description").toString("");
+    p.optional = obj.value("optional").toBool();
+    p.recommended = obj.value("recommended").toBool();
+    p.selected = obj.value("selected").toBool();
+    p.hidden = obj.value("hidden").toBool();
+    p.library = obj.value("library").toBool();
+    p.group = obj.value("group").toString("");
     if (obj.contains("depends")) {
         TRY_INTO(const auto& dependsArr, Json::requireArray(obj, "depends"))
         for (const auto depends : dependsArr) {
@@ -198,32 +219,32 @@ Result<> loadVersionMod(ATLauncher::VersionMod& p, const QJsonObject& obj)
             p.depends.append(v);
         }
     }
-    p.colour = obj["colour"].toString("");
-    p.warning = obj["warning"].toString("");
+    p.colour = obj.value("colour").toString("");
+    p.warning = obj.value("warning").toString("");
 
-    p.client = obj["client"].toBool();
+    p.client = obj.value("client").toBool();
 
     // computed
     p.effectively_hidden = p.hidden || p.library;
     return {};
 }
 
-static void loadVersionMessages(ATLauncher::VersionMessages& m, const QJsonObject& obj)
+void loadVersionMessages(ATLauncher::VersionMessages& m, const QJsonObject& obj)
 {
-    m.install = obj["install"].toString("");
-    m.update = obj["update"].toString("");
+    m.install = obj.value("install").toString("");
+    m.update = obj.value("update").toString("");
 }
 
-static void loadVersionMainClass(ATLauncher::PackVersionMainClass& m, const QJsonObject& obj)
+void loadVersionMainClass(ATLauncher::PackVersionMainClass& m, const QJsonObject& obj)
 {
-    m.mainClass = obj["mainClass"].toString("");
-    m.depends = obj["depends"].toString("");
+    m.mainClass = obj.value("mainClass").toString("");
+    m.depends = obj.value("depends").toString("");
 }
 
-static void loadVersionExtraArguments(ATLauncher::PackVersionExtraArguments& a, const QJsonObject& obj)
+void loadVersionExtraArguments(ATLauncher::PackVersionExtraArguments& a, const QJsonObject& obj)
 {
-    a.arguments = obj["arguments"].toString("");
-    a.depends = obj["depends"].toString("");
+    a.arguments = obj.value("arguments").toString("");
+    a.depends = obj.value("depends").toString("");
 }
 
 Result<> loadVersionKeep(ATLauncher::VersionKeep& k, const QJsonObject& obj)
@@ -283,12 +304,14 @@ Result<> loadVersionDeletes(ATLauncher::VersionDeletes& d, const QJsonObject& ob
     }
     return {};
 }
+}  // namespace
 
-Result<> ATLauncher::loadVersion(PackVersion& v, const QJsonObject& obj)
+Result<ATLauncher::PackVersion> ATLauncher::loadVersion(const QJsonObject& obj)
 {
+    PackVersion v{};
     TRY_INTO(v.version, Json::requireString(obj, "version"))
     TRY_INTO(v.minecraft, Json::requireString(obj, "minecraft"))
-    v.noConfigs = obj["noConfigs"].toBool();
+    v.noConfigs = obj.value("noConfigs").toBool();
 
     if (obj.contains("mainClass")) {
         TRY_INTO(const auto& main, Json::requireObject(obj, "mainClass"))
@@ -326,23 +349,23 @@ Result<> ATLauncher::loadVersion(PackVersion& v, const QJsonObject& obj)
         TRY(Json::requireObject(obj, "configs").and_then([&v](const auto& val) { return loadVersionConfigs(v.configs, val); }))
     }
 
-    auto colourObj = obj["colours"].toObject();
+    auto colourObj = obj.value("colours").toObject();
     for (const auto& key : colourObj.keys()) {
-        TRY_INTO(v.colours[key], Json::requireString(colourObj.value(key), "colour"))
+        TRY_INTO(v.colours.value(key), Json::requireString(colourObj.value(key), "colour"))
     }
 
-    auto warningsObj = obj["warnings"].toObject();
+    auto warningsObj = obj.value("warnings").toObject();
     for (const auto& key : warningsObj.keys()) {
-        TRY_INTO(v.warnings[key], Json::requireString(warningsObj.value(key), "warning"))
+        TRY_INTO(v.warnings.value(key), Json::requireString(warningsObj.value(key), "warning"))
     }
 
-    auto messages = obj["messages"].toObject();
+    auto messages = obj.value("messages").toObject();
     loadVersionMessages(v.messages, messages);
 
-    auto keeps = obj["keeps"].toObject();
+    auto keeps = obj.value("keeps").toObject();
     TRY(loadVersionKeeps(v.keeps, keeps))
 
-    auto deletes = obj["deletes"].toObject();
+    auto deletes = obj.value("deletes").toObject();
     TRY(loadVersionDeletes(v.deletes, deletes))
-    return {};
+    return v;
 }
