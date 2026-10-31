@@ -18,6 +18,7 @@
  */
 
 #include "ScreenshotItemDelegate.h"
+#include <qnamespace.h>
 #include "ui/widgets/WidgetDelegate.h"
 
 #include <QApplication>
@@ -331,6 +332,17 @@ void ScreenshotCard::moveEvent(QMoveEvent* event)
     setHovered(cursorInside());
 }
 
+void ScreenshotCard::mousePressEvent(QMouseEvent* event)
+{
+    if (m_selected && event->button() == Qt::LeftButton && event->modifiers() == Qt::NoModifier &&
+        m_label->geometry().contains(event->position().toPoint())) {
+        startRename();
+        event->accept();
+        return;
+    }
+    QFrame::mousePressEvent(event);
+}
+
 void ScreenshotCard::setIndex(const QModelIndex& index)
 {
     m_index = index;
@@ -349,7 +361,7 @@ void ScreenshotCard::updateActionButtons()
 
 void ScreenshotCard::startRename()
 {
-    if (m_editing || !m_index.isValid()) {
+    if (m_editing || !m_index.isValid() || !(m_index.flags() & Qt::ItemIsEditable)) {
         return;
     }
 

@@ -63,6 +63,7 @@ class ScreenshotCard : public QFrame {
     void resizeEvent(QResizeEvent* event) override;
     void changeEvent(QEvent* event) override;
     void moveEvent(QMoveEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
 
    signals:
     void renameRequested(const QPersistentModelIndex& index, const QString& newName);
