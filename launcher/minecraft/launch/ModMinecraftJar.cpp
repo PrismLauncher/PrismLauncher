@@ -42,9 +42,9 @@
 
 void ModMinecraftJar::executeTask()
 {
-    auto m_inst = m_parent->instance();
+    auto* m_inst = m_parent->instance();
 
-    if (!m_inst->getJarMods().size()) {
+    if (!m_inst->hasJarMods()) {
         emitSucceeded();
         return;
     }
@@ -61,12 +61,16 @@ void ModMinecraftJar::executeTask()
     }
 
     // create temporary modded jar, if needed
-    auto components = m_inst->getPackProfile();
+    auto* components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto jarMods = m_inst->getJarMods();
-    if (jarMods.size()) {
+    if (!jarMods.empty()) {
         auto mainJar = profile->getMainJar();
-        QStringList jars, temp1, temp2, temp3, temp4;
+        QStringList jars;
+        QStringList temp1;
+        QStringList temp2;
+        QStringList temp3;
+        QStringList temp4;
         mainJar->getApplicableFiles(m_inst->runtimeContext(), jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
         auto sourceJarPath = jars[0];
         if (const auto result = MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods); !result) {
