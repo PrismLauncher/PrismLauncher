@@ -85,7 +85,7 @@ public final class StandardLauncher extends AbstractLauncher {
             if (quickPlayMultiplayerSupported) {
                 // as of 23w14a
                 gameArgs.add("--quickPlayMultiplayer");
-                gameArgs.add(serverAddress + ':' + serverPort);
+                gameArgs.add(serverOriginalAddress != null ? serverOriginalAddress : serverAddress + ':' + serverPort);
             } else {
                 gameArgs.add("--server");
                 gameArgs.add(serverAddress);
