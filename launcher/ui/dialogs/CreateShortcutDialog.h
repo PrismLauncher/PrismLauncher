@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QDialog>
+#include "net/NetJob.h"
 
 class MinecraftInstance;
 
@@ -45,6 +46,8 @@ class CreateShortcutDialog : public QDialog {
     void on_serverTarget_toggled(bool checked);
     void on_worldSelectionBox_currentIndexChanged(int index);
     void on_serverAddressBox_textChanged(const QString& text);
+    void on_realmTarget_toggled(bool checked);
+    void on_realmSelectionBox_currentIndexChanged(int index);
 
    private:
     // Data
@@ -52,6 +55,7 @@ class CreateShortcutDialog : public QDialog {
     QString InstIconKey;
     MinecraftInstance* m_instance;
     bool m_QuickJoinSupported = false;
+    NetJob::Ptr m_realmsJob;
 
     // Functions
     void stateChanged();
