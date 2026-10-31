@@ -1,9 +1,6 @@
 #include "ModrinthCheckUpdate.h"
 #include "Application.h"
 #include "ModrinthAPI.h"
-#include "ModrinthPackIndex.h"
-
-#include "Json.h"
 
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
@@ -105,9 +102,9 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader, m_releaseTypes);
+    auto [job, response] = ModrinthAPI::latestVersionsTask(hashes, m_hashType, m_gameVersions, loader, m_releaseTypes);
 
-    connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
+    connect(job.get(), &Task::succeeded, this, [this, response] { checkVersionsResponse(response); });
 
     connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
 
@@ -115,19 +112,10 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     job->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(QHash<QString, ModPlatform::IndexedVersion>* response)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
-
-    auto doc = Json::requireDocument(*response, "ModrinthCheckUpdate");
-    if (!doc) {
-        qWarning() << "Error while parsing JSON response from ModrinthCheckUpdate:" << doc.error();
-        qWarning() << *response;
-
-        emitFailed(doc.error());
-        return;
-    }
 
     auto iter = m_mappings.begin();
 
@@ -135,43 +123,14 @@ void ModrinthCheckUpdate::checkVersionsResponse(QByteArray* response, std::optio
         const QString hash = iter.key();
         Resource* resource = iter.value();
 
-        auto projectObj = doc.value()[hash].toObject();
-
         // If the returned project is empty, but we have Modrinth metadata,
         // it means this specific version is not available
-        if (projectObj.isEmpty()) {
+        if (!response->contains(hash)) {
             qDebug() << "Mod" << m_mappings.find(hash).value()->name() << "got an empty response. Hash:" << hash;
             ++iter;
             continue;
         }
-
-        // Sometimes a version may have multiple files, one with "forge" and one with "fabric",
-        // so we may want to filter it
-        QString loaderFilter;
-        if (loader.has_value() && loader != 0) {
-            auto modLoaders = ModPlatform::modLoaderTypesToList(*loader);
-            if (!modLoaders.isEmpty()) {
-                loaderFilter = ModPlatform::getModLoaderAsString(modLoaders.first());
-            }
-        }
-
-        // Currently, we rely on a couple heuristics to determine whether an update is actually available or not:
-        // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the
-        // loader_filter
-        // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
-        // Such is the pain of having arbitrary files for a given version .-.
-
-        auto projectVer = Modrinth::loadIndexedPackVersion(projectObj, m_hashType, loaderFilter);
-        if (!projectVer) {
-            emitFailed(projectVer.error());
-            return;
-        }
-        auto version = projectVer.value();
-        if (version.downloadUrl.isEmpty()) {
-            qCritical() << "Modrinth mod without download url!" << version.fileName;
-            ++iter;
-            continue;
-        }
+        auto version = response->value(hash);
 
         // Fake pack with the necessary info to pass to the download task :)
         auto pack = std::make_shared<ModPlatform::IndexedPack>();

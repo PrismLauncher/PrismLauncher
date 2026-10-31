@@ -519,8 +519,6 @@ set(FTB_SOURCES
 
 set(FLAME_SOURCES
     # Flame
-    modplatform/flame/FlameModIndex.cpp
-    modplatform/flame/FlameModIndex.h
     modplatform/flame/PackManifest.h
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
@@ -808,6 +806,8 @@ SET(LAUNCHER_SOURCES
     # GUI - windows
     ui/MainWindow.h
     ui/MainWindow.cpp
+    ui/UrlImportHandler.h
+    ui/UrlImportHandler.cpp
     ui/InstanceWindow.h
     ui/InstanceWindow.cpp
     ui/ViewLogWindow.h
