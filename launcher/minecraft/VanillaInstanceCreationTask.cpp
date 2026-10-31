@@ -7,7 +7,7 @@
 #include "minecraft/PackProfile.h"
 #include "settings/INISettingsObject.h"
 
-VanillaCreationTask::VanillaCreationTask(BaseVersion::Ptr version, QString loader, BaseVersion::Ptr loaderVersion)
+VanillaCreationTask::VanillaCreationTask(BaseVersion::Ptr version, QString loader, QString loaderVersion)
     : m_version(std::move(version)), m_usingLoader(true), m_loader(std::move(loader)), m_loaderVersion(std::move(loaderVersion))
 {}
 
@@ -24,7 +24,7 @@ void VanillaCreationTask::executeTask()
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
         if (m_usingLoader) {
-            components->setComponentVersion(m_loader, m_loaderVersion->descriptor());
+            components->setComponentVersion(m_loader, m_loaderVersion);
         }
 
         m_instance->setName(name());
