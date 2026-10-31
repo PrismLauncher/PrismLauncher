@@ -62,6 +62,7 @@ class ScreenshotCard : public QFrame {
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void changeEvent(QEvent* event) override;
+    void moveEvent(QMoveEvent* event) override;
 
    signals:
     void renameRequested(const QPersistentModelIndex& index, const QString& newName);
@@ -75,6 +76,7 @@ class ScreenshotCard : public QFrame {
     QSize thumbnailArea() const;
     void updateThumbnail();
     void updateLabelPalette();
+    bool cursorInside() const;
 
    private:
     QPixmap m_thumbnail;  // unscaled source from the model
@@ -96,7 +98,6 @@ class ScreenshotCard : public QFrame {
     QToolButton* m_rename;
     QToolButton* m_delete;
     QToolButton* m_copy;
-    QTimer* m_hoverTimer;
 
     QPointer<QAbstractItemView> m_view;
 };

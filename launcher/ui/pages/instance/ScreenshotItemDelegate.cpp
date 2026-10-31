@@ -40,20 +40,21 @@
 
 namespace {
 
-class ActionPanel : public QFrame {
+class ActionPanel : public QWidget {
    public:
-    using QFrame::QFrame;
+    using QWidget::QWidget;
 
    protected:
     void paintEvent(QPaintEvent* /*event*/) override
     {
-        QColor scrim = palette().color(QPalette::Window);
-        scrim.setAlpha(90);
+        QColor bg = palette().color(QPalette::Window);
+        // lighter themes need more contrast to stay readable
+        bg.setAlpha(bg.lightness() > 127 ? 160 : 120);
 
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setPen(Qt::NoPen);
-        painter.setBrush(scrim);
+        painter.setBrush(bg);
         painter.drawRoundedRect(QRectF(rect()), 4, 4);
     }
 };
@@ -74,7 +75,6 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
     , m_rename(new QToolButton(this))
     , m_delete(new QToolButton(this))
     , m_copy(new QToolButton(this))
-    , m_hoverTimer(new QTimer(this))
 {
     setFocusPolicy(Qt::NoFocus);
 
@@ -154,14 +154,6 @@ ScreenshotCard::ScreenshotCard(QWidget* parent)
 
     setLayout(&m_layout);
 
-    // timer to make sure entering a child doesn't leave the card
-    m_hoverTimer->setSingleShot(true);
-    connect(m_hoverTimer, &QTimer::timeout, this, [this] {
-        if (!rect().contains(mapFromGlobal(QCursor::pos()))) {
-            setHovered(false);
-        }
-    });
-
     connect(m_rename, &QToolButton::clicked, this, [this](bool /*checked*/) { startRename(); });
     connect(m_delete, &QToolButton::clicked, this, [this](bool /*checked*/) {
         if (m_index.isValid()) {
@@ -182,7 +174,6 @@ void ScreenshotCard::setScreenshot(const QPixmap& pixmap, const QString& name)
 
     m_label->setText(name);
 
-    m_hoverTimer->stop();
     m_actionsFade->stop();
     m_hovered = false;
     m_actionsOpacity->setOpacity(0.0);
@@ -247,16 +238,21 @@ void ScreenshotCard::setCurrent(bool current)
     update();
 }
 
+// scrolling doesn't deliver enter / leave events so the
+// real position test is needed instead of `underMouse()`
+bool ScreenshotCard::cursorInside() const
+{
+    return rect().contains(mapFromGlobal(QCursor::pos()));
+}
+
 void ScreenshotCard::enterEvent(QEnterEvent* /*event*/)
 {
-    m_hoverTimer->stop();
     setHovered(true);
 }
 
 void ScreenshotCard::leaveEvent(QEvent* /*event*/)
 {
-    // prevent a mouse over of the hover buttons from un-hovering the container
-    m_hoverTimer->start(120);
+    setHovered(cursorInside());
 }
 
 void ScreenshotCard::setHovered(bool hovered)
@@ -323,8 +319,16 @@ void ScreenshotCard::changeEvent(QEvent* event)
 {
     QFrame::changeEvent(event);
     if (event->type() == QEvent::PaletteChange || event->type() == QEvent::StyleChange) {
-        updateLabelPalette();  // extracted from setSelected, uses the new palette
+        updateLabelPalette();
     }
+}
+
+void ScreenshotCard::moveEvent(QMoveEvent* event)
+{
+    QFrame::moveEvent(event);
+    // a scroll can move the card out from under a stationary pointer which
+    // produces no enter/leave events
+    setHovered(cursorInside());
 }
 
 void ScreenshotCard::setIndex(const QModelIndex& index)
@@ -435,7 +439,7 @@ void ScreenshotItemDelegate::setEditorData(QWidget* editor, const QModelIndex& i
     }
 }
 
-void ScreenshotItemDelegate::paintItem(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void ScreenshotItemDelegate::paintItem(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
 {
     // draw background, for selected and non selected
     QStyle* style = option.widget ? option.widget->style() : QApplication::style();
