@@ -63,6 +63,7 @@ struct TrashHistoryItem {
     QString path;
     QString trashPath;
     QString groupName;
+    int manualOrder = -1;
     QList<TrashShortcutItem> shortcuts;
 };
 
@@ -84,7 +85,8 @@ class InstanceList : public QAbstractListModel {
     enum AdditionalRoles {
         GroupRole = Qt::UserRole,
         InstancePointerRole = 0x34B1CB48,  ///< Return pointer to real instance
-        InstanceIDRole = 0x34B1CB49        ///< Return id if the instance
+        InstanceIDRole = 0x34B1CB49,       ///< Return id of the instance
+        ManualOrderRole = 0x34B1CB4A       ///< Return the instance's position in its group's manual order
     };
     /*!
      * \brief Error codes returned by functions in the InstanceList class.
@@ -111,6 +113,7 @@ class InstanceList : public QAbstractListModel {
 
     GroupId getInstanceGroup(const InstanceId& id) const;
     void setInstanceGroup(const InstanceId& id, GroupId name);
+    void setInstanceManualOrder(const InstanceId& id, GroupId group, const QList<InstanceId>& order);
 
     void deleteGroup(const GroupId& name);
     void renameGroup(const GroupId& src, const GroupId& dst);
@@ -175,6 +178,7 @@ class InstanceList : public QAbstractListModel {
 
     void increaseGroupCount(const QString& group);
     void decreaseGroupCount(const QString& group);
+    void removeFromManualOrder(const InstanceId& id);
 
    private:
     std::vector<std::unique_ptr<MinecraftInstance>> m_instances;
@@ -189,6 +193,7 @@ class InstanceList : public QAbstractListModel {
     // FIXME: this is so inefficient that looking at it is almost painful.
     QSet<QString> m_collapsedGroups;
     QMap<InstanceId, GroupId> m_instanceGroupIndex;
+    QMap<GroupId, QList<InstanceId>> m_manualOrder;
     QSet<InstanceId> m_instanceSet;
     bool m_groupsLoaded = false;
     bool m_instancesProbed = false;
