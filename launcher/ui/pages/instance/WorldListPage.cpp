@@ -175,7 +175,9 @@ void WorldListPage::closedImpl()
 
 WorldListPage::~WorldListPage()
 {
-    m_worlds->stopWatching();
+    if (m_worlds) {
+        m_worlds->stopWatching();
+    }
     delete m_ui;
 }
 
