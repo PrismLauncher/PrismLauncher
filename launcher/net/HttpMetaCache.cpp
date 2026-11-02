@@ -62,8 +62,12 @@ HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(path)
 
 HttpMetaCache::~HttpMetaCache()
 {
-    saveBatchingTimer.stop();
     SaveNow();
+}
+
+QStringList HttpMetaCache::getPaths(const QString& base) const
+{
+    return m_entries.value(base).entry_list.keys();
 }
 
 auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPtr
@@ -169,6 +173,21 @@ auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
     return true;
 }
 
+bool HttpMetaCache::forgetEntry(const QString& base, const QString& resourcePath)
+{
+    auto entryMap = m_entries.find(base);
+    if (entryMap == m_entries.end()) {
+        return false;
+    }
+
+    if (entryMap->entry_list.remove(resourcePath) == 0) {
+        return false;
+    }
+
+    SaveEventually();
+    return true;
+}
+
 // returns true on success, false otherwise
 auto HttpMetaCache::evictAll() -> bool
 {
@@ -210,7 +229,7 @@ void HttpMetaCache::addBase(QString base, QString base_root)
     m_entries[base] = foo;
 }
 
-auto HttpMetaCache::getBasePath(QString base) -> QString
+auto HttpMetaCache::getBasePath(QString base) const -> QString
 {
     if (m_entries.contains(base)) {
         return m_entries[base].base_path;
@@ -288,6 +307,8 @@ void HttpMetaCache::SaveNow()
 {
     if (m_index_file.isNull())
         return;
+
+    saveBatchingTimer.stop();
 
     qCDebug(taskHttpMetaCacheLogC) << "Saving metacache with" << m_entries.size() << "entries";
 
