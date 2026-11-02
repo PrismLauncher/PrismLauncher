@@ -37,6 +37,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcess>
+#include <QtEnvironmentVariables>
 #include "FileSystem.h"
 
 namespace DesktopServices {
@@ -84,4 +85,10 @@ bool isSnap()
 #endif
 }
 
+#ifdef Q_OS_LINUX
+QString desktopEnvironment()
+{
+    return qEnvironmentVariable("XDG_CURRENT_DESKTOP");
+}
+#endif
 }  // namespace DesktopServices
