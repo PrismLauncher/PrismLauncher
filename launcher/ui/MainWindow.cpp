@@ -91,7 +91,6 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstanceWindow.h"
 
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
@@ -112,6 +111,7 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/EditableLabel.h"
 
+#include "minecraft/AssetPrune.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
@@ -132,8 +132,8 @@
 #include "InstanceDirUpdate.h"
 
 #include "Json.h"
-
 #include "MMCTime.h"
+#include "StringUtils.h"
 
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
@@ -1426,6 +1426,15 @@ void MainWindow::on_actionReportBug_triggered()
 
 void MainWindow::on_actionClearMetadata_triggered()
 {
+    auto* confirmMessageBox = CustomMessageBox::selectable(
+        this, tr("Confirm Clear Metadata Cache"),
+        tr("You are about to clear the launcher's metadata cache. All metadata files, assets and libraries will be removed.\n"
+           "Consider using Clear Unused Assets instead.\n\nAre you sure?"),
+        QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
+    if (confirmMessageBox->exec() != QMessageBox::Yes) {
+        return;
+    }
+
     // This if contains side effects!
     if (!APPLICATION->metacache()->evictAll()) {
         CustomMessageBox::selectable(this, tr("Error"),
@@ -1436,6 +1445,84 @@ void MainWindow::on_actionClearMetadata_triggered()
     }
 
     APPLICATION->metacache()->SaveNow();
+}
+
+void MainWindow::on_actionPruneAssets_triggered()
+{
+    auto* metacache = APPLICATION->metacache();
+    auto* instances = APPLICATION->instances();
+
+    auto prepareTask = AssetPrune::prepare(*instances);
+    connect(prepareTask.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+
+    ProgressDialog progress;
+    progress.showSkipButton();
+    progress.execWithTask(prepareTask.get());
+
+    if (!prepareTask->wasSuccessful()) {
+        return;
+    }
+
+    const auto set = AssetPrune::collect(*metacache, *instances);
+    if (set.count() == 0) {
+        CustomMessageBox::selectable(this, tr("Nothing To Delete"), tr("No unused assets or libraries were found."),
+                                     QMessageBox::Information)
+            ->open();
+        return;
+    }
+
+    const auto confirmMessage =
+        tr("The launcher found %1 files containing assets or libraries which can be deleted, reclaiming %2 of disk space.")
+            .arg(set.count())
+            .arg(StringUtils::humanReadableFileSize(static_cast<double>(set.reclaimableBytes)));
+    auto* confirmMessageBox = CustomMessageBox::selectable(this, tr("Found Unused Assets"), confirmMessage, QMessageBox::Information,
+                                                           QMessageBox::Apply | QMessageBox::Cancel);
+    confirmMessageBox->button(QMessageBox::Apply)->setText(tr("Continue"));
+
+    QString pruneList;
+    pruneList += tr("Total Libraries: %1").arg(set.libs.count());
+    pruneList += '\n';
+    pruneList += tr("Total Asset Indexes: %1").arg(set.assetIndexes.count());
+    pruneList += '\n';
+    pruneList += tr("Total Asset Objects: %1").arg(set.assets.count());
+    pruneList += '\n';
+    for (const auto& lib : set.libs) {
+        pruneList += tr("Will prune library %1").arg(lib);
+        pruneList += '\n';
+    }
+    for (const auto& index : set.assetIndexes) {
+        pruneList += tr("Will prune asset index %1").arg(index);
+        pruneList += '\n';
+    }
+    for (const auto& object : set.assets) {
+        pruneList += tr("Will prune asset object %1").arg(object);
+        pruneList += '\n';
+    }
+    confirmMessageBox->setDetailedText(pruneList);
+
+    if (confirmMessageBox->exec() != QMessageBox::Apply) {
+        return;
+    }
+
+    const auto result = AssetPrune::perform(metacache, set);
+
+    QString finishedMessage;
+    if (result.errors.isEmpty()) {
+        finishedMessage = tr("All %1 files were deleted, reclaiming %2 of disk space.")
+                              .arg(result.removedCount)
+                              .arg(StringUtils::humanReadableFileSize(static_cast<double>(result.reclaimedBytes)));
+    } else {
+        finishedMessage = tr("%1 out of %2 files were deleted, reclaiming %3 of disk space.")
+                              .arg(result.removedCount)
+                              .arg(set.count())
+                              .arg(StringUtils::humanReadableFileSize(static_cast<double>(result.reclaimedBytes)));
+    }
+
+    auto* finishedMessageBox = CustomMessageBox::selectable(this, tr("Pruning Finished"), finishedMessage,
+                                                            result.errors.isEmpty() ? QMessageBox::Information : QMessageBox::Warning);
+    finishedMessageBox->setDetailedText(result.errors.join("\n"));
+    finishedMessageBox->exec();
 }
 
 #ifdef Q_OS_MAC
