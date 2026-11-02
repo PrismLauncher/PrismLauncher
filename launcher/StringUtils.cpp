@@ -38,7 +38,10 @@
 
 #include <QRegularExpression>
 #include <QUuid>
+#include <QtSystemDetection>
 #include <cmath>
+
+#include "DesktopServices.h"
 
 /// If you're wondering where these came from exactly, then know you're not the only one =D
 
@@ -162,10 +165,24 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
 static const QStringList s_units_si{ "KB", "MB", "GB", "TB" };
 static const QStringList s_units_kibi{ "KiB", "MiB", "GiB", "TiB" };
 
-QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decimal_points)
+namespace {
+bool platformUsesSIUnits()
 {
-    const QStringList units = use_si ? s_units_si : s_units_kibi;
-    const int scale = use_si ? 1000 : 1024;
+#ifdef Q_OS_APPLE
+    return true;
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    return DesktopServices::desktopEnvironment() == "GNOME";
+#else
+    return false;
+#endif
+}
+}  // namespace
+
+QString StringUtils::humanReadableFileSize(double bytes, int decimal_points)
+{
+    const bool useSI = platformUsesSIUnits();
+    const QStringList units = useSI ? s_units_si : s_units_kibi;
+    const int scale = useSI ? 1000 : 1024;
 
     int u = -1;
     double r = pow(10, decimal_points);
