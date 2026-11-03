@@ -39,6 +39,23 @@
 #include <QProcess>
 #include "FileSystem.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+
+#include <propkey.h>
+#include <propvarutil.h>
+
+namespace {
+struct PropVariantDeleter {
+    void operator()(PROPVARIANT* property) const noexcept
+    {
+        PropVariantClear(property);
+        delete property;
+    }
+};
+}  // namespace
+#endif
+
 namespace DesktopServices {
 bool openPath(const QFileInfo& path, bool ensureFolderPathExists)
 {
@@ -104,6 +121,60 @@ Result<winrt::com_ptr<IShellLink>> createShellLink(const QString& path,
     }
 
     return shellLink;
+}
+
+// NOTE(@getchoo): ICustomDestinationList is a peak Win32 caveman API
+// There's no real way to edit entries in place, even though it's a glorified list
+// So, we just recreate and assign the list every time, because we don't need more as of now
+// Future callers be warned(?)
+Result<> setJumplist(const QList<JumplistEntry>& entries)
+{
+    try {
+        const auto jumplist = winrt::create_instance<ICustomDestinationList>(CLSID_DestinationList);
+
+        // NOTE(@getchoo): We can ignore the "removed" jump list entires, as they don't apply to "user tasks"
+        // https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-icustomdestinationlist-addusertasks
+        // If we ever support more than only user tasks, do take this into account
+        UINT minSlots;
+        winrt::com_ptr<IObjectArray> removed;
+        qDebug() << "Beginning jumplist";
+        winrt::check_hresult(jumplist->BeginList(&minSlots, IID_PPV_ARGS(removed.put())));
+
+        const auto collection = winrt::create_instance<IObjectCollection>(CLSID_EnumerableObjectCollection);
+        const auto path = QCoreApplication::applicationFilePath();
+        const auto workDir = QCoreApplication::applicationDirPath();
+        for (const auto entry : entries) {
+            const auto task = createShellLink(path, entry.arguments, workDir, entry.iconPath);
+            if (!task)
+                return std::unexpected(task.error());
+
+            const auto properties = task.value().as<IPropertyStore>();
+
+            const auto title = std::unique_ptr<PROPVARIANT, PropVariantDeleter>(new PROPVARIANT{});
+            winrt::check_hresult(InitPropVariantFromString(entry.name.toStdWString().c_str(), title.get()));
+            winrt::check_hresult(properties->SetValue(PKEY_Title, *title));
+
+            winrt::check_hresult(properties->Commit());
+
+            qDebug() << "Adding" << entry.name << "to task collection";
+            winrt::check_hresult(collection->AddObject(task.value().get()));
+        }
+
+        if (!entries.isEmpty()) {
+            const auto tasks = collection.as<IObjectArray>();
+            if (FAILED(jumplist->AddUserTasks(tasks.get()))) {
+                return std::unexpected("Tasks for jumplist are invalid!");
+            }
+        }
+        qDebug() << "Committing jumplist.";
+        winrt::check_hresult(jumplist->CommitList());
+    } catch (const winrt::hresult_error& e) {
+        const auto message = e.message();
+        return std::unexpected("Unable to set jumplist COM object: " + message);
+    }
+
+    qDebug() << "Finished setting jumplist COM object.";
+    return {};
 }
 #endif
 }  // namespace DesktopServices

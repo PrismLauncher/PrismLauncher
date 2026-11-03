@@ -61,13 +61,19 @@ class LaunchTask;
 class BaseInstance;
 
 /// Shortcut saving target representations
+#ifdef Q_OS_WIN
+enum class ShortcutTarget : std::uint8_t { Desktop, Applications, Other, Jumplist };
+#else
 enum class ShortcutTarget : std::uint8_t { Desktop, Applications, Other };
+#endif
 
 /// Shortcut data representation
 struct ShortcutData {
     QString name;
     QString filePath;
     ShortcutTarget target = ShortcutTarget::Other;
+    QStringList arguments;
+    QString iconPath = "";
 };
 
 /// Console settings

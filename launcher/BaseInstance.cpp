@@ -436,7 +436,14 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
     // FIXME: if no change, do not set. setting involves saving a file.
     QJsonArray array;
     for (const auto& elem : shortcuts) {
-        array.append(QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } });
+        auto payload = QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } };
+#ifdef Q_OS_WIN
+        if (elem.target == ShortcutTarget::Jumplist) {
+            payload.insert("arguments", QJsonArray::fromStringList(elem.arguments));
+            payload.insert("iconPath", elem.iconPath);
+        }
+#endif
+        array.append(payload);
     }
 
     QJsonDocument document;
@@ -465,19 +472,50 @@ QList<ShortcutData> BaseInstance::shortcuts() const
         int value = dict["target"].toInt(-1);
         // It would help avoid this messy checking, which is here to avoid easy off-by-one errors in manual int comparision
         // ...and make it more apparent what we're actually checking
+#ifdef Q_OS_WIN
+        const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Jumplist);
+#else
         const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Other);
+#endif
         if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value > newestKnownTarget) {
             qWarning() << "Skipping shortcut of target level" << value << "with unknown fields";
             continue;
         }
+        const auto target = static_cast<ShortcutTarget>(value);
 
         QString shortcutName = dict["name"].toString();
         QString filePath = dict["filePath"].toString();
+#ifdef Q_OS_WIN
+        if (target != ShortcutTarget::Jumplist && !QFileInfo::exists(filePath)) {
+#else
         if (!QFileInfo::exists(filePath)) {
-            qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
+#endif
+            qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "has non-existent path" << filePath;
             continue;
         }
-        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value) });
+
+        QStringList arguments;
+        QString iconPath;
+#ifdef Q_OS_WIN
+        if (target == ShortcutTarget::Jumplist) {
+            if (!dict.value("arguments").isArray() || !dict.value("iconPath").isString()) {
+                qWarning() << "Jumplist shortcut" << shortcutName << "for instance" << name() << "is missing required fields. Skipping";
+                continue;
+            }
+
+            iconPath = dict.value("iconPath").toString();
+
+            for (const auto& arg : dict.value("arguments").toArray()) {
+                if (!arg.isString()) {
+                    continue;
+                }
+
+                arguments.append(arg.toString());
+            }
+        }
+#endif
+
+        results.append({ .name = shortcutName, .filePath = filePath, .target = target, .arguments = arguments, .iconPath = iconPath });
     }
     return results;
 }
