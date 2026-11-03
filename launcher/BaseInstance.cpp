@@ -445,6 +445,11 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
             payload.insert("portalDesktopId", elem.portalDesktopId);
         }
 
+        if (elem.target == ShortcutTarget::Jumplist) {
+            payload.insert("arguments", QJsonArray::fromStringList(elem.arguments));
+            payload.insert("iconPath", elem.iconPath);
+        }
+
         array.append(payload);
     }
 
@@ -474,7 +479,7 @@ QList<ShortcutData> BaseInstance::shortcuts() const
         int value = dict["target"].toInt(-1);
         // It would help avoid this messy checking, which is here to avoid easy off-by-one errors in manual int comparision
         // ...and make it more apparent what we're actually checking
-        const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Portal);
+        const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Jumplist);
         if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value > newestKnownTarget) {
             qWarning() << "Skipping shortcut of target level" << value << "with unknown fields";
             continue;
@@ -489,16 +494,32 @@ QList<ShortcutData> BaseInstance::shortcuts() const
         // These are only used in Flatpaks, so avoid reading them in elsewhere
         if (target == ShortcutTarget::Portal && DesktopServices::isFlatpak()) {
             if (!dict.value("DesktopPortalId").isString()) {
-                qWarning() << "Dynamic launcher shortcut" << shortcutName << "for instance" << name() << "is missing a desktop ID";
+                qWarning() << "Dynamic launcher shortcut" << shortcutName << "for instance" << name() << "is missing a desktop ID. Skipping";
                 continue;
             }
             data.portalDesktopId = dict["desktopPortalId"].toString();
+        } else if (target == ShortcutTarget::Jumplist) {
+            if (!dict.value("arguments").isArray() || !dict.value("iconPath").isString()) {
+                qWarning() << "Jumplist shortcut" << shortcutName << "for instance" << name() << "is missing required fields. Skipping";
+                continue;
+            }
+
+            iconPath = dict.value("iconPath").toString();
+
+            for (const auto& arg : dict.value("arguments").toArray()) {
+                if (!arg.isString()) {
+                    continue;
+                }
+
+                data.arguments.append(arg.toString());
+            }
         } else {
             if (!QFileInfo::exists(filePath)) {
-                qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
+                qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "has non-existent path" << filePath;
                 continue;
             }
         }
+
 
         results.append(data);
     }
