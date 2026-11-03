@@ -85,6 +85,10 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
 
         if (!applicationDir.isEmpty())
             ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(ShortcutTarget::Applications));
+
+#ifdef Q_OS_WIN
+        ui->saveTargetSelectionBox->addItem(tr("Jump List"), QVariant::fromValue(ShortcutTarget::Jumplist));
+#endif
     }
     ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
 
@@ -216,6 +220,10 @@ void CreateShortcutDialog::createShortcut()
         ShortcutUtils::createInstanceShortcutOnDesktop(args);
     else if (target == ShortcutTarget::Applications)
         ShortcutUtils::createInstanceShortcutInApplications(args);
+#ifdef Q_OS_WIN
+    else if (target == ShortcutTarget::Jumplist)
+        ShortcutUtils::createInstanceShortcutInJumplist(args);
+#endif
     else
         ShortcutUtils::createInstanceShortcutInOther(args);
 }

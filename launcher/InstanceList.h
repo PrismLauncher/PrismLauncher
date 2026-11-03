@@ -43,7 +43,9 @@
 #include <QSet>
 #include <QStack>
 #include <cstdint>
+#include <optional>
 
+#include "DesktopServices.h"
 #include "minecraft/MinecraftInstance.h"
 
 class QFileSystemWatcher;
@@ -149,6 +151,10 @@ class InstanceList : public QAbstractListModel {
 
     QStringList getLinkedInstancesById(const QString& id) const;
 
+#ifdef Q_OS_WIN
+    Result<> updateJumplist();
+#endif
+
     QString primaryDir() const { return m_instDirs.isEmpty() ? QString() : m_instDirs.first(); }
     const QStringList& instanceDirs() const { return m_instDirs; }
 
@@ -193,5 +199,8 @@ class InstanceList : public QAbstractListModel {
     bool m_groupsLoaded = false;
     bool m_instancesProbed = false;
 
+#ifdef Q_OS_WIN
+    std::optional<QList<DesktopServices::JumplistEntry>> m_jumplistEntries;
+#endif
     QStack<TrashHistoryItem> m_trashHistory;
 };
