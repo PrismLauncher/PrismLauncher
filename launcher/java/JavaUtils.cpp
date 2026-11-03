@@ -50,10 +50,7 @@
 #include "java/JavaUtils.h"
 
 #ifdef Q_OS_WIN
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#endif
 #endif
 
 #define IBUS "@im=ibus"

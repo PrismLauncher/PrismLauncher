@@ -32,9 +32,6 @@
 #include "StringUtils.h"
 
 #if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 // clang-format off
 #include <windows.h>
 #include <fileapi.h>
