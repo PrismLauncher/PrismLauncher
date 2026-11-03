@@ -16,6 +16,7 @@
 #include <versionhelpers.h>
 #include <winnls.h>
 
+#include <winrt/base.h>
 #include <wrl/client.h>
 #endif
 

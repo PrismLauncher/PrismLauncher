@@ -2,6 +2,10 @@
   "dependencies": [
     "cmark",
     {
+      "name": "cppwinrt",
+      "platform": "mingw"
+    },
+    {
       "name": "ecm",
       "host": true
     },

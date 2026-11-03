@@ -4,6 +4,15 @@
 #include <QUrl>
 #include <QtSystemDetection>
 
+#ifdef Q_OS_WIN
+#include "Result.h"
+
+#include <QStringList>
+
+#include <shlobj.h>
+#include <winrt/base.h>
+#endif
+
 class QFileInfo;
 
 /**
@@ -45,5 +54,16 @@ bool isSnap();
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 QString desktopEnvironment();
+#endif
+
+#ifdef Q_OS_WIN
+/**
+ * Attempt to create an `IShellLink` Windows shell object
+ * https://learn.microsoft.com/en-us/windows/win32/shell/links
+ */
+Result<winrt::com_ptr<IShellLink>> createShellLink(const QString& path,
+                                                   const QStringList& arguments,
+                                                   const QString& workDir,
+                                                   const QString& iconPath);
 #endif
 }  // namespace DesktopServices
