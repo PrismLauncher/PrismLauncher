@@ -1240,6 +1240,8 @@ target_link_libraries(Launcher_logic
     qdcss
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
+    # Required for WinRT
+    $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
 )
 
 if(TARGET PkgConfig::libqrencode)
@@ -1364,6 +1366,8 @@ if(Launcher_BUILD_UPDATER)
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
         cmark::cmark
+        # Required for WinRT
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
     )
     if(TARGET PkgConfig::libarchive)
         target_link_libraries(prism_updater_logic PkgConfig::libarchive)
@@ -1416,6 +1420,8 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
         Qt${QT_VERSION_MAJOR}::Network
         # Qt${QT_VERSION_MAJOR}::Concurrent
         ${Launcher_QT_LIBS}
+        # Required for WinRT
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
     )
 
     add_executable("${Launcher_Name}_filelink" WIN32 filelink/filelink_main.cpp)
@@ -1475,7 +1481,7 @@ foreach(target ${Launcher_TARGETS})
     # Wrangle in windows.h and its nastiness
     # https://learn.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers
     target_compile_definitions(${target} PRIVATE
-        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WIN32_LEAN_AND_MEAN NOGDI NOMINMAX>
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WIN32_LEAN_AND_MEAN NOGDI NOMINMAX WINRT_LEAN_AND_MEAN>
     )
 endforeach()
 
