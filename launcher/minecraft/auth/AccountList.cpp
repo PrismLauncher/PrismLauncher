@@ -222,6 +222,13 @@ void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
 
 void AccountList::accountChanged()
 {
+    MinecraftAccount* account = qobject_cast<MinecraftAccount*>(sender());
+    for (int i = 0; i < count(); i++) {
+        if (at(i).get() == account) {
+            emit dataChanged(index(i), index(i, columnCount(QModelIndex()) - 1));
+            break;
+        }
+    }
     // the list changed. there is no doubt.
     onListChanged();
 }

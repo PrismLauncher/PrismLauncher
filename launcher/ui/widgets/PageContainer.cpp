@@ -244,7 +244,11 @@ void PageContainer::help()
         if (pageId.isEmpty()) {
             return;
         }
-        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
+        if (pageId.startsWith("http://") || pageId.startsWith("https://")) {
+            DesktopServices::openUrl(QUrl(pageId));
+        } else {
+            DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
+        }
     }
 }
 

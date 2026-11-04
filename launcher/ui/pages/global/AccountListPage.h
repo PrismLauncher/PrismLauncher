@@ -65,12 +65,13 @@ class AccountListPage : public QMainWindow, public BasePage {
         return icon;
     }
     QString id() const override { return "accounts"; }
-    QString helpPage() const override { return "getting-started/adding-an-account"; }
+    QString helpPage() const override { return "https://prismlauncher.org/wiki/overview/feedback-and-bugs/"; }
     void retranslate() override;
 
    public slots:
     void on_actionAddMicrosoft_triggered();
     void on_actionAddOffline_triggered();
+    void on_actionRename_triggered();
     void on_actionRemove_triggered();
     void on_actionRefresh_triggered();
     void on_actionSetDefault_triggered();

@@ -55,6 +55,7 @@
    <addaction name="actionAddMicrosoft"/>
    <addaction name="actionAddOffline"/>
    <addaction name="actionRefresh"/>
+   <addaction name="actionRename"/>
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
    <addaction name="actionNoDefault"/>
@@ -100,6 +101,14 @@
    </property>
    <property name="toolTip">
     <string>Refresh the account tokens</string>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="text">
+    <string>Re&amp;name</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
   </action>
   <action name="actionRemove">

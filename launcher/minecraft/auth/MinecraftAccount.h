@@ -101,6 +101,8 @@ class MinecraftAccount : public QObject, public Usable {
 
     shared_qobject_ptr<AuthFlow> currentTask();
 
+    bool renameOfflineAccount(const QString& newUsername);
+
    public: /* queries */
     QString internalId() const { return data.internalId; }
 
