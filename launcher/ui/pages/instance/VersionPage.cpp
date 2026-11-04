@@ -66,7 +66,6 @@
 #include "ui/GuiUtil.h"
 
 #include "DesktopServices.h"
-#include "Result.h"
 #include "icons/IconList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/auth/AccountList.h"
@@ -74,13 +73,13 @@
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 
+namespace {
 class IconProxy : public QIdentityProxyModel {
     Q_OBJECT
    public:
-    IconProxy(QWidget* parentWidget) : QIdentityProxyModel(parentWidget)
+    IconProxy(QWidget* parentWidget) : QIdentityProxyModel(parentWidget), m_parentWidget(parentWidget)
     {
         connect(parentWidget, &QObject::destroyed, this, &IconProxy::widgetGone);
-        m_parentWidget = parentWidget;
     }
 
     virtual QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const override
@@ -92,7 +91,8 @@ class IconProxy : public QIdentityProxyModel {
                 auto string = var.toString();
                 if (string == "warning") {
                     return QIcon::fromTheme("status-yellow");
-                } else if (string == "error") {
+                }
+                if (string == "error") {
                     return QIcon::fromTheme("status-bad");
                 }
             }
@@ -106,6 +106,7 @@ class IconProxy : public QIdentityProxyModel {
    private:
     QWidget* m_parentWidget = nullptr;
 };
+}  // namespace
 
 QIcon VersionPage::icon() const
 {
@@ -128,7 +129,8 @@ QMenu* VersionPage::createPopupMenu()
     return filteredMenu;
 }
 
-VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
+VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::VersionPage), m_filterModel(new QSortFilterProxyModel(this)), m_inst(inst)
 {
     ui->setupUi(this);
 
@@ -138,10 +140,9 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
 
     reloadPackProfile();
 
-    auto proxy = new IconProxy(ui->packageView);
+    auto* proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile);
 
-    m_filterModel = new QSortFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -153,7 +154,7 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
     ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->packageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
-    auto smodel = ui->packageView->selectionModel();
+    auto* smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
     connect(m_profile, &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
@@ -174,7 +175,7 @@ VersionPage::~VersionPage()
 
 void VersionPage::showContextMenu(const QPoint& pos)
 {
-    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    auto* menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->packageView->mapToGlobal(pos));
     delete menu;
 }
@@ -201,9 +202,9 @@ void VersionPage::packageCurrent(const QModelIndex& current, [[maybe_unused]] co
             return;
     }
 
-    auto& problems = patch->getProblems();
+    const auto& problems = patch->getProblems();
     QString problemOut;
-    for (auto& problem : problems) {
+    for (const auto& problem : problems) {
         if (problem.m_severity == ProblemSeverity::Error) {
             problemOut += tr("Error: ");
         } else if (problem.m_severity == ProblemSeverity::Warning) {
@@ -222,8 +223,9 @@ void VersionPage::updateVersionControls()
 
 void VersionPage::updateButtons(int row)
 {
-    if (row == -1)
+    if (row == -1) {
         row = currentRow();
+    }
     auto patch = m_profile->getComponent(row);
     ui->actionRemove->setEnabled(patch && patch->isRemovable());
     ui->actionMove_down->setEnabled(patch && patch->isMoveable());
@@ -265,8 +267,9 @@ void VersionPage::on_actionRemove_triggered()
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
-        if (response != QMessageBox::Yes)
+        if (response != QMessageBox::Yes) {
             return;
+        }
     }
     // FIXME: use actual model, not reloading.
     if (!m_profile->remove(index)) {
@@ -413,7 +416,7 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
     auto task = makeShared<SequentialTask>();
-    for (auto t : updateTasks) {
+    for (const auto& t : updateTasks) {
         task->addTask(t);
     }
     ProgressDialog tDialog(this);
@@ -440,7 +443,7 @@ void VersionPage::on_actionAdd_Empty_triggered()
         blacklist.push_back(comp->getID());
     }
     compdialog.setBlacklist(blacklist);
-    if (compdialog.exec()) {
+    if (compdialog.exec() != 0) {
         qDebug() << "name:" << compdialog.name();
         qDebug() << "uid:" << compdialog.uid();
         m_profile->installEmpty(compdialog.uid(), compdialog.name());
@@ -465,21 +468,19 @@ void VersionPage::versionCurrent(const QModelIndex& current, [[maybe_unused]] co
 
 void VersionPage::preselect(int row)
 {
-    if (row < 0) {
-        row = 0;
-    }
+    row = std::max(row, 0);
     if (row >= m_profile->rowCount(QModelIndex())) {
         row = m_profile->rowCount(QModelIndex()) - 1;
     }
     if (row < 0) {
         return;
     }
-    auto model_index = m_profile->index(row);
-    ui->packageView->selectionModel()->select(model_index, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+    auto modelIndex = m_profile->index(row);
+    ui->packageView->selectionModel()->select(modelIndex, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
     updateButtons(row);
 }
 
-void VersionPage::onGameUpdateError(QString error)
+void VersionPage::onGameUpdateError(const QString& error)
 {
     CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }
@@ -549,8 +550,9 @@ void VersionPage::on_actionRevert_triggered()
                                                  QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                         ->exec();
 
-    if (response != QMessageBox::Yes)
+    if (response != QMessageBox::Yes) {
         return;
+    }
 
     if (!m_profile->revertToBase(version)) {
         // TODO: some error box here
