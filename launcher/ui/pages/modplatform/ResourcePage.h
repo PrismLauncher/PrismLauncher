@@ -60,9 +60,9 @@ class ResourcePage : public QWidget, public BasePage {
     auto metaEntryBase() const -> QString { return m_provider.metaEntryBase; };
     auto debugName() const -> QString { return m_provider.debugName; };
 
-    //: The plural version of 'resource'
+    // The plural version of 'resource'
     QString resourcesString() const { return m_desc.resourcesString; }
-    //: The singular version of 'resources'
+    // The singular version of 'resources'
     QString resourceString() const { return m_desc.resourceString; }
 
     /* Features this resource's page supports */

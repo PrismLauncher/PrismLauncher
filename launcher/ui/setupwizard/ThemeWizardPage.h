@@ -34,12 +34,16 @@ class ThemeWizardPage : public BaseWizardPage {
         layout->setContentsMargins(0, 0, 0, 0);
         setLayout(layout);
 
-        setTitle(tr("Appearance"));
-        setSubTitle(tr("Select theme and icons to use"));
+        retranslate();
     }
 
     bool validatePage() override { return true; };
-    void retranslate() override { widget.retranslateUi(); }
+    void retranslate() override
+    {
+        setTitle(tr("Appearance"));
+        setSubTitle(tr("Select theme and icons to use"));
+        widget.retranslateUi();
+    }
 
    private:
     AppearanceWidget widget{ true };

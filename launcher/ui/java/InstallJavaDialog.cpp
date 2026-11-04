@@ -219,7 +219,7 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
     connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(m_container->selectedPage())->loadList(); });
     refreshLayout->addWidget(refreshButton);
 
-    auto* recommendedCheckBox = new QCheckBox("Recommended", this);
+    auto* recommendedCheckBox = new QCheckBox(tr("Recommended"), this);
     recommendedCheckBox->setCheckState(Qt::CheckState::Checked);
     connect(recommendedCheckBox, &QCheckBox::checkStateChanged, this, [this](int state) {
         for (BasePage* page : m_container->getPages()) {

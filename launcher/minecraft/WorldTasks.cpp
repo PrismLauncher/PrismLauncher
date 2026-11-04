@@ -48,7 +48,7 @@ void InstallWorldTask::executeTask()
 
             auto finalPath = FS::PathCombine(args.targetDir, FS::DirNameFromString(world.name(), { args.targetDir }));
             if (!world.isValid() || !FS::ensureFolderPathExists(finalPath)) {
-                self->emitFailed(self->tr("Failed to import world."));
+                self->emitFailed(tr("Failed to import world."));
                 return;
             }
 
@@ -88,7 +88,7 @@ void CopyWorldTask::executeTask()
             }
 
             if (!ok) {
-                self->emitFailed(self->tr("Failed to copy world."));
+                self->emitFailed(tr("Failed to copy world."));
                 return;
             }
 
@@ -123,7 +123,7 @@ void DeleteWorldTask::executeTask()
             }
 
             if (!ok) {
-                self->emitFailed(self->tr("Failed to delete world."));
+                self->emitFailed(tr("Failed to delete world."));
                 return;
             }
 

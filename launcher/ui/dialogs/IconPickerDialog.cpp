@@ -206,7 +206,7 @@ void IconPickerDialog::addNewIcon()
 {
     //: The title of the select icons open file dialog
     QString selectIcons = tr("Select Icons");
-    //: The type of icon files
+    // The type of icon files
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
     auto* list = APPLICATION->icons();
