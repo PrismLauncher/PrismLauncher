@@ -95,6 +95,7 @@ class VersionPage : public QMainWindow, public BasePage {
 
    protected:
     QMenu* createPopupMenu() override;
+    bool eventFilter(QObject* obj, QEvent* event) override;
 
     /// FIXME: this shouldn't be necessary!
     bool reloadPackProfile();

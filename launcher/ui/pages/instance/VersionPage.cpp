@@ -129,6 +129,19 @@ QMenu* VersionPage::createPopupMenu()
     return filteredMenu;
 }
 
+bool VersionPage::eventFilter(QObject* obj, QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        auto* keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent && keyEvent->matches(QKeySequence::Delete)) {
+            on_actionRemove_triggered();
+            return true;
+        }
+    }
+
+    return QMainWindow::eventFilter(obj, event);
+}
+
 VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent)
     : QMainWindow(parent), ui(new Ui::VersionPage), m_filterModel(new QSortFilterProxyModel(this)), m_inst(inst)
 {
