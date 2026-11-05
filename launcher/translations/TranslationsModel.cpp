@@ -76,9 +76,7 @@ struct Language {
     QString languageName() const
     {
         QString result;
-        if (key == "ja_KANJI") {
-            result = locale.nativeLanguageName() + u8" (漢字)";
-        } else if (key == "es_UY") {
+        if (key == "es_UY") {
             result = u8"Español de Latinoamérica";
         } else if (key == "en_NZ") {
             result = u8"New Zealand English";  // No idea why qt translates this to just english and not to New Zealand English
