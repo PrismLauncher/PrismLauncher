@@ -19,9 +19,11 @@
 #pragma once
 
 #include <QDialog>
+
+#include "meta/Version.h"
+#include "meta/VersionList.h"
 #include "ui/pages/BasePageProvider.h"
 
-class InstallLoaderPage;
 class MinecraftInstance;
 class PageContainer;
 class PackProfile;
@@ -31,18 +33,29 @@ class InstallLoaderDialog final : public QDialog, protected BasePageProvider {
     Q_OBJECT
 
    public:
-    explicit InstallLoaderDialog(PackProfile* instance, const QString& uid = QString(), QWidget* parent = nullptr);
+    explicit InstallLoaderDialog(QString gameVersion, PackProfile* profile, QWidget* parent = nullptr);
 
-    QList<BasePage*> getPages() override;
+    struct Result {
+        Meta::VersionList::Ptr list;
+        Meta::Version::Ptr version;
+    };
+
+    static std::optional<Result> choose(const QString& gameVersion, QWidget* parent = nullptr);
+
+    static bool chooseAndInstall(PackProfile* profile, QWidget* parent = nullptr);
+
     QString dialogTitle() override;
 
-    void validate(BasePage* page);
-    void done(int result) override;
+    std::optional<Result> getResult() const;
+
+   protected:
+    QList<BasePage*> getPages() override;
 
    private:
-    bool resolveLoaderConflicts(InstallLoaderPage* page);
+    void validate(BasePage* page);
 
-    PackProfile* profile;
-    PageContainer* container;
-    QDialogButtonBox* buttons;
+    QString m_gameVersion;
+    PackProfile* m_profile;
+    PageContainer* m_container;
+    QDialogButtonBox* m_buttons;
 };

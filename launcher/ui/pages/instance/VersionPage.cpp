@@ -426,9 +426,9 @@ void VersionPage::on_actionDownload_All_triggered()
 
 void VersionPage::on_actionInstall_Loader_triggered()
 {
-    InstallLoaderDialog dialog(m_inst->getPackProfile(), QString(), this);
-    dialog.exec();
-    m_container->refreshContainer();
+    if (InstallLoaderDialog::chooseAndInstall(m_inst->getPackProfile(), this)) {
+        m_container->refreshContainer();
+    }
 }
 
 void VersionPage::on_actionAdd_Empty_triggered()

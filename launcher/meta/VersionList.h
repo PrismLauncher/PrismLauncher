@@ -60,6 +60,8 @@ class VersionList : public BaseVersionList, public BaseEntity {
     QString name() const { return m_name; }
     QString humanReadable() const;
 
+    bool installableLoader() const { return m_installableLoader; }
+
     Version::Ptr getVersion(const QString& version);
     bool hasVersion(QString version) const;
 
@@ -70,6 +72,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
 
    public:  // for usage only by parsers
     void setName(const QString& name);
+    void setInstallableLoader(bool installable);
     void setVersions(const QList<Version::Ptr>& versions);
     void merge(const VersionList::Ptr& other);
     void mergeFromIndex(const VersionList::Ptr& other);
@@ -89,6 +92,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
     QHash<QString, Version::Ptr> m_lookup;
     QString m_uid;
     QString m_name;
+    bool m_installableLoader = false;
 
     Version::Ptr m_recommended;
 
