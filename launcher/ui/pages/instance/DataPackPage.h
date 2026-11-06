@@ -35,7 +35,7 @@ class DataPackPage : public ExternalResourcesPage {
     bool shouldDisplay() const override { return true; }
 
    public slots:
-    void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
+    void updateFrame(const QModelIndex& current) override;
     void downloadDataPacks();
     void downloadDialogFinished(int result);
     void updateDataPacks();

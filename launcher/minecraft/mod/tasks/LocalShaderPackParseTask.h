@@ -29,13 +29,10 @@
 #include "tasks/Task.h"
 
 namespace ShaderPackUtils {
+bool process(ShaderPack& pack);
 
-enum class ProcessingLevel { Full, BasicInfoOnly };
-
-bool process(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
-
-bool processZIP(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
-bool processFolder(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(ShaderPack& pack);
+bool processFolder(ShaderPack& pack);
 
 /** Checks whether a file is valid as a shader pack or not. */
 bool validate(QFileInfo file);

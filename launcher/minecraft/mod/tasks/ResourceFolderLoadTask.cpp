@@ -83,6 +83,7 @@ void ResourceFolderLoadTask::executeTask()
         }
 
         Resource* resource = m_create_func(entry);
+        resource->moveToThread(m_mainThread);
 
         if (resource->enabled()) {
             if (m_result->resources.contains(resource->internalId())) {
@@ -147,6 +148,7 @@ void ResourceFolderLoadTask::getFromMetadata()
         }
 
         auto* resource = m_create_func(QFileInfo(m_resource_dir.filePath(metadata.filename)));
+        resource->moveToThread(m_mainThread);
         resource->setMetadata(metadata);
         resource->setStatus(ResourceStatus::NotInstalled);
         m_result->resources[resource->internalId()].reset(resource);

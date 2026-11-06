@@ -36,7 +36,6 @@
 
 #include "ResourcePackFolderModel.h"
 
-#include <QIcon>
 #include <QStyle>
 
 #include "minecraft/mod/Resource.h"
@@ -129,26 +128,6 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
     }
 
     return {};
-}
-
-QList<MultiDecorationItemDelegate::Icon> ResourcePackFolderModel::icons(int row) const
-{
-    auto result = ResourceFolderModel::icons(row);
-
-    if (m_showImages) {
-        static const QSize s_iconSize = { 32, 32 };
-
-        QIcon icon;
-        if (const auto pixmap = at(row).image(s_iconSize, Qt::KeepAspectRatio); !pixmap.isNull()) {
-            icon = pixmap;
-        } else {
-            icon = QIcon::fromTheme("resourcepacks");
-        }
-
-        result.prepend({ .icon = icon, .size = s_iconSize });
-    }
-
-    return result;
 }
 
 QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const

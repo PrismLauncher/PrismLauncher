@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QMap>
 #include <utility>
-#include "MTPixmapCache.h"
 #include "Version.h"
 
 // Values taken from:

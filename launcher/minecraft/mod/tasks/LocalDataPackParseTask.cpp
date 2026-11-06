@@ -31,20 +31,20 @@
 
 namespace DataPackUtils {
 
-bool process(DataPack* pack, ProcessingLevel level)
+bool process(DataPack* pack)
 {
     switch (pack->type()) {
         case ResourceType::FOLDER:
-            return DataPackUtils::processFolder(pack, level);
+            return DataPackUtils::processFolder(pack);
         case ResourceType::ZIPFILE:
-            return DataPackUtils::processZIP(pack, level);
+            return DataPackUtils::processZIP(pack);
         default:
             qWarning() << "Invalid type for data pack parse task!";
             return false;
     }
 }
 
-bool processFolder(DataPack* pack, ProcessingLevel level)
+bool processFolder(DataPack* pack)
 {
     Q_ASSERT(pack->type() == ResourceType::FOLDER);
 
@@ -71,95 +71,21 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
         return mcmeta_invalid();  // mcmeta file isn't a valid file
     }
 
-    if (level == ProcessingLevel::BasicInfoOnly) {
-        return true;  // only need basic info already checked
-    }
-    auto png_invalid = [&pack]() {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.png";
-        return true;  // the png is optional
-    };
-
-    QFileInfo image_file_info(FS::PathCombine(pack->fileinfo().filePath(), "pack.png"));
-    if (image_file_info.exists() && image_file_info.isFile()) {
-        QFile pack_png_file(image_file_info.filePath());
-        if (!pack_png_file.open(QIODevice::ReadOnly))
-            return png_invalid();  // can't open pack.png file
-
-        auto data = pack_png_file.readAll();
-
-        bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
-
-        pack_png_file.close();
-        if (!pack_png_result) {
-            return png_invalid();  // pack.png invalid
-        }
-    } else {
-        return png_invalid();  // pack.png does not exists or is not a valid file.
-    }
-
-    return true;  // all tests passed
+    return true;
 }
 
-bool processZIP(DataPack* pack, ProcessingLevel level)
+bool processZIP(DataPack* pack)
 {
     Q_ASSERT(pack->type() == ResourceType::ZIPFILE);
 
     MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
-
-    bool metaParsed = false;
-    bool iconParsed = false;
-    bool mcmeta_result = false;
-    bool pack_png_result = false;
-    if (!zip.parse(
-            [&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, pack, level](MMCZip::ArchiveReader::File* f) -> Result<bool> {
-                bool skip = true;
-                if (!metaParsed && f->filename() == "pack.mcmeta") {
-                    metaParsed = true;
-                    skip = false;
-                    TRY_INTO(auto data, f->readAll())
-
-                    mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
-
-                    if (!mcmeta_result) {
-                        return true;  // mcmeta invalid
-                    }
-                }
-                if (!iconParsed && level != ProcessingLevel::BasicInfoOnly && f->filename() == "pack.png") {
-                    iconParsed = true;
-                    skip = false;
-                    TRY_INTO(auto data, f->readAll())
-
-                    pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
-                    if (!pack_png_result) {
-                        return true;  // pack.png invalid
-                    }
-                }
-                if (skip) {
-                    TRY(f->skip());
-                }
-                if (metaParsed && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
-                    return true;
-                }
-
-                return false;
-            })) {
-        return false;  // can't open zip file
-    }
-    if (!mcmeta_result) {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
-        return false;  // the mcmeta is not optional
+    auto data = zip.readFile("pack.mcmeta");
+    if (!data.has_value()) {
+        qWarning() << "Could not read pack.mcmeta from texture pack at" << pack->fileinfo().filePath() << "-" << data.error();
+        return false;
     }
 
-    if (level == ProcessingLevel::BasicInfoOnly) {
-        return true;  // only need basic info already checked
-    }
-
-    if (!pack_png_result) {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.png";
-        return true;  // the png is optional
-    }
-
-    return true;
+    return DataPackUtils::processMCMeta(pack, std::move(data.value()));
 }
 
 std::pair<int, int> parseVersion(const QJsonValue& value)
@@ -298,28 +224,16 @@ QString processComponent(const QJsonValue& value, bool strikethrough, bool under
     return {};
 }
 
-bool processPackPNG(const DataPack* pack, QByteArray&& raw_data)
+QPixmap processPackPNG(ResourceType type, const QString& path)
 {
-    auto img = QImage::fromData(raw_data);
-    if (!img.isNull()) {
-        pack->setImage(img);
-    } else {
-        qWarning() << "Failed to parse pack.png.";
-        return false;
-    }
-    return true;
-}
-
-bool processPackPNG(const DataPack* pack)
-{
-    auto png_invalid = [&pack]() {
-        qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.png";
-        return false;
+    auto png_invalid = [&path]() {
+        qWarning() << "Data pack at" << path << "does not have a valid pack.png";
+        return QPixmap();
     };
 
-    switch (pack->type()) {
+    switch (type) {
         case ResourceType::FOLDER: {
-            QFileInfo image_file_info(FS::PathCombine(pack->fileinfo().filePath(), "pack.png"));
+            QFileInfo image_file_info(FS::PathCombine(path, "pack.png"));
             if (image_file_info.exists() && image_file_info.isFile()) {
                 QFile pack_png_file(image_file_info.filePath());
                 if (!pack_png_file.open(QIODevice::ReadOnly))
@@ -327,47 +241,46 @@ bool processPackPNG(const DataPack* pack)
 
                 auto data = pack_png_file.readAll();
 
-                bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
-
-                pack_png_file.close();
-                if (!pack_png_result) {
-                    return png_invalid();  // pack.png invalid
+                QPixmap result;
+                if (!result.loadFromData(data)) {
+                    return png_invalid();
                 }
-            } else {
-                return png_invalid();  // pack.png does not exists or is not a valid file.
+
+                return result;
             }
-            return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
+
+            return png_invalid();  // pack.png does not exists or is not a valid file.
         }
         case ResourceType::ZIPFILE: {
-            MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
+            MMCZip::ArchiveReader zip(path);
             auto dataRes = zip.readFile("pack.png");
             if (!dataRes.has_value()) {
                 return png_invalid();
             }
 
-            bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(dataRes.value()));
-
-            if (!pack_png_result) {
+            QPixmap result;
+            if (!result.loadFromData(dataRes.value())) {
                 return png_invalid();  // pack.png invalid
             }
-            return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
+
+            return result;
         }
         default:
             qWarning() << "Invalid type for data pack parse task!";
-            return false;
+            return {};
     }
 }
 
 bool validate(QFileInfo file)
 {
     DataPack dp{ file };
-    return DataPackUtils::process(&dp, ProcessingLevel::BasicInfoOnly) && dp.valid();
+    return DataPackUtils::process(&dp) && dp.valid();
 }
 
 bool validateResourcePack(QFileInfo file)
 {
     ResourcePack rp{ file };
-    return DataPackUtils::process(&rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+    return DataPackUtils::process(&rp) && rp.valid();
 }
 
 }  // namespace DataPackUtils

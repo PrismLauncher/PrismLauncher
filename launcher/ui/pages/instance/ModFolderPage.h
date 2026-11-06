@@ -61,7 +61,7 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual bool shouldDisplay() const override;
 
    public slots:
-    void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
+    void updateFrame(const QModelIndex& current) override;
 
    private slots:
     void removeItems(const QItemSelection& selection) override;

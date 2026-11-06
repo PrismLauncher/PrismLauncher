@@ -95,13 +95,13 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
 
     auto* selectionModel = m_ui->treeView->selectionModel();
 
-    connect(selectionModel, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    connect(selectionModel, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current) {
         if (!current.isValid()) {
             m_ui->frame->clear();
             return;
         }
 
-        updateFrame(current, previous);
+        updateFrame(current);
     });
 
     auto updateExtra = [this]() {
@@ -118,6 +118,12 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
     connect(m_model, &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::dataChanged, this, [this] { updateActions(); });
+    connect(m_model, &ResourceFolderModel::iconChanged, this, [this, selectionModel](int row) {
+        const int currentRow = m_filterModel->mapToSource(selectionModel->currentIndex()).row();
+        if (row == currentRow) {
+            updateFrame(selectionModel->currentIndex());
+        }
+    });
     connect(m_model, &ResourceFolderModel::sizeHintChanged, m_ui->treeView->itemDelegate(),
             [this] { m_ui->treeView->itemDelegate()->sizeHintChanged(QModelIndex()); });
 
@@ -369,7 +375,7 @@ void ExternalResourcesPage::updateActions()
     m_ui->actionExportMetadata->setEnabled(!m_model->empty());
 }
 
-void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ExternalResourcesPage::updateFrame(const QModelIndex& current)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();

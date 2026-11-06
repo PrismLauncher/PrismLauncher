@@ -134,11 +134,11 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
-void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ModFolderPage::updateFrame(const QModelIndex& current)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    const Mod& mod = m_model->at(row);
+    Mod& mod = m_model->at(row);
     m_ui->frame->updateWithMod(mod);
 }
 
