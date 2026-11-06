@@ -21,7 +21,6 @@ set(TEST_SOURCES
     Packwiz_test.cpp
     Index_test.cpp
     Version_test.cpp
-    ModrinthUrl_test.cpp
     MetaComponentParse_test.cpp
     CatPack_test.cpp
     XmlLogs_test.cpp

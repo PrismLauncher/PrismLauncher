@@ -57,7 +57,7 @@ using Spec = std::pair<Request::Spec, typename Sink<T>::ParseFunc>;
 template <typename T>
 std::pair<Request::Ptr, T*> make(const Spec<T>& specPair)
 {
-    auto [spec, parse] = specPair;
+    auto [spec, parse] = std::move(specPair);
     if (ASSERT_NEVER(!spec.url.isValid() || !parse)) {
         return { nullptr, nullptr };
     }
