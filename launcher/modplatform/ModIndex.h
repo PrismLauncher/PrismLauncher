@@ -255,6 +255,10 @@ struct IndexedVersion {
     QList<Dependency> dependencies;
     SideType side = SideType::NoSide;  // this is for flame API
 
+    // Modrinth related
+    QString sha1;
+    qint64 size = 0;
+
     // For internal use, not provided by APIs
     bool isCurrentlySelected = false;
 

@@ -25,13 +25,14 @@
 #include <QtConcurrentRun>
 #include <algorithm>
 #include <utility>
-#include "Json.h"
+#include "BuildConfig.h"
 #include "MMCZip.h"
 #include "archive/ExportToZipTask.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
@@ -154,7 +155,7 @@ void ModrinthPackExportTask::makeApiRequest()
         buildZip();
     } else {
         setStatus(tr("Finding versions for hashes..."));
-        auto [versionsTask, response] = ModrinthAPI::currentVersions(pendingHashes.values(), "sha512");
+        auto [versionsTask, response] = ModrinthAPI::currentVersionsTask(pendingHashes.values(), "sha512");
         task = versionsTask;
         connect(task.get(), &Task::succeeded, this, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
@@ -163,34 +164,23 @@ void ModrinthPackExportTask::makeApiRequest()
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
+void ModrinthPackExportTask::parseApiResponse(QHash<QString, ModPlatform::IndexedVersion>* response)
 {
     task = nullptr;
 
-    auto doc = Json::requireDocument(*response);
-    if (!doc) {
-        emitFailed(tr("Failed to parse versions response: %1").arg(doc.error()));
-        return;
-    }
     QMapIterator<QString, QString> iterator(pendingHashes);
     while (iterator.hasNext()) {
         iterator.next();
+        auto hash = iterator.value();
 
-        const QJsonObject obj = doc.value()[iterator.value()].toObject();
-        if (obj.isEmpty()) {
+        if (!response->contains(hash)) {
             continue;
         }
 
-        const QJsonArray filesArray = obj["files"].toArray();
-        if (auto fileIter = std::ranges::find_if(
-                filesArray, [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-            fileIter != filesArray.end()) {
-            // map the file to the url
-            resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
-                                                          .sha512 = iterator.value(),
-                                                          .url = fileIter->toObject()["url"].toString(),
-                                                          .size = fileIter->toObject()["size"].toInt() };
-        }
+        auto file = response->value(hash);
+
+        // map the file to the url
+        resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = file.sha1, .sha512 = hash, .url = file.downloadUrl, .size = file.size };
     }
     pendingHashes.clear();
     buildZip();
