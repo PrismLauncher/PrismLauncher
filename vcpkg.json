@@ -8,11 +8,6 @@
       "name": "libqrencode",
       "default-features": false
     },
-    {
-      "name": "pkgconf",
-      "host": true,
-      "platform": "windows"
-    },
 
     "cmark",
     {
