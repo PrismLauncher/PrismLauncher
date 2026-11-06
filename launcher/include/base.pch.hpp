@@ -17,7 +17,6 @@
 #include <winnls.h>
 
 #include <winrt/base.h>
-#include <wrl/client.h>
 #endif
 
 #include <algorithm>
