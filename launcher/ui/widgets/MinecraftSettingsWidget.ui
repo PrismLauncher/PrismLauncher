@@ -594,6 +594,35 @@ It is most likely you will need to change the path - please refer to the mod's w
             </widget>
            </item>
            <item>
+            <widget class="QGroupBox" name="autoModUpdateGroup">
+             <property name="title">
+              <string>Automatically Update Mods</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_19">
+              <item>
+               <widget class="QRadioButton" name="allMods">
+                <property name="text">
+                 <string>All mods</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="enabledMods">
+                <property name="text">
+                 <string>Enabled mods only</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -766,7 +795,7 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </widget>
               </item>
-              
+
               <item row="8" column="0">
                <spacer name="verticalSpacer_7">
                 <property name="orientation">
@@ -1008,7 +1037,7 @@ It is most likely you will need to change the path - please refer to the mod's w
   <tabstop>lineEditOpenALPath</tabstop>
   <tabstop>useNativeSDLCheck</tabstop>
   <tabstop>lineEditSDLPath</tabstop>
-  
+
   <tabstop>enableFeralGamemodeCheck</tabstop>
   <tabstop>enableMangoHud</tabstop>
   <tabstop>useDiscreteGpuCheck</tabstop>
