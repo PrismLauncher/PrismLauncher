@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2025 Yihe Li <winmikedows@hotmail.com>
+ *  Copyright (C) 2026 utophii <pos18411@gmail.com>
  *
  *  parent program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,9 +38,11 @@
 
 #include "ShortcutUtils.h"
 
+#include "DynamicLauncherPortal.h"
 #include "FileSystem.h"
 
 #include <QApplication>
+#include <QBuffer>
 #include <QFileDialog>
 
 #include <BuildConfig.h>
@@ -48,18 +51,41 @@
 
 namespace ShortcutUtils {
 
+static void prepareInstanceLaunchArgs(const Shortcut& shortcut, QString& appPath, QStringList& args)
+{
+    appPath = QApplication::applicationFilePath();
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    if (appPath.startsWith("/tmp/.mount_")) {
+        // AppImage
+        appPath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
+        if (appPath.isEmpty()) {
+            QMessageBox::critical(
+                shortcut.parent, QObject::tr("Create Shortcut"),
+                QObject::tr("Launcher is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
+        } else if (appPath.endsWith("/")) {
+            appPath.chop(1);
+        }
+    }
+#endif
+
+    args.append({ "--launch", shortcut.instance->uuid() });
+    args.append(shortcut.extraArgs);
+}
+
 bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 {
     if (!shortcut.instance)
         return false;
 
-    QString appPath = QApplication::applicationFilePath();
+    QString appPath;
     auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
     if (icon == nullptr) {
         icon = APPLICATION->icons()->icon("grass");
     }
     QString iconPath;
     QStringList args;
+    prepareInstanceLaunchArgs(shortcut, appPath, args);
 #if defined(Q_OS_MACOS)
     if (appPath.startsWith("/private/var/")) {
         QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
@@ -85,18 +111,6 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
     }
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    if (appPath.startsWith("/tmp/.mount_")) {
-        // AppImage!
-        appPath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (appPath.isEmpty()) {
-            QMessageBox::critical(
-                shortcut.parent, QObject::tr("Create Shortcut"),
-                QObject::tr("Launcher is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
-        } else if (appPath.endsWith("/")) {
-            appPath.chop(1);
-        }
-    }
-
     iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.png");
 
     QFile iconFile(iconPath);
@@ -115,14 +129,15 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     if (DesktopServices::isFlatpak()) {
         appPath = "flatpak";
-        args.append({ "run", BuildConfig.LAUNCHER_APPID });
+        args.prepend(BuildConfig.LAUNCHER_APPID);
+        args.prepend("run");
     }
 
 #elif defined(Q_OS_WIN)
     iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.ico");
 
     // part of fix for weird bug involving the window icon being replaced
-    // dunno why it happens, but parent 2-line fix seems to be enough, so w/e
+    // dunno why it happens, but this 2-line fix seems to be enough, so w/e
     auto appIcon = APPLICATION->logo();
 
     QFile iconFile(iconPath);
@@ -146,8 +161,6 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
     QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Not supported on your platform!"));
     return false;
 #endif
-    args.append({ "--launch", shortcut.instance->uuid() });
-    args.append(shortcut.extraArgs);
 
     QString shortcutPath = FS::createShortcut(filePath, appPath, args, shortcut.name, iconPath);
     if (shortcutPath.isEmpty()) {
@@ -163,10 +176,93 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
     return true;
 }
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+bool createInstanceShortcutViaPortal(const Shortcut& shortcut)
+{
+    if (!shortcut.instance)
+        return false;
+
+    if (!DynamicLauncherPortal::isPortalAvailable()) {
+        qWarning() << "ShortcutUtils: DynamicLauncher portal is not available";
+        return false;
+    }
+
+    // Set up the application path and arguments (similar to createInstanceShortcut)
+    QString appPath;
+    QStringList args;
+    prepareInstanceLaunchArgs(shortcut, appPath, args);
+
+    if (appPath.isEmpty()) {
+        return false;
+    }
+
+    // Save the icon to a byte array (the portal takes it as-is)
+    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
+    if (icon == nullptr) {
+        icon = APPLICATION->icons()->icon("grass");
+    }
+    QByteArray iconData;
+    {
+        QBuffer iconBuffer(&iconData);
+        if (!iconBuffer.open(QIODevice::WriteOnly) || !icon->icon().pixmap(64, 64).save(&iconBuffer, "PNG")) {
+            QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut."));
+            return false;
+        }
+    }
+
+    auto quoteArg = [](const QString& arg) {
+        QString quoted = arg;
+        quoted.replace(QLatin1Char('\''), QStringLiteral("'\\''"));
+        return QStringLiteral("'") + quoted + QStringLiteral("'");
+    };
+
+    QString execValue = quoteArg(appPath);
+    for (const auto& arg : args) {
+        execValue += QLatin1Char(' ') + quoteArg(arg);
+    }
+
+    QString desktopEntry;
+    desktopEntry += QStringLiteral("[Desktop Entry]\n");
+    desktopEntry += QStringLiteral("Type=Application\n");
+    desktopEntry += QStringLiteral("Categories=Game\n");
+    desktopEntry += QStringLiteral("Exec=") + execValue + QStringLiteral("\n");
+
+    // Call the portal to install the launcher
+    auto installResult = DynamicLauncherPortal::installLauncher(shortcut.name, iconData, desktopEntry);
+    if (!installResult) {
+        qWarning() << "ShortcutUtils: Portal installation failed:" << installResult.error();
+        QMessageBox::critical(
+            shortcut.parent, QObject::tr("Create Shortcut"),
+            QObject::tr("Failed to create %1 shortcut via the system portal: %2").arg(shortcut.targetString, installResult.error()));
+        return false;
+    }
+
+    // The portal manages the actual file location, so register the
+    // desktop file id as the shortcut path
+    QString registeredShortcutPath = DynamicLauncherPortal::buildDesktopFileId(shortcut.name);
+
+    shortcut.instance->registerShortcut({ shortcut.name, registeredShortcutPath, ShortcutTarget::Applications, true });
+
+    qDebug() << "ShortcutUtils: Successfully created shortcut via portal:" << shortcut.name;
+    return true;
+}
+#endif
+
 bool createInstanceShortcutOnDesktop(const Shortcut& shortcut)
 {
     if (!shortcut.instance)
         return false;
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    // in flatpak, the host desktop is not writable from the sandbox and the
+    // DynamicLauncher portal can only install launchers into the app launcher,
+    // so desktop shortcuts aren't supported there
+    if (DesktopServices::isFlatpak()) {
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Desktop shortcuts are not supported in Flatpak. Please use Applications instead."));
+        return false;
+    }
+#endif
 
     QString desktopDir = FS::getDesktopDir();
     if (desktopDir.isEmpty()) {
@@ -186,6 +282,21 @@ bool createInstanceShortcutInApplications(const Shortcut& shortcut)
 {
     if (!shortcut.instance)
         return false;
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    // Try the DynamicLauncher portal first (works in Flatpak and provides better integration)
+    if (DynamicLauncherPortal::isPortalAvailable()) {
+        if (createInstanceShortcutViaPortal(shortcut)) {
+            QMessageBox::information(shortcut.parent, QObject::tr("Create Shortcut"),
+                                     QObject::tr("Created a shortcut to this %1!\n"
+                                                 "It was installed via the system portal and will appear in your app launcher.")
+                                         .arg(shortcut.targetString));
+            return true;
+        }
+        qDebug() << "ShortcutUtils: Portal installation failed, falling back to direct .desktop file";
+        // Fall through to direct method
+    }
+#endif
 
     QString applicationsDir = FS::getApplicationsDir();
     if (applicationsDir.isEmpty()) {
