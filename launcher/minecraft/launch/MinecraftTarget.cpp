@@ -17,6 +17,13 @@
 
 #include <QStringList>
 
+MinecraftTarget MinecraftTarget::fromRealm(const QString& realmId)
+{
+    MinecraftTarget target{};
+    target.realm = realmId;
+    return target;
+}
+
 // FIXME: the way this is written, it can't ever do any sort of validation and can accept total junk
 MinecraftTarget MinecraftTarget::parse(const QString& fullAddress, bool useWorld)
 {
