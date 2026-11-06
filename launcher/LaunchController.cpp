@@ -135,9 +135,10 @@ LaunchDecision LaunchController::decideLaunchMode()
         return LaunchDecision::Continue;
     }
 
-    // Offline accounts don't need a Microsoft account: launch them directly in offline mode.
+    // Offline accounts don't need a Microsoft account to be checked.
+    // Keep the wanted launch mode, so that in Normal mode the game files are still downloaded/updated.
     if (m_accountToUse->accountType() == AccountType::Offline) {
-        m_actualLaunchMode = LaunchMode::Offline;
+        m_actualLaunchMode = m_wantedLaunchMode;
         return LaunchDecision::Continue;
     }
 
