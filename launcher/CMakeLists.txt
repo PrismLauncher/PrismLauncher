@@ -1468,8 +1468,15 @@ foreach(target ${Launcher_TARGETS})
     target_compile_options(${target} PRIVATE
         $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W4 /permissive- /wd4100,-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers>
     )
+
     # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
     target_link_options(${target} PRIVATE $<$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>:/STACK:8388608>)
+
+    # Wrangle in windows.h and its nastiness
+    # https://learn.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers
+    target_compile_definitions(${target} PRIVATE
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WIN32_LEAN_AND_MEAN NOGDI NOMINMAX>
+    )
 endforeach()
 
 set_target_properties(${Launcher_TARGETS} PROPERTIES COMPILE_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})

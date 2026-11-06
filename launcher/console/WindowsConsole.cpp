@@ -19,9 +19,6 @@
 #include "WindowsConsole.h"
 #include <system_error>
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 #include <windows.h>
 
 #include <consoleapi.h>

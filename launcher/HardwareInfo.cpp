@@ -62,9 +62,6 @@ bool readFromOutput(const char* command, F function)
 #endif
 
 #ifdef Q_OS_WINDOWS
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 #include <QSettings>
 
 #include <dxgi1_6.h>
