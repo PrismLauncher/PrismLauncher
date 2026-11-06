@@ -41,6 +41,11 @@ void ChooseProviderDialog::setDescription(QString desc)
     ui->explanationLabel->setText(desc);
 }
 
+void ChooseProviderDialog::setSkipButtonText(const QString& text)
+{
+    ui->skipOneButton->setText(text);
+}
+
 void ChooseProviderDialog::skipOne()
 {
     reject();
