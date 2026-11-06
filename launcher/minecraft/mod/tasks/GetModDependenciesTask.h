@@ -68,6 +68,7 @@ class GetModDependenciesTask : public SequentialTask {
     }
 
    protected slots:
+    void subTaskFailed(Task::Ptr task, const QString& msg) override;
     Task::Ptr prepareDependencyTask(const ModPlatform::Dependency&, ModPlatform::ResourceProvider, int);
     QList<ModPlatform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&,
                                                              ModPlatform::ResourceProvider providerName);
