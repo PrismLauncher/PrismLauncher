@@ -249,6 +249,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ComponentPtr minecraft = profile->getComponent("net.minecraft");
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
         const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
+        const ComponentPtr ornithe = profile->getComponent("net.ornithemc.fabric-loader");
         const ComponentPtr forge = profile->getComponent("net.minecraftforge");
         const ComponentPtr neoForge = profile->getComponent("net.neoforged");
 
@@ -262,6 +263,9 @@ QByteArray ModrinthPackExportTask::generateIndex()
         }
         if (fabric != nullptr) {
             dependencies["fabric-loader"] = fabric->m_version;
+        }
+        if (ornithe != nullptr) {
+            dependencies["ornithe-loader"] = ornithe->m_version;
         }
         if (forge != nullptr) {
             dependencies["forge"] = forge->m_version;

@@ -55,7 +55,7 @@ class ModrinthCreationTask final : public InstanceTask {
     QWidget* m_parent = nullptr;
     bool m_trustedSource;
 
-    QString m_minecraftVersion, m_fabricVersion, m_quiltVersion, m_forgeVersion, m_neoForgeVersion;
+    QString m_minecraftVersion, m_fabricVersion, m_quiltVersion, m_ornitheVersion, m_forgeVersion, m_neoForgeVersion;
     QString m_managedId, m_managedVersionId, m_managedName;
 
     std::vector<File> m_files;
