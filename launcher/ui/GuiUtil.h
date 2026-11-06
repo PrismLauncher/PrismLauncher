@@ -1,7 +1,12 @@
 #pragma once
 
+#include <QApplication>
+#include <QColor>
 #include <QFileInfo>
+#include <QPalette>
 #include <QWidget>
+class QStyle;
+
 #include <optional>
 
 #include "Result.h"
@@ -20,4 +25,6 @@ QString browseForFile(const QString& context,
                       const QString& filter,
                       const QString& defaultPath,
                       QWidget* parentWidget);
+
+QColor selectedItemFg(const QPalette& palette, const QStyle* style = QApplication::style());
 }  // namespace GuiUtil
