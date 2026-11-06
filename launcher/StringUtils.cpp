@@ -185,8 +185,12 @@ QString StringUtils::getRandomAlphaNumeric()
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs)
 {
-    QString left, right;
+    QString left;
+    QString right;
     auto index = s.indexOf(sep, 0, cs);
+    if (index == -1) {
+        return qMakePair(s, "");
+    }
     left = s.mid(0, index);
     right = s.mid(index + sep.length());
     return qMakePair(left, right);
@@ -194,18 +198,26 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString&
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs)
 {
-    QString left, right;
+    QString left;
+    QString right;
     auto index = s.indexOf(sep, 0, cs);
+    if (index == -1) {
+        return qMakePair(s, "");
+    }
     left = s.mid(0, index);
-    right = s.mid(left.length() + 1);
+    right = s.mid(index + 1);
     return qMakePair(left, right);
 }
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegularExpression& re)
 {
-    QString left, right;
+    QString left;
+    QString right;
     QRegularExpressionMatch match;
     auto index = s.indexOf(re, 0, &match);
+    if (index == -1) {
+        return qMakePair(s, "");
+    }
     left = s.mid(0, index);
     auto end = match.hasMatch() ? left.length() + match.capturedLength() : left.length() + 1;
     right = s.mid(end);
