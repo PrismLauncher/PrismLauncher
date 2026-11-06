@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_file_path">
+    <widget class="QLabel" name="labelFilePath">
      <property name="text">
       <string/>
      </property>
@@ -32,14 +32,35 @@
     <widget class="QListView" name="instanceView"/>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="placeholderText">
+      <string>Search instances...</string>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     <property name="clearButtonEnabled">
+      <bool>true</bool>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="showAllCB">
+       <property name="text">
+        <string>Show all instances</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
