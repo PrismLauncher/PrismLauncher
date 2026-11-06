@@ -85,6 +85,10 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     ui->legacyFMLLibsURL->setPlaceholderText(BuildConfig.LEGACY_FMLLIBS_BASE_URL);
     ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
 
+    ui->ghLabel->setVisible(BuildConfig.UPDATER_ENABLED);
+    ui->ghNoteLabel->setVisible(BuildConfig.UPDATER_ENABLED);
+    ui->githubClientID->setVisible(BuildConfig.UPDATER_ENABLED);
+
     loadSettings();
 
     resetBaseURLNote();
@@ -155,6 +159,7 @@ void APIPage::loadSettings()
     QString customUserAgent = s->get("UserAgentOverride").toString();
     ui->userAgentLineEdit->setText(customUserAgent);
     ui->technicClientID->setText(s->get("TechnicClientID").toString());
+    ui->githubClientID->setText(s->get("GithubToken").toString());
 }
 
 void APIPage::applySettings()
@@ -204,6 +209,7 @@ void APIPage::applySettings()
     s->set("ModrinthToken", modrinthToken);
     s->set("UserAgentOverride", ui->userAgentLineEdit->text());
     s->set("TechnicClientID", ui->technicClientID->text());
+    s->set("GithubToken", ui->githubClientID->text());
 }
 
 bool APIPage::apply()

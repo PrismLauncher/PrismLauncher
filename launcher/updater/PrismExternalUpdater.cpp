@@ -32,10 +32,12 @@
 #include <algorithm>
 #include <memory>
 
+#include "Application.h"
 #include "StringUtils.h"
 
 #include "BuildConfig.h"
 
+#include "settings/SettingsObject.h"
 #include "ui/dialogs/UpdateAvailableDialog.h"
 
 class PrismExternalUpdater::Private {
@@ -96,7 +98,7 @@ void PrismExternalUpdater::checkForUpdates()
 void PrismExternalUpdater::checkForUpdates(bool triggeredByUser) const
 {
     QProgressDialog progress(tr("Checking for updates..."), "", 0, 0, priv->parent);
-    progress.setMinimumDuration(0); // Appear immediately without waiting
+    progress.setMinimumDuration(0);  // Appear immediately without waiting
     progress.setCancelButton(nullptr);
     progress.adjustSize();
     if (triggeredByUser) {
@@ -119,6 +121,9 @@ void PrismExternalUpdater::checkForUpdates(bool triggeredByUser) const
     QStringList args = { "--check-only", "--dir", priv->dataDir.absolutePath(), "--debug" };
     if (priv->allowBeta) {
         args.append("--pre-release");
+    }
+    if (auto token = APPLICATION->settings()->get("GithubToken").toString(); !token.isEmpty()) {
+        args.append({ "--github-token", token });
     }
 
     proc.start(priv->appDir.absoluteFilePath(exeName), args);
@@ -360,6 +365,9 @@ void PrismExternalUpdater::performUpdate(const QString& versionTag) const
     QStringList args = { "--dir", priv->dataDir.absolutePath(), "--install-version", versionTag };
     if (priv->allowBeta) {
         args.append("--pre-release");
+    }
+    if (auto token = APPLICATION->settings()->get("GithubToken").toString(); !token.isEmpty()) {
+        args.append({ "--github-token", token });
     }
 
     proc.setProgram(priv->appDir.absoluteFilePath(exeName));
