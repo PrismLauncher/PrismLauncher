@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QUrl>
+#include <QtSystemDetection>
 
 class QFileInfo;
 
@@ -41,4 +42,8 @@ bool isFlatpak();
  * Determine whether the launcher is running in a Snap environment
  */
 bool isSnap();
+
+#ifdef Q_OS_LINUX
+QString desktopEnvironment();
+#endif
 }  // namespace DesktopServices

@@ -36,7 +36,7 @@ std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
         }
         return { QString("%1 %2").arg(QString::number(count), str), count };
     }
-    return { StringUtils::humanReadableFileSize(static_cast<double>(file.size()), true), file.size() };
+    return { StringUtils::humanReadableFileSize(static_cast<double>(file.size())), file.size() };
 }
 }  // namespace
 
