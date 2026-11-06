@@ -36,7 +36,10 @@
 
 #pragma once
 
+#include <QList>
 #include <QWidget>
+#include <utility>
+
 #include "JavaSettingsWidget.h"
 #include "minecraft/MinecraftInstance.h"
 
@@ -56,7 +59,6 @@ class MinecraftSettingsWidget : public QWidget {
     void openGlobalSettings();
     void updateAccountsMenu(SettingsObject& settings) const;
     bool isQuickPlaySupported();
-   private slots:
     void saveSelectedLoaders();
     void saveDataPacksPath();
     void selectDataPacksFolder();
@@ -68,4 +70,5 @@ class MinecraftSettingsWidget : public QWidget {
     Ui::MinecraftSettingsWidget* m_ui;
     JavaSettingsWidget* m_javaSettings = nullptr;
     bool m_quickPlaySingleplayer = false;
+    QList<std::pair<ModLoaderType, QCheckBox*>> m_loaderCheckBoxes;
 };
