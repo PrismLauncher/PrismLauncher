@@ -370,6 +370,11 @@ QString RemoveInvalidPathChars(QString string, QChar replaceWith = '-');
 
 QString DirNameFromString(const QString& string, const QStringList& inDirs = { "." });
 
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+// "Safely" quote the CLI arguments for use in a desktop shortcut
+QString quoteShortcutArgs(const QStringList& args);
+#endif
+
 /// Checks if the a given Path contains "!"
 bool checkProblemticPathJava(const QDir& folder);
 
