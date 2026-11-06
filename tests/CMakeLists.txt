@@ -28,6 +28,10 @@ set(TEST_SOURCES
     Commandline_test.cpp
 )
 
+if(APPLE)
+    list(APPEND TEST_SOURCES MacGameMode_test.cpp)
+endif()
+
 # NOTE(@getchoo): Very funny way of aliasing the Qt generated `main` test functions to respective filenames
 # This is required for any test file passed to `create_test_sourcelist()`
 foreach(src ${TEST_SOURCES})
