@@ -362,20 +362,28 @@ bool InstanceList::trashInstance(const InstanceId& id)
     m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
 
     // Also trash all of its shortcuts; we remove the shortcuts if trash fails since it is invalid anyway
-    for (const auto& [name, filePath, target] : inst->shortcuts()) {
-        if (!FS::trash(filePath, &trashedLoc)) {
-            qWarning() << "Trash of shortcut" << name << "at path" << filePath << "for instance" << id
+    for (const auto& shortcut : inst->shortcuts()) {
+#ifdef Q_OS_WIN
+        // NOTE(@getchoo): jumplist shortcuts will refresh on InstanceList reload
+        if (shortcut.target == ShortcutTarget::Jumplist) {
+            continue;
+        }
+#endif
+        if (!FS::trash(shortcut.filePath, &trashedLoc)) {
+            qWarning() << "Trash of shortcut" << shortcut.name << "at path" << shortcut.filePath << "for instance" << id
                        << "has not been successful, trying to delete it instead...";
-            if (!FS::deletePath(filePath)) {
-                qWarning() << "Deletion of shortcut" << name << "at path" << filePath << "for instance" << id
+            if (!FS::deletePath(shortcut.filePath)) {
+                qWarning() << "Deletion of shortcut" << shortcut.name << "at path" << shortcut.filePath << "for instance" << id
                            << "has not been successful, given up...";
             } else {
-                qDebug() << "Shortcut" << name << "at path" << filePath << "for instance" << id << "has been deleted by the launcher.";
+                qDebug() << "Shortcut" << shortcut.name << "at path" << shortcut.filePath << "for instance" << id
+                         << "has been deleted by the launcher.";
             }
             continue;
         }
-        qDebug() << "Shortcut" << name << "at path" << filePath << "for instance" << id << "has been trashed by the launcher.";
-        m_trashHistory.top().shortcuts.append({ { name, filePath, target }, trashedLoc });
+        qDebug() << "Shortcut" << shortcut.name << "at path" << shortcut.filePath << "for instance" << id
+                 << "has been trashed by the launcher.";
+        m_trashHistory.top().shortcuts.append({ shortcut, trashedLoc });
     }
 
     return true;
@@ -453,12 +461,20 @@ void InstanceList::deleteInstance(const InstanceId& id)
 
     qDebug() << "Instance" << id << "has been deleted by the launcher.";
 
-    for (const auto& [name, filePath, target] : inst->shortcuts()) {
-        if (!FS::deletePath(filePath)) {
-            qWarning() << "Deletion of shortcut" << name << "at path" << filePath << "for instance" << id << "has not been successful...";
+    for (const auto& shortcut : inst->shortcuts()) {
+#ifdef Q_OS_WIN
+        // NOTE(@getchoo): see TrashInstance
+        if (shortcut.target == ShortcutTarget::Jumplist) {
             continue;
         }
-        qDebug() << "Shortcut" << name << "at path" << filePath << "for instance" << id << "has been deleted by the launcher.";
+#endif
+        if (!FS::deletePath(shortcut.filePath)) {
+            qWarning() << "Deletion of shortcut" << shortcut.name << "at path" << shortcut.filePath << "for instance" << id
+                       << "has not been successful...";
+            continue;
+        }
+        qDebug() << "Shortcut" << shortcut.name << "at path" << shortcut.filePath << "for instance" << id
+                 << "has been deleted by the launcher.";
     }
 }
 
@@ -582,6 +598,10 @@ InstanceList::InstListError InstanceList::loadList()
         add(newList);
     }
     migrateTotalPlayTime();
+#ifdef Q_OS_WIN
+    if (!updateJumplist())
+        qWarning() << "Unable to update jumplist with new instance information!";
+#endif
     return NoError;
 }
 
@@ -604,6 +624,32 @@ void InstanceList::migrateTotalPlayTime()
 
     qDebug() << "Migrated" << existingTotal << "seconds of existing instance playtime into global TotalPlayTime.";
 }
+
+#ifdef Q_OS_WIN
+Result<> InstanceList::updateJumplist()
+{
+    qDebug() << "Updating context menu jump list.";
+    QList<DesktopServices::JumplistEntry> entries;
+    for (const auto& inst : m_instances) {
+        for (const auto& shortcut : inst->shortcuts()) {
+            if (shortcut.target == ShortcutTarget::Jumplist) {
+                qDebug() << "Adding" << shortcut.name << "to jumplist.";
+                entries.append({ shortcut.name, shortcut.arguments, shortcut.iconPath });
+            }
+        }
+    }
+
+    if (m_jumplistEntries == entries) {
+        qDebug() << "Jumplist has not been changed.";
+        return {};
+    }
+    if (const auto jumplist = DesktopServices::setJumplist(entries); !jumplist)
+        return jumplist;
+
+    m_jumplistEntries = std::move(entries);
+    return {};
+}
+#endif
 
 void InstanceList::saveNow()
 {

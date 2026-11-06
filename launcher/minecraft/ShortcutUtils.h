@@ -66,4 +66,10 @@ bool createInstanceShortcutInApplications(const Shortcut& shortcut);
 /// Create an instance shortcut in other directories
 bool createInstanceShortcutInOther(const Shortcut& shortcut);
 
+#ifdef Q_OS_WIN
+// Create an instance shortcut in the context menu jumplist
+// https://learn.microsoft.com/en-us/uwp/api/windows.ui.startscreen.jumplist
+bool createInstanceShortcutInJumplist(const Shortcut& shortcut);
+#endif
+
 }  // namespace ShortcutUtils
