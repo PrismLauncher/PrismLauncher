@@ -11,6 +11,7 @@
 class WorldList;
 
 class InstallWorldTask : public Task {
+    Q_OBJECT
    public:
     struct Args {
         QPointer<WorldList> worlds;
@@ -29,6 +30,7 @@ class InstallWorldTask : public Task {
 };
 
 class CopyWorldTask : public Task {
+    Q_OBJECT
    public:
     struct Args {
         QPointer<WorldList> worlds;
@@ -47,6 +49,7 @@ class CopyWorldTask : public Task {
 };
 
 class DeleteWorldTask : public Task {
+    Q_OBJECT
    public:
     struct Args {
         QPointer<WorldList> worlds;
