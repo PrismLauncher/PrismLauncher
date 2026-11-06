@@ -169,6 +169,19 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="updateFromUrlButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Update From URL</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
