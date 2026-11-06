@@ -571,8 +571,9 @@ void AccountList::setListFilePath(QString path, bool autosave)
 
 bool AccountList::anyAccountIsValid()
 {
+    // Offline accounts are considered valid as well, so the launcher can be used without a Microsoft account.
     for (auto account : m_accounts) {
-        if (account->ownsMinecraft()) {
+        if (account->ownsMinecraft() || account->accountType() == AccountType::Offline) {
             return true;
         }
     }
