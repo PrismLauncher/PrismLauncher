@@ -35,6 +35,7 @@
 
 #include "AtlUserInteractionSupportImpl.h"
 #include <QMessageBox>
+#include <algorithm>
 
 #include "AtlOptionalModDialog.h"
 #include "ui/dialogs/VersionSelectDialog.h"
@@ -57,11 +58,11 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
     VersionSelectDialog vselect(vlist.get(), "Choose Version", m_parent, false);
     if (minecraftVersion != nullptr) {
         vselect.setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
-        vselect.setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
+        vselect.setEmptyString(QObject::tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
     } else {
-        vselect.setEmptyString(tr("No versions are currently available"));
+        vselect.setEmptyString(QObject::tr("No versions are currently available"));
     }
-    vselect.setEmptyErrorString(tr("Couldn't load or download the version lists!"));
+    vselect.setEmptyErrorString(QObject::tr("Couldn't load or download the version lists!"));
 
     // select recommended build
     for (int i = 0; i < vlist->versions().size(); i++) {
@@ -70,11 +71,13 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
 
         // filter by minecraft version, if the loader depends on a certain version.
         if (minecraftVersion != nullptr) {
-            auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
-            if (iter == reqs.end())
+            auto iter = std::ranges::find_if(reqs, [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
+            if (iter == reqs.end()) {
                 continue;
-            if (iter->equalsVersion != minecraftVersion)
+            }
+            if (iter->equalsVersion != minecraftVersion) {
                 continue;
+            }
         }
 
         // first recommended build we find, we use.
@@ -85,10 +88,14 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
     }
 
     vselect.exec();
-    return vselect.selectedVersion()->descriptor();
+    auto selectedVersion = vselect.selectedVersion();
+    if (!selectedVersion) {
+        return {};
+    }
+    return selectedVersion->descriptor();
 }
 
 void AtlUserInteractionSupportImpl::displayMessage(QString message)
 {
-    QMessageBox::information(m_parent, tr("Installing"), message);
+    QMessageBox::information(m_parent, QObject::tr("Installing"), message);
 }
