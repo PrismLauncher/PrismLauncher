@@ -89,6 +89,21 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     return account;
 }
 
+bool MinecraftAccount::renameOfflineAccount(const QString& newUsername)
+{
+    if (data.type != AccountType::Offline) {
+        return false;
+    }
+    if (newUsername.isEmpty() || newUsername == data.minecraftProfile.name) {
+        return false;
+    }
+    data.yggdrasilToken.extra["userName"] = newUsername;
+    data.minecraftProfile.id = uuidFromUsername(newUsername).toString(QUuid::Id128);
+    data.minecraftProfile.name = newUsername;
+    emit changed();
+    return true;
+}
+
 QJsonObject MinecraftAccount::saveToJson() const
 {
     return data.saveState();

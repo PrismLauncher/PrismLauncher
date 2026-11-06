@@ -102,6 +102,10 @@ void AccountListPage::retranslate()
 
 void AccountListPage::ShowContextMenu(const QPoint& pos)
 {
+    auto index = ui->listView->indexAt(pos);
+    if (index.isValid()) {
+        ui->listView->setCurrentIndex(index);
+    }
     auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->listView->mapToGlobal(pos));
     delete menu;
@@ -160,6 +164,48 @@ void AccountListPage::on_actionAddOffline_triggered()
             m_accounts->setDefaultAccount(account);
         }
     }
+}
+
+void AccountListPage::on_actionRename_triggered()
+{
+    QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+    if (selection.isEmpty()) {
+        return;
+    }
+    QModelIndex selected = selection.first();
+    MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
+    if (!account) {
+        return;
+    }
+    if (account->accountType() != AccountType::Offline) {
+        CustomMessageBox::selectable(this, tr("Cannot rename account"),
+                                     tr("Only offline accounts can be renamed. Microsoft account names must be changed on minecraft.net."),
+                                     QMessageBox::Information)
+            ->exec();
+        return;
+    }
+
+    ChooseOfflineNameDialog dialog(tr("Please enter the new username for your offline account:"), this);
+    dialog.setWindowTitle(tr("Rename Account"));
+    dialog.setUsername(account->profileName());
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    QString newName = dialog.getUsername();
+    if (newName.isEmpty() || newName == account->profileName()) {
+        return;
+    }
+
+    if (auto existing = m_accounts->getAccountByProfileName(newName); existing && existing != account) {
+        CustomMessageBox::selectable(this, tr("Error"),
+                                     tr("An account with that username already exists."),
+                                     QMessageBox::Warning)
+            ->exec();
+        return;
+    }
+
+    account->renameOfflineAccount(newName);
 }
 
 void AccountListPage::on_actionRemove_triggered()
@@ -221,6 +267,7 @@ void AccountListPage::updateButtonStates()
         int indexOfLast = m_accounts->count() - 1;
         accountCanMoveDown = selected.row() < indexOfLast;
     }
+    ui->actionRename->setEnabled(accountIsReady && !accountIsOnline);
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
     ui->actionManageSkins->setEnabled(accountIsReady && accountIsOnline);
