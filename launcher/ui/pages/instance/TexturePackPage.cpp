@@ -204,9 +204,9 @@ void TexturePackPage::deleteTexturePackMetadata()
     }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
-                                                     tr("You are about to remove the metadata for %1 texture packs.\n"
-                                                        "Are you sure?")
-                                                         .arg(selectionCount),
+                                                     tr("You are about to remove the metadata for %n texture packs.\n"
+                                                        "Are you sure?",
+                                                        "", selectionCount),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
