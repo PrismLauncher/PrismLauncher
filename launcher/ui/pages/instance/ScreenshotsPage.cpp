@@ -69,6 +69,11 @@
 #include <FileSystem.h>
 #include "RWStorage.h"
 
+// HACK(@getchoo): Required so MSVC doesn't try to steal our precious variable names
+#if defined(Q_OS_WIN) && defined(small)
+#undef small
+#endif
+
 class ScreenshotsFSModel : public QFileSystemModel {
    public:
     bool canDropMimeData(const QMimeData* data,

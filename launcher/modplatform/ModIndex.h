@@ -30,6 +30,11 @@
 #include "EnumWrapper.h"
 #include "modplatform/ResourceType.h"
 
+// HACK(@getchoo): Required so MSVC doesn't try to steal our precious variable names
+#if defined(Q_OS_WIN) && defined(OPTIONAL)
+#undef OPTIONAL
+#endif
+
 class QIODevice;
 
 namespace ModPlatform {
