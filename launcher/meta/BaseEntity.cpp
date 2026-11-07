@@ -142,6 +142,10 @@ void BaseEntityLoadTask::executeTask()
         emitSucceeded();
         return;
     }
+    if (m_mode == Net::Mode::Offline) {
+        emitFailed(tr("Metadata file %1 not found on disk while in offline mode.").arg(m_entity->localFilename()));
+        return;
+    }
     m_task.reset(new NetJob(QObject::tr("Download of meta file %1").arg(m_entity->localFilename()), APPLICATION->network()));
     auto url = m_entity->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", m_entity->localFilename());

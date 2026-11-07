@@ -132,12 +132,11 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
             result = LoadResult::LoadedLocal;
         } else {
             loadTask = APPLICATION->metadataIndex()->loadVersion(component->m_uid, component->m_version, netmode);
-            if (netmode == Net::Mode::Online)
+            if (loadTask) {
                 result = LoadResult::RequiresRemote;
-            else if (metaVersion->isLoaded())
-                result = LoadResult::LoadedLocal;
-            else
+            } else {
                 result = LoadResult::Failed;
+            }
         }
     }
     return result;
@@ -755,7 +754,7 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
         return;
     }
     qCDebug(instanceProfileResolveC) << "Remote task" << taskIndex << "succeeded";
-    taskSlot.succeeded = false;
+    taskSlot.succeeded = true;
     taskSlot.finished = true;
     d->remoteTasksInProgress--;
     // update the cached data of the component from the downloaded version file.
@@ -800,7 +799,7 @@ void ComponentUpdateTask::checkIfAllFinished()
         // nothing bad happened... clear the temp load status and proceed with looking at dependencies
         d->remoteLoadStatusList.clear();
         performUpdateActions();
-        resolveDependencies(d->mode == Mode::Launch);
+        resolveDependencies(d->mode == Mode::Launch || d->netmode == Net::Mode::Offline);
     } else {
         // remote load failed... report error and bail
         QStringList allErrorsList;
