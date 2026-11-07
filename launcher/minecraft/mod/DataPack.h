@@ -63,6 +63,11 @@ class DataPack : public Resource {
 
     QString packFormatStr() const;
 
+    bool hasAssets() const;
+    bool hasData() const;
+    void setHasAssets(bool has_assets);
+    void setHasData(bool has_data);
+
    protected:
     virtual QMap<std::pair<int, int>, std::pair<Version, Version>> mappings() const;
 
@@ -80,6 +85,8 @@ class DataPack : public Resource {
      */
     QString m_description;
 
+    bool m_has_assets = false;
+    bool m_has_data = false;
     /** The data pack's image file cache key, for access in the QPixmapCache global instance.
      *
      *  The 'was_ever_used' state simply identifies whether the key was never inserted on the cache (true),

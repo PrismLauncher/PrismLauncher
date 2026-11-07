@@ -222,6 +222,14 @@ void Flame::FileResolvingTask::getFlameProjects()
                     TRY(Flame::Parse::loadIndexedPack(file->pack, entryObj))
                     if (file->pack.resourceType == ModPlatform::ResourceType::World) {
                         file->targetFolder = "saves";
+                    } else if (file->pack.resourceType == ModPlatform::ResourceType::DataPack) {
+                        file->targetFolder = "datapacks";
+                    } else if (file->pack.resourceType == ModPlatform::ResourceType::ResourcePack) {
+                        file->targetFolder = "resourcepacks";
+                    } else if (file->pack.resourceType == ModPlatform::ResourceType::TexturePack) {
+                        file->targetFolder = "texturepacks";
+                    } else if (file->pack.resourceType == ModPlatform::ResourceType::ShaderPack) {
+                        file->targetFolder = "shaderpacks";
                     }
                 }
                 return {};

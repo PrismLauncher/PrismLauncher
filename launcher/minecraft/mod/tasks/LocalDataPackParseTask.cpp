@@ -71,6 +71,12 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
         return mcmeta_invalid();  // mcmeta file isn't a valid file
     }
 
+    QFileInfo assets_dir(FS::PathCombine(pack->fileinfo().filePath(), "assets"));
+    pack->setHasAssets(assets_dir.exists() && assets_dir.isDir());
+
+    QFileInfo data_dir(FS::PathCombine(pack->fileinfo().filePath(), "data"));
+    pack->setHasData(data_dir.exists() && data_dir.isDir());
+
     if (level == ProcessingLevel::BasicInfoOnly) {
         return true;  // only need basic info already checked
     }
@@ -110,45 +116,71 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
     bool iconParsed = false;
     bool mcmeta_result = false;
     bool pack_png_result = false;
-    if (!zip.parse(
-            [&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, pack, level](MMCZip::ArchiveReader::File* f) -> Result<bool> {
-                bool skip = true;
-                if (!metaParsed && f->filename() == "pack.mcmeta") {
-                    metaParsed = true;
-                    skip = false;
-                    TRY_INTO(auto data, f->readAll())
+    bool hasAssets = false;
+    bool hasData = false;
+    if (!zip.parse([&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, &hasAssets, &hasData, pack,
+                    level](MMCZip::ArchiveReader::File* f) -> Result<bool> {
+            QString filename = f->filename();
+            while (filename.startsWith("./") || filename.startsWith(".\\")) {
+                filename.remove(0, 2);
+            }
+            if (filename.startsWith('/') || filename.startsWith('\\')) {
+                filename.remove(0, 1);
+            }
 
-                    mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
+            if (!hasAssets &&
+                (filename.startsWith("assets/", Qt::CaseInsensitive) || filename.startsWith("assets\\", Qt::CaseInsensitive) ||
+                 ((filename.compare("assets", Qt::CaseInsensitive) == 0 || filename.compare("assets/", Qt::CaseInsensitive) == 0 ||
+                   filename.compare("assets\\", Qt::CaseInsensitive) == 0) &&
+                  !f->isFile()))) {
+                hasAssets = true;
+            }
+            if (!hasData && (filename.startsWith("data/", Qt::CaseInsensitive) || filename.startsWith("data\\", Qt::CaseInsensitive) ||
+                             ((filename.compare("data", Qt::CaseInsensitive) == 0 || filename.compare("data/", Qt::CaseInsensitive) == 0 ||
+                               filename.compare("data\\", Qt::CaseInsensitive) == 0) &&
+                              !f->isFile()))) {
+                hasData = true;
+            }
 
-                    if (!mcmeta_result) {
-                        return true;  // mcmeta invalid
-                    }
-                }
-                if (!iconParsed && level != ProcessingLevel::BasicInfoOnly && f->filename() == "pack.png") {
-                    iconParsed = true;
-                    skip = false;
-                    TRY_INTO(auto data, f->readAll())
+            bool skip = true;
+            if (!metaParsed && filename == "pack.mcmeta") {
+                metaParsed = true;
+                skip = false;
+                TRY_INTO(auto data, f->readAll())
 
-                    pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
-                    if (!pack_png_result) {
-                        return true;  // pack.png invalid
-                    }
-                }
-                if (skip) {
-                    TRY(f->skip());
-                }
-                if (metaParsed && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
-                    return true;
-                }
+                mcmeta_result = DataPackUtils::processMCMeta(pack, std::move(data));
 
-                return false;
-            })) {
+                if (!mcmeta_result) {
+                    return true;  // mcmeta invalid
+                }
+            }
+            if (!iconParsed && level != ProcessingLevel::BasicInfoOnly && filename == "pack.png") {
+                iconParsed = true;
+                skip = false;
+                TRY_INTO(auto data, f->readAll())
+
+                pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+                if (!pack_png_result) {
+                    return true;  // pack.png invalid
+                }
+            }
+            if (skip) {
+                TRY(f->skip());
+            }
+            if (metaParsed && hasAssets && hasData && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
+                return true;
+            }
+
+            return false;
+        })) {
         return false;  // can't open zip file
     }
     if (!mcmeta_result) {
         qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
         return false;  // the mcmeta is not optional
     }
+    pack->setHasAssets(hasAssets);
+    pack->setHasData(hasData);
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         return true;  // only need basic info already checked
@@ -361,13 +393,13 @@ bool processPackPNG(const DataPack* pack)
 bool validate(QFileInfo file)
 {
     DataPack dp{ file };
-    return DataPackUtils::process(&dp, ProcessingLevel::BasicInfoOnly) && dp.valid();
+    return DataPackUtils::process(&dp, ProcessingLevel::BasicInfoOnly) && dp.valid() && dp.hasData();
 }
 
 bool validateResourcePack(QFileInfo file)
 {
     ResourcePack rp{ file };
-    return DataPackUtils::process(&rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+    return DataPackUtils::process(&rp, ProcessingLevel::BasicInfoOnly) && rp.valid() && !rp.hasData();
 }
 
 }  // namespace DataPackUtils

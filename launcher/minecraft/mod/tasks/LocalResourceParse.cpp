@@ -33,20 +33,20 @@
 namespace ResourceUtils {
 ModPlatform::ResourceType identify(QFileInfo file)
 {
-    if (file.exists() && file.isFile()) {
+    if (file.exists() && (file.isFile() || file.isDir())) {
         if (ModUtils::validate(file)) {
             // mods can contain resource and data packs so they must be tested first
             qDebug() << file.fileName() << "is a mod";
             return ModPlatform::ResourceType::Mod;
+        } else if (DataPackUtils::validate(file)) {
+            qDebug() << file.fileName() << "is a data pack";
+            return ModPlatform::ResourceType::DataPack;
         } else if (DataPackUtils::validateResourcePack(file)) {
             qDebug() << file.fileName() << "is a resource pack";
             return ModPlatform::ResourceType::ResourcePack;
         } else if (TexturePackUtils::validate(file)) {
             qDebug() << file.fileName() << "is a pre 1.6 texture pack";
             return ModPlatform::ResourceType::TexturePack;
-        } else if (DataPackUtils::validate(file)) {
-            qDebug() << file.fileName() << "is a data pack";
-            return ModPlatform::ResourceType::DataPack;
         } else if (WorldSaveUtils::validate(file)) {
             qDebug() << file.fileName() << "is a world save";
             return ModPlatform::ResourceType::World;

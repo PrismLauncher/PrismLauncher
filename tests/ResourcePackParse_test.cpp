@@ -19,6 +19,7 @@
 #include <QTest>
 #include <QTimer>
 #include "minecraft/mod/tasks/LocalDataPackParseTask.h"
+#include "minecraft/mod/tasks/LocalResourceParse.h"
 
 #include <FileSystem.h>
 
@@ -70,6 +71,36 @@ class ResourcePackParseTest : public QObject {
         QVERIFY(pack.packFormat() == 6);
         QVERIFY(pack.description() == "o quartel pegou fogo, policia deu sinal, acode acode acode a bandeira nacional");
         QVERIFY(valid == true);  // no assets dir but it is still valid based on https://minecraft.wiki/w/Resource_pack
+    }
+
+    void test_identifyResourcePackZIP()
+    {
+        QString source = QFINDTESTDATA("testdata/Resources");
+        QFileInfo zip_rp(FS::PathCombine(source, "test_resource_pack_idk.zip"));
+        QVERIFY(DataPackUtils::validateResourcePack(zip_rp));
+        QVERIFY(!DataPackUtils::validate(zip_rp));
+        auto type = ResourceUtils::identify(zip_rp);
+        QCOMPARE(type, ModPlatform::ResourceType::ResourcePack);
+    }
+
+    void test_identifyResourcePackFolder()
+    {
+        QString source = QFINDTESTDATA("testdata/Resources");
+        QFileInfo folder_rp(FS::PathCombine(source, "test_folder"));
+        QVERIFY(DataPackUtils::validateResourcePack(folder_rp));
+        QVERIFY(!DataPackUtils::validate(folder_rp));
+        auto type = ResourceUtils::identify(folder_rp);
+        QCOMPARE(type, ModPlatform::ResourceType::ResourcePack);
+    }
+
+    void test_identifyResourcePackFolder2()
+    {
+        QString source = QFINDTESTDATA("testdata/Resources");
+        QFileInfo folder_rp(FS::PathCombine(source, "another_test_folder"));
+        QVERIFY(DataPackUtils::validateResourcePack(folder_rp));
+        QVERIFY(!DataPackUtils::validate(folder_rp));
+        auto type = ResourceUtils::identify(folder_rp);
+        QCOMPARE(type, ModPlatform::ResourceType::ResourcePack);
     }
 };
 

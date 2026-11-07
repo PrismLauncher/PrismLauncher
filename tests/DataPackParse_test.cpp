@@ -26,6 +26,7 @@
 
 #include <minecraft/mod/DataPack.h>
 #include <minecraft/mod/tasks/LocalDataPackParseTask.h>
+#include <minecraft/mod/tasks/LocalResourceParse.h>
 
 class DataPackParseTest : public QObject {
     Q_OBJECT
@@ -71,6 +72,36 @@ class DataPackParseTest : public QObject {
         QVERIFY(pack.packFormat() == 6);
         QVERIFY(pack.description() == "Some data pack three, leaves on the tree");
         QVERIFY(valid == true);
+    }
+
+    void test_identifyDataPackZIP()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo zip_dp(FS::PathCombine(source, "test_data_pack_boogaloo.zip"));
+        QVERIFY(DataPackUtils::validate(zip_dp));
+        QVERIFY(!DataPackUtils::validateResourcePack(zip_dp));
+        auto type = ResourceUtils::identify(zip_dp);
+        QCOMPARE(type, ModPlatform::ResourceType::DataPack);
+    }
+
+    void test_identifyDataPackFolder()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo folder_dp(FS::PathCombine(source, "test_folder"));
+        QVERIFY(DataPackUtils::validate(folder_dp));
+        QVERIFY(!DataPackUtils::validateResourcePack(folder_dp));
+        auto type = ResourceUtils::identify(folder_dp);
+        QCOMPARE(type, ModPlatform::ResourceType::DataPack);
+    }
+
+    void test_identifyDataPackFolder2()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo folder_dp(FS::PathCombine(source, "another_test_folder"));
+        QVERIFY(DataPackUtils::validate(folder_dp));
+        QVERIFY(!DataPackUtils::validateResourcePack(folder_dp));
+        auto type = ResourceUtils::identify(folder_dp);
+        QCOMPARE(type, ModPlatform::ResourceType::DataPack);
     }
 };
 
