@@ -156,22 +156,10 @@ void DataPack::setDescription(QString new_description)
     m_description = new_description;
 }
 
-bool DataPack::hasAssets() const
-{
-    QMutexLocker locker(&m_data_lock);
-    return m_has_assets;
-}
-
 bool DataPack::hasData() const
 {
     QMutexLocker locker(&m_data_lock);
     return m_has_data;
-}
-
-void DataPack::setHasAssets(bool has_assets)
-{
-    QMutexLocker locker(&m_data_lock);
-    m_has_assets = has_assets;
 }
 
 void DataPack::setHasData(bool has_data)
@@ -190,7 +178,8 @@ void DataPack::setImage(QImage new_image) const
         PixmapCache::instance().remove(m_pack_image_cache_key.key);
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap = QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;

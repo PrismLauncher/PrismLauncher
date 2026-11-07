@@ -103,6 +103,46 @@ class DataPackParseTest : public QObject {
         auto type = ResourceUtils::identify(folder_dp);
         QCOMPARE(type, ModPlatform::ResourceType::DataPack);
     }
+
+    void test_identifyHybridPackZIP()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo hybrid_zip(FS::PathCombine(source, "test_hybrid_pack.zip"));
+        QVERIFY(DataPackUtils::validate(hybrid_zip));
+        QVERIFY(!DataPackUtils::validateResourcePack(hybrid_zip));
+        auto type = ResourceUtils::identify(hybrid_zip);
+        QCOMPARE(type, ModPlatform::ResourceType::DataPack);
+    }
+
+    void test_identifyHybridPackFolder()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo hybrid_folder(FS::PathCombine(source, "hybrid_folder"));
+        QVERIFY(DataPackUtils::validate(hybrid_folder));
+        QVERIFY(!DataPackUtils::validateResourcePack(hybrid_folder));
+        auto type = ResourceUtils::identify(hybrid_folder);
+        QCOMPARE(type, ModPlatform::ResourceType::DataPack);
+    }
+
+    void test_identifyMcmetaOnlyZIP()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo mcmeta_only(FS::PathCombine(source, "test_mcmeta_only.zip"));
+        QVERIFY(!DataPackUtils::validate(mcmeta_only));
+        QVERIFY(DataPackUtils::validateResourcePack(mcmeta_only));
+        auto type = ResourceUtils::identify(mcmeta_only);
+        QCOMPARE(type, ModPlatform::ResourceType::ResourcePack);
+    }
+
+    void test_identifyMcmetaOnlyFolder()
+    {
+        QString source = QFINDTESTDATA("testdata/DataPackParse");
+        QFileInfo mcmeta_only(FS::PathCombine(source, "mcmeta_only_folder"));
+        QVERIFY(!DataPackUtils::validate(mcmeta_only));
+        QVERIFY(DataPackUtils::validateResourcePack(mcmeta_only));
+        auto type = ResourceUtils::identify(mcmeta_only);
+        QCOMPARE(type, ModPlatform::ResourceType::ResourcePack);
+    }
 };
 
 QTEST_GUILESS_MAIN(DataPackParseTest)

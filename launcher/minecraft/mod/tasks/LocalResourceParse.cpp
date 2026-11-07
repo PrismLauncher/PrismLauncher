@@ -39,6 +39,9 @@ ModPlatform::ResourceType identify(QFileInfo file)
             qDebug() << file.fileName() << "is a mod";
             return ModPlatform::ResourceType::Mod;
         } else if (DataPackUtils::validate(file)) {
+            // Packs containing both data/ and assets/ are datapacks (data pack takes precedence).
+            // DataPackUtils::validate() only requires data/, so it must be checked before
+            // validateResourcePack(), whose packs require !data/.
             qDebug() << file.fileName() << "is a data pack";
             return ModPlatform::ResourceType::DataPack;
         } else if (DataPackUtils::validateResourcePack(file)) {

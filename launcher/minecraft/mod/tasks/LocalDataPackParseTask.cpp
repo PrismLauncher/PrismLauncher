@@ -71,9 +71,6 @@ bool processFolder(DataPack* pack, ProcessingLevel level)
         return mcmeta_invalid();  // mcmeta file isn't a valid file
     }
 
-    QFileInfo assets_dir(FS::PathCombine(pack->fileinfo().filePath(), "assets"));
-    pack->setHasAssets(assets_dir.exists() && assets_dir.isDir());
-
     QFileInfo data_dir(FS::PathCombine(pack->fileinfo().filePath(), "data"));
     pack->setHasData(data_dir.exists() && data_dir.isDir());
 
@@ -116,10 +113,11 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
     bool iconParsed = false;
     bool mcmeta_result = false;
     bool pack_png_result = false;
-    bool hasAssets = false;
     bool hasData = false;
-    if (!zip.parse([&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, &hasAssets, &hasData, pack,
+    if (!zip.parse([&metaParsed, &iconParsed, &mcmeta_result, &pack_png_result, &hasData, pack,
                     level](MMCZip::ArchiveReader::File* f) -> Result<bool> {
+            // Entries are stored relative to the archive root. Leading "./" and "/" are
+            // stripped so "./data/..." entries still match the checks below.
             QString filename = f->filename();
             while (filename.startsWith("./") || filename.startsWith(".\\")) {
                 filename.remove(0, 2);
@@ -128,13 +126,6 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
                 filename.remove(0, 1);
             }
 
-            if (!hasAssets &&
-                (filename.startsWith("assets/", Qt::CaseInsensitive) || filename.startsWith("assets\\", Qt::CaseInsensitive) ||
-                 ((filename.compare("assets", Qt::CaseInsensitive) == 0 || filename.compare("assets/", Qt::CaseInsensitive) == 0 ||
-                   filename.compare("assets\\", Qt::CaseInsensitive) == 0) &&
-                  !f->isFile()))) {
-                hasAssets = true;
-            }
             if (!hasData && (filename.startsWith("data/", Qt::CaseInsensitive) || filename.startsWith("data\\", Qt::CaseInsensitive) ||
                              ((filename.compare("data", Qt::CaseInsensitive) == 0 || filename.compare("data/", Qt::CaseInsensitive) == 0 ||
                                filename.compare("data\\", Qt::CaseInsensitive) == 0) &&
@@ -167,7 +158,7 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
             if (skip) {
                 TRY(f->skip());
             }
-            if (metaParsed && hasAssets && hasData && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
+            if (metaParsed && hasData && (level == ProcessingLevel::BasicInfoOnly || iconParsed)) {
                 return true;
             }
 
@@ -179,7 +170,6 @@ bool processZIP(DataPack* pack, ProcessingLevel level)
         qWarning() << "Data pack at" << pack->fileinfo().filePath() << "does not have a valid pack.mcmeta";
         return false;  // the mcmeta is not optional
     }
-    pack->setHasAssets(hasAssets);
     pack->setHasData(hasData);
 
     if (level == ProcessingLevel::BasicInfoOnly) {

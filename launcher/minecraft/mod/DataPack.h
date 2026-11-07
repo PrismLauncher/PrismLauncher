@@ -63,9 +63,7 @@ class DataPack : public Resource {
 
     QString packFormatStr() const;
 
-    bool hasAssets() const;
     bool hasData() const;
-    void setHasAssets(bool has_assets);
     void setHasData(bool has_data);
 
    protected:
@@ -85,7 +83,7 @@ class DataPack : public Resource {
      */
     QString m_description;
 
-    bool m_has_assets = false;
+    // Whether the pack contains data/, the sole datapack vs resource pack discriminator.
     bool m_has_data = false;
     /** The data pack's image file cache key, for access in the QPixmapCache global instance.
      *
