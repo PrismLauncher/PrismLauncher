@@ -1465,18 +1465,26 @@ endif()
 get_directory_property(Launcher_TARGETS BUILDSYSTEM_TARGETS)
 foreach(target ${Launcher_TARGETS})
     # TODO: Fix unused parameter warnings (/wd4100, -Wno-unused-parameter, etc)
-    target_compile_options(${target} PRIVATE
-        $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W4 /permissive- /wd4100,-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers>
-    )
-    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
-    target_link_options(${target} PRIVATE $<$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>:/STACK:8388608>)
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        target_compile_options(${target} PRIVATE
+            /W4 /permissive- /wd4100
+            $<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-Wno-missing-field-initializers -Wno-missing-designated-field-initializers>
+        )
+        # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+        target_link_options(${target} PRIVATE /STACK:8388608)
+    else()
+        target_compile_options(${target} PRIVATE
+            -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers
+        )
+    endif()
 endforeach()
 
 set_target_properties(${Launcher_TARGETS} PROPERTIES COMPILE_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
 
 # NOTE: Universal macOS builds (i.e., `CMAKE_OSX_ARCHITECTURES="x86_64;arm64") emit benign warnings for duplicate libraries
+# lld-link on Windows fails warns with `found both wWinMain and WinMain; using latter`
 # TODO: Maybe fix this...?
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR (MSVC AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_LINKER_TYPE STREQUAL "LLD"))))
     set_target_properties(${Launcher_TARGETS} PROPERTIES LINK_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
 endif()
 
