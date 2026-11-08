@@ -150,9 +150,9 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent)
     m_filterModel->setFilterKeyColumn(-1);
 
     ui->packageView->setModel(m_filterModel);
-    ui->packageView->installEventFilter(this);
     ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->packageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->packageView->addAction(ui->actionRemove);
 
     auto* smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
