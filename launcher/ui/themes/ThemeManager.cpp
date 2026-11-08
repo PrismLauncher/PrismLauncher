@@ -191,7 +191,7 @@ void ThemeManager::initializeWidgets()
 }
 
 #ifndef Q_OS_MACOS
-void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color) {}
+void ThemeManager::setTitlebarColorOnMac(NSWindow* window, const QColor& color) {}
 void ThemeManager::setTitlebarColorOfAllWindowsOnMac(const QColor& color) {}
 void ThemeManager::stopSettingNewWindowColorsOnMac() {}
 #endif
