@@ -74,6 +74,8 @@ class MetaEntry {
     auto getMaximumAge() -> qint64 { return m_max_age; }
     void setMaximumAge(qint64 age) { m_max_age = age; }
 
+    void setLastRefresh(qint64 refresh) { m_last_refresh = refresh; }
+
     bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); }
 
    protected:
@@ -87,6 +89,7 @@ class MetaEntry {
     QString m_remote_changed_timestamp;  // QString for now, RFC 2822 encoded time
     qint64 m_current_age = 0;
     qint64 m_max_age = 0;
+    qint64 m_last_refresh = 0;
     bool m_is_eternal = false;
 
     bool m_stale = true;

@@ -124,6 +124,7 @@ auto MetaCacheSink::finalizeCache(QNetworkReply& reply) -> Result<>
     }
 
     m_entry->setStale(false);
+    m_entry->setLastRefresh(QDateTime::currentSecsSinceEpoch());
     APPLICATION->metacache()->updateEntry(m_entry);
 
     return {};
