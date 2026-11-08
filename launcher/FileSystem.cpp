@@ -862,7 +862,7 @@ bool deleteContents(const QString& path)
     std::error_code err;
     auto entry = fs::directory_iterator(StringUtils::toStdString(path), err);
     if (err) {
-        qWarning() << "Could not iterate the directory" << path << ":" << QString::fromStdString(err.message());
+        qWarning() << "Could not iterate the directory" << path << "-" << QString::fromStdString(err.message());
         return false;
     }
 
@@ -877,7 +877,7 @@ bool deleteContents(const QString& path)
 
         entry.increment(err);
         if (err) {
-            qWarning() << "Could not get next file" << path << ":" << QString::fromStdString(err.message());
+            qWarning() << "Could not get next file" << path << "-" << QString::fromStdString(err.message());
             return false;
         }
     }
