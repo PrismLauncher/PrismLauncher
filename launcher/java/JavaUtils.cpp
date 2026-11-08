@@ -365,7 +365,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     return candidates;
 }
 
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
 QList<QString> JavaUtils::FindJavaPaths()
 {
     QList<QString> javas;
