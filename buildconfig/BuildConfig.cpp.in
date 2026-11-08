@@ -112,6 +112,7 @@ Config::Config()
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";
     MSA_CLIENT_ID = "@Launcher_MSA_CLIENT_ID@";
     FLAME_API_KEY = "@Launcher_CURSEFORGE_API_KEY@";
+    DISCORD_CLIENT_ID = "@Launcher_DISCORD_CLIENT_ID@";
     META_URL = "@Launcher_META_URL@";
     LEGACY_FMLLIBS_BASE_URL = "@Launcher_LEGACY_FMLLIBS_BASE_URL@";
 

@@ -279,6 +279,8 @@ set(Launcher_MSA_CLIENT_ID "c36a9fb6-4f2a-41ff-90bd-ae7cc92031eb" CACHE STRING "
 # This key was issued specifically for Prism Launcher
 set(Launcher_CURSEFORGE_API_KEY "$2a$10$wuAJuNZuted3NORVmpgUC.m8sI.pv1tOPKZyBgLFGjxFp/br0lZCC" CACHE STRING "API key for the CurseForge platform")
 
+set(Launcher_DISCORD_CLIENT_ID "1569019166281826464" CACHE STRING "Client ID for the Discord application used for RPC")
+
 set(Launcher_COMPILER_NAME ${CMAKE_CXX_COMPILER_ID})
 set(Launcher_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION})
 set(Launcher_COMPILER_TARGET_SYSTEM ${CMAKE_SYSTEM_NAME})
@@ -536,6 +538,7 @@ add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 add_subdirectory(libraries/qdcss) # css parser
+add_subdirectory(libraries/discord-presence)
 
 ############################### Built Artifacts ###############################
 

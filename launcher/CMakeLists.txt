@@ -795,6 +795,9 @@ SET(LAUNCHER_SOURCES
     KonamiCode.h
     KonamiCode.cpp
 
+    LauncherRichPresence.h
+    LauncherRichPresence.cpp
+
     # Icons
     icons/MMCIcon.h
     icons/MMCIcon.cpp
@@ -1282,6 +1285,7 @@ target_link_libraries(Launcher_logic
     cmark::cmark
     LocalPeer
     Launcher_rainbow
+    discord-rpc
 )
 if (TARGET ${Launcher_QT_DBUS})
     target_compile_definitions(Launcher_logic PUBLIC WITH_QTDBUS)
