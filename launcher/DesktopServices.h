@@ -4,6 +4,7 @@
 #include <QUrl>
 
 #ifdef Q_OS_WIN
+#include <QList>
 #include <QStringList>
 
 #include <shlobj.h>
@@ -50,6 +51,14 @@ bool isFlatpak();
 bool isSnap();
 
 #ifdef Q_OS_WIN
+struct JumplistEntry {
+    QString name;
+    QStringList arguments;
+    QString iconPath;
+
+    bool operator==(const JumplistEntry& rhs) const = default;
+};
+
 /**
  * Attempt to create an `IShellLink` Windows shell object
  * https://learn.microsoft.com/en-us/windows/win32/shell/links
@@ -58,5 +67,7 @@ Result<winrt::com_ptr<IShellLink>> createShellLink(const QString& path,
                                                    const QStringList& arguments,
                                                    const QString& workDir,
                                                    const QString& iconPath);
+
+Result<> setJumplist(const QList<JumplistEntry>& entries);
 #endif
 }  // namespace DesktopServices
