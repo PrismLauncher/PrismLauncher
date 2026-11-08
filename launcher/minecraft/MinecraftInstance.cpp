@@ -78,10 +78,12 @@
 
 #include "icons/IconList.h"
 
+#include "mod/Mod.h"
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/ShaderPackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
+#include "mod/DataPackFolderModel.h"
 
 #include "WorldList.h"
 
