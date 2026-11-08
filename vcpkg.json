@@ -1,20 +1,10 @@
 {
   "dependencies": [
+    "cmark",
     {
       "name": "ecm",
       "host": true
     },
-    {
-      "name": "libqrencode",
-      "default-features": false
-    },
-    {
-      "name": "pkgconf",
-      "host": true,
-      "platform": "windows"
-    },
-
-    "cmark",
     {
       "name": "libarchive",
       "default-features": false,
@@ -25,6 +15,10 @@
         "lzo",
         "zstd"
       ]
+    },
+    {
+      "name": "libqrencode",
+      "default-features": false
     },
     "tomlplusplus",
     "zlib"
