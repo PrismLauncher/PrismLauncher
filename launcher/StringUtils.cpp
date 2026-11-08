@@ -161,7 +161,7 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
     return url_compact;
 }
 
-QString StringUtils::humanReadableFileSize(double bytes, int decimal_points)
+QString StringUtils::humanReadableFileSize(qint64 bytes, int decimalPoint)
 {
     const QLocale locale;
 #ifdef Q_OS_WIN
@@ -169,14 +169,14 @@ QString StringUtils::humanReadableFileSize(double bytes, int decimal_points)
 #elifdef Q_OS_MACOS
     // https://support.apple.com/en-us/102119
     const auto format = QLocale::DataSizeSIFormat;
-#elseif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
     // GNOME doesn't allow configuring units, and sticks with the glib default of SI https://docs.gtk.org/glib/func.format_size.html
     // Desktops like Plasma (and most Unix tools) use IEC by default https://api.kde.org/kformat.html#BinaryUnitDialect-enum
     const auto format = DesktopServices::desktopEnvironment() == "gnome" ? QLocale::DataSizeSIFormat : QLocale::DataSizeIecFormat;
 #else
     const auto format = QLocale::DataSizeIecFormat;
 #endif
-    return locale.formattedDataSize(bytes, decimal_points, format);
+    return locale.formattedDataSize(bytes, decimalPoint, format);
 }
 
 QString StringUtils::getRandomAlphaNumeric()
