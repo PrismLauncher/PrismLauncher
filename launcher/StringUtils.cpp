@@ -38,7 +38,6 @@
 
 #include <QRegularExpression>
 #include <QUuid>
-#include <QtSystemDetection>
 #include <cmath>
 
 #include "DesktopServices.h"
@@ -162,37 +161,20 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
     return url_compact;
 }
 
-static const QStringList s_units_si{ "KB", "MB", "GB", "TB" };
-static const QStringList s_units_kibi{ "KiB", "MiB", "GiB", "TiB" };
-
-namespace {
-bool platformUsesSIUnits()
-{
-#ifdef Q_OS_APPLE
-    return true;
-#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    return DesktopServices::desktopEnvironment() == "GNOME";
-#else
-    return false;
-#endif
-}
-}  // namespace
-
 QString StringUtils::humanReadableFileSize(double bytes, int decimal_points)
 {
-    const bool useSI = platformUsesSIUnits();
-    const QStringList units = useSI ? s_units_si : s_units_kibi;
-    const int scale = useSI ? 1000 : 1024;
-
-    int u = -1;
-    double r = pow(10, decimal_points);
-
-    do {
-        bytes /= scale;
-        u++;
-    } while (round(abs(bytes) * r) / r >= scale && u < units.length() - 1);
-
-    return QString::number(bytes, 'f', 2) + " " + units[u];
+    const auto locale = QLocale::system();
+    const auto defaultFormat = locale.measurementSystem() == QLocale::MetricSystem ? QLocale::DataSizeSIFormat : QLocale::DataSizeIecFormat;
+#ifdef Q_OS_WIN
+    const auto format = QLocale::DataSizeTraditionalFormat;
+#elifdef Q_OS_MACOS
+    const auto format = QLocale::DataSizeSIFormat;
+#elseif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    const auto format = DesktopServices::desktopEnvironment() == "gnome" ? QLocale::DataSizeSiFormat : defaultFormat;
+#else
+    const auto format = defaultFormat;
+#endif
+    return locale.formattedDataSize(bytes, decimal_points, format);
 }
 
 QString StringUtils::getRandomAlphaNumeric()
