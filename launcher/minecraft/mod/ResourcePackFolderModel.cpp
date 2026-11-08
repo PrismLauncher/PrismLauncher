@@ -55,9 +55,8 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir,
         QStringList({ "", tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") });
     m_columnSortKeys = { SortType::Enabled, SortType::Name,     SortType::Version, SortType::PackFormat,
                          SortType::Date,    SortType::Provider, SortType::Size,    SortType::Filename };
-    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,          QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::ResizeToContents, QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, false, true, true, true, true, true, true, true };
 }
 
