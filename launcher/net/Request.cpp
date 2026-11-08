@@ -194,12 +194,12 @@ void Request::onProgress(qint64 bytesReceived, qint64 bytesTotal)
     auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
     auto bytesReceivedSince = bytesReceived - m_lastProgressBytes;
     auto dlSpeedBps = static_cast<double>(bytesReceivedSince) / static_cast<double>(elapsedMs.count()) * 1000;
-    auto remainingTimeS = static_cast<double>(bytesTotal - bytesReceived) / dlSpeedBps;
+    auto remainingTimeS = (bytesTotal - bytesReceived) / dlSpeedBps;
 
     //: Current amount of bytes downloaded, out of the total amount of bytes in the download
     QString dlProgress = tr("%1 / %2")
-                             .arg(StringUtils::humanReadableFileSize(static_cast<double>(bytesReceived)))
-                             .arg(StringUtils::humanReadableFileSize(static_cast<double>(bytesTotal)));
+                             .arg(StringUtils::humanReadableFileSize(bytesReceived))
+                             .arg(StringUtils::humanReadableFileSize(bytesTotal));
 
     QString dlSpeedStr;
     if (elapsedMs.count() > 0) {

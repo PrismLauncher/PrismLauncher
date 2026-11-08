@@ -161,7 +161,7 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
     return url_compact;
 }
 
-QString StringUtils::humanReadableFileSize(double bytes, int decimal_points)
+QString StringUtils::humanReadableFileSize(qint64 bytes, int decimal_points)
 {
     const auto locale = QLocale::system();
     const auto defaultFormat = locale.measurementSystem() == QLocale::MetricSystem ? QLocale::DataSizeSIFormat : QLocale::DataSizeIecFormat;
