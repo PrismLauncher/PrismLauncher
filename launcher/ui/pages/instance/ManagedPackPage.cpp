@@ -11,6 +11,7 @@
 #include "ui_ManagedPackPage.h"
 
 #include <QFileDialog>
+#include <QInputDialog>
 #include <memory>
 
 #include "Application.h"
@@ -71,6 +72,8 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
 
     connect(ui->urlLine, &QLineEdit::textChanged, this,
             [this](const QString& text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
+
+    connect(ui->updateFromUrlButton, &QPushButton::clicked, this, &ManagedPackPage::updateFromUrl);
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -86,6 +89,8 @@ void ManagedPackPage::openedImpl()
         ui->packOrigin->hide();
         ui->packOriginLabel->hide();
         ui->versionsComboBox->hide();
+        // the URL line edit already covers this for local packs
+        ui->updateFromUrlButton->hide();
         ui->updateToVersionLabel->setText(tr("URL:"));
         ui->updateButton->setText(tr("Update Pack"));
         ui->updateButton->setDisabled(false);
@@ -451,6 +456,25 @@ void FlameManagedPackPage::updateFromFile()
     }
 
     updatePack(output, false);
+}
+
+void ManagedPackPage::updateFromUrl()
+{
+    bool ok = false;
+    auto input = QInputDialog::getText(this, tr("Update from URL"), tr("Enter the download URL of the modpack file:"), QLineEdit::Normal,
+                                       QString(), &ok)
+                     .trimmed();
+    if (!ok || input.isEmpty()) {
+        return;
+    }
+
+    auto url = QUrl::fromUserInput(input);
+    if (!url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
+        CustomMessageBox::selectable(this, tr("Invalid URL"), tr("Please enter a valid HTTP(S) URL."), QMessageBox::Critical)->show();
+        return;
+    }
+
+    updatePack(url, false);
 }
 
 void ManagedPackPage::updatePack(const QUrl& url, bool trusted, const QString& versionID, const QString& versionName)
