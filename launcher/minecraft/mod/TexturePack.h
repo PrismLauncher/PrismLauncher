@@ -45,7 +45,7 @@ class TexturePack : public Resource {
 
     QPixmap icon(QSize size) const override { return m_iconCache.icon(size); }
 
-    QIcon fallbackIcon() const override { return QIcon::fromTheme("datapacks"); }
+    QIcon fallbackIcon() const override { return QIcon::fromTheme("resourcepacks"); }
 
     bool valid() const override;
 

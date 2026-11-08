@@ -81,7 +81,7 @@ bool processZIP(DataPack* pack)
     MMCZip::ArchiveReader zip(pack->fileinfo().filePath());
     auto data = zip.readFile("pack.mcmeta");
     if (!data.has_value()) {
-        qWarning() << "Could not read pack.mcmeta from texture pack at" << pack->fileinfo().filePath() << "-" << data.error();
+        qWarning() << "Could not read pack.mcmeta from data pack at" << pack->fileinfo().filePath() << "-" << data.error();
         return false;
     }
 
