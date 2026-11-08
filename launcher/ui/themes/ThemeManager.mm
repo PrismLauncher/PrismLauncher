@@ -18,7 +18,32 @@
 
 #include "ThemeManager.h"
 
+#include <QGuiApplication>
+#include <QWindow>
+
 #include <AppKit/AppKit.h>
+
+namespace {
+// [NSApp windows] and the occlusion notification also cover windows owned by AppKit or other libraries, such as
+// menu bar menus, native message boxes (NSAlert) and Sparkle's update dialogs. On macOS 27 these draw their own
+// translucent background with large rounded corners, so overriding their backgroundColor leaves a solid rectangle
+// around them. Only touch titled windows that back one of our own Qt windows.
+bool isThemeableQtWindow(NSWindow* nsWindow)
+{
+    if (nsWindow == nil || (nsWindow.styleMask & NSWindowStyleMaskTitled) == 0) {
+        return false;
+    }
+
+    const auto windows = QGuiApplication::topLevelWindows();
+    for (QWindow* window : windows) {
+        // handle() is null until the native window exists, check it first so winId() doesn't create one
+        if (window->handle() != nullptr && [(NSView*)window->winId() window] == nsWindow) {
+            return true;
+        }
+    }
+    return false;
+}
+}  // namespace
 
 void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color)
 {
@@ -28,6 +53,10 @@ void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color)
 
     NSView* view = (NSView*)windowId;
     NSWindow* window = [view window];
+    if (!isThemeableQtWindow(window)) {
+        return;
+    }
+
     window.titlebarAppearsTransparent = YES;
     window.backgroundColor = [NSColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF() alpha:color.alphaF()];
 
