@@ -3,6 +3,13 @@
 #include <QString>
 #include <QUrl>
 
+#ifdef Q_OS_WIN
+#include <QStringList>
+
+#include <shlobj.h>
+#include <winrt/base.h>
+#endif
+
 class QFileInfo;
 
 /**
@@ -41,4 +48,15 @@ bool isFlatpak();
  * Determine whether the launcher is running in a Snap environment
  */
 bool isSnap();
+
+#ifdef Q_OS_WIN
+/**
+ * Attempt to create an `IShellLink` Windows shell object
+ * https://learn.microsoft.com/en-us/windows/win32/shell/links
+ */
+Result<winrt::com_ptr<IShellLink>> createShellLink(const QString& path,
+                                                   const QStringList& arguments,
+                                                   const QString& workDir,
+                                                   const QString& iconPath);
+#endif
 }  // namespace DesktopServices

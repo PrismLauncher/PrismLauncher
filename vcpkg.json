@@ -1,6 +1,10 @@
 {
   "dependencies": [
     {
+      "name": "cppwinrt",
+      "platform": "mingw"
+    },
+    {
       "name": "ecm",
       "host": true
     },

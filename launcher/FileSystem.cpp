@@ -1233,75 +1233,21 @@ QString createShortcut(QString destination, const QString& target, const QString
         return QString();
     }
 
-    auto argStr = quoteShortcutArgs(args);
-    if (argStr.length() >= MAX_PATH) {
-        qWarning() << "Arguments string is too long!";
+    const auto shellLink = DesktopServices::createShellLink(absoluteTarget, args, targetInfo.absolutePath(), icon);
+    if (!shellLink) {
+        qWarning() << shellLink.error();
         return QString();
     }
 
-    HRESULT hres;
-
-    // ...yes, you need to initialize the entire COM stack just to make a shortcut
-    hres = CoInitialize(nullptr);
-    if (FAILED(hres)) {
-        qWarning() << "Failed to initialize COM!";
+    // query an IPersistFile interface from our IShellLink instance
+    // this is the interface that will actually let us save the shortcut to disk!
+    const auto persistFile = shellLink.value().as<IPersistFile>();
+    if (FAILED(persistFile->Save(destination.toStdWString().c_str(), TRUE))) {
+        qWarning() << "IPresistFile->Save() failed";
         return QString();
     }
 
-    WCHAR wsz[MAX_PATH];
-
-    IShellLink* psl;
-
-    // create an IShellLink instance - this stores the shortcut's attributes
-    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
-    if (SUCCEEDED(hres)) {
-        wmemset(wsz, 0, MAX_PATH);
-        absoluteTarget.toWCharArray(wsz);
-        psl->SetPath(wsz);
-
-        wmemset(wsz, 0, MAX_PATH);
-        argStr.toWCharArray(wsz);
-        psl->SetArguments(wsz);
-
-        wmemset(wsz, 0, MAX_PATH);
-        targetInfo.absolutePath().toWCharArray(wsz);
-        psl->SetWorkingDirectory(wsz);  // "Starts in" attribute
-
-        if (!icon.isEmpty()) {
-            wmemset(wsz, 0, MAX_PATH);
-            icon.toWCharArray(wsz);
-            psl->SetIconLocation(wsz, 0);
-        }
-
-        // query an IPersistFile interface from our IShellLink instance
-        // this is the interface that will actually let us save the shortcut to disk!
-        IPersistFile* ppf;
-        hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
-        if (SUCCEEDED(hres)) {
-            wmemset(wsz, 0, MAX_PATH);
-            destination.toWCharArray(wsz);
-            hres = ppf->Save(wsz, TRUE);
-            if (FAILED(hres)) {
-                qWarning() << "IPresistFile->Save() failed";
-                qWarning() << "hres =" << hres;
-            }
-            ppf->Release();
-        } else {
-            qWarning() << "Failed to query IPersistFile interface from IShellLink instance";
-            qWarning() << "hres =" << hres;
-        }
-        psl->Release();
-    } else {
-        qWarning() << "Failed to create IShellLink instance";
-        qWarning() << "hres =" << hres;
-    }
-
-    // go away COM, nobody likes you
-    CoUninitialize();
-
-    if (SUCCEEDED(hres))
-        return destination;
-    return QString();
+    return destination;
 #else
     qWarning("Desktop Shortcuts not supported on your platform!");
     return QString();
