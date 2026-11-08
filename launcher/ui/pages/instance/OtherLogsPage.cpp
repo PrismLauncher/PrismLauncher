@@ -259,8 +259,8 @@ void OtherLogsPage::reload()
     if (!file.open(QFile::ReadOnly)) {
         setControlsEnabled(false);
         ui->btnReload->setEnabled(true);  // allow reload
-        m_currentFile = QString();
         QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
+        m_currentFile = QString();
     } else {
         auto setPlainText = [this](const QString& text) {
             QTextDocument* doc = ui->text->document();

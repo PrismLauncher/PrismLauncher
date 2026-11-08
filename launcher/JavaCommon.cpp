@@ -130,7 +130,7 @@ void JavaCommon::TestCheck::checkFinished(const JavaChecker::Result& result)
         emit finished();
         return;
     }
-    checker.reset(new JavaChecker(m_path, m_args, m_maxMem, m_maxMem, result.javaVersion.requiresPermGen() ? m_permGen : 0, 0));
+    checker.reset(new JavaChecker(m_path, m_args, m_minMem, m_maxMem, result.javaVersion.requiresPermGen() ? m_permGen : 0, 0));
     connect(checker.get(), &JavaChecker::checkFinished, this, &JavaCommon::TestCheck::checkFinishedWithArgs);
     checker->start();
 }
