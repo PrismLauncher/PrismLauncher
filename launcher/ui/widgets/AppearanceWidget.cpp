@@ -191,14 +191,18 @@ void AppearanceWidget::loadThemeSettings()
     const QString currentIconTheme = settings->get("IconTheme").toString();
     const auto iconThemes = APPLICATION->themeManager()->getValidIconThemes();
 
-    for (int i = 0; i < iconThemes.count(); ++i) {
-        const IconTheme* theme = iconThemes[i];
+    {
+        auto restoreOldIconTheme = qScopeGuard([prev = QIcon::themeName()] { QIcon::setThemeName(prev); });
+        const auto sampleIcon = QIcon::fromTheme("appearance");
+        for (int i = 0; i < iconThemes.count(); ++i) {
+            const IconTheme* theme = iconThemes[i];
 
-        QIcon iconForComboBox = QIcon(theme->path() + "/scalable/settings");
-        m_ui->iconsComboBox->addItem(iconForComboBox, theme->name(), theme->id());
+            QIcon::setThemeName(theme->id());
+            m_ui->iconsComboBox->addItem(sampleIcon.pixmap(32, 32), theme->name(), theme->id());
 
-        if (currentIconTheme == theme->id())
-            m_ui->iconsComboBox->setCurrentIndex(i);
+            if (currentIconTheme == theme->id())
+                m_ui->iconsComboBox->setCurrentIndex(i);
+        }
     }
 
     const QString currentTheme = settings->get("ApplicationTheme").toString();
