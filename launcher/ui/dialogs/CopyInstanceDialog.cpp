@@ -44,6 +44,7 @@
 
 #include "ui/dialogs/IconPickerDialog.h"
 
+#include "config/InstanceConfig.h"
 #include "BaseInstance.h"
 #include "BaseVersion.h"
 #include "DesktopServices.h"
@@ -58,7 +59,7 @@ CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     resize(minimumSizeHint());
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    InstIconKey = original->iconKey();
+    InstIconKey = original->config()->iconKey;
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setText(original->name());
     ui->instNameTextBox->setFocus();

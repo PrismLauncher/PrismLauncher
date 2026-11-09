@@ -16,7 +16,7 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "settings/SettingsObject.h"
+#include "config/GlobalConfig.h"
 
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "modplatform/ModIndex.h"
@@ -34,7 +34,7 @@ ResourceModel::ResourceModel(ResourceFolderModel* resourceList, const ResourceAP
 {
     s_runningModels.insert(this, true);
     if (APPLICATION_DYN) {
-        m_currentInfoJob.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        m_currentInfoJob.setMaxConcurrent(APPLICATION->config()->numberOfConcurrentDownloads);
     }
 }
 

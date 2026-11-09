@@ -26,12 +26,7 @@ class ManagedPackPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    static ManagedPackPage* createPage(BaseInstance* inst, QWidget* parent = nullptr)
-    {
-        return ManagedPackPage::createPage(inst, inst->getManagedPackType(), parent);
-    }
-
-    static ManagedPackPage* createPage(BaseInstance* inst, const QString& type, QWidget* parent = nullptr);
+    static ManagedPackPage* createPage(BaseInstance* inst, QWidget* parent = nullptr);
     ~ManagedPackPage() override;
 
     QString displayName() const override;

@@ -42,10 +42,10 @@
 #include "FileSystem.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "config/InstanceConfig.h"
 #include "minecraft/GradleSpecifier.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "settings/INISettingsObject.h"
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -132,11 +132,9 @@ void PackInstallTask::install()
     }
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
-    m_instance =
-        std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+    auto confTmp = std::make_unique<InstanceConfigHolder>(instanceConfigPath, InstanceConfig::loadDefaults());
+    m_instance = std::make_unique<MinecraftInstance>(std::move(confTmp), m_stagingPath);
     {
-        const SettingsObject::Lock lock(m_instance->settings());
-
         auto* components = m_instance->getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
@@ -204,6 +202,11 @@ void PackInstallTask::install()
             m_instIcon = "ftb_logo";
         }
         m_instance->setIconKey(m_instIcon);
+    }
+
+    if (const auto saveResult = m_instance->config().save(); !saveResult) {
+        emitFailed(tr("Failed to save instance config: %1").arg(saveResult.error()));
+        return;
     }
 
     downloadFiles(m_instance.get());

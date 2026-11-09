@@ -40,6 +40,7 @@
 #include "FileSystem.h"
 
 #include "InstanceList.h"
+#include "config/GlobalConfig.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldName, const QString& newName, QWidget* parent)
@@ -47,7 +48,7 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
     if (oldName == newName)
         return QString();
 
-    QString renamingMode = APPLICATION->settings()->get("InstRenamingMode").toString();
+    QString renamingMode = APPLICATION->config()->instRenamingMode;
     if (renamingMode == "MetadataOnly")
         return QString();
 
@@ -87,9 +88,9 @@ QString askToUpdateInstanceDirName(BaseInstance* instance, const QString& oldNam
         auto res = dialog->exec();
         if (checkBox->isChecked()) {
             if (res == QMessageBox::Yes)
-                APPLICATION->settings()->set("InstRenamingMode", "PhysicalDir");
+                APPLICATION->config().update().instRenamingMode = "PhysicalDir";
             else
-                APPLICATION->settings()->set("InstRenamingMode", "MetadataOnly");
+                APPLICATION->config().update().instRenamingMode = "MetadataOnly";
         }
         if (res == QMessageBox::No)
             return QString();

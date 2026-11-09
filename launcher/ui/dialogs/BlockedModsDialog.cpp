@@ -24,11 +24,11 @@
  */
 
 #include "BlockedModsDialog.h"
+#include "config/GlobalConfig.h"
 #include "ui_BlockedModsDialog.h"
 
 #include "Application.h"
 #include "modplatform/helpers/HashUtils.h"
-#include "settings/SettingsObject.h"
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -47,7 +47,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
     : QDialog(parent), m_ui(new Ui::BlockedModsDialog), m_mods(mods), m_hashType(std::move(hashType))
 {
     m_hashingTask = shared_qobject_ptr<ConcurrentTask>(
-        new ConcurrentTask("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+        new ConcurrentTask("MakeHashesTask", APPLICATION->config()->numberOfConcurrentTasks));
     connect(m_hashingTask.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
 
     m_ui->setupUi(this);
@@ -191,9 +191,9 @@ void BlockedModsDialog::directoryChanged(const QString& path)
 /// @brief add the user downloads folder and the global mods folder to the filesystem watcher
 void BlockedModsDialog::setupWatch()
 {
-    const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
-    const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
-    const bool downloadsFolderWatchRecursive = APPLICATION->settings()->get("DownloadsDirWatchRecursive").toBool();
+    const QString downloadsFolder = APPLICATION->config()->downloadsDir;
+    const QString modsFolder = APPLICATION->config()->centralModsDir;
+    const bool downloadsFolderWatchRecursive = APPLICATION->config()->downloadsDirWatchRecursive;
     watchPath(downloadsFolder, downloadsFolderWatchRecursive);
     watchPath(modsFolder, true);
 }
@@ -286,8 +286,8 @@ void BlockedModsDialog::checkMatchHash(const QString& hash, const QString& path)
 
     qDebug() << "[Blocked Mods Dialog] Checking for match on hash:" << hash << "| From path:" << path;
 
-    auto downloadDir = QFileInfo(APPLICATION->settings()->get("DownloadsDir").toString()).absoluteFilePath();
-    auto moveFiles = APPLICATION->settings()->get("MoveModsFromDownloadsDir").toBool();
+    auto downloadDir = QFileInfo(APPLICATION->config()->downloadsDir).absoluteFilePath();
+    auto moveFiles = APPLICATION->config()->moveModsFromDownloadsDir;
     for (auto& mod : m_mods) {
         if (mod.matched) {
             continue;
@@ -349,8 +349,8 @@ bool BlockedModsDialog::checkValidPath(const QString& path)
         return fsName.compare(metaName) == 0;
     };
 
-    auto downloadDir = QFileInfo(APPLICATION->settings()->get("DownloadsDir").toString()).absoluteFilePath();
-    auto moveFiles = APPLICATION->settings()->get("MoveModsFromDownloadsDir").toBool();
+    auto downloadDir = QFileInfo(APPLICATION->config()->downloadsDir).absoluteFilePath();
+    auto moveFiles = APPLICATION->config()->moveModsFromDownloadsDir;
     for (auto& mod : m_mods) {
         if (compare(filename, mod.name)) {
             // if the mod is not yet matched and doesn't have a hash then

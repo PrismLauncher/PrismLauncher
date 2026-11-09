@@ -36,6 +36,7 @@
 
 #include "JavaPage.h"
 #include "BuildConfig.h"
+#include "config/GlobalConfig.h"
 #include "JavaCommon.h"
 #include "java/JavaInstall.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -56,7 +57,6 @@
 
 #include <FileSystem.h>
 #include "Application.h"
-#include "settings/SettingsObject.h"
 
 JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
@@ -85,7 +85,7 @@ void JavaPage::retranslate()
 bool JavaPage::apply()
 {
     ui->javaSettings->saveSettings();
-    JavaCommon::checkJVMArgs(APPLICATION->settings()->get("JvmArgs").toString(), this);
+    JavaCommon::checkJVMArgs(APPLICATION->config()->jvmArgs, this);
     return true;
 }
 

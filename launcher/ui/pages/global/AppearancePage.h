@@ -43,7 +43,6 @@
 #include "ui/widgets/AppearanceWidget.h"
 
 class QTextCharFormat;
-class SettingsObject;
 
 class AppearancePage : public AppearanceWidget, public BasePage {
     Q_OBJECT

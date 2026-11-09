@@ -36,6 +36,7 @@
  */
 
 #include "ShaderPackPage.h"
+#include "config/GlobalConfig.h"
 #include "ui_ExternalResourcesPage.h"
 
 #include "minecraft/mod/ShaderPackFolderModel.h"
@@ -89,7 +90,7 @@ void ShaderPackPage::downloadShaderPack()
 void ShaderPackPage::downloadDialogFinished(int result)
 {
     if (result != 0) {
-        ConcurrentTask tasks("Download Shader Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Shader Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
         });
@@ -121,7 +122,7 @@ void ShaderPackPage::downloadDialogFinished(int result)
 
 void ShaderPackPage::updateShaderPacks()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Shader pack updates are unavailable when metadata is disabled!"));
         return;
     }
@@ -166,7 +167,7 @@ void ShaderPackPage::updateShaderPacks()
     }
 
     if (updateDialog.exec() != 0) {
-        ConcurrentTask tasks("Download Shader Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        ConcurrentTask tasks("Download Shader Packs", APPLICATION->config()->numberOfConcurrentDownloads);
         connect(&tasks, &Task::failed, this, [this](const QString& reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
         });
@@ -214,7 +215,7 @@ void ShaderPackPage::deleteShaderPackMetadata()
 
 void ShaderPackPage::changeShaderPackVersion()
 {
-    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (APPLICATION->config()->modMetadataDisabled) {
         QMessageBox::critical(this, tr("Error"), tr("Shader pack updates are unavailable when metadata is disabled!"));
         return;
     }
