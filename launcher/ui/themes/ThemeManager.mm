@@ -28,6 +28,11 @@ void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color)
 
     NSView* view = (NSView*)windowId;
     NSWindow* window = [view window];
+    // Only apply effects to windows with a title bar, else child dialogs that aren't meant to have one (like AppKit) break
+    // https://github.com/PrismLauncher/PrismLauncher/issues/6441
+    if ((window.styleMask & NSWindowStyleMaskTitled) == 0) {
+        return;
+    }
     window.titlebarAppearsTransparent = YES;
     window.backgroundColor = [NSColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF() alpha:color.alphaF()];
 
