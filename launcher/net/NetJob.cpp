@@ -49,7 +49,7 @@
 NetJob::NetJob(const QString& jobName, QNetworkAccessManager* network, int maxConcurrent) : ConcurrentTask(jobName), m_network(network)
 {
 #ifdef LAUNCHER_APPLICATION
-    if (APPLICATION_DYN) {
+    if (APPLICATION) {
         if (maxConcurrent < 0) {
             maxConcurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
         }
@@ -178,7 +178,7 @@ void NetJob::emitFailed(QString reason)
 {
 #ifdef LAUNCHER_APPLICATION
 
-    if (APPLICATION_DYN && m_askRetry && isOnline()) {
+    if (APPLICATION && m_askRetry && isOnline()) {
         auto failed = getFailedActions();
         QWidget* activeWindow = QApplication::activeWindow();
         auto* dialog = new NetworkJobFailedDialog(objectName(), m_try, m_done.size(), failed.size(), activeWindow);

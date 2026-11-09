@@ -46,7 +46,7 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, MinecraftInstance* ins
         m_resourceResolver.clear();
         m_resourceResolverRunning = false;
     });
-    if (APPLICATION_DYN) {  // in tests the application macro doesn't work
+    if (APPLICATION) {  // in tests the application macro doesn't work
         m_resourceResolver.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     }
 }
