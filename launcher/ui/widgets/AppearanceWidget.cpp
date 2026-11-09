@@ -64,10 +64,8 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
         m_ui->settingsBox->hide();
         m_ui->consolePreview->hide();
         m_ui->catPreview->hide();
-        loadThemeSettings();
     } else {
         loadSettings();
-        loadThemeSettings();
 
         updateConsolePreview();
         updateCatPreview();
@@ -87,7 +85,10 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
     connect(m_ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path()); });
-    connect(m_ui->reloadThemesButton, &QPushButton::pressed, this, &AppearanceWidget::loadThemeSettings);
+    connect(m_ui->reloadThemesButton, &QPushButton::pressed, this, [this] {
+        m_themeSettingsLoaded = false;
+        loadThemeSettings();
+    });
 }
 
 AppearanceWidget::~AppearanceWidget()
@@ -176,6 +177,11 @@ void AppearanceWidget::applyCatTheme(int index)
 
 void AppearanceWidget::loadThemeSettings()
 {
+    if (m_themeSettingsLoaded) {
+        return;
+    }
+    m_themeSettingsLoaded = true;
+
     APPLICATION->themeManager()->refresh();
 
     m_ui->iconsComboBox->blockSignals(true);
