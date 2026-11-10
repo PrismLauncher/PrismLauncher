@@ -77,6 +77,8 @@ ResourceAPI::VersionSearchArgs TexturePackResourceModel::createVersionsArguments
 {
     auto args = ResourcePackResourceModel::createVersionsArguments(entry);
     args.resourceType = ModPlatform::ResourceType::TexturePack;
+    args.mcVersions = { maximumTexturePackVersion() };
+
     if (!m_versionList->isLoaded()) {
         qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
         return args;
