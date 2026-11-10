@@ -615,62 +615,6 @@ void ResourcePage::openUrl(QUrl url)
         return;
     }
 
-    // detect URLs and search instead
-
-    const QString address = url.host() + url.path();
-    QRegularExpressionMatch match;
-    QString page;
-
-    auto handlers = urlHandlers();
-    for (auto it = handlers.constKeyValueBegin(); it != handlers.constKeyValueEnd(); it++) {
-        auto&& [regex, candidate] = *it;
-        if (match = QRegularExpression(regex).match(address); match.hasMatch()) {
-            page = candidate;
-            break;
-        }
-    }
-
-    if (!page.isNull() && !m_doNotJumpToMod) {
-        const QString slug = match.captured(1);
-
-        // ensure the user isn't opening the same mod
-        if (auto currentPack = getCurrentPack(); currentPack && slug != currentPack->slug) {
-            m_parentDialog->selectPage(page);
-
-            auto* newPage = m_parentDialog->selectedPage();
-
-            QLineEdit* searchEdit = newPage->m_ui->searchEdit;
-            auto* model = newPage->m_model;
-            QListView* view = newPage->m_ui->packView;
-
-            auto jump = [url, slug, model, view] {
-                for (int row = 0; row < model->rowCount({}); row++) {
-                    const QModelIndex index = model->index(row);
-                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
-
-                    if (pack->slug == slug) {
-                        view->setCurrentIndex(index);
-                        return;
-                    }
-                }
-
-                // The final fallback.
-                QDesktopServices::openUrl(url);
-            };
-
-            searchEdit->setText(slug);
-            newPage->triggerSearch();
-
-            if (model->hasActiveSearchJob()) {
-                connect(model->activeSearchJob().get(), &Task::finished, newPage, jump);
-            } else {
-                jump();
-            }
-
-            return;
-        }
-    }
-
     // open in the user's web browser
     QDesktopServices::openUrl(url);
 }
@@ -686,7 +630,6 @@ void ResourcePage::openProject(const QVariant& projectID)
     }
     m_ui->packView->hide();
     m_ui->resourceSelectionButton->hide();
-    m_doNotJumpToMod = true;
 
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 

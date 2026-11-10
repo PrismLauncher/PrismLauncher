@@ -40,7 +40,6 @@ struct ResourceDescriptor {
 
     bool supportsFiltering = false;
     bool isIndexed = true;
-    QMap<QString, QString> urlHandlers;
 };
 
 class ResourcePage : public QWidget, public BasePage {
@@ -125,8 +124,6 @@ class ResourcePage : public QWidget, public BasePage {
     void onResourceSelected();
     void onResourceToggle(const QModelIndex& index);
 
-    /** Associates regex expressions to pages in the order they're given in the map. */
-    QMap<QString, QString> urlHandlers() const { return m_desc.urlHandlers; };
     void openUrl(QUrl);
 
     void refreshVersionComboBox();
@@ -147,8 +144,6 @@ class ResourcePage : public QWidget, public BasePage {
 
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_searchTimer;
-
-    bool m_doNotJumpToMod = false;
 
     bool m_projectMode = false;
 
