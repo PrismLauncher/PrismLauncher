@@ -169,8 +169,6 @@ void PageContainer::createUI()
     m_header->setFont(headerLabelFont);
 
     auto* headerHLayout = new QHBoxLayout;
-    const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
-    headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 
