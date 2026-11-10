@@ -58,7 +58,7 @@ ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
     args.versions = { maximumTexturePackVersion() };
 
     if (!m_versionList->isLoaded()) {
-        qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
+        qWarning() << "The version list could not be loaded. Falling back to showing all entries.";
         return args;
     }
 
