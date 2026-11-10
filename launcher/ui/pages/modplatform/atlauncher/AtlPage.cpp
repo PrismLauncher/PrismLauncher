@@ -81,11 +81,6 @@ AtlPage::~AtlPage()
     delete ui;
 }
 
-bool AtlPage::shouldDisplay() const
-{
-    return true;
-}
-
 void AtlPage::retranslate()
 {
     ui->retranslateUi(this);

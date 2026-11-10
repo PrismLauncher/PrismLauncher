@@ -33,10 +33,10 @@ class InstallLoaderDialog final : public QDialog, protected BasePageProvider {
    public:
     explicit InstallLoaderDialog(PackProfile* instance, const QString& uid = QString(), QWidget* parent = nullptr);
 
-    QList<BasePage*> getPages() override;
+    QList<PageInfo> getPages() override;
     QString dialogTitle() override;
 
-    void validate(BasePage* page);
+    void validate(QWidget* page);
     void done(int result) override;
 
    private:

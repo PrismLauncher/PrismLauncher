@@ -16,6 +16,25 @@ class DataPackResourcePage : public ResourcePage {
    public:
     DataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, ResourceProviderData provider, const ResourceAPI* api);
 
+    static PageInfo page(ResourceDownloadDialog* dialog,
+                         BaseInstance& instance,
+                         ResourceProviderData provider,
+                         const ResourceAPI* api,
+                         bool suppressInitialSearch)
+    {
+        return {
+            .id = provider.id,
+            .displayName = provider.displayName,
+            .icon = provider.icon,
+            .constructor =
+                [dialog, &instance, provider = std::move(provider), api, suppressInitialSearch](const QWidget* /*parent*/) {
+                    auto* result = new DataPackResourcePage(dialog, instance, provider, api);
+                    result->setSuppressInitialSearch(suppressInitialSearch);
+                    return result;
+                },
+        };
+    }
+
    protected slots:
     void triggerSearch() override;
 };

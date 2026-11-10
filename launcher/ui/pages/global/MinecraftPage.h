@@ -51,10 +51,17 @@ class MinecraftPage : public MinecraftSettingsWidget, public BasePage {
     explicit MinecraftPage(QWidget* parent = nullptr) : MinecraftSettingsWidget(nullptr, parent) {}
     ~MinecraftPage() override {}
 
-    QString displayName() const override { return tr("Minecraft"); }
-    QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
-    QString id() const override { return "minecraft-settings"; }
-    QString helpPage() const override { return "Minecraft-settings"; }
+    static PageInfo page()
+    {
+        return {
+            .id = "minecraft-settings",
+            .displayName = QT_TR_NOOP("Minecraft"),
+            .icon = QIcon::fromTheme("minecraft"),
+            .helpPage = "Minecraft-settings",
+            .constructor = [](QWidget* parent) { return new MinecraftPage(parent); },
+        };
+    }
+
     bool apply() override
     {
         saveSettings();

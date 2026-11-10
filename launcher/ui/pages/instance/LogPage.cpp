@@ -230,11 +230,6 @@ bool LogPage::apply()
     return true;
 }
 
-bool LogPage::shouldDisplay() const
-{
-    return true;
-}
-
 void LogPage::on_btnPaste_clicked()
 {
     if (!m_model) {

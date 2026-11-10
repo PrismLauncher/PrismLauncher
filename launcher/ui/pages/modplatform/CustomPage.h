@@ -52,11 +52,18 @@ class CustomPage : public QWidget, public BasePage {
    public:
     explicit CustomPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     ~CustomPage() override;
-    QString displayName() const override { return tr("Custom"); }
-    QIcon icon() const override { return QIcon::fromTheme("minecraft"); }
-    QString id() const override { return "vanilla"; }
-    QString helpPage() const override { return "Vanilla-platform"; }
-    bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "vanilla",
+            .displayName = QT_TR_NOOP("Custom"),
+            .icon = QIcon::fromTheme("minecraft"),
+            .helpPage = "Vanilla-platform",
+            .constructor = [dialog](QWidget* parent) { return new CustomPage(dialog, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void openedImpl() override;

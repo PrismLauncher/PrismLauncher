@@ -129,11 +129,6 @@ ModFolderPage::ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWi
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
-bool ModFolderPage::shouldDisplay() const
-{
-    return true;
-}
-
 void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
@@ -261,7 +256,8 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), std::move(releaseTypes));
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(),
+                                      std::move(releaseTypes));
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
@@ -377,9 +373,9 @@ void ModFolderPage::exportModMetadata()
     dlg.exec();
 }
 
-CoreModFolderPage::CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent)
+void ModFolderPage::refreshCoreModsDisplay()
 {
-    auto* version = inst->getPackProfile();
+    auto* version = m_instance->getPackProfile();
     if ((version != nullptr) && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
         auto minecraftCmp = version->getComponent("net.minecraft");
         if (!minecraftCmp->m_loaded) {
@@ -401,24 +397,14 @@ CoreModFolderPage::CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mo
     }
 }
 
-bool CoreModFolderPage::shouldDisplay() const
+bool ModFolderPage::shouldDisplayCoreMods(MinecraftInstance* instance)
 {
-    if (ModFolderPage::shouldDisplay()) {
-        auto* version = m_instance->getPackProfile();
-        if ((version == nullptr) || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft")) {
-            return false;
-        }
-        auto minecraftCmp = version->getComponent("net.minecraft");
-        return minecraftCmp->m_loaded && minecraftCmp->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
+    auto* version = instance->getPackProfile();
+    if ((version == nullptr) || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft")) {
+        return false;
     }
-    return false;
-}
-
-NilModFolderPage::NilModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent) : ModFolderPage(inst, mods, parent) {}
-
-bool NilModFolderPage::shouldDisplay() const
-{
-    return m_model->dir().exists();
+    auto minecraftCmp = version->getComponent("net.minecraft");
+    return minecraftCmp->m_loaded && minecraftCmp->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
 }
 
 // Helper function so this doesn't need to be duplicated 3 times

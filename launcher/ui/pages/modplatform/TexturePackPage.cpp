@@ -22,7 +22,6 @@ ResourceDownload::ResourceDescriptor prepareResourcePackDescriptor()
                        "curseforge");
     urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
-        .helpPage = {},
         //: The singular version of 'texture packs'
         .resourceString = QObject::tr("texture pack"),
         //: The plural version of 'texture pack'

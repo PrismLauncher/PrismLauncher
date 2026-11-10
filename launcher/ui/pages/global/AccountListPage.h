@@ -55,17 +55,17 @@ class AccountListPage : public QMainWindow, public BasePage {
     explicit AccountListPage(QWidget* parent = 0);
     ~AccountListPage();
 
-    QString displayName() const override { return tr("Accounts"); }
-    QIcon icon() const override
+    static PageInfo page()
     {
-        auto icon = QIcon::fromTheme("accounts");
-        if (icon.isNull()) {
-            icon = QIcon::fromTheme("noaccount");
-        }
-        return icon;
+        return {
+            .id = "language-settings",
+            .displayName = QT_TR_NOOP("Accounts"),
+            .icon = QIcon::fromTheme("accounts"),
+            .helpPage = "getting-started/adding-an-account",
+            .constructor = [](QWidget* parent) { return new AccountListPage(parent); },
+        };
     }
-    QString id() const override { return "accounts"; }
-    QString helpPage() const override { return "getting-started/adding-an-account"; }
+
     void retranslate() override;
 
    public slots:

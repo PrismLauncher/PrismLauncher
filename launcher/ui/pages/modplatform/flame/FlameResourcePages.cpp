@@ -57,30 +57,30 @@ static ResourceProviderData prepareFlame()
     };
 }
 
-ShaderPackResourcePage* Flame::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Flame::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new ShaderPackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
+    return ShaderPackResourcePage::page(dialog, instance, prepareFlame(), &FlameAPI::get(), suppressInitialSearch);
 }
 
-DataPackResourcePage* Flame::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Flame::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new DataPackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
+    return DataPackResourcePage::page(dialog, instance, prepareFlame(), &FlameAPI::get(), suppressInitialSearch);
 }
 
-ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Flame::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new ResourcePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
+    return ResourcePackResourcePage::page(dialog, instance, prepareFlame(), &FlameAPI::get(), suppressInitialSearch);
 }
 
-TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new TexturePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get(),
-                                       new FlameTexturePackModel(dialog->getBaseModel()));
+    return TexturePackResourcePage::page(dialog, instance, prepareFlame(), &FlameAPI::get(),
+                                         new FlameTexturePackModel(dialog->getBaseModel()), suppressInitialSearch);
 }
 
-ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new ModPage(dialog, instance, prepareFlame(), &FlameAPI::get(),
-                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false));
+    return ModPage::page(dialog, instance, prepareFlame(), &FlameAPI::get(),
+                         ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false), suppressInitialSearch);
 }
 }  // namespace ResourceDownload

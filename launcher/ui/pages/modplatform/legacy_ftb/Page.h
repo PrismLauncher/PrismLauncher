@@ -62,11 +62,18 @@ class Page : public QWidget, public ModpackProviderBasePage {
    public:
     explicit Page(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~Page();
-    QString displayName() const override { return "FTB Legacy"; }
-    QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }
-    QString id() const override { return "legacy_ftb"; }
-    QString helpPage() const override { return "FTB-legacy"; }
-    bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "legacy_ftb",
+            .displayName = QT_TR_NOOP("FTB Legacy"),
+            .icon = QIcon::fromTheme("ftb_logo"),
+            .helpPage = "FTB-Legacy",
+            .constructor = [dialog](QWidget* parent) { return new Page(dialog, parent); },
+        };
+    }
+
     void openedImpl() override;
     void retranslate() override;
 

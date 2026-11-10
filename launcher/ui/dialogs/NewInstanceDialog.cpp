@@ -152,7 +152,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     checkboxButtonsContainer->addWidget(m_buttons);
     m_container->addButtons(checkboxButtonsContainer);
 
-    connect(m_container, &PageContainer::selectedPageChanged, this, [this](BasePage* /*previous*/, BasePage* /*selected*/) {
+    connect(m_container, &PageContainer::selectedPageChanged, this, [this](QWidget* /*previous*/, QWidget* /*selected*/) {
         m_buttons->button(QDialogButtonBox::Ok)->setEnabled(m_creationTask && !instName().isEmpty());
     });
 
@@ -180,16 +180,21 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
         QUrl actualUrl(url);
         const auto packId = extraInfo.value("pack_id");
         if (actualUrl.scheme().compare("modrinth", Qt::CaseInsensitive) == 0 && !packId.isEmpty()) {
-            auto* page = dynamic_cast<ModrinthPage*>(m_container->getPage("modrinth"));
+            // NOTE: make sure to select the page first so it's initialized (lazy loading)
+            m_container->selectPage("modrinth");
+            auto* page = dynamic_cast<ModrinthPage*>(m_container->pageWidget("modrinth"));
             if (page) {
                 m_searchTerm = "#" + packId;
                 page->setSearchTerm(m_searchTerm);
-                m_container->selectPage(page->id());
             }
         } else {
+            // NOTE: make sure to select the page first so it's initialized (lazy loading)
             m_container->selectPage("import");
-            m_importPage->setUrl(url);
-            m_importPage->setExtraInfo(extraInfo);
+            auto* page = dynamic_cast<ImportPage*>(m_container->pageWidget("import"));
+            if (page != nullptr) {
+                page->setUrl(url);
+                page->setExtraInfo(extraInfo);
+            }
         }
     }
 
@@ -238,23 +243,21 @@ void NewInstanceDialog::accept()
     QDialog::accept();
 }
 
-QList<BasePage*> NewInstanceDialog::getPages()
+QList<PageInfo> NewInstanceDialog::getPages()
 {
-    QList<BasePage*> pages;
+    QList<PageInfo> pages;
 
-    m_importPage = new ImportPage(this);
-
-    pages.append(new CustomPage(this));
-    pages.append(m_importPage);
-    pages.append(new AtlPage(this));
+    pages.append(CustomPage::page(this));
+    pages.append(ImportPage::page(this));
+    pages.append(AtlPage::page(this));
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        pages.append(new FlamePage(this));
+        pages.append(FlamePage::page(this));
     }
-    pages.append(new FtbPage(this));
-    pages.append(new LegacyFTB::Page(this));
-    pages.append(new FTBImportAPP::ImportFTBPage(this));
-    pages.append(new ModrinthPage(this));
-    pages.append(new TechnicPage(this));
+    pages.append(FtbPage::page(this));
+    pages.append(LegacyFTB::Page::page(this));
+    pages.append(FTBImportAPP::ImportFTBPage::page(this));
+    pages.append(ModrinthPage::page(this));
+    pages.append(TechnicPage::page(this));
 
     return pages;
 }
@@ -458,7 +461,7 @@ bool NewInstanceDialog::eventFilter(QObject* watched, QEvent* event)
     return QDialog::eventFilter(watched, event);
 }
 
-void NewInstanceDialog::selectedPageChanged(BasePage* previous, BasePage* selected)
+void NewInstanceDialog::selectedPageChanged(QWidget* previous, QWidget* selected)
 {
     auto* prevPage = dynamic_cast<ModpackProviderBasePage*>(previous);
     if (prevPage) {

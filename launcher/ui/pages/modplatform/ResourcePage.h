@@ -26,7 +26,7 @@ class ResourceDownloadDialog;
 class ResourceModel;
 
 struct ResourceProviderData {
-    QString displayName;
+    const char* displayName;
     QIcon icon;
     QString id;
     QString metaEntryBase;
@@ -34,7 +34,6 @@ struct ResourceProviderData {
 };
 
 struct ResourceDescriptor {
-    QString helpPage;
     QString resourceString = QObject::tr("resource");
     QString resourcesString = QObject::tr("resources");
 
@@ -48,13 +47,6 @@ class ResourcePage : public QWidget, public BasePage {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
     ~ResourcePage() override;
-
-    /* Affects what the user sees */
-    auto displayName() const -> QString override { return m_provider.displayName; };
-    auto icon() const -> QIcon override { return m_provider.icon; };
-    auto id() const -> QString override { return m_provider.id; };
-    auto helpPage() const -> QString override { return m_desc.helpPage; };
-    bool shouldDisplay() const override { return true; };
 
     /* Used internally */
     auto metaEntryBase() const -> QString { return m_provider.metaEntryBase; };

@@ -55,12 +55,18 @@ class JavaPage : public QWidget, public BasePage {
     explicit JavaPage(QWidget* parent = 0);
     ~JavaPage();
 
-    QString displayName() const override { return tr("Java"); }
-    QIcon icon() const override { return QIcon::fromTheme("java"); }
-    QString id() const override { return "java-settings"; }
-    QString helpPage() const override { return "Java-settings"; }
-    void retranslate() override;
+    static PageInfo page()
+    {
+        return {
+            .id = "java-settings",
+            .displayName = QT_TR_NOOP("Java"),
+            .icon = QIcon::fromTheme("java"),
+            .helpPage = "Java-settings",
+            .constructor = [](QWidget* parent) { return new JavaPage(parent); },
+        };
+    }
 
+    void retranslate() override;
     bool apply() override;
 
    private slots:

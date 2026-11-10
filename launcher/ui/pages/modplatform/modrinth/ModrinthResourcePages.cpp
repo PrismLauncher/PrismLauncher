@@ -55,29 +55,29 @@ static ResourceProviderData prepareModrinth()
     };
 }
 
-ShaderPackResourcePage* Modrinth::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Modrinth::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new ShaderPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return ShaderPackResourcePage::page(dialog, instance, prepareModrinth(), &ModrinthAPI::get(), suppressInitialSearch);
 }
 
-DataPackResourcePage* Modrinth::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Modrinth::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new DataPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return DataPackResourcePage::page(dialog, instance, prepareModrinth(), &ModrinthAPI::get(), suppressInitialSearch);
 }
 
-ResourcePackResourcePage* Modrinth::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Modrinth::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new ResourcePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return ResourcePackResourcePage::page(dialog, instance, prepareModrinth(), &ModrinthAPI::get(), suppressInitialSearch);
 }
 
-TexturePackResourcePage* Modrinth::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Modrinth::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new TexturePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return TexturePackResourcePage::page(dialog, instance, prepareModrinth(), &ModrinthAPI::get(), nullptr, suppressInitialSearch);
 }
 
-ModPage* Modrinth::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
+PageInfo Modrinth::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch)
 {
-    return new ModPage(dialog, instance, prepareModrinth(), &ModrinthAPI::get(),
-                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true));
+    return ModPage::page(dialog, instance, prepareModrinth(), &ModrinthAPI::get(),
+                         ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true), suppressInitialSearch);
 }
 }  // namespace ResourceDownload

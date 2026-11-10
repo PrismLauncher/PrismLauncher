@@ -27,6 +27,27 @@ class ModPage : public ResourcePage {
             const ResourceAPI* api,
             ModFilterWidget* filterWidget);
 
+    static PageInfo page(ResourceDownloadDialog* dialog,
+                         BaseInstance& instance,
+                         ResourceProviderData provider,
+                         const ResourceAPI* api,
+                         ModFilterWidget* filterWidget,
+                         bool suppressInitialSearch)
+    {
+        return {
+            .id = provider.id,
+            .displayName = provider.displayName,
+            .icon = provider.icon,
+            .helpPage = "Mod-platform",
+            .constructor =
+                [dialog, &instance, provider = std::move(provider), api, suppressInitialSearch, filterWidget](const QWidget* /*parent*/) {
+                    auto* result = new ModPage(dialog, instance, provider, api, filterWidget);
+                    result->setSuppressInitialSearch(suppressInitialSearch);
+                    return result;
+                },
+        };
+    }
+
    protected:
     void prepareProviderCategories();
     void setFilterWidget(ModFilterWidget*);

@@ -145,7 +145,7 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
 
     // add ourself as the modpack page's instance window
     {
-        static_cast<ManagedPackPage*>(m_container->getPage("managed_pack"))->setInstanceWindow(this);
+        // static_cast<ManagedPackPage*>(m_container->pageWidget("managed_pack"))->setInstanceWindow(this);
     }
 
     show();
@@ -247,9 +247,9 @@ void InstanceWindow::refreshContainer()
     m_container->refreshContainer();
 }
 
-BasePage* InstanceWindow::selectedPage() const
+QWidget* InstanceWindow::selectedPageWidget() const
 {
-    return m_container->selectedPage();
+    return m_container->selectedPageWidget();
 }
 
 bool InstanceWindow::requestClose()

@@ -67,8 +67,8 @@ class PageEntryFilterModel : public QSortFilterProxyModel {
     {
         const QString pattern = filterRegularExpression().pattern();
         auto* const model = static_cast<PageModel*>(sourceModel());
-        auto* const page = model->pages().at(sourceRow);
-        if (!page->shouldDisplay()) {
+        const auto& page = model->pages().at(sourceRow);
+        if (page.shouldDisplay != nullptr && !page.shouldDisplay()) {
             return false;
         }
         // Regular contents check, then check page-filter.
@@ -82,22 +82,12 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
     createUI();
     useSidebarStyle(true);
 
-    int counter = 0;
-    auto pages = pageProvider->getPages();
-    for (auto* page : pages) {
-        auto* widget = dynamic_cast<QWidget*>(page);
-        widget->setParent(this);
-        page->stackIndex = m_pageStack->addWidget(widget);
-        page->listIndex = counter;
-        page->setParentContainer(this);
-        counter++;
-        page->updateExtraInfo = [this](const QString& id, const QString& info) {
-            if (m_currentPage && id == m_currentPage->id()) {
-                m_header->setText(m_currentPage->displayName() + info);
-            }
-        };
+    m_model->setPages(pageProvider->getPages());
+    m_widgets.resize(m_model->pages().size());
+    for (int i = 0; i < m_model->pages().size(); ++i) {
+        // NOTE: reserve the space for when the pages are lazily loaded
+        m_pageStack->addWidget(new QWidget(this));
     }
-    m_model->setPages(pages);
 
     m_proxyModel->setSourceModel(m_model);
     m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -107,8 +97,7 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
     m_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_pageList->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     m_pageList->setModel(m_proxyModel);
-    connect(m_pageList->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &PageContainer::currentChanged);
-    m_pageStack->setStackingMode(QStackedLayout::StackOne);
+    connect(m_pageList->selectionModel(), &QItemSelectionModel::currentChanged, this, &PageContainer::currentChanged);
     m_pageList->setFocus();
     selectPage(std::move(defaultId));
 }
@@ -116,10 +105,10 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
 bool PageContainer::selectPage(QString pageId)
 {
     // now find what we want to have selected...
-    auto* page = m_model->findPageEntryById(pageId);
+    const auto pageIndex = m_model->findPageIndex(pageId);
     QModelIndex index;
-    if (page) {
-        index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
+    if (pageIndex != -1) {
+        index = m_proxyModel->mapFromSource(m_model->index(pageIndex));
     }
     if (!index.isValid()) {
         index = m_proxyModel->index(0, 0);
@@ -131,31 +120,54 @@ bool PageContainer::selectPage(QString pageId)
     return false;
 }
 
-BasePage* PageContainer::getPage(QString pageId)
+QWidget* PageContainer::selectedPageWidget() const
 {
-    return m_model->findPageEntryById(pageId);
+    if (m_currentPage < 0) {
+        return nullptr;
+    }
+
+    return m_widgets.at(m_currentPage);
 }
 
-BasePage* PageContainer::selectedPage() const
+const PageInfo* PageContainer::selectedPageInfo() const
 {
-    return m_currentPage;
+    if (m_currentPage < 0) {
+        return nullptr;
+    }
+
+    return &m_model->pages().at(m_currentPage);
 }
 
-const QList<BasePage*>& PageContainer::getPages() const
+QWidget* PageContainer::pageWidget(QString pageId) const
 {
-    return m_model->pages();
+    const auto pageIndex = m_model->findPageIndex(pageId);
+    if (pageIndex == -1) {
+        return nullptr;
+    }
+
+    return m_widgets.at(pageIndex);
+}
+
+void PageContainer::forceLoadWidgets()
+{
+    for (int i = 0; i < m_widgets.size(); ++i) {
+        loadWidgetAt(i);
+    }
 }
 
 void PageContainer::refreshContainer()
 {
     m_proxyModel->invalidate();
-    if (!m_currentPage->shouldDisplay()) {
-        auto index = m_proxyModel->index(0, 0);
-        if (index.isValid()) {
-            m_pageList->setCurrentIndex(index);
-        } else {
-            // FIXME: unhandled corner case: what to do when there's no page to select?
-        }
+    const auto* currentPage = selectedPageInfo();
+    if (currentPage == nullptr || currentPage->shouldDisplay == nullptr || currentPage->shouldDisplay()) {
+        return;
+    }
+
+    auto index = m_proxyModel->index(0, 0);
+    if (index.isValid()) {
+        m_pageList->setCurrentIndex(index);
+    } else {
+        m_pageList->clearSelection();
     }
 }
 
@@ -193,12 +205,17 @@ void PageContainer::createUI()
 
 void PageContainer::retranslate()
 {
-    if (m_currentPage) {
-        m_header->setText(m_currentPage->displayName());
+    if (const auto* info = selectedPageInfo(); info != nullptr) {
+        m_header->setText(QObject::tr(info->displayName));
     }
 
-    for (auto* page : m_model->pages()) {
-        page->retranslate();
+    for (auto* page : m_widgets) {
+        auto* basePage = dynamic_cast<BasePage*>(page);
+        if (basePage == nullptr) {
+            continue;
+        }
+
+        basePage->retranslate();
     }
 }
 
@@ -219,45 +236,76 @@ void PageContainer::useSidebarStyle(bool sidebar)
 
 void PageContainer::showPage(int row)
 {
-    if (m_currentPage) {
-        m_currentPage->closed();
+    if (auto* basePage = dynamic_cast<BasePage*>(selectedPageWidget()); basePage != nullptr) {
+        basePage->closed();
     }
-    if (row != -1) {
-        m_currentPage = m_model->pages().at(row);
-    } else {
-        m_currentPage = nullptr;
+    m_currentPage = row;
+
+    // NOTE: passing -1 is safe
+    m_pageStack->setCurrentIndex(m_currentPage);
+
+    if (const auto* info = selectedPageInfo(); info != nullptr) {
+        m_header->setText(QObject::tr(info->displayName));
+
+        loadWidgetAt(m_currentPage);
     }
-    if (m_currentPage) {
-        m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
-        m_header->setText(m_currentPage->displayName());
-        m_currentPage->opened();
-    } else {
-        m_pageStack->setCurrentIndex(0);
-        m_header->setText(QString());
+    if (auto* basePage = dynamic_cast<BasePage*>(selectedPageWidget()); basePage != nullptr) {
+        basePage->opened();
     }
 }
 
-void PageContainer::help()
+void PageContainer::loadWidgetAt(int idx)
 {
-    if (m_currentPage) {
-        QString pageId = m_currentPage->helpPage();
-        if (pageId.isEmpty()) {
-            return;
-        }
-        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
+    if (m_widgets.at(idx) != nullptr) {
+        return;
     }
+
+    QWidget* containerWidget = m_pageStack->widget(idx);
+    Q_ASSERT(containerWidget != nullptr);
+
+    const auto info = m_model->pages().at(idx);
+    QWidget* widget = info.constructor(containerWidget);
+    m_widgets[idx] = widget;
+    // NOTE: needed as some pages are QMainWindow (?) and without this they appear as separate windows instead of inside the page depsite
+    // the same parent being passed through the constructor
+    // FIXME: move away from using QMainWindow for pages
+    widget->setParent(this);
+
+    auto* layout = new QVBoxLayout(containerWidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    layout->addWidget(widget);
+
+    if (auto* basePage = dynamic_cast<BasePage*>(widget); basePage != nullptr) {
+        // FIXME: hacky, breaks with retranslate
+        // pages should probably display extra info inside their own area instead
+        basePage->updateExtraInfo = [this, widget](const QString& info) {
+            if (selectedPageWidget() == widget) {
+                m_header->setText(tr(selectedPageInfo()->displayName) + info);
+            }
+        };
+        basePage->setParentContainer(this);
+    }
+}
+
+void PageContainer::help() const
+{
+    const auto* info = selectedPageInfo();
+    if (info == nullptr) {
+        return;
+    }
+
+    DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(info->id)));
 }
 
 void PageContainer::currentChanged(const QModelIndex& current)
 {
     int selectedIndex = current.isValid() ? m_proxyModel->mapToSource(current).row() : -1;
 
-    Q_ASSERT(selectedIndex < m_model->pages().size() && selectedIndex >= 0);
+    QWidget* currentWidget = selectedIndex >= 0 ? m_widgets.at(selectedIndex) : nullptr;
+    auto* prevWidget = selectedPageWidget();
 
-    auto* selected = m_model->pages().at(selectedIndex);
-    auto* previous = m_currentPage;
-
-    emit selectedPageChanged(previous, selected);
+    emit selectedPageChanged(prevWidget, currentWidget);
 
     showPage(selectedIndex);
 }
@@ -267,16 +315,22 @@ bool PageContainer::prepareToClose()
     if (!saveAll()) {
         return false;
     }
-    if (m_currentPage) {
-        m_currentPage->closed();
+
+    if (auto* basePage = dynamic_cast<BasePage*>(selectedPageWidget()); basePage != nullptr) {
+        basePage->closed();
     }
     return true;
 }
 
 bool PageContainer::saveAll()
 {
-    for (auto* page : m_model->pages()) {
-        if (!page->apply()) {
+    for (auto* page : m_widgets) {
+        auto* basePage = dynamic_cast<BasePage*>(page);
+        if (basePage == nullptr) {
+            continue;
+        }
+
+        if (!basePage->apply()) {
             return false;
         }
     }

@@ -93,11 +93,6 @@ bool FtbPage::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-bool FtbPage::shouldDisplay() const
-{
-    return true;
-}
-
 void FtbPage::retranslate()
 {
     m_ui->retranslateUi(this);

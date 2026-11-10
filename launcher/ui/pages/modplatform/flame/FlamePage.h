@@ -59,11 +59,18 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
    public:
     explicit FlamePage(NewInstanceDialog* dialog, QWidget* parent = 0);
     ~FlamePage() override;
-    QString displayName() const override { return "CurseForge"; }
-    QIcon icon() const override { return QIcon::fromTheme("flame"); }
-    QString id() const override { return "flame"; }
-    QString helpPage() const override { return "Flame-platform"; }
-    bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "flame",
+            .displayName = "CurseForge",
+            .icon = QIcon::fromTheme("flame"),
+            .helpPage = "Flame-platform",
+            .constructor = [dialog](QWidget* parent) { return new FlamePage(dialog, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void updateUi();

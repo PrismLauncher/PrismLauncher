@@ -20,37 +20,29 @@
 
 class BasePageProvider {
    public:
-    virtual QList<BasePage*> getPages() = 0;
+    virtual QList<PageInfo> getPages() = 0;
     virtual QString dialogTitle() = 0;
 };
 
 class GenericPageProvider : public BasePageProvider {
-    using PageCreator = std::function<BasePage*()>;
-
    public:
     explicit GenericPageProvider(const QString& dialogTitle) : m_dialogTitle(dialogTitle) {}
     virtual ~GenericPageProvider() {}
 
-    QList<BasePage*> getPages() override
+    QList<PageInfo> getPages() override
     {
-        QList<BasePage*> pages;
-        for (PageCreator creator : m_creators) {
-            pages.append(creator());
-        }
-        return pages;
+        return m_pages;
     }
     QString dialogTitle() override { return m_dialogTitle; }
 
     void setDialogTitle(const QString& title) { m_dialogTitle = title; }
-    void addPageCreator(PageCreator page) { m_creators.append(page); }
 
-    template <typename PageClass>
-    void addPage()
+    void addPage(PageInfo info)
     {
-        addPageCreator([]() { return new PageClass(); });
+        m_pages.append(std::move(info));
     }
 
    private:
-    QList<PageCreator> m_creators;
+    QList<PageInfo> m_pages;
     QString m_dialogTitle;
 };

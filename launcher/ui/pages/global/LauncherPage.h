@@ -56,10 +56,17 @@ class LauncherPage : public QWidget, public BasePage {
     explicit LauncherPage(QWidget* parent = 0);
     ~LauncherPage();
 
-    QString displayName() const override { return tr("General"); }
-    QIcon icon() const override { return QIcon::fromTheme("settings"); }
-    QString id() const override { return "launcher-settings"; }
-    QString helpPage() const override { return "Launcher-settings"; }
+    static PageInfo page()
+    {
+        return {
+            .id = "launcher-settings",
+            .displayName = QT_TR_NOOP("General"),
+            .icon = QIcon::fromTheme("settings"),
+            .helpPage = "Launcher-settings",
+            .constructor = [](QWidget* parent) { return new LauncherPage(parent); },
+        };
+    }
+
     bool apply() override;
     void retranslate() override;
 

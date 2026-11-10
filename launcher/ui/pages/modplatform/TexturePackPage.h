@@ -21,6 +21,26 @@ class TexturePackResourcePage : public ResourcePage {
                             const ResourceAPI* api,
                             TexturePackResourceModel* model = nullptr);
 
+    static PageInfo page(ResourceDownloadDialog* dialog,
+                         BaseInstance& instance,
+                         ResourceProviderData provider,
+                         const ResourceAPI* api,
+                         TexturePackResourceModel* model,
+                         bool suppressInitialSearch)
+    {
+        return {
+            .id = provider.id,
+            .displayName = provider.displayName,
+            .icon = provider.icon,
+            .constructor =
+                [dialog, &instance, provider = std::move(provider), api, model, suppressInitialSearch](const QWidget* /*parent*/) {
+                    auto* result = new TexturePackResourcePage(dialog, instance, provider, api, model);
+                    result->setSuppressInitialSearch(suppressInitialSearch);
+                    return result;
+                },
+        };
+    }
+
    protected slots:
     void triggerSearch() override;
 };

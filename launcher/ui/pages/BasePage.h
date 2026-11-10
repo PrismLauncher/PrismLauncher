@@ -38,20 +38,23 @@
 #include <QIcon>
 #include <QString>
 #include <functional>
-#include <memory>
 
 #include "BasePageContainer.h"
 
+struct PageInfo {
+    QString id;
+    const char* displayName;
+    QIcon icon;
+    QString helpPage;
+    std::function<QWidget*(QWidget* parent)> constructor;
+    std::function<bool()> shouldDisplay;
+};
+
 class BasePage {
    public:
-    using updateExtraInfoFunc = std::function<void(QString, QString)>;
-    virtual ~BasePage() {}
-    virtual QString id() const = 0;
-    virtual QString displayName() const = 0;
-    virtual QIcon icon() const = 0;
+    using updateExtraInfoFunc = std::function<void(QString)>;
+    virtual ~BasePage() = default;
     virtual bool apply() { return true; }
-    virtual bool shouldDisplay() const { return true; }
-    virtual QString helpPage() const { return QString(); }
     void opened()
     {
         isOpened = true;
@@ -68,13 +71,9 @@ class BasePage {
     virtual void retranslate() {}
 
    public:
-    int stackIndex = -1;
-    int listIndex = -1;
     updateExtraInfoFunc updateExtraInfo;
 
    protected:
     BasePageContainer* m_container = nullptr;
     bool isOpened = false;
 };
-
-using BasePagePtr = std::shared_ptr<BasePage>;

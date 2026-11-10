@@ -54,11 +54,17 @@ class WorldListPage : public QMainWindow, public BasePage {
     explicit WorldListPage(MinecraftInstance* inst, WorldList* worlds, QWidget* parent = nullptr);
     ~WorldListPage() override;
 
-    QString displayName() const override { return tr("Worlds"); }
-    QIcon icon() const override { return QIcon::fromTheme("worlds"); }
-    QString id() const override { return "worlds"; }
-    QString helpPage() const override { return "Worlds"; }
-    bool shouldDisplay() const override;
+    static PageInfo page(MinecraftInstance* inst, WorldList* worlds)
+    {
+        return {
+            .id = "worlds",
+            .displayName = QT_TR_NOOP("Worlds"),
+            .icon = QIcon::fromTheme("worlds"),
+            .helpPage = "Worlds",
+            .constructor = [inst, worlds](QWidget* parent) { return new WorldListPage(inst, worlds, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void openedImpl() override;

@@ -22,12 +22,6 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     explicit ExternalResourcesPage(MinecraftInstance* instance, ResourceFolderModel* model, QWidget* parent = nullptr);
     ~ExternalResourcesPage() override;
 
-    QString displayName() const override = 0;
-    QIcon icon() const override = 0;
-    QString id() const override = 0;
-    QString helpPage() const override = 0;
-
-    bool shouldDisplay() const override = 0;
     QString extraHeaderInfoString();
 
     void openedImpl() override;

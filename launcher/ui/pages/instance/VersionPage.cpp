@@ -106,14 +106,15 @@ class IconProxy : public QIdentityProxyModel {
    private:
     QWidget* m_parentWidget = nullptr;
 };
-
-QIcon VersionPage::icon() const
+PageInfo VersionPage::page(MinecraftInstance* inst)
 {
-    return APPLICATION->icons()->getIcon(m_inst->iconKey());
-}
-bool VersionPage::shouldDisplay() const
-{
-    return true;
+    return {
+        .id = "version",
+        .displayName = QT_TR_NOOP("Version"),
+        .icon = APPLICATION->icons()->getIcon(inst->iconKey()),
+        .helpPage = "Instance-Version",
+        .constructor = [inst](QWidget* parent) { return new VersionPage(inst, parent); },
+    };
 }
 
 void VersionPage::retranslate()

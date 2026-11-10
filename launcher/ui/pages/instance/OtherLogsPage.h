@@ -50,13 +50,20 @@ class OtherLogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance = nullptr, QWidget* parent = 0);
+    explicit OtherLogsPage(BaseInstance* instance = nullptr, QWidget* parent = 0);
     ~OtherLogsPage();
 
-    QString id() const override { return m_id; }
-    QString displayName() const override { return m_displayName; }
-    QIcon icon() const override { return QIcon::fromTheme("log"); }
-    QString helpPage() const override { return m_helpPage; }
+    static PageInfo page(BaseInstance* inst)
+    {
+        return {
+            .id = "logs",
+            .displayName = QT_TR_NOOP("Other Logs"),
+            .icon = QIcon::fromTheme("log"),
+            .helpPage = "Other-Logs",
+            .constructor = [inst](QWidget* parent) { return new OtherLogsPage(inst, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void openedImpl() override;

@@ -52,10 +52,17 @@ class APIPage : public QWidget, public BasePage {
     explicit APIPage(QWidget* parent = 0);
     ~APIPage();
 
-    QString displayName() const override { return tr("Services"); }
-    QIcon icon() const override { return QIcon::fromTheme("worlds"); }
-    QString id() const override { return "apis"; }
-    QString helpPage() const override { return "APIs"; }
+    static PageInfo page()
+    {
+        return {
+            .id = "apis",
+            .displayName = QT_TR_NOOP("Services"),
+            .icon = QIcon::fromTheme("worlds"),
+            .helpPage = "APIs",
+            .constructor = [](QWidget* parent) { return new APIPage(parent); },
+        };
+    }
+
     virtual bool apply() override;
     void retranslate() override;
 

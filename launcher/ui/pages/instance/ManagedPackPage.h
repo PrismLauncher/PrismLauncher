@@ -26,19 +26,11 @@ class ManagedPackPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    static ManagedPackPage* createPage(BaseInstance* inst, QWidget* parent = nullptr)
-    {
-        return ManagedPackPage::createPage(inst, inst->getManagedPackType(), parent);
-    }
+    static PageInfo page(BaseInstance* inst) { return ManagedPackPage::page(inst, inst->getManagedPackType()); }
 
-    static ManagedPackPage* createPage(BaseInstance* inst, const QString& type, QWidget* parent = nullptr);
+    static PageInfo page(BaseInstance* inst, const QString& type);
+
     ~ManagedPackPage() override;
-
-    QString displayName() const override;
-    QIcon icon() const override;
-    QString helpPage() const override;
-    QString id() const override { return "managed_pack"; }
-    bool shouldDisplay() const override;
 
     void openedImpl() override;
 
@@ -89,6 +81,8 @@ class ManagedPackPage : public QWidget, public BasePage {
 
     void onUpdateTaskCompleted(bool didSucceed) const;
 
+    virtual QString displayName() const = 0;
+
    protected:
     InstanceWindow* m_instanceWindow = nullptr;
 
@@ -98,30 +92,30 @@ class ManagedPackPage : public QWidget, public BasePage {
     bool m_loaded = false;
 };
 
-/** Simple page for when we aren't a managed pack. */
-class GenericManagedPackPage final : public ManagedPackPage {
-    Q_OBJECT
-
-   public:
-    GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr)
-        : ManagedPackPage(inst, instanceWindow, parent)
-    {}
-    ~GenericManagedPackPage() override = default;
-
-    // TODO: We may want to show this page with some useful info at some point.
-    bool shouldDisplay() const override { return false; };
-};
-
 class ModrinthManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
+    static PageInfo page(BaseInstance* inst, InstanceWindow* instanceWindow)
+    {
+        return {
+            .id = "managed_pack",
+            .displayName = "Modrinth",
+            .icon = QIcon::fromTheme("modrinth"),
+            .helpPage = "modrinth-managed-pack",
+            .constructor = [inst, instanceWindow](QWidget* parent) { return new ModrinthManagedPackPage(inst, instanceWindow, parent); },
+            .shouldDisplay = [inst] { return inst->isManagedPack(); },
+        };
+    }
+
     ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
     ~ModrinthManagedPackPage() override = default;
 
     void parseManagedPack() override;
     QString url() const override;
-    QString helpPage() const override { return "modrinth-managed-pack"; }
+
+   protected:
+    QString displayName() const override { return "Modrinth"; }
 
    public slots:
     void suggestVersion() override;
@@ -142,9 +136,23 @@ class FlameManagedPackPage final : public ManagedPackPage {
     FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent = nullptr);
     ~FlameManagedPackPage() override = default;
 
+    static PageInfo page(BaseInstance* inst, InstanceWindow* instanceWindow)
+    {
+        return {
+            .id = "managed_pack",
+            .displayName = "CurseForge",
+            .icon = QIcon::fromTheme("flame"),
+            .helpPage = "curseforge-managed-pack",
+            .constructor = [inst, instanceWindow](QWidget* parent) { return new FlameManagedPackPage(inst, instanceWindow, parent); },
+            .shouldDisplay = [inst] { return inst->isManagedPack(); },
+        };
+    }
+
     void parseManagedPack() override;
     QString url() const override;
-    QString helpPage() const override { return "curseforge-managed-pack"; }
+
+   protected:
+    QString displayName() const override { return "Modrinth"; }
 
    public slots:
     void suggestVersion() override;

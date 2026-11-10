@@ -50,17 +50,19 @@ class NotesPage : public QWidget, public BasePage {
    public:
     explicit NotesPage(BaseInstance* inst, QWidget* parent = 0);
     virtual ~NotesPage();
-    virtual QString displayName() const override { return tr("Notes"); }
-    virtual QIcon icon() const override
+
+    static PageInfo page(BaseInstance* inst)
     {
-        auto icon = QIcon::fromTheme("notes");
-        if (icon.isNull())
-            icon = QIcon::fromTheme("news");
-        return icon;
+        return {
+            .id = "notes",
+            .displayName = QT_TR_NOOP("Notes"),
+            .icon = QIcon::fromTheme("notes"),
+            .helpPage = "Notes",
+            .constructor = [inst](QWidget* parent) { return new NotesPage(inst, parent); },
+        };
     }
-    virtual QString id() const override { return "notes"; }
-    virtual bool apply() override;
-    virtual QString helpPage() const override { return "Notes"; }
+
+    bool apply() override;
     void retranslate() override;
 
    private:

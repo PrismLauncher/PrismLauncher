@@ -106,7 +106,7 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
 
     auto updateExtra = [this]() {
         if (updateExtraInfo) {
-            updateExtraInfo(id(), extraHeaderInfoString());
+            updateExtraInfo(extraHeaderInfoString());
         }
     };
 
@@ -188,11 +188,6 @@ void ExternalResourcesPage::filterTextChanged(const QString& newContents)
     m_filterModel->setFilterRegularExpression(m_viewFilter);
 }
 
-bool ExternalResourcesPage::shouldDisplay() const
-{
-    return true;
-}
-
 bool ExternalResourcesPage::listFilter(QKeyEvent* keyEvent)
 {
     switch (keyEvent->key()) {
@@ -233,9 +228,8 @@ bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
 
 void ExternalResourcesPage::addItem()
 {
-    auto list = GuiUtil::browseForFiles(
-        helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
-        m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+    auto list = GuiUtil::browseForFiles(metaObject()->className(), tr("Select Files"), m_fileSelectionFilter,
+                                        APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
         for (const auto& filename : list) {

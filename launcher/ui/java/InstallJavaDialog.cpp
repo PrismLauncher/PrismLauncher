@@ -52,11 +52,9 @@ class InstallJavaPage : public QWidget, public BasePage {
    public:
     Q_OBJECT
    public:
-    explicit InstallJavaPage(QString id, QString iconName, QString name, QWidget* parent = nullptr)
+    explicit InstallJavaPage(QString id, QWidget* parent = nullptr)
         : QWidget(parent)
         , m_uid(std::move(id))
-        , m_iconName(std::move(iconName))
-        , m_name(std::move(name))
         , m_horizontalLayout(new QHBoxLayout(this))
         , m_majorVersionSelect(new VersionSelectWidget(this))
         , m_javaVersionSelect(new VersionSelectWidget(this))
@@ -87,6 +85,17 @@ class InstallJavaPage : public QWidget, public BasePage {
         delete m_javaVersionSelect;
     }
 
+    static PageInfo page(const QString& id, const QString& iconName, const char* displayName)
+    {
+        return {
+            .id = id,
+            .displayName = displayName,
+            .icon = QIcon::fromTheme(iconName),
+            .helpPage = "Loader-mods",
+            .constructor = [id](QWidget* parent) { return new InstallJavaPage(id, parent); },
+        };
+    }
+
     //! loads the list if needed.
     void initialize(const Meta::VersionList::Ptr& vlist)
     {
@@ -103,10 +112,6 @@ class InstallJavaPage : public QWidget, public BasePage {
         m_javaVersionSelect->initialize(new Java::VersionList(dcast, this));
         m_javaVersionSelect->selectCurrent();
     }
-
-    QString id() const override { return m_uid; }
-    QString displayName() const override { return m_name; }
-    QIcon icon() const override { return QIcon::fromTheme(m_iconName); }
 
     void openedImpl() override
     {
@@ -162,8 +167,6 @@ class InstallJavaPage : public QWidget, public BasePage {
 
    private:
     const QString m_uid;
-    const QString m_iconName;
-    const QString m_name;
     bool m_loaded = false;
 
     QHBoxLayout* m_horizontalLayout = nullptr;
@@ -174,7 +177,7 @@ class InstallJavaPage : public QWidget, public BasePage {
     bool m_recommend{};
 };
 
-InstallJavaPage* pageCast(BasePage* page)
+InstallJavaPage* pageCast(QWidget* page)
 {
     auto* result = dynamic_cast<InstallJavaPage*>(page);
     Q_ASSERT(result != nullptr);
@@ -199,6 +202,9 @@ namespace Java {
 InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QWidget* parent)
     : QDialog(parent), m_container(new PageContainer(this, QString(), this)), m_buttons(new QDialogButtonBox(this))
 {
+    // FIXME: we need this since the code heavily relies on iterating the pages
+    m_container->forceLoadWidgets();
+
     auto* layout = new QVBoxLayout(this);
 // small margins look ugly on macOS on modal windows
 #ifndef Q_OS_MACOS
@@ -216,13 +222,18 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
     auto* refreshLayout = new QHBoxLayout(this);
 
     auto* refreshButton = new QPushButton(tr("&Refresh"), this);
-    connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(m_container->selectedPage())->loadList(); });
+    connect(refreshButton, &QPushButton::clicked, this, [this] {
+        if (m_container->selectedPageWidget() == nullptr) {
+            return;
+        }
+        pageCast(m_container->selectedPageWidget())->loadList();
+    });
     refreshLayout->addWidget(refreshButton);
 
     auto* recommendedCheckBox = new QCheckBox("Recommended", this);
     recommendedCheckBox->setCheckState(Qt::CheckState::Checked);
     connect(recommendedCheckBox, &QCheckBox::checkStateChanged, this, [this](int state) {
-        for (BasePage* page : m_container->getPages()) {
+        for (QWidget* page : m_container->pageWidgets()) {
             pageCast(page)->setRecommend(state == Qt::Checked);
         }
     });
@@ -265,7 +276,7 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
                 if (newTask) {
                     connect(newTask.get(), &Task::succeeded, this, [this, versions] {
                         auto recommendedJavas = getRecommendedJavaVersionsFromVersionList(versions);
-                        for (BasePage* page : m_container->getPages()) {
+                        for (QWidget* page : m_container->pageWidgets()) {
                             pageCast(page)->setRecommendedMajors(recommendedJavas);
                         }
                     });
@@ -278,11 +289,8 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
             }
         }
     }
-    for (BasePage* page : m_container->getPages()) {
-        if (page->id() == uid) {
-            m_container->selectPage(page->id());
-        }
-
+    m_container->selectPage(uid);
+    for (QWidget* page : m_container->pageWidgets()) {
         auto* cast = pageCast(page);
         cast->setRecommend(true);
         connect(cast, &InstallJavaPage::selectionChanged, this, [this, cast] { validate(cast); });
@@ -291,25 +299,27 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
         }
     }
     connect(m_container, &PageContainer::selectedPageChanged, this,
-            [this](BasePage* /*previous*/, BasePage* selected) { validate(selected); });
-    pageCast(m_container->selectedPage())->selectSearch();
-    validate(m_container->selectedPage());
+            [this](QWidget* /*previous*/, QWidget* selected) { validate(selected); });
+    if (m_container->selectedPageWidget() != nullptr) {
+        pageCast(m_container->selectedPageWidget())->selectSearch();
+    }
+    validate(m_container->selectedPageWidget());
 }
 
-QList<BasePage*> InstallDialog::getPages()
+QList<PageInfo> InstallDialog::getPages()
 {
     return {
         // Mojang
-        new InstallJavaPage("net.minecraft.java", "mojang", tr("Mojang")),
+        InstallJavaPage::page("net.minecraft.java", "mojang", "Mojang"),
         // Adoptium
-        new InstallJavaPage("net.adoptium.java", "adoptium", tr("Adoptium")),
+        InstallJavaPage::page("net.adoptium.java", "adoptium", "Adoptium"),
         // Azul
-        new InstallJavaPage("com.azul.java", "azul", tr("Azul Zulu")),
+        InstallJavaPage::page("com.azul.java", "azul", "Azul Zulu"),
         // IBM
         /* Must watch out in case the AdoptOpenJDK infrastructure is deprecated.
         In case of happening, IBM does not seem to provide as of today (03/2026) an API like Adoptium does and rather uses GitHub directly
         in its website: `developer.ibm.com`. GitHub is known for rate limiting requests that do not use an API key from an account. */
-        new InstallJavaPage("com.ibm.java", "openj9_hex_custom", tr("IBM Semeru Open")),
+        InstallJavaPage::page("com.ibm.java", "openj9_hex_custom", "IBM Semeru Open"),
     };
 }
 
@@ -318,15 +328,16 @@ QString InstallDialog::dialogTitle()
     return tr("Install Java");
 }
 
-void InstallDialog::validate(BasePage* selected)
+void InstallDialog::validate(QWidget* selected)
 {
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!!std::dynamic_pointer_cast<Java::Metadata>(pageCast(selected)->selectedVersion()));
+    m_buttons->button(QDialogButtonBox::Ok)
+        ->setEnabled(selected != nullptr && !!std::dynamic_pointer_cast<Java::Metadata>(pageCast(selected)->selectedVersion()));
 }
 
 void InstallDialog::done(int result)
 {
     if (result == Accepted) {
-        auto* page = pageCast(m_container->selectedPage());
+        auto* page = pageCast(m_container->selectedPageWidget());
         if (page->selectedVersion()) {
             auto meta = std::dynamic_pointer_cast<Java::Metadata>(page->selectedVersion());
             if (meta) {

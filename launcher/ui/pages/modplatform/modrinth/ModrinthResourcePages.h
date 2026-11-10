@@ -47,7 +47,7 @@
 namespace ResourceDownload {
 
 namespace Modrinth {
-static inline QString displayName()
+static inline const char* displayName()
 {
     return "Modrinth";
 }
@@ -68,11 +68,11 @@ static inline QString metaEntryBase()
     return "ModrinthPacks";
 }
 
-ShaderPackResourcePage* createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-DataPackResourcePage* createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-ResourcePackResourcePage* createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-TexturePackResourcePage* createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
-ModPage* createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance);
+PageInfo createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch);
+PageInfo createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch);
+PageInfo createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch);
+PageInfo createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch);
+PageInfo createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance, bool suppressInitialSearch);
 }  // namespace Modrinth
 
 }  // namespace ResourceDownload

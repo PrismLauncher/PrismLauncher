@@ -65,12 +65,20 @@ class LogPage : public QWidget, public BasePage {
    public:
     explicit LogPage(BaseInstance* instance, QWidget* parent = 0);
     virtual ~LogPage();
-    virtual QString displayName() const override { return tr("Minecraft Log"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("log"); }
-    virtual QString id() const override { return "console"; }
-    virtual bool apply() override;
-    virtual QString helpPage() const override { return "Minecraft-Logs"; }
-    virtual bool shouldDisplay() const override;
+
+    static PageInfo page(BaseInstance* instance)
+    {
+        return {
+            .id = "console",
+            .displayName = QT_TR_NOOP("Minecraft Log"),
+            .icon = QIcon::fromTheme("log"),
+            .helpPage = "Minecraft-Logs",
+            .constructor = [instance](QWidget* parent) { return new LogPage(instance, parent); },
+        };
+    }
+
+    bool apply() override;
+
     void retranslate() override;
 
    private slots:

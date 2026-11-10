@@ -49,10 +49,17 @@ class LanguagePage : public QWidget, public BasePage {
     explicit LanguagePage(QWidget* parent = 0);
     virtual ~LanguagePage();
 
-    QString displayName() const override { return tr("Language"); }
-    QIcon icon() const override { return QIcon::fromTheme("language"); }
-    QString id() const override { return "language-settings"; }
-    QString helpPage() const override { return "Language-settings"; }
+    static PageInfo page()
+    {
+        return {
+            .id = "language-settings",
+            .displayName = QT_TR_NOOP("Language"),
+            .icon = QIcon::fromTheme("language"),
+            .helpPage = "Language-settings",
+            .constructor = [](QWidget* parent) { return new LanguagePage(parent); },
+        };
+    }
+
     bool apply() override;
 
     void retranslate() override;

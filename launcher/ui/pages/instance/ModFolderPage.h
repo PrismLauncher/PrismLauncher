@@ -51,14 +51,58 @@ class ModFolderPage : public ExternalResourcesPage {
     explicit ModFolderPage(MinecraftInstance* inst, ModFolderModel* model, QWidget* parent = nullptr);
     virtual ~ModFolderPage() = default;
 
+    static PageInfo page(MinecraftInstance* inst, ModFolderModel* model)
+    {
+        return {
+            .id = "mods",
+            .displayName = QT_TR_NOOP("Mods"),
+            .icon = QIcon::fromTheme("loadermods"),
+            .helpPage = "Loader-mods",
+            .constructor =
+                [inst, model](QWidget* parent) {
+                    auto* result = new ModFolderPage(inst, model, parent);
+                    result->setFilter("Mods (*.zip *.jar *.litemod)");
+                    return result;
+                },
+        };
+    }
+
+    static PageInfo coreModsPage(MinecraftInstance* inst, ModFolderModel* model)
+    {
+        return {
+            .id = "coremods",
+            .displayName = QT_TR_NOOP("Core Mods"),
+            .icon = QIcon::fromTheme("coremods"),
+            .helpPage = "Core-mods",
+            .constructor =
+                [inst, model](QWidget* parent) {
+                    auto* result = new ModFolderPage(inst, model, parent);
+                    result->setFilter("Core Mods (*.zip *.jar)");
+                    result->refreshCoreModsDisplay();
+                    return result;
+                },
+            .shouldDisplay = [inst] { return shouldDisplayCoreMods(inst); },
+        };
+    }
+
+    static PageInfo nilModsPage(MinecraftInstance* inst, ModFolderModel* model)
+    {
+        return {
+            .id = "nilmods",
+            .displayName = QT_TR_NOOP("Nilmods"),
+            .icon = QIcon::fromTheme("coremods"),
+            .helpPage = "Nilmods",
+            .constructor =
+                [inst, model](QWidget* parent) {
+                    auto* result = new ModFolderPage(inst, model, parent);
+                    result->setFilter("Nilmods (*.nilmod)");
+                    return result;
+                },
+            .shouldDisplay = [model] { return model->dir().exists(); }
+        };
+    }
+
     void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
-
-    virtual QString displayName() const override { return tr("Mods"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("loadermods"); }
-    virtual QString id() const override { return "mods"; }
-    virtual QString helpPage() const override { return "Loader-mods"; }
-
-    virtual bool shouldDisplay() const override;
 
    public slots:
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
@@ -73,35 +117,10 @@ class ModFolderPage : public ExternalResourcesPage {
     void exportModMetadata();
     void changeModVersion();
 
-   protected:
+   private:
+    void refreshCoreModsDisplay();
+    static bool shouldDisplayCoreMods(MinecraftInstance* inst);
+
     ModFolderModel* m_model;
     QPointer<ResourceDownload::ResourceDownloadDialog> m_downloadDialog;
-};
-
-class CoreModFolderPage : public ModFolderPage {
-    Q_OBJECT
-   public:
-    explicit CoreModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
-    virtual ~CoreModFolderPage() = default;
-
-    virtual QString displayName() const override { return tr("Core Mods"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
-    virtual QString id() const override { return "coremods"; }
-    virtual QString helpPage() const override { return "Core-mods"; }
-
-    virtual bool shouldDisplay() const override;
-};
-
-class NilModFolderPage : public ModFolderPage {
-    Q_OBJECT
-   public:
-    explicit NilModFolderPage(MinecraftInstance* inst, ModFolderModel* mods, QWidget* parent = 0);
-    virtual ~NilModFolderPage() = default;
-
-    virtual QString displayName() const override { return tr("Nilmods"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("coremods"); }
-    virtual QString id() const override { return "nilmods"; }
-    virtual QString helpPage() const override { return "Nilmods"; }
-
-    virtual bool shouldDisplay() const override;
 };

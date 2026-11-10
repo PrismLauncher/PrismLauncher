@@ -49,11 +49,8 @@
 #include <QShortcut>
 #include <QUrl>
 
-OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, BaseInstance* instance, QWidget* parent)
+OtherLogsPage::OtherLogsPage(BaseInstance* instance, QWidget* parent)
     : QWidget(parent)
-    , m_id(id)
-    , m_displayName(displayName)
-    , m_helpPage(helpPage)
     , ui(new Ui::OtherLogsPage)
     , m_instance(instance)
     , m_basePath(instance ? instance->gameRoot() : APPLICATION->dataRoot())
@@ -361,7 +358,7 @@ void OtherLogsPage::reload()
 
 void OtherLogsPage::on_btnPaste_clicked()
 {
-    QString name = m_currentFile.isEmpty() ? displayName() : m_currentFile;
+    QString name = m_currentFile.isEmpty() && m_instance == nullptr ? tr("Current logs") : m_currentFile;
     auto res = GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
     if (!res) {
         qWarning() << "Log upload failed:" << res.error();

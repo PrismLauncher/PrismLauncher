@@ -169,11 +169,6 @@ CustomPage::~CustomPage()
     delete m_ui;
 }
 
-bool CustomPage::shouldDisplay() const
-{
-    return true;
-}
-
 void CustomPage::retranslate()
 {
     m_ui->retranslateUi(this);

@@ -50,12 +50,17 @@ class TexturePackPage : public ExternalResourcesPage {
    public:
     explicit TexturePackPage(MinecraftInstance* instance, TexturePackFolderModel* model, QWidget* parent = nullptr);
 
-    QString displayName() const override { return tr("Texture packs"); }
-    QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }
-    QString id() const override { return "texturepacks"; }
-    QString helpPage() const override { return "Texture-packs"; }
-
-    bool shouldDisplay() const override { return m_instance->traits().contains("texturepacks"); }
+    static PageInfo page(MinecraftInstance* inst, TexturePackFolderModel* model)
+    {
+        return {
+            .id = "texturepacks",
+            .displayName = QT_TR_NOOP("Texture packs"),
+            .icon = QIcon::fromTheme("resourcepacks"),
+            .helpPage = "Texture-packs",
+            .constructor = [inst, model](QWidget* parent) { return new TexturePackPage(inst, model, parent); },
+            .shouldDisplay = [inst] { return inst->traits().contains("texturepacks"); }
+        };
+    }
 
    public slots:
     void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;

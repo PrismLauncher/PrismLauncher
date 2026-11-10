@@ -24,27 +24,25 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
     explicit InstancePageProvider(MinecraftInstance* parent) { inst = parent; }
 
     virtual ~InstancePageProvider() = default;
-    virtual QList<BasePage*> getPages() override
+    virtual QList<PageInfo> getPages() override
     {
-        QList<BasePage*> values;
-        values.append(new LogPage(inst));
-        values.append(new VersionPage(inst));
-        values.append(ManagedPackPage::createPage(inst));
-        auto modsPage = new ModFolderPage(inst, inst->loaderModList());
-        modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
-        values.append(modsPage);
-        values.append(new CoreModFolderPage(inst, inst->coreModList()));
-        values.append(new NilModFolderPage(inst, inst->nilModList()));
-        values.append(new ResourcePackPage(inst, inst->resourcePackList()));
-        values.append(new GlobalDataPackPage(inst));
-        values.append(new TexturePackPage(inst, inst->texturePackList()));
-        values.append(new ShaderPackPage(inst, inst->shaderPackList()));
-        values.append(new NotesPage(inst));
-        values.append(new WorldListPage(inst, inst->worldList()));
-        values.append(new ServersPage(inst));
-        values.append(new ScreenshotsPage(FS::PathCombine(inst->gameRoot(), "screenshots")));
-        values.append(new InstanceSettingsPage(inst));
-        values.append(new OtherLogsPage("logs", tr("Other Logs"), "Other-Logs", inst));
+        QList<PageInfo> values;
+        values.append(LogPage::page(inst));
+        values.append(VersionPage::page(inst));
+        values.append(ManagedPackPage::page(inst));
+        values.append(ModFolderPage::page(inst, inst->loaderModList()));
+        values.append(ModFolderPage::coreModsPage(inst, inst->coreModList()));
+        values.append(ModFolderPage::nilModsPage(inst, inst->nilModList()));
+        values.append(ResourcePackPage::page(inst, inst->resourcePackList()));
+        // values.append(GlobalDataPackPage::page(inst));
+        values.append(TexturePackPage::page(inst, inst->texturePackList()));
+        values.append(ShaderPackPage::page(inst, inst->shaderPackList()));
+        values.append(NotesPage::page(inst));
+        values.append(WorldListPage::page(inst, inst->worldList()));
+        values.append(ServersPage::page(inst));
+        values.append(ScreenshotsPage::page(FS::PathCombine(inst->gameRoot(), "screenshots")));
+        values.append(InstanceSettingsPage::page(inst));
+        values.append(OtherLogsPage::page(inst));
         return values;
     }
 

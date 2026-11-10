@@ -366,9 +366,7 @@ void ModpackListModel::searchRequestFailed(const QString& /*reason*/, int networ
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself
-                              QString("%1 %2")
-                                  .arg(m_parent->displayName())
-                                  .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
+                              tr("Modrinth API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
     }
     m_jobPtr.reset();
 

@@ -26,16 +26,20 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, const QString& type, QWidget* parent)
+PageInfo ManagedPackPage::page(BaseInstance* inst, const QString& type)
 {
     if (type == "modrinth") {
-        return new ModrinthManagedPackPage(inst, nullptr, parent);
+        return ModrinthManagedPackPage::page(inst, nullptr);
     }
     if (type == "flame" && ((APPLICATION->capabilities() & Application::SupportsFlame) != 0U)) {
-        return new FlameManagedPackPage(inst, nullptr, parent);
+        return FlameManagedPackPage::page(inst, nullptr);
     }
 
-    return new GenericManagedPackPage(inst, nullptr, parent);
+    return PageInfo{
+        .id = "managed_pack",
+        .constructor = [](QWidget* parent) { return new QWidget(parent); },
+        .shouldDisplay = [] { return false; },
+    };
 }
 
 ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWindow, QWidget* parent)
@@ -114,36 +118,9 @@ void ManagedPackPage::openedImpl()
     parseManagedPack();
 }
 
-QString ManagedPackPage::displayName() const
-{
-    auto type = m_inst->getManagedPackType();
-    if (type.isEmpty()) {
-        return {};
-    }
-    if (type == "flame") {
-        type = "CurseForge";
-    }
-    return type.replace(0, 1, type[0].toUpper());
-}
-
-QIcon ManagedPackPage::icon() const
-{
-    return QIcon::fromTheme(m_inst->getManagedPackType());
-}
-
-QString ManagedPackPage::helpPage() const
-{
-    return {};
-}
-
 void ManagedPackPage::retranslate()
 {
     ui->retranslateUi(this);
-}
-
-bool ManagedPackPage::shouldDisplay() const
-{
-    return m_inst->isManagedPack();
 }
 
 bool ManagedPackPage::runUpdateTask(InstanceTask* task)

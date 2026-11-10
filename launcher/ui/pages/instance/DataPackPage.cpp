@@ -243,103 +243,71 @@ void DataPackPage::changeDataPackVersion()
     }
 }
 
-GlobalDataPackPage::GlobalDataPackPage(MinecraftInstance* instance, QWidget* parent) : QWidget(parent), m_instance(instance)
-{
-    auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
-
-    connect(instance->settings()->getSetting("GlobalDataPacksEnabled").get(), &Setting::SettingChanged, this, [this] {
-        updateContent();
-        if (m_container != nullptr) {
-            m_container->refreshContainer();
-        }
-    });
-
-    connect(instance->settings()->getSetting("GlobalDataPacksPath").get(), &Setting::SettingChanged, this,
-            &GlobalDataPackPage::updateContent);
-}
-
-QString GlobalDataPackPage::displayName() const
-{
-    if (m_underlyingPage == nullptr) {
-        return {};
-    }
-
-    return m_underlyingPage->displayName();
-}
-
-QIcon GlobalDataPackPage::icon() const
-{
-    if (m_underlyingPage == nullptr) {
-        return {};
-    }
-
-    return m_underlyingPage->icon();
-}
-
-QString GlobalDataPackPage::helpPage() const
-{
-    if (m_underlyingPage == nullptr) {
-        return {};
-    }
-
-    return m_underlyingPage->helpPage();
-}
-
-bool GlobalDataPackPage::shouldDisplay() const
-{
-    return m_instance->settings()->get("GlobalDataPacksEnabled").toBool();
-}
-
-bool GlobalDataPackPage::apply()
-{
-    return m_underlyingPage == nullptr || m_underlyingPage->apply();
-}
-
-void GlobalDataPackPage::openedImpl()
-{
-    if (m_underlyingPage != nullptr) {
-        m_underlyingPage->openedImpl();
-    }
-}
-
-void GlobalDataPackPage::closedImpl()
-{
-    if (m_underlyingPage != nullptr) {
-        m_underlyingPage->closedImpl();
-    }
-}
-
-void GlobalDataPackPage::updateContent()
-{
-    if (m_underlyingPage != nullptr) {
-        if (m_container->selectedPage() == this) {
-            m_underlyingPage->closedImpl();
-        }
-
-        m_underlyingPage->apply();
-
-        layout()->removeWidget(m_underlyingPage);
-
-        delete m_underlyingPage;
-        m_underlyingPage = nullptr;
-    }
-
-    if (shouldDisplay()) {
-        m_underlyingPage = new DataPackPage(m_instance, m_instance->dataPackList());
-        m_underlyingPage->setParentContainer(m_container);
-        m_underlyingPage->updateExtraInfo = [this](QString id, QString value) { updateExtraInfo(std::move(id), std::move(value)); };
-
-        if (m_container->selectedPage() == this) {
-            m_underlyingPage->openedImpl();
-        }
-
-        layout()->addWidget(m_underlyingPage);
-    }
-}
-void GlobalDataPackPage::setParentContainer(BasePageContainer* container)
-{
-    BasePage::setParentContainer(container);
-    updateContent();
-}
+// GlobalDataPackPage::GlobalDataPackPage(MinecraftInstance* instance, QWidget* parent) : QWidget(parent), m_instance(instance)
+// {
+//     auto* layout = new QVBoxLayout(this);
+//     layout->setContentsMargins(0, 0, 0, 0);
+//     setLayout(layout);
+//
+//     connect(instance->settings()->getSetting("GlobalDataPacksEnabled").get(), &Setting::SettingChanged, this, [this] {
+//         updateContent();
+//         if (m_container != nullptr) {
+//             m_container->refreshContainer();
+//         }
+//     });
+//
+//     connect(instance->settings()->getSetting("GlobalDataPacksPath").get(), &Setting::SettingChanged, this,
+//             &GlobalDataPackPage::updateContent);
+// }
+//
+// bool GlobalDataPackPage::apply()
+// {
+//     return m_underlyingPage == nullptr || m_underlyingPage->apply();
+// }
+//
+// void GlobalDataPackPage::openedImpl()
+// {
+//     if (m_underlyingPage != nullptr) {
+//         m_underlyingPage->openedImpl();
+//     }
+// }
+//
+// void GlobalDataPackPage::closedImpl()
+// {
+//     if (m_underlyingPage != nullptr) {
+//         m_underlyingPage->closedImpl();
+//     }
+// }
+//
+// void GlobalDataPackPage::updateContent()
+// {
+//     if (m_underlyingPage != nullptr) {
+//         if (m_container->selectedPageWidget() == this) {
+//             m_underlyingPage->closedImpl();
+//         }
+//
+//         m_underlyingPage->apply();
+//
+//         layout()->removeWidget(m_underlyingPage);
+//
+//         delete m_underlyingPage;
+//         m_underlyingPage = nullptr;
+//     }
+//
+//     // if (shouldDisplay()) {
+//     //     m_underlyingPage = new DataPackPage(m_instance, m_instance->dataPackList());
+//     //     m_underlyingPage->setParentContainer(m_container);
+//     //     m_underlyingPage->updateExtraInfo = [this](QString id, QString value) { updateExtraInfo(std::move(id), std::move(value)); };
+//     //
+//     //     if (m_container->selectedPage() == this) {
+    //         m_underlyingPage->openedImpl();
+    //     }
+    //
+    //     layout()->addWidget(m_underlyingPage);
+    // }
+// }
+// void GlobalDataPackPage::setParentContainer(BasePageContainer* container)
+// {
+//     BasePage::setParentContainer(container);
+//     updateContent();
+// }

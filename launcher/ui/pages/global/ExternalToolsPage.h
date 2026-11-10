@@ -52,17 +52,17 @@ class ExternalToolsPage : public QWidget, public BasePage {
     explicit ExternalToolsPage(QWidget* parent = 0);
     ~ExternalToolsPage() override;
 
-    QString displayName() const override { return tr("Tools"); }
-    QIcon icon() const override
+    static PageInfo page()
     {
-        auto icon = QIcon::fromTheme("externaltools");
-        if (icon.isNull()) {
-            icon = QIcon::fromTheme("loadermods");
-        }
-        return icon;
+        return {
+            .id = "external-tools",
+            .displayName = QT_TR_NOOP("Tools"),
+            .icon = QIcon::fromTheme("externaltools"),
+            .helpPage = "Tools",
+            .constructor = [](QWidget* parent) { return new ExternalToolsPage(parent); },
+        };
     }
-    QString id() const override { return "external-tools"; }
-    QString helpPage() const override { return "Tools"; }
+
     bool apply() override;
     void retranslate() override;
 

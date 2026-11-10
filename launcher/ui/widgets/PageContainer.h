@@ -81,9 +81,22 @@ class PageContainer : public QWidget, public BasePageContainer {
     }
 
     bool selectPage(QString pageId) override;
-    BasePage* selectedPage() const override;
-    BasePage* getPage(QString pageId) override;
-    const QList<BasePage*>& getPages() const;
+
+    /** Returns the widget for the currently selected page - may be null if no page is selected */
+    QWidget* selectedPageWidget() const override;
+
+    /** Returns the info for the currently selected page - may be null if no page is selected */
+    const PageInfo* selectedPageInfo() const;
+
+    /** Returns the info for the page of the specified ID - may be null if the page has not yet been loaded */
+    QWidget* pageWidget(QString pageId) const override;
+
+    /** Returns a list where each index corresponds to the widget for the page at the same index provided by the BasePageProvider. Some
+     * elements may be null. */
+    const QList<QWidget*>& pageWidgets() const { return m_widgets; }
+
+    // NOTE: Used to keep existing code working. This should not be used in new code.
+    void forceLoadWidgets();
 
     void refreshContainer() override;
     virtual void setParentContainer(BasePageContainer* container) { m_container = container; };
@@ -95,13 +108,14 @@ class PageContainer : public QWidget, public BasePageContainer {
    private:
     void createUI();
     void retranslate();
+    void loadWidgetAt(int idx);
 
    public slots:
-    void help();
+    void help() const;
 
    signals:
     /** Emitted when the currently selected page is changed */
-    void selectedPageChanged(BasePage* previous, BasePage* selected);
+    void selectedPageChanged(QWidget* prevWidget, QWidget* selectedWidget);
 
    private slots:
     void currentChanged(const QModelIndex& current);
@@ -109,9 +123,10 @@ class PageContainer : public QWidget, public BasePageContainer {
 
    private:
     BasePageContainer* m_container = nullptr;
-    BasePage* m_currentPage = 0;
+    int m_currentPage = -1;
     QSortFilterProxyModel* m_proxyModel;
     PageModel* m_model;
+    QList<QWidget*> m_widgets;
     QStackedLayout* m_pageStack;
     QListView* m_pageList;
     QLabel* m_header;

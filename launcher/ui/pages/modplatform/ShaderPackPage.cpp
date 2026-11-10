@@ -21,7 +21,6 @@ ResourceDownload::ResourceDescriptor prepareShaderPackDescriptor()
     urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/shaders\/([^\/]+)\/?)"), "curseforge");
     urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
-        .helpPage = {},
         //: The singular version of 'shader packs'
         .resourceString = QObject::tr("shader pack"),
         //: The plural version of 'shader pack'

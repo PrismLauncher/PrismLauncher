@@ -52,11 +52,18 @@ class ImportPage : public QWidget, public BasePage {
    public:
     explicit ImportPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~ImportPage();
-    virtual QString displayName() const override { return tr("Import"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("viewfolder"); }
-    virtual QString id() const override { return "import"; }
-    virtual QString helpPage() const override { return "Zip-import"; }
-    virtual bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "import",
+            .displayName = QT_TR_NOOP("Import"),
+            .icon = QIcon::fromTheme("viewfolder"),
+            .helpPage = "Zip-import",
+            .constructor = [dialog](QWidget* parent) { return new ImportPage(dialog, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void setUrl(const QString& url);

@@ -53,10 +53,17 @@ class ProxyPage : public QWidget, public BasePage {
     explicit ProxyPage(QWidget* parent = 0);
     ~ProxyPage();
 
-    QString displayName() const override { return tr("Proxy"); }
-    QIcon icon() const override { return QIcon::fromTheme("proxy"); }
-    QString id() const override { return "proxy-settings"; }
-    QString helpPage() const override { return "Proxy-settings"; }
+    static PageInfo page()
+    {
+        return {
+            .id = "proxy-settings",
+            .displayName = QT_TR_NOOP("Proxy"),
+            .icon = QIcon::fromTheme("proxy"),
+            .helpPage = "Proxy-settings",
+            .constructor = [](QWidget* parent) { return new ProxyPage(parent); },
+        };
+    }
+
     bool apply() override;
     void retranslate() override;
 

@@ -23,7 +23,6 @@ ResourceDownload::ResourceDescriptor prepareDataPackDescriptor()
                        "curseforge");
     urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
-        .helpPage = {},
         //: The singular version of 'data packs'
         .resourceString = QObject::tr("data pack"),
         //: The plural version of 'data pack'

@@ -55,11 +55,18 @@ class AtlPage : public QWidget, public ModpackProviderBasePage {
    public:
     explicit AtlPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~AtlPage();
-    virtual QString displayName() const override { return "ATLauncher"; }
-    virtual QIcon icon() const override { return QIcon::fromTheme("atlauncher"); }
-    virtual QString id() const override { return "atl"; }
-    virtual QString helpPage() const override { return "ATL-platform"; }
-    virtual bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "atl",
+            .displayName = "ATLauncher",
+            .icon = QIcon::fromTheme("atlauncher"),
+            .helpPage = "ATL-platform",
+            .constructor = [dialog](QWidget* parent) { return new AtlPage(dialog, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void openedImpl() override;

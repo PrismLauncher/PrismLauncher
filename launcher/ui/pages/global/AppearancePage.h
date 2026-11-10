@@ -51,10 +51,16 @@ class AppearancePage : public AppearanceWidget, public BasePage {
    public:
     explicit AppearancePage(QWidget* parent = nullptr) : AppearanceWidget(false, parent) { layout()->setContentsMargins(0, 0, 6, 0); }
 
-    QString displayName() const override { return tr("Appearance"); }
-    QIcon icon() const override { return QIcon::fromTheme("appearance"); }
-    QString id() const override { return "appearance-settings"; }
-    QString helpPage() const override { return "Launcher-settings"; }
+    static PageInfo page()
+    {
+        return {
+            .id = "appearance-settings",
+            .displayName = QT_TR_NOOP("Appearance"),
+            .icon = QIcon::fromTheme("appearance"),
+            .helpPage = "Launcher-settings",
+            .constructor = [](QWidget* parent) { return new AppearancePage(parent); },
+        };
+    }
 
     void openedImpl() override { loadThemeSettings(); }
 

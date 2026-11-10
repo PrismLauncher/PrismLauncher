@@ -920,15 +920,15 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Init page provider
         {
             m_globalSettingsProvider = std::make_unique<GenericPageProvider>(tr("Settings"));
-            m_globalSettingsProvider->addPage<LauncherPage>();
-            m_globalSettingsProvider->addPage<LanguagePage>();
-            m_globalSettingsProvider->addPage<AppearancePage>();
-            m_globalSettingsProvider->addPage<MinecraftPage>();
-            m_globalSettingsProvider->addPage<JavaPage>();
-            m_globalSettingsProvider->addPage<AccountListPage>();
-            m_globalSettingsProvider->addPage<APIPage>();
-            m_globalSettingsProvider->addPage<ExternalToolsPage>();
-            m_globalSettingsProvider->addPage<ProxyPage>();
+            m_globalSettingsProvider->addPage(LauncherPage::page());
+            m_globalSettingsProvider->addPage(LanguagePage::page());
+            m_globalSettingsProvider->addPage(AppearancePage::page());
+            m_globalSettingsProvider->addPage(MinecraftPage::page());
+            m_globalSettingsProvider->addPage(JavaPage::page());
+            m_globalSettingsProvider->addPage(AccountListPage::page());
+            m_globalSettingsProvider->addPage(APIPage::page());
+            m_globalSettingsProvider->addPage(ExternalToolsPage::page());
+            m_globalSettingsProvider->addPage(ProxyPage::page());
         }
 
         PixmapCache::setInstance(new PixmapCache(this));

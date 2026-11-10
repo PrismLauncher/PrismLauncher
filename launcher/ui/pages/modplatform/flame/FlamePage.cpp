@@ -100,11 +100,6 @@ FlamePage::~FlamePage()
     delete m_ui;
 }
 
-bool FlamePage::shouldDisplay() const
-{
-    return true;
-}
-
 void FlamePage::retranslate()
 {
     m_ui->retranslateUi(this);

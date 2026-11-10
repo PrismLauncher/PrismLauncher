@@ -222,7 +222,10 @@ void ResourceDownloadDialog::confirm()
 
     if (confirmDialog->exec() != 0) {
         auto deselected = confirmDialog->deselectedResources();
-        for (auto* page : m_container->getPages()) {
+        for (auto* page : m_container->pageWidgets()) {
+            if (page == nullptr) {
+                continue;
+            }
             auto* res = static_cast<ResourcePage*>(page);
             for (const auto& name : deselected) {
                 res->removeResourceFromPage(name);
@@ -244,7 +247,7 @@ bool ResourceDownloadDialog::selectPage(QString pageId)
 
 ResourcePage* ResourceDownloadDialog::selectedPage()
 {
-    auto* result = dynamic_cast<ResourcePage*>(m_container->selectedPage());
+    auto* result = dynamic_cast<ResourcePage*>(m_container->selectedPageWidget());
     Q_ASSERT(result != nullptr);
     return result;
 }
@@ -290,7 +293,11 @@ void ResourceDownloadDialog::addResource(const ModPlatform::IndexedPack::Ptr& pa
 
 void ResourceDownloadDialog::removeResource(const QString& packName)
 {
-    for (auto* page : m_container->getPages()) {
+    for (auto* page : m_container->pageWidgets()) {
+        if (page == nullptr) {
+            continue;
+        }
+
         static_cast<ResourcePage*>(page)->removeResourceFromPage(packName);
     }
     setButtonStatus();
@@ -299,7 +306,11 @@ void ResourceDownloadDialog::removeResource(const QString& packName)
 void ResourceDownloadDialog::setButtonStatus()
 {
     auto selected = false;
-    for (auto* page : m_container->getPages()) {
+    for (auto* page : m_container->pageWidgets()) {
+        if (page == nullptr) {
+            continue;
+        }
+
         auto* res = static_cast<ResourcePage*>(page);
         selected = selected || res->hasSelectedPacks();
     }
@@ -309,14 +320,18 @@ void ResourceDownloadDialog::setButtonStatus()
 QList<ResourceDownloadDialog::DownloadTaskPtr> ResourceDownloadDialog::getTasks()
 {
     QList<DownloadTaskPtr> selected;
-    for (auto* page : m_container->getPages()) {
+    for (auto* page : m_container->pageWidgets()) {
+        if (page == nullptr) {
+            continue;
+        }
+
         auto* res = static_cast<ResourcePage*>(page);
         selected.append(res->selectedPacks());
     }
     return selected;
 }
 
-void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* selected)
+void ResourceDownloadDialog::selectedPageChanged(QWidget* previous, QWidget* selected)
 {
     // If previous is null (first selection), nothing to sync
     if (!previous) {
@@ -325,7 +340,7 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
 
     auto* prevPage = dynamic_cast<ResourcePage*>(previous);
     if (!prevPage) {
-        qCritical() << "Page '" << previous->displayName() << "' in ResourceDownloadDialog is not a ResourcePage!";
+        qCritical() << "Page '" << previous << "' in ResourceDownloadDialog is not a ResourcePage!";
         return;
     }
 
@@ -374,7 +389,7 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
                                                           bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("mods"), "ModDownloadGeometry", suppressInitialSearch);
-    QList<BasePage*> pages;
+    QList<PageInfo> pages;
 
     // need to load all resources for dependency task
     auto* mInstance = instance;
@@ -391,14 +406,10 @@ ResourceDownloadDialog* ResourceDownloadDialog::createMod(QWidget* parent,
     auto loaders = instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
 
     if (ModrinthAPI::validateModLoaders(loaders)) {
-        auto* page = Modrinth::createModPage(dialog, *instance);
-        page->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(page);
+        pages.append(Modrinth::createModPage(dialog, *instance, suppressInitialSearch));
     }
     if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders)) {
-        auto* flamePage = Flame::createModPage(dialog, *instance);
-        flamePage->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(flamePage);
+        pages.append(Flame::createModPage(dialog, *instance, suppressInitialSearch));
     }
     dialog->initPages(pages);
     return dialog;
@@ -410,15 +421,11 @@ ResourceDownloadDialog* ResourceDownloadDialog::createResourcePack(QWidget* pare
                                                                    bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("resource packs"), "RPDownloadGeometry", suppressInitialSearch);
-    QList<BasePage*> pages;
+    QList<PageInfo> pages;
 
-    auto* page = Modrinth::createResourcePackResourcePage(dialog, *instance);
-    page->setSuppressInitialSearch(suppressInitialSearch);
-    pages.append(page);
+    pages.append(Modrinth::createResourcePackResourcePage(dialog, *instance, suppressInitialSearch));
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = Flame::createResourcePackResourcePage(dialog, *instance);
-        flamePage->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(flamePage);
+        pages.append(Flame::createResourcePackResourcePage(dialog, *instance, suppressInitialSearch));
     }
     dialog->initPages(pages);
 
@@ -431,15 +438,11 @@ ResourceDownloadDialog* ResourceDownloadDialog::createTexturePack(QWidget* paren
                                                                   bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("texture packs"), "TPDownloadGeometry", suppressInitialSearch);
-    QList<BasePage*> pages;
+    QList<PageInfo> pages;
 
-    auto* page = Modrinth::createTexturePackResourcePage(dialog, *instance);
-    page->setSuppressInitialSearch(suppressInitialSearch);
-    pages.append(page);
+    pages.append(Modrinth::createTexturePackResourcePage(dialog, *instance, suppressInitialSearch));
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = Flame::createTexturePackResourcePage(dialog, *instance);
-        flamePage->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(flamePage);
+        pages.append(Flame::createTexturePackResourcePage(dialog, *instance, suppressInitialSearch));
     }
     dialog->initPages(pages);
 
@@ -452,15 +455,11 @@ ResourceDownloadDialog* ResourceDownloadDialog::createShaderPack(QWidget* parent
                                                                  bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("shader packs"), "ShaderDownloadGeometry", suppressInitialSearch);
-    QList<BasePage*> pages;
+    QList<PageInfo> pages;
 
-    auto* page = Modrinth::createShaderPackResourcePage(dialog, *instance);
-    page->setSuppressInitialSearch(suppressInitialSearch);
-    pages.append(page);
+    pages.append(Modrinth::createShaderPackResourcePage(dialog, *instance, suppressInitialSearch));
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = Flame::createShaderPackResourcePage(dialog, *instance);
-        flamePage->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(flamePage);
+        pages.append(Flame::createShaderPackResourcePage(dialog, *instance, suppressInitialSearch));
     }
     dialog->initPages(pages);
 
@@ -473,22 +472,18 @@ ResourceDownloadDialog* ResourceDownloadDialog::createDataPack(QWidget* parent,
                                                                bool suppressInitialSearch)
 {
     auto* dialog = new ResourceDownloadDialog(parent, mods, instance, tr("data packs"), "DataPackDownloadGeometry", suppressInitialSearch);
-    QList<BasePage*> pages;
+    QList<PageInfo> pages;
 
-    auto* page = Modrinth::createDataPackResourcePage(dialog, *instance);
-    page->setSuppressInitialSearch(suppressInitialSearch);
-    pages.append(page);
+    pages.append(Modrinth::createDataPackResourcePage(dialog, *instance, suppressInitialSearch));
     if (APPLICATION->capabilities() & Application::SupportsFlame) {
-        auto* flamePage = Flame::createDataPackResourcePage(dialog, *instance);
-        flamePage->setSuppressInitialSearch(suppressInitialSearch);
-        pages.append(flamePage);
+        pages.append(Flame::createDataPackResourcePage(dialog, *instance, suppressInitialSearch));
     }
     dialog->initPages(pages);
 
     return dialog;
 }
 
-void ResourceDownloadDialog::initPages(QList<BasePage*> pages)
+void ResourceDownloadDialog::initPages(QList<PageInfo> pages)
 {
     m_pages = std::move(pages);
 

@@ -191,11 +191,6 @@ QMenu* WorldListPage::createPopupMenu()
     return filteredMenu;
 }
 
-bool WorldListPage::shouldDisplay() const
-{
-    return true;
-}
-
 void WorldListPage::retranslate()
 {
     m_ui->retranslateUi(this);
@@ -300,7 +295,7 @@ void WorldListPage::on_actionData_Packs_triggered()
     bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     m_datapackModel = std::make_unique<DataPackFolderModel>(folder, m_inst, isIndexed, true);
 
-    provider.addPageCreator([this] { return new DataPackPage(m_inst, m_datapackModel.get(), this); });
+    provider.addPage(DataPackPage::page(m_inst, m_datapackModel.get()));
 
     auto* layout = new QVBoxLayout(dialog);
 
@@ -444,8 +439,8 @@ void WorldListPage::worldChanged()
 
 void WorldListPage::on_actionAdd_triggered()
 {
-    auto list = GuiUtil::browseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File") + " (*.zip)",
-                                        QString(), this->parentWidget());
+    auto list = GuiUtil::browseForFiles(metaObject()->className(), tr("Select a Minecraft world zip"),
+                                        tr("Minecraft World Zip File") + " (*.zip)", QString(), this->parentWidget());
     if (list.empty()) {
         return;
     }

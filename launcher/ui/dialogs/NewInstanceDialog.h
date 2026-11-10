@@ -70,7 +70,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     InstanceTask* extractTask();
 
     QString dialogTitle() override;
-    QList<BasePage*> getPages() override;
+    QList<PageInfo> getPages() override;
 
     QString instName() const;
     bool copyTemplateDir() const;
@@ -86,7 +86,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
    private slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString& arg1);
-    void selectedPageChanged(BasePage* previous, BasePage* selected);
+    void selectedPageChanged(QWidget* previous, QWidget* selected);
 
    private:
     void importIconNow();
@@ -99,7 +99,6 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QCheckBox* m_copyTemplateDirCheckbox = nullptr;
 
     QString m_instIconKey;
-    ImportPage* m_importPage = nullptr;
     std::unique_ptr<InstanceTask> m_creationTask;
 
     bool m_importIcon = false;

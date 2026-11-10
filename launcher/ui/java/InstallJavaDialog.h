@@ -33,10 +33,10 @@ class InstallDialog final : public QDialog, private BasePageProvider {
    public:
     explicit InstallDialog(const QString& uid = QString(), MinecraftInstance* instance = nullptr, QWidget* parent = nullptr);
 
-    QList<BasePage*> getPages() override;
+    QList<PageInfo> getPages() override;
     QString dialogTitle() override;
 
-    void validate(BasePage* selected);
+    void validate(QWidget* selected);
     void done(int result) override;
 
    private:

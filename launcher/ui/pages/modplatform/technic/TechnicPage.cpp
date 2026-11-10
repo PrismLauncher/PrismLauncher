@@ -92,11 +92,6 @@ TechnicPage::~TechnicPage()
     delete ui;
 }
 
-bool TechnicPage::shouldDisplay() const
-{
-    return true;
-}
-
 void TechnicPage::retranslate()
 {
     ui->retranslateUi(this);

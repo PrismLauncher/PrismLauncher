@@ -140,11 +140,6 @@ Page::~Page()
     delete ui;
 }
 
-bool Page::shouldDisplay() const
-{
-    return true;
-}
-
 void Page::openedImpl()
 {
     if (!initialized) {

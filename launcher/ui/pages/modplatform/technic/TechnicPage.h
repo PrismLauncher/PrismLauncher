@@ -59,11 +59,18 @@ class TechnicPage : public QWidget, public ModpackProviderBasePage {
    public:
     explicit TechnicPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     ~TechnicPage() override;
-    QString displayName() const override { return "Technic"; }
-    QIcon icon() const override { return QIcon::fromTheme("technic"); }
-    QString id() const override { return "technic"; }
-    QString helpPage() const override { return "Technic-platform"; }
-    bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "technic",
+            .displayName = QT_TR_NOOP("Technic"),
+            .icon = QIcon::fromTheme("technic"),
+            .helpPage = "Technic-platform",
+            .constructor = [dialog](QWidget* parent) { return new TechnicPage(dialog, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void openedImpl() override;

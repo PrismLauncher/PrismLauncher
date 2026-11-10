@@ -60,10 +60,17 @@ class ServersPage : public QMainWindow, public BasePage {
     void openedImpl() override;
     void closedImpl() override;
 
-    virtual QString displayName() const override { return tr("Servers"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("server"); }
-    virtual QString id() const override { return "servers"; }
-    virtual QString helpPage() const override { return "Servers-management"; }
+    static PageInfo page(MinecraftInstance* inst)
+    {
+        return {
+            .id = "servers",
+            .displayName = QT_TR_NOOP("Servers"),
+            .icon = QIcon::fromTheme("server"),
+            .helpPage = "Servers-management",
+            .constructor = [inst](QWidget* parent) { return new ServersPage(inst, parent); },
+        };
+    }
+
     void retranslate() override;
 
    protected:

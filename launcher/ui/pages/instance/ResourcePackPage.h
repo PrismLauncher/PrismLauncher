@@ -50,14 +50,16 @@ class ResourcePackPage : public ExternalResourcesPage {
    public:
     explicit ResourcePackPage(MinecraftInstance* instance, ResourcePackFolderModel* model, QWidget* parent = 0);
 
-    QString displayName() const override { return tr("Resource Packs"); }
-    QIcon icon() const override { return QIcon::fromTheme("resourcepacks"); }
-    QString id() const override { return "resourcepacks"; }
-    QString helpPage() const override { return "Resource-packs"; }
-
-    virtual bool shouldDisplay() const override
+    static PageInfo page(MinecraftInstance* inst, ResourcePackFolderModel* model)
     {
-        return !m_instance->traits().contains("no-texturepacks") && !m_instance->traits().contains("texturepacks");
+        return {
+            .id = "resourcepacks",
+            .displayName = QT_TR_NOOP("Resource Packs"),
+            .icon = QIcon::fromTheme("resourcepacks"),
+            .helpPage = "Resource-Packs",
+            .constructor = [inst, model](QWidget* parent) { return new ResourcePackPage(inst, model, parent); },
+            .shouldDisplay = [inst] { return !inst->traits().contains("no-texturepacks") && !inst->traits().contains("texturepacks"); },
+        };
     }
 
    public slots:

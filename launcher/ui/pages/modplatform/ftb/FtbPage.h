@@ -57,11 +57,18 @@ class FtbPage : public QWidget, public ModpackProviderBasePage {
    public:
     explicit FtbPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~FtbPage();
-    virtual QString displayName() const override { return "FTB"; }
-    virtual QIcon icon() const override { return QIcon::fromTheme("ftb_logo"); }
-    virtual QString id() const override { return "ftb"; }
-    virtual QString helpPage() const override { return "FTB-platform"; }
-    virtual bool shouldDisplay() const override;
+
+    static PageInfo page(NewInstanceDialog* dialog)
+    {
+        return {
+            .id = "ftb",
+            .displayName = "FTB",
+            .icon = QIcon::fromTheme("ftb_logo"),
+            .helpPage = "FTB-platform",
+            .constructor = [dialog](QWidget* parent) { return new FtbPage(dialog, parent); },
+        };
+    }
+
     void retranslate() override;
 
     void openedImpl() override;

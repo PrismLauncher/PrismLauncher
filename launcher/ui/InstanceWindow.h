@@ -57,7 +57,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     virtual ~InstanceWindow() = default;
 
     bool selectPage(QString pageId) override;
-    BasePage* selectedPage() const override;
+    QWidget* selectedPageWidget() const override;
     void refreshContainer() override;
 
     QString instanceId();

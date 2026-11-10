@@ -20,6 +20,8 @@
 #include <QScrollBar>
 #include <QStyledItemDelegate>
 
+#include "ui/pages/BasePage.h"
+
 class BasePage;
 const int pageIconSize = 24;
 
@@ -49,9 +51,9 @@ class PageModel : public QAbstractListModel {
     {
         switch (role) {
             case Qt::DisplayRole:
-                return m_pages.at(index.row())->displayName();
+                return tr(m_pages.at(index.row()).displayName);
             case Qt::DecorationRole: {
-                QIcon icon = m_pages.at(index.row())->icon();
+                QIcon icon = m_pages.at(index.row()).icon;
                 if (icon.isNull())
                     icon = m_emptyIcon;
                 // HACK: fixes icon stretching on windows. TODO: report Qt bug for this
@@ -61,24 +63,25 @@ class PageModel : public QAbstractListModel {
         return QVariant();
     }
 
-    void setPages(const QList<BasePage*>& pages)
+    void setPages(QList<PageInfo> pages)
     {
         beginResetModel();
-        m_pages = pages;
+        m_pages = std::move(pages);
         endResetModel();
     }
-    const QList<BasePage*>& pages() const { return m_pages; }
+    const QList<PageInfo>& pages() const { return m_pages; }
 
-    BasePage* findPageEntryById(QString id)
+    int findPageIndex(const QString& id)
     {
-        for (auto page : m_pages) {
-            if (page->id() == id)
-                return page;
+        for (int i = 0; i < m_pages.size(); ++i) {
+            if (m_pages[i].id == id) {
+                return i;
+            }
         }
-        return nullptr;
+        return -1;
     }
 
-    QList<BasePage*> m_pages;
+    QList<PageInfo> m_pages;
     QIcon m_emptyIcon;
 };
 

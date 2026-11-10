@@ -57,15 +57,22 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
     explicit ScreenshotsPage(QString path, QWidget* parent = 0);
     virtual ~ScreenshotsPage();
 
+    static PageInfo page(QString path)
+    {
+        return {
+            .id = "screenshots",
+            .displayName = QT_TR_NOOP("Screenshots"),
+            .icon = QIcon::fromTheme("screenshots"),
+            .helpPage = "Screenshots-management",
+            .constructor = [path = std::move(path)](QWidget* parent) { return new ScreenshotsPage(std::move(path), parent); },
+        };
+    }
+
     void openedImpl() override;
 
     enum { NothingDone = 0x42 };
 
     virtual bool eventFilter(QObject*, QEvent*) override;
-    virtual QString displayName() const override { return tr("Screenshots"); }
-    virtual QIcon icon() const override { return QIcon::fromTheme("screenshots"); }
-    virtual QString id() const override { return "screenshots"; }
-    virtual QString helpPage() const override { return "Screenshots-management"; }
     virtual bool apply() override { return !m_uploadActive; }
     void retranslate() override;
 

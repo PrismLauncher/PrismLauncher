@@ -93,14 +93,14 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     void setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta);
 
-    QList<BasePage*> getPages() override { return m_pages; };
+    QList<PageInfo> getPages() override { return m_pages; };
 
    public slots:
     void accept() override;
     void reject() override;
 
    protected slots:
-    void selectedPageChanged(BasePage* previous, BasePage* selected);
+    void selectedPageChanged(QWidget* previous, QWidget* selected);
 
     virtual void confirm();
 
@@ -117,7 +117,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     GetModDependenciesTask::Ptr getModDependenciesTask();
 
-    void initPages(QList<BasePage*> pages);
+    void initPages(QList<PageInfo> pages);
 
    protected:
     ResourceFolderModel* m_baseModel;
@@ -132,7 +132,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     QString m_resourcesString;
     QString m_geometrySaveKey;
-    QList<BasePage*> m_pages;
+    QList<PageInfo> m_pages;
 };
 
 }  // namespace ResourceDownload
