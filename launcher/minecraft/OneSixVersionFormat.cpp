@@ -263,7 +263,7 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
         }
     }
     if (root.contains("conflicts")) {
-        TRY(Meta::parseRequires(root, &out->conflicts))
+        TRY(Meta::parseRequires(root, &out->conflicts, "conflicts"))
     }
     if (root.contains("volatile")) {
         TRY_INTO(out->m_volatile, requireBoolean(root, "volatile"))
