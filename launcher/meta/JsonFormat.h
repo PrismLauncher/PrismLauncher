@@ -32,6 +32,7 @@ struct Require {
     QString uid;
     QString equalsVersion;
     QString suggests;
+    bool matchGameVersion;
 };
 
 using RequireSet = std::set<Require>;
