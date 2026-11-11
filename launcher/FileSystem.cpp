@@ -1015,6 +1015,17 @@ QString NormalizePath(const QString& path)
     return newAbsolute;
 }
 
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+QString quoteShortcutArgs(const QStringList& args)
+{
+#ifdef Q_OS_WIN
+    return quoteArgs(args, "\"", "\\\"", true);
+#elifdef Q_OS_MACOS
+    return quoteArgs(args, "\"", "\\\"");
+#endif
+}
+#endif
+
 namespace {
 const QString g_badChars = "<>:\"|?*\r\n!";
 QString removeChars(QString source, QChar replace, const QString& extraChars = "")
@@ -1132,7 +1143,7 @@ QString createShortcut(QString destination, const QString& target, const QString
     }
     QTextStream stream(&f);
 
-    auto argstring = quoteArgs(args, "\"", "\\\"");
+    auto argstring = quoteShortcutArgs(args);
 
     stream << "#!/bin/bash" << "\n";
     stream << "\"" << target << "\" " << argstring << "\n";
@@ -1224,7 +1235,7 @@ QString createShortcut(QString destination, const QString& target, const QString
         return QString();
     }
 
-    auto argStr = quoteArgs(args, "\"", "\\\"", true);
+    auto argStr = quoteShortcutArgs(args);
     if (argStr.length() >= MAX_PATH) {
         qWarning() << "Arguments string is too long!";
         return QString();
