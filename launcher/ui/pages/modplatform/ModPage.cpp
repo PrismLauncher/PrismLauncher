@@ -51,10 +51,6 @@
 namespace {
 ResourceDownload::ResourceDescriptor prepareModDescriptor()
 {
-    QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/mod\/([^\/]+)\/?)"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/mc-mods\/([^\/]+)\/?)"), "curseforge");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
         .helpPage = "Mod-platform",
         //: The singular version of 'mods'
@@ -63,7 +59,6 @@ ResourceDownload::ResourceDescriptor prepareModDescriptor()
         .resourcesString = QObject::tr("mods"),
         .supportsFiltering = true,
         .isIndexed = true,
-        .urlHandlers = urlHandlers,
     };
 }
 }  // namespace

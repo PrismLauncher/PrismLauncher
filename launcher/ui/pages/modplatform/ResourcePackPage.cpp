@@ -16,11 +16,6 @@ namespace {
 
 ResourceDownload::ResourceDescriptor prepareResourcePackDescriptor()
 {
-    QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/resourcepack\/([^\/]+)\/?)"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/texture-packs\/([^\/]+)\/?)"),
-                       "curseforge");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
         .helpPage = {},
         //: The singular version of 'resource packs'
@@ -29,7 +24,6 @@ ResourceDownload::ResourceDescriptor prepareResourcePackDescriptor()
         .resourcesString = QObject::tr("resource packs"),
         .supportsFiltering = false,
         .isIndexed = true,
-        .urlHandlers = urlHandlers,
     };
 }
 }  // namespace
