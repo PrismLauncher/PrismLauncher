@@ -54,7 +54,7 @@ QPalette DarkTheme::colorScheme()
     darkPalette.setColor(QPalette::WindowText, Qt::white);
     darkPalette.setColor(QPalette::Base, QColor(34, 34, 34));
     darkPalette.setColor(QPalette::AlternateBase, QColor(42, 42, 42));
-    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipBase, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::ToolTipText, Qt::white);
     darkPalette.setColor(QPalette::Text, Qt::white);
     darkPalette.setColor(QPalette::Button, QColor(48, 48, 48));
@@ -79,12 +79,12 @@ QColor DarkTheme::fadeColor()
 
 bool DarkTheme::hasStyleSheet()
 {
-    return true;
+    return false;
 }
 
 QString DarkTheme::appStyleSheet()
 {
-    return "QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }";
+    return "";
 }
 
 QString DarkTheme::tooltip()
