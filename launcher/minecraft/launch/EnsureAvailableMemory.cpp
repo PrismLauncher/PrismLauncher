@@ -55,7 +55,6 @@ void EnsureAvailableMemory::executeTask()
                                                     QMessageBox::StandardButton::No);
 
         shouldAbort = dialog->exec() == QMessageBox::No;
-        dialog->deleteLater();
     }
 
     const auto message = tr("The system is under high memory pressure");
@@ -95,7 +94,6 @@ void EnsureAvailableMemory::executeTask()
                 QMessageBox::StandardButton::No);
 
             shouldAbort = dialog->exec() == QMessageBox::No;
-            dialog->deleteLater();
         }
 
         const auto message = tr("Not enough RAM available to launch this instance");
