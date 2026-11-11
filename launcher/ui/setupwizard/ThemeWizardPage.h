@@ -41,6 +41,8 @@ class ThemeWizardPage : public BaseWizardPage {
     bool validatePage() override { return true; };
     void retranslate() override { widget.retranslateUi(); }
 
+    void initializePage() override { widget.loadThemeSettings(); }
+
    private:
     AppearanceWidget widget{ true };
 };

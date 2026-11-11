@@ -64,10 +64,8 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
         m_ui->settingsBox->hide();
         m_ui->consolePreview->hide();
         m_ui->catPreview->hide();
-        loadThemeSettings();
     } else {
         loadSettings();
-        loadThemeSettings();
 
         updateConsolePreview();
         updateCatPreview();
@@ -87,7 +85,10 @@ AppearanceWidget::AppearanceWidget(bool themesOnly, QWidget* parent)
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
     connect(m_ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path()); });
-    connect(m_ui->reloadThemesButton, &QPushButton::pressed, this, &AppearanceWidget::loadThemeSettings);
+    connect(m_ui->reloadThemesButton, &QPushButton::clicked, this, [this] {
+        m_themeSettingsLoaded = false;
+        loadThemeSettings();
+    });
 }
 
 AppearanceWidget::~AppearanceWidget()
@@ -176,6 +177,11 @@ void AppearanceWidget::applyCatTheme(int index)
 
 void AppearanceWidget::loadThemeSettings()
 {
+    if (m_themeSettingsLoaded) {
+        return;
+    }
+    m_themeSettingsLoaded = true;
+
     APPLICATION->themeManager()->refresh();
 
     m_ui->iconsComboBox->blockSignals(true);
@@ -191,14 +197,18 @@ void AppearanceWidget::loadThemeSettings()
     const QString currentIconTheme = settings->get("IconTheme").toString();
     const auto iconThemes = APPLICATION->themeManager()->getValidIconThemes();
 
-    for (int i = 0; i < iconThemes.count(); ++i) {
-        const IconTheme* theme = iconThemes[i];
+    {
+        auto restoreOldIconTheme = qScopeGuard([prev = QIcon::themeName()] { QIcon::setThemeName(prev); });
+        const auto sampleIcon = QIcon::fromTheme("appearance");
+        for (int i = 0; i < iconThemes.count(); ++i) {
+            const IconTheme* theme = iconThemes[i];
 
-        QIcon iconForComboBox = QIcon(theme->path() + "/scalable/settings");
-        m_ui->iconsComboBox->addItem(iconForComboBox, theme->name(), theme->id());
+            QIcon::setThemeName(theme->id());
+            m_ui->iconsComboBox->addItem(sampleIcon.pixmap(32, 32), theme->name(), theme->id());
 
-        if (currentIconTheme == theme->id())
-            m_ui->iconsComboBox->setCurrentIndex(i);
+            if (currentIconTheme == theme->id())
+                m_ui->iconsComboBox->setCurrentIndex(i);
+        }
     }
 
     const QString currentTheme = settings->get("ApplicationTheme").toString();
