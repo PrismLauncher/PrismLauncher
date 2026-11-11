@@ -39,7 +39,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     using Ptr = std::shared_ptr<Version>;
 
     explicit Version(const QString& uid, const QString& version);
-    virtual ~Version() = default;
+    ~Version() override = default;
 
     QString descriptor() const override;
     QString name() const override;
@@ -67,7 +67,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     void setType(const QString& type);
     void setTime(qint64 time);
     void setRequires(const Meta::RequireSet& reqs, const Meta::RequireSet& conflicts);
-    void setVolatile(bool volatile_);
+    void setVolatile(bool volatileVar);
     void setRecommended(bool recommended);
     void setProvidesRecommendations();
     void setData(const VersionFilePtr& data);
