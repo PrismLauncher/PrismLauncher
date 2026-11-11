@@ -395,11 +395,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // the dir param. it makes multimc data path point to whatever the user specified
         // on command line
         adjustedBy = "Command line";
-        dataPath = dirParam;
+        dataPath = QDir(dirParam).absolutePath();
     } else if (dataDirEnv = QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
                !dataDirEnv.isEmpty()) {
         adjustedBy = "System environment";
-        dataPath = dataDirEnv;
+        dataPath = QDir(dataDirEnv).absolutePath();
     } else {
         QDir foo;
         if (DesktopServices::isSnap()) {
