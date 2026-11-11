@@ -220,8 +220,21 @@ void Flame::FileResolvingTask::getFlameProjects()
                 if (file != m_manifest.files.end()) {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
                     TRY(Flame::Parse::loadIndexedPack(file->pack, entryObj))
-                    if (file->pack.resourceType == ModPlatform::ResourceType::World) {
-                        file->targetFolder = "saves";
+                    switch (file->pack.resourceType) {
+                        case ModPlatform::ResourceType::World:
+                            file->targetFolder = "saves";
+                            break;
+                        case ModPlatform::ResourceType::DataPack:
+                            file->targetFolder = "datapacks";
+                            break;
+                        case ModPlatform::ResourceType::ResourcePack:
+                            file->targetFolder = "resourcepacks";
+                            break;
+                        case ModPlatform::ResourceType::ShaderPack:
+                            file->targetFolder = "shaderpacks";
+                            break;
+                        default:
+                            break;
                     }
                 }
                 return {};
