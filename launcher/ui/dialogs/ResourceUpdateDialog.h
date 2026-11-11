@@ -3,10 +3,9 @@
 #include "ResourceDownloadTask.h"
 #include "ReviewMessageBox.h"
 
-#include "minecraft/mod/ModFolderModel.h"
-
 #include "modplatform/CheckUpdateTask.h"
 
+class QTextBrowser;
 class Minecraft;
 class Mod;
 class ModrinthCheckUpdate;
@@ -61,6 +60,9 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
 
     QHash<QString, ResourceDownloadTask::Ptr> m_tasks;
     MinecraftInstance* m_instance;
+
+    ConcurrentTask::Ptr m_dependencyChangelogJobs;
+    QHash<QString, QTextBrowser*> m_changelogAreas;
 
     bool m_noUpdates = false;
     bool m_aborted = false;
