@@ -193,7 +193,6 @@
     <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewSkinsFolder"/>
     <addaction name="actionViewJavaFolder"/>
-
     <addaction name="separator"/>
     <addaction name="actionViewWidgetThemeFolder"/>
     <addaction name="actionViewIconThemeFolder"/>
@@ -212,6 +211,7 @@
      <bool>true</bool>
     </property>
     <addaction name="actionClearMetadata"/>
+    <addaction name="actionPruneAssets"/>
     <addaction name="actionReportBug"/>
     <addaction name="actionViewLog"/>
     <addaction name="actionAddToPATH"/>
@@ -785,6 +785,17 @@
    </property>
    <property name="toolTip">
     <string>Open the template folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionPruneAssets">
+   <property name="icon">
+    <iconset theme="delete"/>
+   </property>
+   <property name="text">
+    <string>Clear Unused &amp;Assets</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear assets installed instances are no longer using, including game and library JARs.</string>
    </property>
   </action>
  </widget>

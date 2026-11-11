@@ -357,6 +357,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/GetModDependenciesTask.cpp
 
     # Assets
+    minecraft/AssetPrune.h
+    minecraft/AssetPrune.cpp
     minecraft/AssetsUtils.h
     minecraft/AssetsUtils.cpp
 
