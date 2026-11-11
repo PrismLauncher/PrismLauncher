@@ -50,6 +50,8 @@ class ScreenshotsFSModel;
 struct ScreenShot;
 class ScreenshotList;
 
+class ScreenshotItemDelegate;
+
 class ScreenshotsPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
@@ -84,10 +86,17 @@ class ScreenshotsPage : public QMainWindow, public BasePage {
     void showContextMenu(const QPoint& pos);
 
    private:
+    QList<QPersistentModelIndex> selectedIndexes() const;
+    void copyImage(const QList<QPersistentModelIndex>& indexes) const;
+    void copyFiles(const QList<QPersistentModelIndex>& indexes) const;
+    void deleteScreenshots(const QList<QPersistentModelIndex>& indexes);
+
+   private:
     Ui::ScreenshotsPage* ui;
     std::shared_ptr<ScreenshotsFSModel> m_model;
     std::shared_ptr<QIdentityProxyModel> m_filterModel;
     QString m_folder;
     bool m_valid = false;
     bool m_uploadActive = false;
+    ScreenshotItemDelegate* m_delegate = nullptr;
 };
