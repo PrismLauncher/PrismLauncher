@@ -37,11 +37,13 @@
  */
 
 #include "ModFolderPage.h"
+#include <qmessagebox.h>
 #include "minecraft/mod/Resource.h"
 #include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
+#include <QAbstractButton>
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QEvent>
@@ -185,8 +187,7 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
 
 void ModFolderPage::downloadMods()
 {
-    auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (handleNoModLoader()) {
         return;
     }
 
@@ -231,8 +232,7 @@ void ModFolderPage::downloadDialogFinished(int result)
 
 void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::IndexedVersionType> releaseTypes)
 {
-    auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (handleNoModLoader()) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -261,7 +261,18 @@ void ModFolderPage::updateMods(bool includeDeps, std::vector<ModPlatform::Indexe
         modsList = m_model->allResources();
     }
 
-    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, profile->getModLoadersList(), std::move(releaseTypes));
+    auto* profile = m_instance->getPackProfile();
+    auto loadersList = profile->getModLoadersList();
+    if (m_instance->settings()->get("OverrideModDownloadLoaders").toBool()) {
+        loadersList.clear();
+        for (const auto& loader : Json::toStringList(m_instance->settings()->get("ModDownloadLoaders").toString())) {
+            const auto type = ModPlatform::getModLoaderFromString(loader);
+            if (type != ModPlatform::None && !loadersList.contains(type)) {
+                loadersList.append(type);
+            }
+        }
+    }
+    ResourceUpdateDialog updateDialog(this, m_instance, m_model, modsList, includeDeps, loadersList, std::move(releaseTypes));
     updateDialog.checkCandidates();
 
     if (updateDialog.aborted()) {
@@ -342,8 +353,7 @@ void ModFolderPage::changeModVersion()
         }
     }
 
-    auto* profile = m_instance->getPackProfile();
-    if (!profile->getModLoaders().has_value() && handleNoModLoader()) {
+    if (handleNoModLoader()) {
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
@@ -424,17 +434,26 @@ bool NilModFolderPage::shouldDisplay() const
 // Helper function so this doesn't need to be duplicated 3 times
 inline bool ModFolderPage::handleNoModLoader()
 {
-    int resp = QMessageBox::question(
-        this, ModFolderPage::tr("Missing Mod Loader"),
-        ModFolderPage::tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    auto* profile = m_instance->getPackProfile();
+    if (profile->getModLoaders().has_value()) {
+        return false;
+    }
+    auto* settings = m_instance->settings();
+    const bool overrideLoaders = settings->get("OverrideModDownloadLoaders").toBool();
+    if (overrideLoaders) {
+        return false;
+    }
+    auto* msgBox = CustomMessageBox::selectable(
+        this, tr("Missing Mod Loader"), tr("You need to install a compatible mod loader before installing mods. Would you like to do so?"),
+        QMessageBox::Question, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+    msgBox->button(QMessageBox::Cancel)->setText(tr("Install Mods Anyway"));
+    const int resp = msgBox->exec();
     if (resp == QMessageBox::Yes) {
         // Should be safe
-        auto* profile = this->m_instance->getPackProfile();
         InstallLoaderDialog dialog(profile, QString(), this);
         // true if the user went through the install loader dialog
         // false if the dialog got canceled/closed
-        bool dialogAccepted = dialog.exec() != 0;
+        const bool dialogAccepted = dialog.exec() != 0;
         this->m_container->refreshContainer();
 
         if (!dialogAccepted) {
@@ -449,5 +468,5 @@ inline bool ModFolderPage::handleNoModLoader()
     }
     // Nothing happens the dialog is already closing
     // returning true so the caller doesn't go and continue with opening it's dialog without a mod loader
-    return true;
+    return resp == QMessageBox::No;
 }
