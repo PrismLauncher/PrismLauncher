@@ -45,6 +45,7 @@ class MinecraftSettingsWidget;
 }
 
 class MinecraftSettingsWidget : public QWidget {
+    Q_OBJECT
    public:
     explicit MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent = nullptr);
     ~MinecraftSettingsWidget() override;
