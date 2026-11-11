@@ -276,47 +276,25 @@ void FlamePackExportTask::getProjectsInfo()
             buildZip();
         });
     } else {
-        QByteArray* response = nullptr;
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+        auto [projectTask, response] = FlameAPI::get().getProjectsTask(addonIds);
+        projTask = projectTask;
         connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-            auto doc = Json::requireObject(*response).and_then([addonIds](const auto& v) { return Json::requireArray(v, "data"); });
-            if (!doc) {
-                qWarning() << "Error while parsing JSON response from CurseForge projects task:" << doc.error();
-                qWarning() << *response;
-                emitFailed(doc.error());
-                return;
-            }
+            for (const auto& pack : *response) {
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(pack.name));
 
-            for (auto entry : doc.value()) {
-                auto parse = [&entry, this] -> Result<> {
-                    TRY_INTO(const auto& entryObj, Json::requireObject(entry))
-
-                    TRY_INTO(const auto& name, Json::requireString(entryObj, "name"))
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(name));
-
-                    ModPlatform::IndexedPack pack;
-                    TRY(Flame::Parse::loadIndexedPack(pack, entryObj))
-
-                    for (const auto& key : resolvedFiles.keys()) {
-                        auto val = resolvedFiles.value(key);
-                        if (val.addonId == pack.addonId) {
-                            val.name = pack.name;
-                            val.slug = pack.slug;
-                            QStringList authors;
-                            for (const auto& author : pack.authors) {
-                                authors << author.name;
-                            }
-
-                            val.authors = authors.join(", ");
-                            resolvedFiles[key] = val;
+                for (const auto& key : resolvedFiles.keys()) {
+                    auto val = resolvedFiles.value(key);
+                    if (val.addonId == pack.addonId) {
+                        val.name = pack.name;
+                        val.slug = pack.slug;
+                        QStringList authors;
+                        for (const auto& author : pack.authors) {
+                            authors << author.name;
                         }
+
+                        val.authors = authors.join(", ");
+                        resolvedFiles[key] = val;
                     }
-                    return {};
-                };
-                if (auto res = parse(); !res) {
-                    qDebug() << res.error();
-                    qDebug() << *doc;
-                    continue;
                 }
             }
             buildZip();
