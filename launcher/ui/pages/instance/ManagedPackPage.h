@@ -7,9 +7,6 @@
 #include "BaseInstance.h"
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
-
-#include "modplatform/flame/FlameAPI.h"
 
 #include "ui/pages/BasePage.h"
 
@@ -154,6 +151,7 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
    private:
     Task::Ptr m_fetchJob = nullptr;
+    Task::Ptr m_changelogJob = nullptr;
 
     ModPlatform::IndexedPack m_pack;
 };
