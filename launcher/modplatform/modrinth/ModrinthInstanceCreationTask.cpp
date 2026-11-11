@@ -396,8 +396,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
                 }
                 const auto modLoader = ModLoaderType::fromString(name);
                 if (!modLoader.isValid()) {
-                    logWarning(tr("Dependency '%1' is not recognized").arg(it.key()));
-                    continue;
+                    return std::unexpected(tr("Dependency '%1' is not recognized").arg(it.key()));
                 }
 
                 TRY_INTO(const auto& loaderVersion, Json::requireString(*it, modLoader.displayName() + " version"));

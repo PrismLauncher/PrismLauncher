@@ -195,7 +195,11 @@ void V1::updateModIndex(const QDir& indexDir, Mod& mod)
     }
 
     toml::array loaders;
-    for (const auto& loader : mod.loaders) {
+    for (const auto loader : ModLoaderType::all()) {
+        if (!mod.loaders.contains(loader)) {
+            continue;
+        }
+
         loaders.push_back(loader.toString().toStdString());
     }
     toml::array mcVersions;

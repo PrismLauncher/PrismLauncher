@@ -60,11 +60,19 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJson
         }
 
         if (str == "Client") {
-            file.side = ModPlatform::SideType::ClientSide;
+            if (file.side == ModPlatform::SideType::ServerSide) {
+                file.side = ModPlatform::SideType::UniversalSide;
+            } else {
+                file.side = ModPlatform::SideType::ClientSide;
+            }
             continue;
         }
         if (str == "Server") {
-            file.side = ModPlatform::SideType::ServerSide;
+            if (file.side == ModPlatform::SideType::ClientSide) {
+                file.side = ModPlatform::SideType::UniversalSide;
+            } else {
+                file.side = ModPlatform::SideType::ServerSide;
+            }
             continue;
         }
 
