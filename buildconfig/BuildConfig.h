@@ -159,6 +159,11 @@ class Config {
     QString FLAME_API_KEY;
 
     /**
+     * Client ID for Discord RPC
+     */
+    QString DISCORD_CLIENT_ID;
+
+    /**
      * Metadata repository URL prefix
      */
     QString META_URL;

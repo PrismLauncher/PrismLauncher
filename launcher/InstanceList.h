@@ -164,6 +164,7 @@ class InstanceList : public QAbstractListModel {
     void instancesChanged();
     void instanceSelectRequest(QString instanceId);
     void groupsChanged(QSet<QString> groups);
+    void runningStatusChanged(MinecraftInstance* instance, bool running);
 
    public slots:
     void on_InstFolderChanged(const Setting& setting, const QVariant& value);

@@ -167,6 +167,8 @@
 
 #include "console/Console.h"
 
+#include "LauncherRichPresence.h"
+
 static const QLatin1String g_liveCheckFile("live.check");
 
 PixmapCache* PixmapCache::s_instance = nullptr;
@@ -917,6 +919,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Custom Technic Client ID
         m_settings->registerSetting("TechnicClientID", "");
 
+        auto richPresenceSetting = m_settings->registerSetting("EnableRichPresence", false);
+        connect(richPresenceSetting.get(), &Setting::SettingChanged, this,
+                [this](const Setting&, const QVariant& value) { m_richPresence->enable(value.toBool()); });
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_unique<GenericPageProvider>(tr("Settings"));
@@ -974,6 +980,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // Themes
     m_themeManager = std::make_unique<ThemeManager>();
 
+    m_richPresence = std::make_unique<LauncherRichPresence>();
+
 #ifdef Q_OS_MACOS
     // for macOS: getting directory settings will generate URL security-scoped bookmarks if needed and not present
     // this facilitates a smooth transition from a non-sandboxed version of the launcher, that likely can access the directory,
@@ -1011,6 +1019,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
 
         m_instances.reset(new InstanceList(m_settings.get(), allInstDirs, this));
+        connect(m_instances.get(), &InstanceList::runningStatusChanged, this, [this](MinecraftInstance* instance, bool running) {
+            m_richPresence->sync(instance, running);
+        });
         connect(instDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         connect(additionalInstanceDirsSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
         qInfo() << "Loading Instances...";
@@ -1375,6 +1386,8 @@ bool Application::event(QEvent* event)
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
+    m_richPresence->enable(settings()->get("EnableRichPresence").toBool());
+
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto* inst = instances()->getInstanceById(m_instanceIdToLaunch);
         if (inst) {
