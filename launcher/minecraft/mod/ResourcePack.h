@@ -20,4 +20,6 @@ class ResourcePack : public DataPack {
 
     /** Gets, respectively, the lower and upper versions supported by the set pack format. */
     QMap<std::pair<int, int>, std::pair<Version, Version>> mappings() const override;
+
+    QIcon fallbackIcon() const override { return QIcon::fromTheme("resourcepacks"); }
 };

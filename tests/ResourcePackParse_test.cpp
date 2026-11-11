@@ -35,7 +35,7 @@ class ResourcePackParseTest : public QObject {
         QString zip_rp = FS::PathCombine(source, "test_resource_pack_idk.zip");
         ResourcePack pack{ QFileInfo(zip_rp) };
 
-        bool valid = DataPackUtils::processZIP(&pack, DataPackUtils::ProcessingLevel::BasicInfoOnly);
+        bool valid = DataPackUtils::processZIP(&pack);
 
         QVERIFY(pack.packFormat() == 3);
         QVERIFY(pack.description() ==
@@ -51,7 +51,7 @@ class ResourcePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "test_folder");
         ResourcePack pack{ QFileInfo(folder_rp) };
 
-        bool valid = DataPackUtils::processFolder(&pack, DataPackUtils::ProcessingLevel::BasicInfoOnly);
+        bool valid = DataPackUtils::processFolder(&pack);
 
         QVERIFY(pack.packFormat() == 1);
         QVERIFY(pack.description() == "Some resource pack maybe");
@@ -65,7 +65,7 @@ class ResourcePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "another_test_folder");
         ResourcePack pack{ QFileInfo(folder_rp) };
 
-        bool valid = DataPackUtils::process(&pack, DataPackUtils::ProcessingLevel::BasicInfoOnly);
+        bool valid = DataPackUtils::process(&pack);
 
         QVERIFY(pack.packFormat() == 6);
         QVERIFY(pack.description() == "o quartel pegou fogo, policia deu sinal, acode acode acode a bandeira nacional");

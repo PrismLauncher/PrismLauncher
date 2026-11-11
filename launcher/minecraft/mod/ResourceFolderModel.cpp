@@ -430,8 +430,18 @@ void ResourceFolderModel::onParseSucceeded(int ticket, const QString& resourceId
 Task* ResourceFolderModel::createUpdateTask()
 {
     auto indexDir2 = indexDir();
-    auto* task = new ResourceFolderLoadTask(dir(), indexDir2, m_isIndexed, m_firstFolderLoad,
-                                            [this](const QFileInfo& file) { return createResource(file); });
+    auto* task = new ResourceFolderLoadTask(dir(), indexDir2, m_isIndexed, m_firstFolderLoad, [this](const QFileInfo& file) {
+        auto* resource = createResource(file);
+        connect(resource, &Resource::iconChanged, this, [this, resource] {
+            const int row = m_resourcesIndex.value(resource->internalId());
+            emit iconChanged(row);
+
+            if (m_showImages && supportsImage()) {
+                emit dataChanged(index(row, NameColumn), index(row, NameColumn), { Qt::DecorationRole });
+            }
+        });
+        return resource;
+    });
     m_firstFolderLoad = false;
     return task;
 }
@@ -561,11 +571,10 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 }
 
                 if (at(row).isSymLinkUnder(instDirPath())) {
-                    tooltip +=
-                        m_resources[row]->internalId() +
-                        tr("\nThis resource is symbolically linked from elsewhere. Editing it will also change the original."
-                           "\nCanonical Path: %1")
-                            .arg(at(row).fileinfo().canonicalFilePath());
+                    tooltip += m_resources[row]->internalId() +
+                               tr("\nThis resource is symbolically linked from elsewhere. Editing it will also change the original."
+                                  "\nCanonical Path: %1")
+                                   .arg(at(row).fileinfo().canonicalFilePath());
                 }
 
                 if (at(row).isMoreThanOneHardLink()) {
@@ -604,14 +613,26 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
 QList<MultiDecorationItemDelegate::Icon> ResourceFolderModel::icons(int row) const
 {
     QList<MultiDecorationItemDelegate::Icon> result;
-    static const QSize s_iconSize{ 16, 16 };
+    static const QSize s_statusSize{ 16, 16 };
 
-    if (APPLICATION->settings()->get("ShowModIncompat").toBool() && at(row).hasIssues()) {
-        result.append({ .icon = QIcon::fromTheme("status-bad"), .size = s_iconSize });
+    auto& resource = *m_resources.at(row);
+
+    if (APPLICATION->settings()->get("ShowModIncompat").toBool() && resource.hasIssues()) {
+        result.append({ .icon = QIcon::fromTheme("status-bad"), .size = s_statusSize });
     }
 
-    if (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()) {
-        result.append({ .icon = QIcon::fromTheme("status-linked"), .size = s_iconSize });
+    if (resource.isSymLinkUnder(instDirPath()) || resource.isMoreThanOneHardLink()) {
+        result.append({ .icon = QIcon::fromTheme("status-linked"), .size = s_statusSize });
+    }
+
+    if (m_showImages && supportsImage()) {
+        static const QSize s_iconSize{ 32, 32 };
+        const auto pixmap = resource.icon(s_iconSize);
+        if (pixmap.isNull()) {
+            resource.loadIcon();
+        }
+        const auto icon = pixmap.isNull() ? resource.fallbackIcon() : QIcon(pixmap);
+        result.append({ .icon = icon, .size = s_iconSize });
     }
 
     return result;

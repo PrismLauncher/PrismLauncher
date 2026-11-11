@@ -26,20 +26,20 @@
 
 namespace ShaderPackUtils {
 
-bool process(ShaderPack& pack, ProcessingLevel level)
+bool process(ShaderPack& pack)
 {
     switch (pack.type()) {
         case ResourceType::FOLDER:
-            return ShaderPackUtils::processFolder(pack, level);
+            return ShaderPackUtils::processFolder(pack);
         case ResourceType::ZIPFILE:
-            return ShaderPackUtils::processZIP(pack, level);
+            return ShaderPackUtils::processZIP(pack);
         default:
             qWarning() << "Invalid type for shader pack parse task!";
             return false;
     }
 }
 
-bool processFolder(ShaderPack& pack, ProcessingLevel level)
+bool processFolder(ShaderPack& pack)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
@@ -49,14 +49,10 @@ bool processFolder(ShaderPack& pack, ProcessingLevel level)
     }
     pack.setPackFormat(ShaderPackFormat::VALID);
 
-    if (level == ProcessingLevel::BasicInfoOnly) {
-        return true;  // only need basic info already checked
-    }
-
     return true;  // all tests passed
 }
 
-bool processZIP(ShaderPack& pack, ProcessingLevel level)
+bool processZIP(ShaderPack& pack)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
@@ -91,17 +87,13 @@ bool processZIP(ShaderPack& pack, ProcessingLevel level)
     }
     pack.setPackFormat(ShaderPackFormat::VALID);
 
-    if (level == ProcessingLevel::BasicInfoOnly) {
-        return true;  // only need basic info already checked
-    }
-
     return true;
 }
 
 bool validate(QFileInfo file)
 {
     ShaderPack sp{ file };
-    return ShaderPackUtils::process(sp, ProcessingLevel::BasicInfoOnly) && sp.valid();
+    return ShaderPackUtils::process(sp) && sp.valid();
 }
 
 }  // namespace ShaderPackUtils

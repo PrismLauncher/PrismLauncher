@@ -28,18 +28,15 @@
 
 namespace TexturePackUtils {
 
-enum class ProcessingLevel { Full, BasicInfoOnly };
+bool process(TexturePack& pack);
 
-bool process(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
-
-bool processZIP(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
-bool processFolder(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(TexturePack& pack);
+bool processFolder(TexturePack& pack);
 
 bool processPackTXT(TexturePack& pack, QByteArray&& raw_data);
-bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data);
 
 /// processes ONLY the pack.png (rest of the pack may be invalid)
-bool processPackPNG(const TexturePack& pack);
+QPixmap processPackPNG(ResourceType type, const QString& path);
 
 /** Checks whether a file is valid as a texture pack or not. */
 bool validate(QFileInfo file);
