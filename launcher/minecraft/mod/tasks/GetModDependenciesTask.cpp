@@ -184,13 +184,20 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackDependency>& pDep)
 {
     auto provider = pDep->pack->provider;
-    auto [info, responseInfo] = getAPI(provider)->getProjectTask(pDep->pack->addonId.toString());
+    auto [info, responseInfo] = getAPI(provider)->getProjectTask(pDep->pack->addonId.toString(), false, false);
     connect(info.get(), &NetJob::succeeded, this, [responseInfo, pDep] { *pDep->pack = *responseInfo; });
     QObject::connect(info.get(), &NetJob::failed, this, [this, info, pDep] {
+        logWarning(tr("Failed to fetch information for dependency %1, it will not be installed.").arg(pDep->pack->addonId.toString()));
         removePack(pDep->pack->addonId);
         m_failed.remove(info.get());
     });
     return info;
+}
+
+void GetModDependenciesTask::subTaskFailed(Task::Ptr task, const QString& msg)
+{
+    ConcurrentTask::subTaskFailed(task, msg);
+    m_failed.remove(task.get());
 }
 
 Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
@@ -234,6 +241,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
                     return;
                 }
             }
+            logWarning(tr("Dependency %1 could not be resolved to a valid project, it will not be installed.").arg(dep.addonId.toString()));
             removePack(dep.addonId);
             return;
         }
@@ -242,8 +250,8 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         pDep->pack->versionsLoaded = true;
 
         if (level == 0) {
+            logWarning(tr("Dependency %1 was skipped because the dependency chain is too deep.").arg(dep.addonId.toString()));
             removePack(dep.addonId);
-            qWarning() << "Dependency cycle exceeded";
             return;
         }
         if (dep.addonId.toString().isEmpty() && !pDep->version.addonId.toString().isEmpty()) {
@@ -266,9 +274,13 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     };
 
     auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
-    QObject::connect(version.get(), &NetJob::failed, this, [this, version, pDep] {
+    if (auto* netJob = dynamic_cast<NetJob*>(version.get())) {
+        netJob->setAskRetry(false);
+    }
+    QObject::connect(version.get(), &NetJob::failed, this, [this, pDep] {
+        logWarning(tr("Failed to resolve dependency %1, it will not be installed. The mod may not work correctly without it.")
+                       .arg(pDep->pack->addonId.toString()));
         removePack(pDep->pack->addonId);
-        m_failed.remove(version.get());
     });
     tasks->addTask(version);
     return tasks;
