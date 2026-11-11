@@ -39,9 +39,7 @@
 
 #include "modplatform/atlauncher/ATLPackInstallTask.h"
 
-class AtlUserInteractionSupportImpl : public QObject, public ATLauncher::UserInteractionSupport {
-    Q_OBJECT
-
+class AtlUserInteractionSupportImpl : public ATLauncher::UserInteractionSupport {
    public:
     AtlUserInteractionSupportImpl(QWidget* parent);
     virtual ~AtlUserInteractionSupportImpl() = default;
