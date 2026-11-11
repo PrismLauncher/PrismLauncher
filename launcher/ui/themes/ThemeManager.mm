@@ -20,14 +20,12 @@
 
 #include <AppKit/AppKit.h>
 
-void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color)
+void ThemeManager::setTitlebarColorOnMac(NSWindow* window, const QColor& color)
 {
-    if (windowId == 0) {
+    if (!window) {
         return;
     }
 
-    NSView* view = (NSView*)windowId;
-    NSWindow* window = [view window];
     // Only apply effects to windows with a title bar, else child dialogs that aren't meant to have one (like AppKit) break
     // https://github.com/PrismLauncher/PrismLauncher/issues/6441
     if ((window.styleMask & NSWindowStyleMaskTitled) == 0) {
@@ -35,14 +33,13 @@ void ThemeManager::setTitlebarColorOnMac(WId windowId, const QColor& color)
     }
     window.titlebarAppearsTransparent = YES;
     window.backgroundColor = [NSColor colorWithRed:color.redF() green:color.greenF() blue:color.blueF() alpha:color.alphaF()];
-
 }
 
 void ThemeManager::setTitlebarColorOfAllWindowsOnMac(const QColor& color)
 {
     NSArray<NSWindow*>* windows = [NSApp windows];
     for (NSWindow* window : windows) {
-        setTitlebarColorOnMac((WId)window.contentView, color);
+        setTitlebarColorOnMac(window, color);
     }
 
     // We want to change the titlebar color of newly opened windows as well.
@@ -55,7 +52,7 @@ void ThemeManager::setTitlebarColorOfAllWindowsOnMac(const QColor& color)
                                                     queue:[NSOperationQueue mainQueue]
                                                usingBlock:^(NSNotification* notification) {
                                                    NSWindow* window = notification.object;
-                                                   setTitlebarColorOnMac((WId)window.contentView, color);
+                                                   setTitlebarColorOnMac(window, color);
                                                }];
 }
 
