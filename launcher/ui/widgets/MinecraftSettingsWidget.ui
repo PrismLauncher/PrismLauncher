@@ -59,8 +59,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>623</width>
-            <height>1352</height>
+            <width>604</width>
+            <height>1154</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -138,10 +138,10 @@
               <item row="3" column="0">
                <spacer name="verticalSpacer_3">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
+                 <enum>QSizePolicy::Policy::Fixed</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -200,7 +200,7 @@
               <item row="2" column="5">
                <spacer name="horizontalSpacer">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -275,10 +275,10 @@ It is most likely you will need to change the path - please refer to the mod's w
               <item>
                <spacer name="verticalSpacer_4">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
+                 <enum>QSizePolicy::Policy::Fixed</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -401,7 +401,7 @@ It is most likely you will need to change the path - please refer to the mod's w
               <item>
                <spacer name="horizontalSpacer_2">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -463,7 +463,7 @@ It is most likely you will need to change the path - please refer to the mod's w
               <item row="0" column="2">
                <spacer name="horizontalSpacer_3">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -596,7 +596,7 @@ It is most likely you will need to change the path - please refer to the mod's w
            <item>
             <spacer name="verticalSpacer_2">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -627,11 +627,99 @@ It is most likely you will need to change the path - please refer to the mod's w
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>623</width>
-            <height>484</height>
+            <width>621</width>
+            <height>488</height>
            </rect>
           </property>
          </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Security</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_12">
+       <item>
+        <widget class="QGroupBox" name="sandboxingGroupBox">
+         <property name="title">
+          <string>Sandboxing</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_14">
+          <item>
+           <widget class="QCheckBox" name="enableSandboxingCheckBox">
+            <property name="text">
+             <string>Sandbox instances by default</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="sandboxingSettings" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QCheckBox" name="enableSandboxNetworkCheckBox">
+               <property name="text">
+                <string>Allow network access</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Policy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>6</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Filesystem Access</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="FileSystemAccessWidget" name="sandboxingFileSystemAccess" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>A set of paths including the instance folder will automatically be included.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -651,8 +739,8 @@ It is most likely you will need to change the path - please refer to the mod's w
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>609</width>
-            <height>499</height>
+            <width>621</width>
+            <height>488</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -697,9 +785,8 @@ It is most likely you will need to change the path - please refer to the mod's w
              </property>
              <layout class="QFormLayout" name="formLayout_2">
               <property name="labelAlignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
-
               <item row="1" column="0" colspan="2">
                <widget class="QCheckBox" name="useNativeGLFWCheck">
                 <property name="text">
@@ -724,14 +811,13 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </widget>
               </item>
-
               <item row="4" column="0">
                <spacer name="verticalSpacer_6">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
+                 <enum>QSizePolicy::Policy::Fixed</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -741,7 +827,6 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </spacer>
               </item>
-
               <item row="5" column="0" colspan="2">
                <widget class="QCheckBox" name="useNativeOpenALCheck">
                 <property name="text">
@@ -766,14 +851,13 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </widget>
               </item>
-              
               <item row="8" column="0">
                <spacer name="verticalSpacer_7">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
+                 <enum>QSizePolicy::Policy::Fixed</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -783,7 +867,6 @@ It is most likely you will need to change the path - please refer to the mod's w
                 </property>
                </spacer>
               </item>
-
               <item row="9" column="0" colspan="2">
                <widget class="QCheckBox" name="useNativeSDLCheck">
                 <property name="text">
@@ -872,7 +955,7 @@ It is most likely you will need to change the path - please refer to the mod's w
            <item>
             <spacer name="verticalSpacer">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -937,50 +1020,42 @@ It is most likely you will need to change the path - please refer to the mod's w
    <header>ui/widgets/EnvironmentVariables.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>FileSystemAccessWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/FileSystemAccessWidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>openGlobalSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>scrollArea</tabstop>
-
-  <!-- game window settings -->
   <tabstop>windowSizeGroupBox</tabstop>
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>
   <tabstop>closeAfterLaunchCheck</tabstop>
   <tabstop>quitAfterGameStopCheck</tabstop>
-
-  <!-- console settings -->
   <tabstop>consoleSettingsBox</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>showConsoleErrorCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
-
-  <!-- global data packs -->
   <tabstop>globalDataPacksGroupBox</tabstop>
   <tabstop>dataPacksPathEdit</tabstop>
   <tabstop>dataPacksPathBrowse</tabstop>
-
-  <!-- game time -->-->
   <tabstop>gameTimeGroupBox</tabstop>
   <tabstop>showGameTime</tabstop>
   <tabstop>recordGameTime</tabstop>
   <tabstop>showGlobalGameTime</tabstop>
   <tabstop>showGameTimeWithoutDays</tabstop>
-
-  <!-- default account -->
   <tabstop>instanceAccountGroupBox</tabstop>
   <tabstop>instanceAccountSelector</tabstop>
-
-  <!-- auto join -->
   <tabstop>serverJoinGroupBox</tabstop>
   <tabstop>serverJoinAddressButton</tabstop>
   <tabstop>serverJoinAddress</tabstop>
   <tabstop>worldJoinButton</tabstop>
   <tabstop>worldsCb</tabstop>
-
-  <!-- mod loaders-->
   <tabstop>loaderGroup</tabstop>
   <tabstop>neoForge</tabstop>
   <tabstop>forge</tabstop>
@@ -992,15 +1067,10 @@ It is most likely you will need to change the path - please refer to the mod's w
   <tabstop>legacyFabric</tabstop>
   <tabstop>ornithe</tabstop>
   <tabstop>rift</tabstop>
-
   <tabstop>javaScrollArea</tabstop>
   <tabstop>scrollArea_2</tabstop>
-
-  <!-- legacy tweaks -->
   <tabstop>legacySettingsGroupBox</tabstop>
   <tabstop>onlineFixes</tabstop>
-
-  <!-- native library workarounds -->
   <tabstop>nativeWorkaroundsGroupBox</tabstop>
   <tabstop>useNativeGLFWCheck</tabstop>
   <tabstop>lineEditGLFWPath</tabstop>
@@ -1008,7 +1078,6 @@ It is most likely you will need to change the path - please refer to the mod's w
   <tabstop>lineEditOpenALPath</tabstop>
   <tabstop>useNativeSDLCheck</tabstop>
   <tabstop>lineEditSDLPath</tabstop>
-  
   <tabstop>enableFeralGamemodeCheck</tabstop>
   <tabstop>enableMangoHud</tabstop>
   <tabstop>useDiscreteGpuCheck</tabstop>

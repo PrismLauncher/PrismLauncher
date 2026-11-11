@@ -157,6 +157,8 @@ set(LAUNCH_SOURCES
     launch/LogModel.h
     launch/TaskStepWrapper.cpp
     launch/TaskStepWrapper.h
+    launch/SandboxedProcess.cpp
+    launch/SandboxedProcess.h
     logs/LogParser.cpp
     logs/LogParser.h
 )
@@ -1103,6 +1105,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/CustomCommands.h
     ui/widgets/EnvironmentVariables.cpp
     ui/widgets/EnvironmentVariables.h
+    ui/widgets/FileSystemAccessWidget.cpp
+    ui/widgets/FileSystemAccessWidget.h
     ui/widgets/IconLabel.cpp
     ui/widgets/IconLabel.h
     ui/widgets/JavaWizardWidget.cpp
@@ -1488,6 +1492,9 @@ if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR (MSVC AND (CMAKE_CXX_COMPILER_ID 
     set_target_properties(${Launcher_TARGETS} PROPERTIES LINK_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
 endif()
 
+target_link_directories(Launcher_logic PUBLIC C:/Users/Me/Projects/Modrinth/target/release)
+target_include_directories(Launcher_logic PUBLIC C:/Users/Me/Projects/Modrinth/packages/modrinth-sandbox)
+target_link_libraries(Launcher_logic C:/Users/Me/Projects/Modrinth/target/release/modrinth_sandbox.dll.lib)
 
 #### The bundle mess! ####
 # Bundle utilities are used to complete packages for different platforms - they add all the libraries that would otherwise be missing on the target system.
@@ -1523,6 +1530,7 @@ if(WIN32 OR (UNIX AND APPLE))
             ${CMAKE_SYSTEM_LIBRARY_PATH}
             ${QT_LIBS_DIR}
             ${QT_LIBEXECS_DIR}
+            C:/Users/Me/Projects/Modrinth/target/release
         PRE_EXCLUDE_REGEXES
             "^(api-ms-win|ext-ms)-.*\\.dll$"
             # FIXME: Why aren't these caught by the below regex???
