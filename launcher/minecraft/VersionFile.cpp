@@ -84,5 +84,8 @@ void VersionFile::applyTo(LaunchProfile* profile, const RuntimeContext& runtimeC
     for (auto agent : agents) {
         profile->applyAgent(agent, runtimeContext);
     }
+    if (logging.has_value()) {
+        profile->applyLogging(logging.value());
+    }
     profile->applyProblemSeverity(getProblemSeverity());
 }
