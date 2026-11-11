@@ -47,6 +47,7 @@ using UpdateAction = std::variant<UpdateActionNone,
 struct ModloaderMapEntry {
     ModPlatform::ModLoaderType type;
     QStringList knownConflictingComponents;
+    QString intermediaryComponent;
 };
 
 class Component : public QObject, public ProblemProvider {
@@ -60,6 +61,8 @@ class Component : public QObject, public ProblemProvider {
     virtual ~Component() {}
 
     static const QMap<QString, ModloaderMapEntry> KNOWN_MODLOADERS;
+    static const QStringList KNOWN_INTERMEDIARIES;
+    static bool loaderSupportsMinecraft(const QString& loaderUid, const QString& minecraftVersion);
 
     void applyTo(LaunchProfile* profile);
 
