@@ -198,18 +198,9 @@ Result<ModPlatform::IndexedVersion> Modrinth::loadIndexedPackVersion(const QJson
     }
     TRY_INTO(const auto& loaders, Json::requireArray(obj, "loaders"))
     for (auto loader : loaders) {
-        if (loader == "neoforge") {
-            file.loaders |= ModPlatform::NeoForge;
-        } else if (loader == "forge") {
-            file.loaders |= ModPlatform::Forge;
-        } else if (loader == "cauldron") {
-            file.loaders |= ModPlatform::Cauldron;
-        } else if (loader == "liteloader") {
-            file.loaders |= ModPlatform::LiteLoader;
-        } else if (loader == "fabric") {
-            file.loaders |= ModPlatform::Fabric;
-        } else if (loader == "quilt") {
-            file.loaders |= ModPlatform::Quilt;
+        const auto parsed = ModLoaderType::fromString(loader.toString());
+        if (parsed != ModLoaderType::Invalid) {
+            file.loaders.insert(parsed);
         }
     }
     TRY_INTO(file.version, Json::requireString(obj, "name"))
