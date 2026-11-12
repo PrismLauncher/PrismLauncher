@@ -84,6 +84,18 @@ auto logCatForMethod(HttpMethod method) -> Request::LogCatFunc
     }
     return taskNetLogC;
 }
+
+/** A header proxy that always returns a fixed set of headers. */
+class StaticHeaderProxy : public HeaderProxy {
+   public:
+    explicit StaticHeaderProxy(QList<HeaderPair> headers) : m_headers(std::move(headers)) {}
+    ~StaticHeaderProxy() override = default;
+
+    QList<HeaderPair> headers(const QNetworkRequest&) const override { return m_headers; }
+
+   private:
+    QList<HeaderPair> m_headers;
+};
 }  // namespace
 
 Request::Request() : Request(Spec{}) {}
@@ -111,6 +123,9 @@ Request::Request(const Spec& spec) : m_options(spec.options), m_url(spec.url), m
         addHeaderProxy(std::make_unique<ApiHeaderProxy>());
     }
 #endif
+    if (!spec.headers.isEmpty()) {
+        addHeaderProxy(std::make_unique<StaticHeaderProxy>(spec.headers));
+    }
 }
 
 void Request::addValidator(Validator* v)
@@ -559,6 +574,17 @@ auto Request::makeByteArray(const QUrl& url, QByteArray postData, Options option
 auto Request::makeByteArray(const QUrl& url, Options options) -> std::pair<Ptr, QByteArray*>
 {
     auto dl = Ptr(new Request(url, options));
+
+    auto sink = std::make_unique<ByteArraySink>();
+    auto* response = sink->output();
+    dl->m_sink = std::move(sink);
+
+    return { dl, response };
+}
+
+auto Request::makeByteArray(const Spec& spec) -> std::pair<Ptr, QByteArray*>
+{
+    auto dl = Ptr(new Request(spec));
 
     auto sink = std::make_unique<ByteArraySink>();
     auto* response = sink->output();

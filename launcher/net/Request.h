@@ -112,6 +112,8 @@ class Request : public Task {
         Request::PostData data;
         Options options = Option::NoOptions;
         QString name{};
+        /** Extra raw headers applied to every request made from this spec (e.g. User-Agent for GitHub). */
+        QList<HeaderPair> headers{};
     };
 
    public:
@@ -124,6 +126,7 @@ class Request : public Task {
      * The QByteArray will live as long as the Download object.
      */
     static auto makeByteArray(const QUrl& url, Options options = Option::NoOptions) -> std::pair<Request::Ptr, QByteArray*>;
+    static auto makeByteArray(const Spec& spec) -> std::pair<Request::Ptr, QByteArray*>;
     static auto makeByteArray(const QUrl& url, QByteArray postData, Options options = Option::NoOptions)
         -> std::pair<Request::Ptr, QByteArray*>;
     static auto makeFile(const QUrl& url, const QString& path, Options options = Option::NoOptions) -> Request::Ptr;

@@ -19,6 +19,9 @@
         <!-- Modrinth logo icon -->
         <file>scalable/instances/modrinth.svg</file>
 
+        <!-- GitHub logo icon (Octicons, MIT) -->
+        <file>scalable/instances/github.svg</file>
+
         <!-- A proxy icon. Our own. SSSsss -->
         <file>scalable/proxy.svg</file>
 

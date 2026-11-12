@@ -126,6 +126,14 @@ void EnsureMetadataTask::executeTask()
         case (ModPlatform::ResourceProvider::FLAME):
             versionTask = flameVersionsTask();
             break;
+        case (ModPlatform::ResourceProvider::GITHUB):
+            // GitHub metadata is always created at download time; there is no hash-lookup flow for it.
+            for (auto resource = m_resources.constBegin(); resource != m_resources.constEnd(); resource++) {
+                emitFail(resource.value(), resource.key(), RemoveFromList::No);
+            }
+            m_resources.clear();
+            emitSucceeded();
+            return;
     }
 
     auto invalidadeLeftover = [this] {
@@ -146,6 +154,8 @@ void EnsureMetadataTask::executeTask()
                 break;
             case (ModPlatform::ResourceProvider::FLAME):
                 projectTask = flameProjectsTask();
+                break;
+            case (ModPlatform::ResourceProvider::GITHUB):
                 break;
         }
 

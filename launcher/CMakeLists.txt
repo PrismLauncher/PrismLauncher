@@ -544,6 +544,13 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackExportTask.h
 )
 
+set(GITHUB_SOURCES
+    modplatform/github/GithubAPI.cpp
+    modplatform/github/GithubAPI.h
+    modplatform/github/GithubCheckUpdate.cpp
+    modplatform/github/GithubCheckUpdate.h
+)
+
 set(PACKWIZ_SOURCES
     modplatform/packwiz/Packwiz.h
     modplatform/packwiz/Packwiz.cpp
@@ -756,6 +763,7 @@ set(LOGIC_SOURCES
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
     ${MODRINTH_SOURCES}
+    ${GITHUB_SOURCES}
     ${PACKWIZ_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
@@ -1025,6 +1033,9 @@ SET(LAUNCHER_SOURCES
 
     ui/pages/modplatform/modrinth/ModrinthResourcePages.cpp
     ui/pages/modplatform/modrinth/ModrinthResourcePages.h
+
+    ui/pages/modplatform/github/GithubResourcePages.cpp
+    ui/pages/modplatform/github/GithubResourcePages.h
 
     # GUI - dialogs
     ui/dialogs/AboutDialog.cpp

@@ -21,6 +21,7 @@
 
 #include "modplatform/EnsureMetadataTask.h"
 #include "modplatform/flame/FlameCheckUpdate.h"
+#include "modplatform/github/GithubCheckUpdate.h"
 #include "modplatform/modrinth/ModrinthCheckUpdate.h"
 
 #include <QClipboard>
@@ -42,6 +43,9 @@ ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
             return ModPlatform::ResourceProvider::FLAME;
         case ModPlatform::ResourceProvider::FLAME:
             return ModPlatform::ResourceProvider::MODRINTH;
+        case ModPlatform::ResourceProvider::GITHUB:
+            // There is no alternate provider to fall back to for GitHub-sourced mods.
+            return ModPlatform::ResourceProvider::GITHUB;
     }
 
     return ModPlatform::ResourceProvider::FLAME;
@@ -129,6 +133,15 @@ void ResourceUpdateDialog::checkCandidates()
         checkTask.addTask(m_flameCheckTask);
     }
 
+    if (!m_githubToUpdate.empty()) {
+        m_githubCheckTask.reset(new GithubCheckUpdate(m_githubToUpdate, versions, m_loadersList, m_resourceModel, m_releaseTypes));
+        connect(m_githubCheckTask.get(), &CheckUpdateTask::checkFailed, this,
+                [this](Resource* resource, const QString& reason, const QUrl& recoverUrl) {
+                    m_failedCheckUpdate.append({ resource, reason, recoverUrl });
+                });
+        checkTask.addTask(m_githubCheckTask);
+    }
+
     connect(&checkTask, &Task::failed, this,
             [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
@@ -176,6 +189,18 @@ void ResourceUpdateDialog::checkCandidates()
             m_tasks.insert(updatable.name, updatable.download);
         }
         selectedVers.append(m_flameCheckTask->getDependencies());
+    }
+
+    // Add found updates for GitHub
+    if (m_githubCheckTask) {
+        auto githubUpdates = m_githubCheckTask->getUpdates();
+        for (auto& updatable : githubUpdates) {
+            qDebug() << QString("Mod %1 has an update available!").arg(updatable.name);
+
+            appendResource(updatable);
+            m_tasks.insert(updatable.name, updatable.download);
+        }
+        selectedVers.append(m_githubCheckTask->getDependencies());
     }
 
     // Report failed update checking
@@ -430,6 +455,9 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
             break;
         case ModPlatform::ResourceProvider::FLAME:
             m_flameToUpdate.push_back(resource);
+            break;
+        case ModPlatform::ResourceProvider::GITHUB:
+            m_githubToUpdate.push_back(resource);
             break;
     }
 }

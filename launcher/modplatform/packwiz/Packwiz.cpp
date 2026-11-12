@@ -192,6 +192,16 @@ void V1::updateModIndex(const QDir& indexDir, Mod& mod)
                 { "version", mod.version().toString().toStdString() },
             };
             break;
+        case (ModPlatform::ResourceProvider::GITHUB):
+            if (mod.projectId.toString().isEmpty() || mod.versionNumber.isEmpty()) {
+                qCritical() << QString("Did not write file %1 because missing information!").arg(normalizedFname);
+                return;
+            }
+            update = toml::table{
+                { "repo", mod.projectId.toString().toStdString() },
+                { "tag", mod.versionNumber.toStdString() },
+            };
+            break;
     }
 
     toml::array loaders;
@@ -358,14 +368,21 @@ auto V1::getIndexForMod(const QDir& indexDir, const QString& slug) -> Mod
             mod.fileId = intEntry(*modProviderTable, "file-id");
             mod.projectId = intEntry(*modProviderTable, "project-id");
         } else {
-            modProviderTable = updateTable[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table();
+            modProviderTable = updateTable[ModPlatform::ProviderCapabilities::name(Provider::GITHUB)].as_table();
             if (modProviderTable != nullptr) {
-                mod.provider = Provider::MODRINTH;
-                mod.modId() = stringEntry(*modProviderTable, "mod-id");
-                mod.version() = stringEntry(*modProviderTable, "version");
+                mod.provider = Provider::GITHUB;
+                mod.projectId = QString::fromStdString((*modProviderTable)["repo"].value_or(""));
+                mod.versionNumber = QString::fromStdString((*modProviderTable)["tag"].value_or(""));
             } else {
-                qCritical() << QString("No mod provider on mod metadata!");
-                return {};
+                modProviderTable = updateTable[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table();
+                if (modProviderTable != nullptr) {
+                    mod.provider = Provider::MODRINTH;
+                    mod.modId() = stringEntry(*modProviderTable, "mod-id");
+                    mod.version() = stringEntry(*modProviderTable, "version");
+                } else {
+                    qCritical() << QString("No mod provider on mod metadata!");
+                    return {};
+                }
             }
         }
     }
