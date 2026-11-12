@@ -168,7 +168,7 @@ void InstanceWindow::updateButtons()
 
     m_launchButton->setEnabled(m_instance->canLaunch());
     m_restartButton->setEnabled(running && !m_restartQueued);
-    m_killButton->setEnabled(running);
+    m_killButton->setVisible(running);
 
     QMenu* launchMenu = m_launchButton->menu();
     if (launchMenu)
