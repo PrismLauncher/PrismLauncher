@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <QIcon>
+
 #include "ui/pages/modplatform/ModPage.h"
 
 class BaseInstance;

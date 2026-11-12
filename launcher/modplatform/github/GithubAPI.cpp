@@ -126,7 +126,7 @@ Net::RPC::Spec<ModPlatform::IndexedPack> GithubAPI::getProject(const QString& id
 {
     // https://docs.github.com/en/rest/repos/repos#get-a-repository
     return { { .url = Github::apiUrl().toString() + QStringLiteral("/repos/") + id, .headers = GithubAPI::headers() },
-             [id](const auto& response) -> Result<ModPlatform::IndexedPack> {
+             [](const auto& response) -> Result<ModPlatform::IndexedPack> {
                  TRY_INTO(const auto obj, Json::requireObject(response, "GitHub repository"))
                  TRY_INTO(auto pack, loadIndexedPack(obj))
 

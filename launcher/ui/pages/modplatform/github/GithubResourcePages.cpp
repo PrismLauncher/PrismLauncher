@@ -18,6 +18,11 @@
 
 #include "GithubResourcePages.h"
 
+#include <algorithm>
+#include <utility>
+
+#include "minecraft/MinecraftInstance.h"
+
 #include "modplatform/github/GithubAPI.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
