@@ -28,20 +28,20 @@ QString ModrinthAPI::getModpackIdFromUrl(const QUrl& url)
 
 namespace {
 
-QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
+QStringList getModLoaderStrings(const QSet<ModLoaderType>& types)
 {
     QStringList l;
-    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt, ModPlatform::LiteLoader,
-                         ModPlatform::DataPack, ModPlatform::Babric, ModPlatform::BTA, ModPlatform::LegacyFabric, ModPlatform::Ornithe,
-                         ModPlatform::Rift }) {
-        if ((types & loader) != 0U) {
-            l << getModLoaderAsString(loader);
+
+    for (const auto type : types) {
+        if (ModrinthAPI::get().supportsModLoader(type)) {
+            l.append(type.toString());
         }
     }
+
     return l;
 }
 
-QString getModLoaderFilters(ModPlatform::ModLoaderTypes types)
+QString getModLoaderFilters(const QSet<ModLoaderType>& types)
 {
     QStringList l;
     for (const auto& loader : getModLoaderStrings(types)) {
@@ -106,8 +106,8 @@ QString createFacets(const ResourceAPI::SearchArgs& args)
 {
     QStringList facetsList;
 
-    if (args.loaders.has_value() && args.loaders.value() != 0) {
-        auto loaders = getModLoaderFilters(args.loaders.value());
+    if (!args.loaders.isEmpty()) {
+        auto loaders = getModLoaderFilters(args.loaders);
         if (!loaders.isEmpty()) {
             facetsList.append(QString("[%1]").arg(loaders));
         }
@@ -186,15 +186,15 @@ static void addVersionTypes(QJsonObject& bodyObj, const std::optional<std::vecto
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersion(const QString& hash,
                                                              const QString& hashFormat,
                                                              std::optional<std::vector<Version>> mcVersions,
-                                                             std::optional<ModPlatform::ModLoaderTypes> loaders,
+                                                             const QSet<ModLoaderType>& loaders,
                                                              std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
     QJsonObject bodyObj;
 
-    if (loaders.has_value()) {
-        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
+    if (!loaders.isEmpty()) {
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders));
     }
 
     if (mcVersions.has_value()) {
@@ -221,7 +221,7 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
     const QStringList& hashes,
     const QString& hashFormat,
     std::optional<std::vector<Version>> mcVersions,
-    std::optional<ModPlatform::ModLoaderTypes> loaders,
+    const QSet<ModLoaderType>& loaders,
     std::optional<std::vector<ModPlatform::IndexedVersionType>> releaseTypes) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
@@ -231,8 +231,8 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::latestVersions(
     Json::writeStringList(bodyObj, "hashes", hashes);
     Json::writeString(bodyObj, "algorithm", hashFormat);
 
-    if (loaders.has_value()) {
-        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders.value()));
+    if (!loaders.isEmpty()) {
+        Json::writeStringList(bodyObj, "loaders", getModLoaderStrings(loaders));
     }
 
     if (mcVersions.has_value()) {
@@ -273,11 +273,24 @@ QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
              { .index = 4, .name = "newest", .readableName = QObject::tr("Sort by Newest") },
              { .index = 5, .name = "updated", .readableName = QObject::tr("Sort by Last Updated") } };
 }
-bool ModrinthAPI::validateModLoaders(ModPlatform::ModLoaderTypes loaders)
+bool ModrinthAPI::supportsModLoader(ModLoaderType loader) const
 {
-    return loaders.testAnyFlags(ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt |
-                                ModPlatform::LiteLoader | ModPlatform::DataPack | ModPlatform::Babric | ModPlatform::BTA |
-                                ModPlatform::LegacyFabric | ModPlatform::Ornithe | ModPlatform::Rift);
+    switch (loader.value()) {
+        case ModLoaderType::NeoForge:
+        case ModLoaderType::Forge:
+        case ModLoaderType::Fabric:
+        case ModLoaderType::Quilt:
+        case ModLoaderType::LiteLoader:
+        case ModLoaderType::DataPack:
+        case ModLoaderType::Babric:
+        case ModLoaderType::BTABabric:
+        case ModLoaderType::LegacyFabric:
+        case ModLoaderType::Ornithe:
+        case ModLoaderType::Rift:
+            return true;
+        default:
+            return false;
+    }
 }
 
 auto ModrinthAPI::getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString>
@@ -286,8 +299,8 @@ auto ModrinthAPI::getVersionsURL(const VersionSearchArgs& args) const -> std::op
     if (args.mcVersions.has_value()) {
         getArguments.append(QString("game_versions=[%1]").arg(getGameVersionsString(args.mcVersions.value())));
     }
-    if (args.loaders.has_value()) {
-        getArguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
+    if (!args.loaders.isEmpty()) {
+        getArguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders).join("\",\"")));
     }
     getArguments.append(QString("include_changelog=%1").arg(args.includeChangelog ? "true" : "false"));
 
