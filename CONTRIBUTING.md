@@ -1,8 +1,14 @@
 # Contributions Guidelines
 
-## Foreword on AI usage
+## Foreword on low-effort/AI Contributions
 
-Our team believes in **human contributions**. Any contribution - be it an issue report or a pull request - which is created by, documented by, or aided by AI/LLM usage will typically be **closed and locked without further discussion**.
+As explained in our [Code of Conduct](./CODE_OF_CONDUCT.md):
+
+> We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+
+Our team believes a fundamental part of this is **valuable, human engagement**. In the context of contributing to this project, this helps ensure that conversations remain productive, kind, and respectful to the time of others. It also helps keep the project itself safe, maintainable, and more easily accessible to new and future contributors.
+
+With this in mind, our team have come to the decision that **any** contribution - be it an issue report, pull request, etc. - which is created by, documented by, or otherwise aided by AI/LLM usage **in any way** will typically be **closed and locked without further discussion**. Similarly, the team may also take action against contributions deemed to be "low-effort" - such as unverified bug reports, large and untested pull requests, or using AI-generated content in your interactions with others.
 
 ## Code style
 
