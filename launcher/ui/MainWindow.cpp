@@ -845,6 +845,8 @@ void MainWindow::updateCatState()
     }
 
     ui->actionCAT->setVisible(catEnabled);
+    const auto toolBarActions = ui->mainToolBar->actions();
+    toolBarActions.at(toolBarActions.indexOf(ui->actionCAT) - 1)->setVisible(catEnabled);
     ui->actionCAT->setChecked(catVisible);
     setCatBackground(catVisible);
 }
