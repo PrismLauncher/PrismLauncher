@@ -46,6 +46,13 @@
 #include <DesktopServices.h>
 #include <icons/IconList.h>
 
+#ifdef Q_OS_LINUX
+#include "Result.h"
+
+#include <libportal/dynamic-launcher.h>
+#include <libportal/portal-qt6.h>
+#endif
+
 namespace ShortcutUtils {
 
 bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
@@ -245,4 +252,64 @@ bool createInstanceShortcutInOther(const Shortcut& shortcut)
     return true;
 }
 
+#ifdef Q_OS_LINUX
+Result<> createInstanceShortcutInPortal(const Shortcut& shortcut)
+{
+    if (!shortcut.instance || !shortcut.parent)
+        return std::unexpected("Tried to access a shortcut with no valid instance or parent");
+
+    // TODO
+    auto icon;
+    const auto portal = XdpQt::globalPortalObject();
+    const g_autoptr(XdpParent) parent = xdp_parent_new_qt(shortcut.parent->windowHandle());
+
+    xdg_portal_dynamic_launcher_prepare_install(portal, parent, shortuct.name.toUtf8().constData(), icon, XDP_LAUNCHER_APPLICATION);
+
+    g_autoptr(GError) error;
+    g_autoptr(GVariant) prepData = xdg_portal_dynamic_launcher_prepare_install_finish(portal, res, &error);
+    if (!prepData) {
+        const auto errorMessage = "Failed to prepare Dynamic Launcher portal for install: " + error->message;
+        return std::unexpected(errorMessage);
+    }
+
+    g_autoptr(GVariant) token;
+    if (!g_variant_lookup(prepData, "token", "s", &token)) {
+        return std::unexpected("Failed to find `token` in Dynamic Launcher install preparation data from portal");
+    }
+
+    // TODO(@getchoo): This is sorta broken compared to our actual .desktop file
+    // ...but so are shortcuts from FS::createShortcut()! The modularity in that fn is non-existent though,
+    // so re-implement it here til a better solution is found
+    //
+    // Both should be re-using the in-tree desktop file in some way
+    QString desktopEntry;
+    QTextStream entryStream(&desktopEntry);
+
+    // The portal will supply `Exec` and `Name` fields
+    entryStream << "[Desktop Entry]\n";
+    entryStream << "Version=1\n";
+    entryStream << "Type=Application\n";
+    entryStream << "Terminal=false\n";
+    entryStream << "StartupNotify=true\n";
+    entryStream << "Comment=Discover, manage, and play Minecraft instances\n";
+    entryStream << "Categories=Game;ActionGame;AdventureGame;Simulation\n";
+    entryStream << "Keywords=game;minecraft;mc;\n";
+
+    // NOTE: This field helps the portal delete orphaned "launchers" on next use if the Flatpak itself is uninstalled
+    // https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.DynamicLauncher.html#install
+    entryStream << "TryExec=" << BuildConfig.LAUNCHER_APP_BINARY_NAME << "\n";
+
+    // TODO
+    auto id;
+
+    const auto portalInstall = xdg_portal_dynamic_launcher_install(portal, token, id, entry.toUtf8().constData(), &error);
+
+    if (!portalInstall) {
+        const auto errorMessage = "Failed to install shortcut through Dynamic Launcher portal: " + error->message;
+        return std::unexpected(errorMessage);
+    }
+
+    return {};
+}
+#endif
 }  // namespace ShortcutUtils

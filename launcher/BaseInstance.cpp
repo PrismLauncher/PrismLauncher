@@ -45,6 +45,7 @@
 #include <QUuid>
 
 #include "Application.h"
+#include "DesktopServices.h"
 #include "Json.h"
 #include "LaunchController.h"
 #include "launch/LaunchTask.h"
@@ -439,7 +440,12 @@ void BaseInstance::setShortcuts(const QList<ShortcutData>& shortcuts)
     // FIXME: if no change, do not set. setting involves saving a file.
     QJsonArray array;
     for (const auto& elem : shortcuts) {
-        array.append(QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } });
+        auto payload = QJsonObject{ { "name", elem.name }, { "filePath", elem.filePath }, { "target", static_cast<int>(elem.target) } };
+        if (elem.target == ShortcutTarget::Portal) {
+            payload.insert("portalDesktopId", elem.portalDesktopId);
+        }
+
+        array.append(payload);
     }
 
     QJsonDocument document;
@@ -468,19 +474,33 @@ QList<ShortcutData> BaseInstance::shortcuts() const
         int value = dict["target"].toInt(-1);
         // It would help avoid this messy checking, which is here to avoid easy off-by-one errors in manual int comparision
         // ...and make it more apparent what we're actually checking
-        const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Other);
+        const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Portal);
         if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value > newestKnownTarget) {
             qWarning() << "Skipping shortcut of target level" << value << "with unknown fields";
             continue;
         }
+        const auto target = static_cast<ShortcutTarget>(value);
 
-        QString shortcutName = dict["name"].toString();
-        QString filePath = dict["filePath"].toString();
-        if (!QFileInfo::exists(filePath)) {
-            qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
-            continue;
+        ShortcutData data;
+        data.name = dict["name"].toString();
+        data.filePath = dict["filePath"].toString();
+        data.target = target;
+
+        // These are only used in Flatpaks, so avoid reading them in elsewhere
+        if (target == ShortcutTarget::Portal && DesktopServices::isFlatpak()) {
+            if (!dict.value("DesktopPortalId").isString()) {
+                qWarning() << "Dynamic launcher shortcut" << shortcutName << "for instance" << name() << "is missing a desktop ID";
+                continue;
+            }
+            data.portalDesktopId = dict["desktopPortalId"].toString();
+        } else {
+            if (!QFileInfo::exists(filePath)) {
+                qWarning() << "Shortcut" << shortcutName << "for instance" << name() << "have non-existent path" << filePath;
+                continue;
+            }
         }
-        results.append({ .name = shortcutName, .filePath = filePath, .target = static_cast<ShortcutTarget>(value) });
+
+        results.append(data);
     }
     return results;
 }

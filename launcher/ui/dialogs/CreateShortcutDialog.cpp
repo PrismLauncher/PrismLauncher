@@ -76,7 +76,9 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
     }
 
     // Populate save targets
-    if (!DesktopServices::isFlatpak()) {
+    if (DesktopServices::isFlatpak()) {
+        ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Portal));
+    } else {
         QString desktopDir = FS::getDesktopDir();
         QString applicationDir = FS::getApplicationsDir();
 
@@ -85,8 +87,9 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
 
         if (!applicationDir.isEmpty())
             ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(ShortcutTarget::Applications));
+
+        ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
     }
-    ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
 
     // Populate worlds
     if (m_QuickJoinSupported) {
@@ -216,6 +219,10 @@ void CreateShortcutDialog::createShortcut()
         ShortcutUtils::createInstanceShortcutOnDesktop(args);
     else if (target == ShortcutTarget::Applications)
         ShortcutUtils::createInstanceShortcutInApplications(args);
+#ifdef Q_OS_LINUX
+    else if (target == ShortcutTarget::Portal)
+        Shortcututils::createInstanceShortcutInPortal(args);
+#endif
     else
         ShortcutUtils::createInstanceShortcutInOther(args);
 }

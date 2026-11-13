@@ -61,13 +61,18 @@ class LaunchController;
 class QDir;
 
 /// Shortcut saving target representations
-enum class ShortcutTarget : std::uint8_t { Desktop, Applications, Other };
+///
+/// NOTE(@getchoo): Some targets (and members of their representation) are
+/// platform-specific. We recognize them everywhere though in order for our
+/// instance.cfgs to stay consistent across platforms
+enum class ShortcutTarget : std::uint8_t { Desktop, Applications, Other, Portal };
 
 /// Shortcut data representation
 struct ShortcutData {
     QString name;
     QString filePath;
     ShortcutTarget target = ShortcutTarget::Other;
+    QString portalDesktopId;
 };
 
 /// Console settings
