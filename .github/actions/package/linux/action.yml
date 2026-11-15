@@ -80,11 +80,13 @@ runs:
           echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
         fi
 
+        UBUNTU_LIB_PATH="/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/"
         sharun lib4bin \
           --hard-links \
           --with-hooks \
           --dst-dir "$INSTALL_APPIMAGE_DIR" \
-          "$INSTALL_APPIMAGE_DIR"/bin/* "$QT_PLUGIN_PATH"/*/*.so
+          "$INSTALL_APPIMAGE_DIR"/bin/* "$QT_PLUGIN_PATH"/*/*.so \
+          "$UBUNTU_LIB_PATH/libssl.so.3"  # I hate official qt builds
 
         cp ~/bin/AppImageUpdate.AppImage "$INSTALL_APPIMAGE_DIR"/bin/
         # FIXME(@getchoo): gamemode doesn't seem to be very portable with DBus. Find a way to make it work!
@@ -121,11 +123,13 @@ runs:
         cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
         cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
+        UBUNTU_LIB_PATH="/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/"
         sharun lib4bin \
           --with-hooks \
           --hard-links \
           --dst-dir "$INSTALL_PORTABLE_DIR" \
-          "$INSTALL_PORTABLE_DIR"/bin/* "$QT_PLUGIN_PATH"/*/*.so
+          "$INSTALL_PORTABLE_DIR"/bin/* "$QT_PLUGIN_PATH"/*/*.so \
+          "$UBUNTU_LIB_PATH/libssl.so.3"  # I hate official qt builds
 
         # FIXME(@getchoo): gamemode doesn't seem to be very portable with DBus. Find a way to make it work!
         find "$INSTALL_PORTABLE_DIR" -name '*gamemode*' -exec rm {} +
