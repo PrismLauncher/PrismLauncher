@@ -500,6 +500,9 @@ bool LaunchController::abort()
                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                         ->exec();
     if (response == QMessageBox::Yes) {
+        if (!m_launcher || !m_launcher->canAbort()) {
+            return false;
+        }
         return m_launcher->abort();
     }
     return false;

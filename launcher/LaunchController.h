@@ -34,6 +34,9 @@
  */
 
 #pragma once
+
+#include <QPointer>
+
 #include <tools/BaseProfiler.h>
 
 #include "minecraft/MinecraftInstance.h"
@@ -98,6 +101,6 @@ class LaunchController : public Task {
     InstanceWindow* m_console = nullptr;
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session = nullptr;
-    LaunchTask* m_launcher = nullptr;
+    QPointer<LaunchTask> m_launcher = nullptr;
     MinecraftTarget::Ptr m_targetToJoin = nullptr;
 };

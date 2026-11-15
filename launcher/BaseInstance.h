@@ -206,6 +206,8 @@ class BaseInstance : public QObject {
 
     LaunchController* launchController() { return m_launchController.get(); }
 
+    shared_qobject_ptr<LaunchController> launchControllerRef() const { return m_launchController; }
+
     void setLaunchController(std::unique_ptr<LaunchController> controller);
 
     InstanceWindow* window() { return m_window; }
@@ -318,7 +320,7 @@ class BaseInstance : public QObject {
     SettingsObject* m_globalSettings;
     bool m_specificSettingsLoaded = false;
 
-    std::unique_ptr<LaunchController> m_launchController;
+    shared_qobject_ptr<LaunchController> m_launchController;
     InstanceWindow* m_window = nullptr;
 };
 
