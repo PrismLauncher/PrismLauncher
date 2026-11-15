@@ -21,7 +21,6 @@
 
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
-#include "modplatform/flame/FlameAPI.h"
 #include "tasks/Task.h"
 
 struct FlamePackExportOptions {
