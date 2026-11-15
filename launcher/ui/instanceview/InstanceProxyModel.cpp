@@ -19,8 +19,12 @@
 #include <icons/IconList.h>
 #include "Application.h"
 #include "InstanceView.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 
 #include <QDebug>
+#include <utility>
 
 InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
@@ -28,6 +32,20 @@ InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(
     m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
     // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
     m_naturalSort.setLocale(QLocale::system());
+}
+void InstanceProxyModel::sortBy(QStringList mcVersions, ModPlatform::ModLoaderTypes loader)
+{
+    m_mcVersions = std::move(mcVersions);
+    m_loader = loader;
+}
+
+void InstanceProxyModel::setSearchTerm(QString searchTerm)
+{
+    if (m_searchTerm == searchTerm) {
+        return;
+    }
+    m_searchTerm = std::move(searchTerm);
+    invalidateFilter();
 }
 
 QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
@@ -45,29 +63,52 @@ bool InstanceProxyModel::lessThan(const QModelIndex& left, const QModelIndex& ri
     const QString rightCategory = right.data(InstanceViewRoles::GroupRole).toString();
     if (leftCategory == rightCategory) {
         return subSortLessThan(left, right);
-    } else {
-        // FIXME: real group sorting happens in InstanceView::updateGeometries(), see LocaleString
-        auto result = leftCategory.localeAwareCompare(rightCategory);
-        if (result == 0) {
-            return subSortLessThan(left, right);
-        }
-        return result < 0;
+    }  // FIXME: real group sorting happens in InstanceView::updateGeometries(), see LocaleString
+    auto result = leftCategory.localeAwareCompare(rightCategory);
+    if (result == 0) {
+        return subSortLessThan(left, right);
     }
+    return result < 0;
 }
 
 bool InstanceProxyModel::subSortLessThan(const QModelIndex& left, const QModelIndex& right) const
 {
-    BaseInstance* pdataLeft = static_cast<BaseInstance*>(left.internalPointer());
-    BaseInstance* pdataRight = static_cast<BaseInstance*>(right.internalPointer());
+    auto* pdataLeft = static_cast<BaseInstance*>(left.internalPointer());
+    auto* pdataRight = static_cast<BaseInstance*>(right.internalPointer());
     QString sortMode = APPLICATION->settings()->get("InstSortMode").toString();
     if (sortMode == "LastLaunch") {
         return pdataLeft->lastLaunch() > pdataRight->lastLaunch();
-    } else if (sortMode == "Playtime") {
+    }
+    if (sortMode == "Playtime") {
         if (pdataLeft->totalTimePlayed() == pdataRight->totalTimePlayed()) {
             return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
         }
         return pdataLeft->totalTimePlayed() > pdataRight->totalTimePlayed();
-    } else {
-        return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
     }
+    return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
+}
+
+bool InstanceProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    auto data = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto* inst = static_cast<MinecraftInstance*>(data.internalPointer());
+    if (!m_searchTerm.isEmpty() && !inst->name().contains(m_searchTerm, Qt::CaseInsensitive)) {
+        return false;
+    }
+    if (m_mcVersions.isEmpty() && m_loader == ModPlatform::ModLoaderType::None) {
+        return true;
+    }
+    auto* profile = inst->getPackProfile();
+    if ((profile == nullptr) || profile->rowCount() == 0) {
+        return true;
+    }
+    const auto mcVersion = profile->getComponentVersion("net.minecraft");
+    auto loader = profile->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    if (!m_mcVersions.isEmpty() && !m_mcVersions.contains(mcVersion)) {
+        return false;
+    }
+    if (m_loader != ModPlatform::ModLoaderType::None && !loader.testAnyFlags(m_loader)) {
+        return false;
+    }
+    return true;
 }

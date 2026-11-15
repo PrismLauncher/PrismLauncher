@@ -38,6 +38,7 @@
  */
 
 #include "ModPage.h"
+#include "modplatform/ResourceType.h"
 #include "ui_ResourcePage.h"
 
 #include <QRegularExpression>
@@ -146,9 +147,9 @@ void ModPage::triggerSearch()
     m_fetchProgress.watch(m_model->activeSearchJob().get());
 }
 
-void ModPage::openProject(const QVariant& projectID)
+void ModPage::openProject(const QVariant& projectID, const QString& btnTxt)
 {
-    ResourcePage::openProject(projectID);
+    ResourcePage::openProject(projectID, btnTxt);
 
     m_filterWidget->setLoaderVersionOnly(true);
     m_ui->resourceFilterButton->setVisible(true);
@@ -156,12 +157,9 @@ void ModPage::openProject(const QVariant& projectID)
 
 void ModPage::prepareProviderCategories()
 {
-    auto [task, response] = m_api->getModCategories();
+    auto [task, response] = m_api->getCategoriesTask(ModPlatform::ResourceType::Mod);
     m_categoriesTask = task;
-    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = m_api->loadModCategories(*response);
-        m_filterWidget->setCategories(categories);
-    });
+    connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() { m_filterWidget->setCategories(*response); });
     m_categoriesTask->start();
 };
 }  // namespace ResourceDownload
