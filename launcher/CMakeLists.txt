@@ -157,6 +157,8 @@ set(LAUNCH_SOURCES
     launch/steps/PrintServers.h
     launch/LaunchStep.cpp
     launch/LaunchStep.h
+    launch/LaunchPipelineBuilder.cpp
+    launch/LaunchPipelineBuilder.h
     launch/LaunchTask.cpp
     launch/LaunchTask.h
     launch/LogModel.cpp

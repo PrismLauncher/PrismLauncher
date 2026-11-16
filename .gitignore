@@ -62,3 +62,7 @@ flatbuild
 
 # Snap
 *.snap
+**/local_docs/
+
+# python exlude
+**/__pycache__/

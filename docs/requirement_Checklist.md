@@ -1,6 +1,6 @@
 Technical Quality
 
-Group ID: (fill in before the Canvas post)
+Group ID: Group F
 
 [x] Syntax & Execution: Course CI runs on a clean `ubuntu-24.04` runner. The build job (checkout, Qt and vcpkg setup, CMake configure, Debug build, CTest, install, artifact upload) succeeded in [run 36435815684](https://github.com/Colby-Frison/PrismLauncher/actions/runs/36435815684) and again in the strict-boundary run [37239138792](https://github.com/Colby-Frison/PrismLauncher/actions/runs/37239138792). The workflow uses `actions/checkout@v7` and `actions/upload-artifact@v7`. Shell steps are short command lines, not scripts assembled from unpinned downloads. With the greylist removed, the architecture job fails until the tree matches the proposed design; the build job can still succeed in parallel.
 

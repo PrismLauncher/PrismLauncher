@@ -59,6 +59,7 @@ class LaunchTask : public Task {
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);
+    const QList<shared_qobject_ptr<LaunchStep>>& steps() const { return m_steps; }
     void setCensorFilter(QMap<QString, QString> filter);
 
     MinecraftInstance* instance() { return m_instance; }
