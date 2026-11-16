@@ -431,10 +431,9 @@ inline bool ModFolderPage::handleNoModLoader()
     if (resp == QMessageBox::Yes) {
         // Should be safe
         auto* profile = this->m_instance->getPackProfile();
-        InstallLoaderDialog dialog(profile, QString(), this);
         // true if the user went through the install loader dialog
         // false if the dialog got canceled/closed
-        bool dialogAccepted = dialog.exec() != 0;
+        bool dialogAccepted = InstallLoaderDialog::chooseAndInstall(profile, this);
         this->m_container->refreshContainer();
 
         if (!dialogAccepted) {
