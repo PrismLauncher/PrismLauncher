@@ -172,6 +172,16 @@
       </layout>
      </item>
      <item>
+      <widget class="QCheckBox" name="skipUntrustedModsWarningCheck">
+       <property name="toolTip">
+        <string>Only applies when updating this pack. Installing a new modpack always shows the warning.</string>
+       </property>
+       <property name="text">
+        <string>Don't warn about untrusted mods when updating this pack</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QGroupBox" name="changelogBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">

@@ -167,6 +167,10 @@ class BaseInstance : public QObject {
     QString getManagedPackVersionName() const;
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
 
+    /// Whether this instance opted out of the untrusted mods confirmation shown during pack updates.
+    bool shouldSkipUntrustedModsWarning() const;
+    void setSkipUntrustedModsWarning(bool skip);
+
     virtual QStringList extraArguments();
 
     /// Traits. Normally inside the version, depends on instance implementation.

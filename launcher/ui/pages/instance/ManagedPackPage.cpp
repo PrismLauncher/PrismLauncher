@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ManagedPackPage.h"
+#include <QCheckBox>
 #include <QDesktopServices>
 #include <QLineEdit>
 #include <QUrl>
@@ -62,7 +63,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
             auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
             auto newUrl = QUrl(decoded);
             if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https")) {
-                QDesktopServices ::openUrl(newUrl);
+                QDesktopServices::openUrl(newUrl);
             }
             return;
         }
@@ -71,6 +72,9 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
 
     connect(ui->urlLine, &QLineEdit::textChanged, this,
             [this](const QString& text) { m_inst->settings()->set("ManagedPackURL", text.trimmed()); });
+
+    connect(ui->skipUntrustedModsWarningCheck, &QCheckBox::toggled, this,
+            [this](bool checked) { m_inst->setSkipUntrustedModsWarning(checked); });
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -80,6 +84,8 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
+    ui->skipUntrustedModsWarningCheck->setChecked(m_inst->shouldSkipUntrustedModsWarning());
+
     if (m_inst->getManagedPackID().isEmpty()) {
         ui->packVersion->hide();
         ui->packVersionLabel->hide();

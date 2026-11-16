@@ -465,6 +465,11 @@ bool ModrinthCreationTask::promptForUntrustedMods()
         return true;
     }
 
+    if (m_oldInstance && (*m_oldInstance)->shouldSkipUntrustedModsWarning()) {
+        logWarning(tr("The untrusted mod warning is disabled for this instance; skipping confirmation."));
+        return true;
+    }
+
     QStringList untrustedMods;
 
     for (const auto& file : m_files) {

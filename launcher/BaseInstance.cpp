@@ -132,6 +132,10 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
     m_settings->registerSetting("ManagedPackVersionName", "");
     m_settings->registerSetting("ManagedPackURL", "");
 
+    // Only consulted when an existing instance is updated. Fresh installs still
+    // ask, since there is no instance to opt out on yet.
+    m_settings->registerSetting("SkipUntrustedModsWarning", false);
+
     m_settings->registerSetting("Profiler", "");
 }
 
@@ -183,6 +187,16 @@ QString BaseInstance::getManagedPackVersionID() const
 QString BaseInstance::getManagedPackVersionName() const
 {
     return m_settings->get("ManagedPackVersionName").toString();
+}
+
+bool BaseInstance::shouldSkipUntrustedModsWarning() const
+{
+    return m_settings->get("SkipUntrustedModsWarning").toBool();
+}
+
+void BaseInstance::setSkipUntrustedModsWarning(bool skip)
+{
+    m_settings->set("SkipUntrustedModsWarning", skip);
 }
 
 void BaseInstance::setManagedPack(const QString& type,
