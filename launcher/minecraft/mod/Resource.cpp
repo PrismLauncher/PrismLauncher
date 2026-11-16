@@ -1,5 +1,6 @@
 #include "Resource.h"
 
+#include <QCoreApplication>
 #include <QFileInfo>
 #include <QObject>
 #include <QRegularExpression>
@@ -143,7 +144,7 @@ QStringList Resource::issues() const
     result.reserve(m_issues.length());
 
     for (const char* issue : m_issues) {
-        result.append(QObject::tr(issue));
+        result.append(qApp->translate("Resource", issue));
     }
 
     return result;
@@ -162,7 +163,7 @@ void Resource::updateIssues(const MinecraftInstance* inst)
 
     if (!m_metadata->mcVersions.empty() && !m_metadata->mcVersions.contains(mcVersion)) {
         // delay translation until issues() is called
-        m_issues.append(QT_TRANSLATE_NOOP("QObject", "Not marked as compatible with the instance's game version."));
+        m_issues.append(QT_TRANSLATE_NOOP("Resource", "Not marked as compatible with the instance's game version."));
     }
 }
 
