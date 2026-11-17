@@ -337,6 +337,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         // set the cat action priority here so you can still see the action in qt designer
         ui->actionCAT->setPriority(QAction::LowPriority);
+        m_catSeparator = ui->mainToolBar->insertSeparator(ui->actionCAT);
         updateCatState();
         connect(ui->actionCAT, &QAction::toggled, this, &MainWindow::onCatToggled);
         connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
@@ -845,6 +846,7 @@ void MainWindow::updateCatState()
     }
 
     ui->actionCAT->setVisible(catEnabled);
+    m_catSeparator->setVisible(catEnabled);
     ui->actionCAT->setChecked(catVisible);
     setCatBackground(catVisible);
 }

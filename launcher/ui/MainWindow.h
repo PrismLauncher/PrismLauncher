@@ -249,6 +249,7 @@ class MainWindow : public QMainWindow {
     QToolButton* m_changeIconButton = nullptr;
     QAction* m_instanceToolBarTopSeparator = nullptr;
     QAction* m_instanceInfoWidget = nullptr;
+    QAction* m_catSeparator = nullptr;
     EditableLabel* m_nameLabel = nullptr;
     QToolButton* helpMenuButton = nullptr;
     KonamiCode* secretEventFilter = nullptr;

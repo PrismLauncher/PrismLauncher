@@ -55,7 +55,6 @@
    <addaction name="actionSettings"/>
    <addaction name="actionHelpButton"/>
    <addaction name="actionCheckUpdate"/>
-   <addaction name="separator"/>
    <addaction name="actionCAT"/>
    <addaction name="actionAccountsButton"/>
   </widget>
