@@ -272,6 +272,10 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             removePack(pDep->version.addonId);
             return;
         }
+        if (pDep->version.downloadUrl.isEmpty()) {
+            logWarning(tr("Dependency %1 is blocked, skiping it.").arg(pDep->pack->addonId.toString()));
+            removePack(pDep->pack->addonId);
+        }
         for (const auto& dependency : getDependenciesForVersion(pDep->version, provider)) {
             addTask(prepareDependencyTask(dependency, provider, level - 1));
         }
