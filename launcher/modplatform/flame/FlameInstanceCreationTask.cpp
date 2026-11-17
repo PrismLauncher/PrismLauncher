@@ -473,7 +473,7 @@ void FlameCreationTask::createInstance()
             }
             components->setComponentVersion(componentId.value(), version);
         } else {
-            logWarning(tr("Cannot install loader: %1").arg(selectedLoader.displayName()));
+            logWarning(tr("Cannot install unsupported loader: %1").arg(selectedLoader.displayName()));
         }
     }
 

@@ -2,7 +2,6 @@
 
 #include <QString>
 #include <QtAssert>
-#include <array>
 #include <optional>
 
 #include "Version.h"

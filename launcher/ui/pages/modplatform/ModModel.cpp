@@ -131,7 +131,7 @@ bool ModModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
         loaders = m_filter->loaders;
     }
     return (!optedOut(v) &&                                                                   // is opted out(aka curseforge download link)
-            (loaders.isEmpty() || v.loaders.isEmpty() || std::ranges::any_of(loaders, [v](const ModLoaderType loader) { return v.loaders.contains(loader); })) &&  // loaders)
+            (loaders.isEmpty() || v.loaders.isEmpty() || std::ranges::any_of(loaders, [v](const ModLoaderType loader) { return v.loaders.contains(loader); })) &&  // loaders
             checkSide(m_filter->side, v.side) &&                                              // side
             (m_filter->releases.empty() ||                                                    // releases
              std::find(m_filter->releases.cbegin(), m_filter->releases.cend(), v.versionType) != m_filter->releases.cend()) &&

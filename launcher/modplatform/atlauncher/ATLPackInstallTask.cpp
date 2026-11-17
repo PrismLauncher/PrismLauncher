@@ -1060,7 +1060,7 @@ void PackInstallTask::install()
         if (m_version.loader.type.isValid()) {
             const auto component = m_version.loader.type.componentId();
             if (!component.has_value()) {
-                emitFailed(tr("Cannot install loader: %1").arg(m_version.loader.type.displayName()));
+                emitFailed(tr("Cannot install unsupported loader: %1").arg(m_version.loader.type.displayName()));
                 return;
             }
 

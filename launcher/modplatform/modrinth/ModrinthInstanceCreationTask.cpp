@@ -223,7 +223,7 @@ void ModrinthCreationTask::createInstance()
     for (const auto& [loader, version] : m_loaderVersions) {
         const auto componentId = loader.componentId();
         if (!componentId.has_value()) {
-            logWarning(tr("Cannot install loader: %1").arg(loader.displayName()));
+            logWarning(tr("Cannot install unsupported loader: %1").arg(loader.displayName()));
             continue;
         }
 

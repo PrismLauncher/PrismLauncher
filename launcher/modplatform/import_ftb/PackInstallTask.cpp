@@ -72,7 +72,7 @@ void PackInstallTask::copySettings()
             if (componentId.has_value()) {
                 components->setComponentVersion(componentId.value(), m_pack.loaderVersion, true);
             } else {
-                logWarning(tr("Cannot install loader: %1").arg(modloader->displayName()));
+                logWarning(tr("Cannot install unsupported loader: %1").arg(modloader->displayName()));
             }
         }
         components->saveNow();

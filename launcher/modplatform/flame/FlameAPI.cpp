@@ -176,9 +176,9 @@ QStringList getModLoaderStrings(const QSet<ModLoaderType>& types)
 {
     QStringList l;
     for (const auto& type : types) {
-        const int no = getMappedModLoader(type);
-        if (no != 0) {
-            l.append(QString::number(no));
+        const int id = getMappedModLoader(type);
+        if (id != 0) {
+            l.append(QString::number(id));
         }
     }
     return l;
