@@ -1,9 +1,11 @@
 #pragma once
 
 #include <QString>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <utility>
 
 #include "EnumWrapper.h"
 
@@ -47,10 +49,7 @@ struct ModLoaderType : EnumWrapper<ModLoaderType, ModLoaderTypeValue> {
     static constexpr auto all()
     {
         std::array<ModLoaderType, mapping().size()> result;
-        for (std::size_t i = 0; i < result.size(); ++i) {
-            // NOLINTNEXTLINE cppcoreguidelines-pro-bounds-constant-array-index
-            result[i] = mapping()[i].first;
-        }
+        std::ranges::transform(mapping(), result.begin(), [](const auto& m) { return m.first; });
         return result;
     }
 
@@ -69,5 +68,5 @@ struct ModLoaderType : EnumWrapper<ModLoaderType, ModLoaderTypeValue> {
 
 template <>
 struct std::hash<ModLoaderType> {
-    std::size_t operator()(ModLoaderType type) const { return static_cast<std::size_t>(type.value()); }
+    std::size_t operator()(ModLoaderType type) const noexcept { return std::to_underlying(type.value()); }
 };
