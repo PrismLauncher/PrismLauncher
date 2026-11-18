@@ -34,13 +34,13 @@ void JVisualVM::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus
     }
     if (m_profilerProcess) {
         m_profilerProcess->deleteLater();
-        m_profilerProcess = 0;
+        m_profilerProcess = nullptr;
     }
 }
 
 void JVisualVM::beginProfilingImpl(LaunchTask* process)
 {
-    QProcess* profiler = new QProcess(this);
+    auto* profiler = new QProcess(this);
     QStringList profilerArgs = { "--openpid", QString::number(process->pid()) };
     auto programPath = globalSettings->get("JVisualVMPath").toString();
 
@@ -50,8 +50,8 @@ void JVisualVM::beginProfilingImpl(LaunchTask* process)
     connect(profiler, &QProcess::started, this, &JVisualVM::profilerStarted);
     connect(profiler, &QProcess::finished, this, &JVisualVM::profilerFinished);
 
-    profiler->start();
     m_profilerProcess = profiler;
+    m_profilerProcess->start();
 }
 
 void JVisualVMFactory::registerSettings(SettingsObject* settings)
