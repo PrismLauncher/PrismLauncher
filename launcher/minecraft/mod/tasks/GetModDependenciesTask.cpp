@@ -282,9 +282,6 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     };
 
     auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
-    if (auto* netJob = dynamic_cast<NetJob*>(version.get())) {
-        netJob->setAskRetry(false);
-    }
     QObject::connect(version.get(), &NetJob::failed, this, [this, pDep] {
         logWarning(tr("Failed to resolve dependency %1, it will not be installed. The mod may not work correctly without it.")
                        .arg(pDep->pack->addonId.toString()));
