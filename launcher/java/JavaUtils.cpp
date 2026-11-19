@@ -522,12 +522,6 @@ QString JavaUtils::getJavaCheckPath()
     return APPLICATION->getJarPath("JavaCheck.jar");
 }
 
-QString JavaUtils::getPinnedPath(int major)
-{
-    auto javas = Json::toMap(APPLICATION->settings()->get("PinnedJavaPaths").toString());
-    return javas.value(QString::number(major)).toString();
-}
-
 QStringList getMinecraftJavaBundle()
 {
     QStringList processpaths;

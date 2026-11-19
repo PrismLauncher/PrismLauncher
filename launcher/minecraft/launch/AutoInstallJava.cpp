@@ -40,6 +40,7 @@
 
 #include "Application.h"
 #include "FileSystem.h"
+#include "Json.h"
 #include "MessageLevel.h"
 #include "QObjectPtr.h"
 #include "SysInfo.h"
@@ -69,10 +70,13 @@ void AutoInstallJava::executeTask()
         return;
     }
     auto* packProfile = m_instance->getPackProfile();
+    auto compatibleJavaMajors = packProfile->getProfile()->getCompatibleJavaMajors();
+    auto pinnedJavas = Json::toMap(APPLICATION->settings()->get("PinnedJavaPaths").toString());
+
     // java installations the user pinned to a specific major in the global settings win over
     // both the detected installations and the Mojang downloads
-    for (int major : packProfile->getProfile()->getCompatibleJavaMajors()) {
-        auto pinned = JavaUtils::getPinnedPath(major);
+    for (int major : compatibleJavaMajors) {
+        auto pinned = pinnedJavas.value(QString::number(major)).toString();
         if (pinned.isEmpty()) {
             continue;
         }
