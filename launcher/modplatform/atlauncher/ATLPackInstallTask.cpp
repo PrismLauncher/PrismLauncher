@@ -111,7 +111,7 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
     QByteArray response = std::move(*responsePtr);
     m_jobPtr.reset();
 
-    ATLauncher::PackVersion version;
+    ATLauncher::PackVersion version{};
     auto doc = Json::requireDocument(response, "ATLauncher pack manifest").and_then([&version](const auto& v) {
         auto obj = v.object();
         return ATLauncher::loadVersion(version, obj);
