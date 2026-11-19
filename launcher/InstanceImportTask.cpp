@@ -216,7 +216,8 @@ void InstanceImportTask::extractFinished()
     setAbortable(false);
 
     qDebug() << "Fixing permissions for extracted pack files...";
-    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive)) {
+    for (const auto& file : QDirListing(m_stagingPath, QDirListing::IteratorFlag::ResolveSymlinks | QDirListing::IteratorFlag::Recursive |
+                                                           QDirListing::IteratorFlag::IncludeHidden)) {
         auto permissions = QFile::permissions(file.absoluteFilePath());
         auto origPermissions = permissions;
         if (file.isDir()) {
