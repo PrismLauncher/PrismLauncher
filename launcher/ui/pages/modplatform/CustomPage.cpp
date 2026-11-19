@@ -43,7 +43,6 @@
 #include "Filter.h"
 #include "Version.h"
 #include "meta/Index.h"
-#include "meta/VersionList.h"
 #include "minecraft/VanillaInstanceCreationTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 

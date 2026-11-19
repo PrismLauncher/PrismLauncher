@@ -37,7 +37,7 @@ jobs:
         uses: ./.github/actions/setup-dependencies
         with:
           build-type: Debug
-          qt-version: 6.8.3
+          qt-version: 6.9.3
 
       - name: Install JDK 17
         uses: actions/setup-java@v6
