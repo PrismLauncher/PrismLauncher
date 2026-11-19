@@ -563,6 +563,9 @@ It is most likely you will need to change the path - please refer to the mod's w
            </item>
            <item>
             <widget class="QGroupBox" name="latestMCVersionGroupBox">
+             <property name="toolTip">
+              <string>Requires "Refresh on launch" to be enabled in Settings &gt; Services &gt; Metadata Server.</string>
+             </property>
              <property name="title">
               <string>Always use the latest minecraft version</string>
              </property>
