@@ -413,7 +413,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
                    .arg(baseUrl.host());
     }
 
-    auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Upload"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
                                                  QMessageBox::No)
                         ->exec();
 

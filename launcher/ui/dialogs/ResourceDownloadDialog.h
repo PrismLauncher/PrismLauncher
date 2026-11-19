@@ -74,7 +74,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void initializeContainer();
     void connectButtons();
 
-    //: String that gets appended to the download dialog title ("Download " + resourcesString())
+    // String that gets appended to the download dialog title ("Download " + resourcesString())
     QString resourcesString() const { return m_resourcesString; }
 
     QString dialogTitle() override { return tr("Download %1").arg(resourcesString()); };
