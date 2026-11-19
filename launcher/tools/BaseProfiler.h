@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BaseExternalTool.h"
-#include "QObjectPtr.h"
 
 class BaseInstance;
 class SettingsObject;
@@ -18,7 +17,7 @@ class BaseProfiler : public BaseExternalTool {
     void abortProfiling();
 
    protected:
-    QProcess* m_profilerProcess;
+    QProcess* m_profilerProcess = nullptr;
 
     virtual void beginProfilingImpl(LaunchTask* process) = 0;
     virtual void abortProfilingImpl();
