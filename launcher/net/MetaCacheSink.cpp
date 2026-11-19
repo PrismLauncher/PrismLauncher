@@ -56,6 +56,9 @@ MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool
 
 auto MetaCacheSink::initCache(QNetworkRequest& request) -> InitResult
 {
+    // if the file changed and its hash doesn't match, this swaps in a fresh stale entry
+    m_entry = APPLICATION->metacache()->verifyEntry(m_entry);
+
     if (!m_entry->isStale()) {
         return InitType::CacheHit;
     }
