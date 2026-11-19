@@ -108,7 +108,6 @@
 #include <utility>
 
 #include "InstanceList.h"
-#include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
@@ -168,8 +167,6 @@
 #include "console/Console.h"
 
 static const QLatin1String g_liveCheckFile("live.check");
-
-PixmapCache* PixmapCache::s_instance = nullptr;
 
 static bool isANSIColorConsole;
 
@@ -930,8 +927,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
         }
-
-        PixmapCache::setInstance(new PixmapCache(this));
 
         qInfo() << "<> Settings loaded.";
     }

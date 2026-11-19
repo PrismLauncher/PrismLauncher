@@ -33,6 +33,7 @@
  *      limitations under the License.
  */
 
+#include <QPixmapCache>
 #include <iostream>
 
 #include "Application.h"
@@ -47,6 +48,8 @@ int main(int argc, char* argv[])
     // used on Windows to attach the standard IO streams
     console::WindowsConsoleGuard _consoleGuard;
 #endif
+
+    QPixmapCache::setCacheLimit(1024 * 20);
 
     // initialize Qt
     Application app(argc, argv);
