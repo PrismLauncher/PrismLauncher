@@ -39,7 +39,7 @@
 #include <java/JavaVersion.h>
 #include <QDir>
 #include <QProcess>
-
+#include <memory>
 #include "BaseInstance.h"
 #include "minecraft/launch/MinecraftTarget.h"
 
@@ -125,7 +125,8 @@ class MinecraftInstance : public BaseInstance {
     LaunchTask* createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) override;
     QStringList extraArguments() override;
     QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) override;
-    QList<Mod*> getJarMods() const;
+    bool hasJarMods() const;
+    std::vector<std::unique_ptr<Mod>> getJarMods() const;
     QString createLaunchScript(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin);
     /// get arguments passed to java
     QStringList javaArguments();
