@@ -68,6 +68,7 @@ struct ShortcutData {
     QString name;
     QString filePath;
     ShortcutTarget target = ShortcutTarget::Other;
+    bool isPortal = false;
 };
 
 /// Console settings

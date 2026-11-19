@@ -46,6 +46,7 @@
 
 #include "BaseInstance.h"
 #include "DesktopServices.h"
+#include "DynamicLauncherPortal.h"
 #include "FileSystem.h"
 #include "InstanceList.h"
 #include "icons/IconList.h"
@@ -76,14 +77,15 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
     }
 
     // Populate save targets
-    if (!DesktopServices::isFlatpak()) {
+    bool portalAvailable = DynamicLauncherPortal::isPortalAvailable();
+    if (!DesktopServices::isFlatpak() || portalAvailable) {
         QString desktopDir = FS::getDesktopDir();
         QString applicationDir = FS::getApplicationsDir();
 
         if (!desktopDir.isEmpty())
             ui->saveTargetSelectionBox->addItem(tr("Desktop"), QVariant::fromValue(ShortcutTarget::Desktop));
 
-        if (!applicationDir.isEmpty())
+        if (!applicationDir.isEmpty() || portalAvailable)
             ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(ShortcutTarget::Applications));
     }
     ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
