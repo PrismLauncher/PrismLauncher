@@ -59,13 +59,6 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            QString dependentOn)
     : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs)
 {
-    if (isIndexed) {
-        m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
-        connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
-
-        addTask(m_update_task);
-    }
-
     m_filesNetJob.reset(new NetJob(tr("Resource download"), APPLICATION->network()));
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
@@ -94,21 +87,28 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
         }
     }
     m_filesNetJob->addNetAction(action);
-    connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ResourceDownloadTask::downloadSucceeded);
-    connect(m_filesNetJob.get(), &NetJob::progress, this, &ResourceDownloadTask::downloadProgressChanged);
+    connect(m_filesNetJob.get(), &NetJob::progress, this, &ResourceDownloadTask::progress);
     connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &ResourceDownloadTask::propagateStepProgress);
-    connect(m_filesNetJob.get(), &NetJob::failed, this, &ResourceDownloadTask::downloadFailed);
+    connect(m_filesNetJob.get(), &NetJob::failed, this, &ResourceDownloadTask::emitFailed);
 
     addTask(m_filesNetJob);
+
+    if (isIndexed) {
+        m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
+        connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
+        connect(m_update_task.get(), &Task::succeeded, this, &ResourceDownloadTask::cleanup);
+
+        addTask(m_update_task);
+    }
 }
 
-void ResourceDownloadTask::downloadSucceeded()
+void ResourceDownloadTask::cleanup()
 {
-    m_filesNetJob.reset();
     auto oldName = std::get<0>(to_delete);
     auto oldFilename = std::get<1>(to_delete);
 
     if (oldName.isEmpty() || oldFilename == m_pack_version.fileName) {
+        m_pack_model->update();
         return;
     }
 
@@ -127,17 +127,6 @@ void ResourceDownloadTask::downloadSucceeded()
             }
         }
     }
-}
-
-void ResourceDownloadTask::downloadFailed(QString reason)
-{
-    m_filesNetJob.reset();
-    emitFailed(std::move(reason));
-}
-
-void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
-{
-    emit progress(current, total);
 }
 
 // This indirection is done so that we don't delete a mod before being sure it was

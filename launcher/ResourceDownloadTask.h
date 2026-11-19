@@ -51,9 +51,7 @@ class ResourceDownloadTask : public SequentialTask {
     NetJob::Ptr m_filesNetJob;
     LocalResourceUpdateTask::Ptr m_update_task;
 
-    void downloadProgressChanged(qint64 current, qint64 total);
-    void downloadFailed(QString reason);
-    void downloadSucceeded();
+    void cleanup();
 
     std::tuple<QString, QString> to_delete{ "", "" };
 
