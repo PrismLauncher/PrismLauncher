@@ -4,13 +4,16 @@
 
 #include <QByteArray>
 #include <QCryptographicHash>
+#include <QHash>
 #include <QQueue>
 #include <QString>
 #include <QUrl>
 #include <QVector>
+#include <utility>
 
 #include "BaseInstance.h"
 #include "InstanceTask.h"
+#include "minecraft/ModLoaderType.h"
 
 class Resource;
 
@@ -55,7 +58,8 @@ class ModrinthCreationTask final : public InstanceTask {
     QWidget* m_parent = nullptr;
     bool m_trustedSource;
 
-    QString m_minecraftVersion, m_fabricVersion, m_quiltVersion, m_forgeVersion, m_neoForgeVersion;
+    QString m_minecraftVersion;
+    QList<std::pair<ModLoaderType, QString>> m_loaderVersions;
     QString m_managedId, m_managedVersionId, m_managedName;
 
     std::vector<File> m_files;
