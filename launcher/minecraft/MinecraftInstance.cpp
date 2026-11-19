@@ -78,12 +78,12 @@
 
 #include "icons/IconList.h"
 
+#include "mod/DataPackFolderModel.h"
 #include "mod/Mod.h"
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/ShaderPackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
-#include "mod/DataPackFolderModel.h"
 
 #include "WorldList.h"
 
@@ -541,6 +541,15 @@ QStringList MinecraftInstance::extraArguments()
 
         for (const QString& item : addn) {
             list.append(replaceTokensIn(item, tokenMapping));
+        }
+    }
+    const auto logging = m_components->getProfile()->getLogging();
+    if (logging.has_value()) {
+        const auto base = APPLICATION->metacache()->getBasePath("log_configs");
+        const auto path = FS::PathCombine(base, logging->id);
+
+        if (QFile::exists(path)) {
+            list.append(logging->formatArgument(path));
         }
     }
     auto agents = m_components->getProfile()->getAgents();

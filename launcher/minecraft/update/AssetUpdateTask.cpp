@@ -80,7 +80,7 @@ void AssetUpdateTask::assetIndexFinished()
         }
         setStatus(tr("Getting the asset files from %1...").arg(source));
         downloadJob = job;
-        connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
+        connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::assetsFinished);
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);
         connect(downloadJob.get(), &NetJob::aborted, this, &AssetUpdateTask::emitAborted);
         connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
@@ -88,7 +88,7 @@ void AssetUpdateTask::assetIndexFinished()
         downloadJob->start();
         return;
     }
-    emitSucceeded();
+    assetsFinished();
 }
 
 void AssetUpdateTask::assetIndexFailed(QString reason)
@@ -97,9 +97,45 @@ void AssetUpdateTask::assetIndexFailed(QString reason)
     emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
 }
 
+void AssetUpdateTask::assetsFinished()
+{
+    const auto* components = m_inst->getPackProfile();
+    const auto profile = components->getProfile();
+    if (!profile->getLogging().has_value()) {
+        emitSucceeded();
+        return;
+    }
+
+    setStatus(tr("Downloading logging config..."));
+
+    const auto& logging = profile->getLogging().value();
+
+    const auto job = makeShared<NetJob>(tr("Logging config %1").arg(logging.id), APPLICATION->network());
+
+    const auto entry = APPLICATION->metacache()->resolveEntry("log_configs", logging.id);
+    entry->setStale(true);
+
+    const auto dl = Net::ApiRequest::makeCached(logging.url, entry);
+    dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, logging.sha1));
+    job->addNetAction(dl);
+
+    downloadJob.reset(job);
+
+    connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
+    connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::loggingConfigFailed);
+    connect(downloadJob.get(), &NetJob::aborted, this, &AssetUpdateTask::emitAborted);
+    connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
+    connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
+    downloadJob->start();
+}
+
 void AssetUpdateTask::assetsFailed(QString reason)
 {
     emitFailed(tr("Failed to download assets:\n%1").arg(reason));
+}
+
+void AssetUpdateTask::loggingConfigFailed(const QString& reason) {
+    emitFailed(tr("Failed to download logging config:\n%1").arg(reason));
 }
 
 bool AssetUpdateTask::abort()

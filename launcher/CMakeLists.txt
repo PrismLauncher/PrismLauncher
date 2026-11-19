@@ -296,6 +296,7 @@ set(MINECRAFT_SOURCES
     minecraft/Library.cpp
     minecraft/Library.h
     minecraft/MojangDownloadInfo.h
+    minecraft/LoggingSpec.h
     minecraft/VanillaInstanceCreationTask.cpp
     minecraft/VanillaInstanceCreationTask.h
     minecraft/VersionFile.cpp

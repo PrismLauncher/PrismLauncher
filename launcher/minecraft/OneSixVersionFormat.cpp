@@ -277,6 +277,20 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
         }
     }
 
+    if (root.contains("logging")) {
+        TRY_INTO(const auto& loggingObj, requireObject(root, "logging"));
+        TRY_INTO(const auto& loggingFileObj, requireObject(loggingObj, "file"));
+
+        LoggingSpec spec;
+        TRY_INTO(spec.argument, requireString(loggingObj, "argument"));
+        TRY_INTO(spec.id, requireString(loggingFileObj, "id"));
+        TRY_INTO(spec.url, requireString(loggingFileObj, "url"));
+        TRY_INTO(spec.sha1, requireString(loggingFileObj, "sha1"));
+        TRY_INTO(spec.size, requireInteger(loggingFileObj, "size"));
+
+        out->logging = spec;
+    }
+
     /* removed features that shouldn't be used */
     if (root.contains("tweakers")) {
         out->addProblem(ProblemSeverity::Error, QObject::tr("Version file contains unsupported element 'tweakers'"));
@@ -365,6 +379,24 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     if (patch->m_volatile) {
         root.insert("volatile", true);
     }
+
+    if (patch->logging.has_value()) {
+        const auto logging = patch->logging.value();
+        const QJsonObject loggingObj{
+            { "argument", logging.argument },
+            {
+                "file",
+                QJsonObject{
+                    { "id", logging.id },
+                    { "url", logging.url },
+                    { "sha1", logging.sha1 },
+                    { "size", logging.size },
+                },
+            },
+        };
+        root.insert("logging", loggingObj);
+    }
+
     // write the contents to a json document.
     {
         QJsonDocument out;

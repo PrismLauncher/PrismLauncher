@@ -1033,6 +1033,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_metacache.reset(new HttpMetaCache("metacache"));
         m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
         m_metacache->addBase("libraries", QDir("libraries").absolutePath());
+        m_metacache->addBase("log_configs", QDir("assets/log_configs").absolutePath());
         m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
         m_metacache->addBase("general", QDir("cache").absolutePath());
         m_metacache->addBase("ATLauncherPacks", QDir("cache/ATLauncherPacks").absolutePath());
