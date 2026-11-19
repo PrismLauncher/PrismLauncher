@@ -98,6 +98,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, co
 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
     auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
+    netJob->setAskRetry(false);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
