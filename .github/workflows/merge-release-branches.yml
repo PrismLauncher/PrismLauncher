@@ -1,0 +1,35 @@
+name: Automatically merge release branches
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  merge:
+    name: Merge (${{ matrix.head }} -> ${{ matrix.base }})
+
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - base: release-10.x
+            head: release-10.0.x
+
+    runs-on: ubuntu-slim
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check and merge branches
+        uses: ./.github/actions/merge-branches
+        with:
+          base: ${{ matrix.base }}
+          head: ${{ matrix.head }}
+          token: ${{ github.token }}
