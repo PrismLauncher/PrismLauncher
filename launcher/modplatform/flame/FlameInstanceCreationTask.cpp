@@ -703,6 +703,7 @@ void FlameCreationTask::validateOtherResources()
 {
     qDebug() << "Validating whether other resources are in the right place";
     QStringList zipMods;
+    bool hasDataPacks = false;
     for (const auto& [fileName, targetFolder] : m_otherResources) {
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, m_rootPath, targetFolder, fileName);
@@ -737,6 +738,10 @@ void FlameCreationTask::validateOtherResources()
         QFileInfo localFileInfo(localPath);
         auto type = ResourceUtils::identify(localFileInfo);
 
+        if (targetFolder == "datapacks" && type == ModPlatform::ResourceType::ResourcePack) {
+            type = ModPlatform::ResourceType::DataPack;
+        }
+
         QString worldPath;
 
         switch (type) {
@@ -752,6 +757,7 @@ void FlameCreationTask::validateOtherResources()
                 break;
             case ModPlatform::ResourceType::DataPack:
                 validatePath(fileName, targetFolder, "datapacks");
+                hasDataPacks = true;
                 break;
             case ModPlatform::ResourceType::ShaderPack:
                 // in theory flame API can't do this but who knows, that *may* change ?
@@ -768,6 +774,9 @@ void FlameCreationTask::validateOtherResources()
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
                 break;
         }
+    }
+    if (hasDataPacks) {
+        m_newInstance->settings()->set("GlobalDataPacksEnabled", true);
     }
     // TODO make this work with other sorts of resource
     auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
