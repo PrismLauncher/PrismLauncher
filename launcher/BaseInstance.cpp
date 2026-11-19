@@ -503,7 +503,7 @@ LaunchTask* BaseInstance::getLaunchTask()
 
 void BaseInstance::setLaunchController(std::unique_ptr<LaunchController> controller)
 {
-    m_launchController = std::move(controller);
+    m_launchController.reset(controller.release());
 }
 
 void BaseInstance::updateRuntimeContext()

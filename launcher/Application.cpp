@@ -1610,8 +1610,10 @@ bool Application::kill(BaseInstance* instance)
         qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
         return false;
     }
-    if (instance->launchController() != nullptr) {
-        return instance->launchController()->abort();
+
+    auto controller = instance->launchControllerRef();
+    if (!controller.isNull()) {
+        return controller->abort();
     }
     return true;
 }
