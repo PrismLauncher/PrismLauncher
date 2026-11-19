@@ -46,7 +46,33 @@ class ShaderPackIndexMigrateTask : public Task {
    private:
     QDir m_resourceDir, m_indexDir;
 };
+
+QString versionSuffix(const QString& name, const QString& versionNumber)
+{
+    auto nameWords = name.split(' ', Qt::SkipEmptyParts);
+    QStringList versionWords;
+
+    for (const auto& word : versionNumber.split(' ', Qt::SkipEmptyParts)) {
+        if (!nameWords.contains(word, Qt::CaseInsensitive))
+            versionWords << word;
+    }
+
+    return versionWords.join(' ');
+}
 }  // namespace
+
+QVariant ShaderPackFolderModel::data(const QModelIndex& index, int role) const
+{
+    if (role == Qt::DisplayRole && index.column() == NameColumn && validateIndex(index)) {
+        if (auto metadata = m_resources[index.row()]->metadata(); metadata && !metadata->version_number.isEmpty()) {
+            auto suffix = versionSuffix(metadata->name, metadata->version_number);
+            if (!suffix.isEmpty())
+                return QString("%1 %2").arg(metadata->name, suffix);
+        }
+    }
+
+    return ResourceFolderModel::data(index, role);
+}
 
 Task* ShaderPackFolderModel::createPreUpdateTask()
 {
