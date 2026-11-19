@@ -335,6 +335,18 @@ const QList<Agent>& LaunchProfile::getAgents() const
     return m_agents;
 }
 
+QList<LibraryPtr> LaunchProfile::getArtifacts() const {
+    QList<LibraryPtr> result;
+    result.append(m_libraries);
+    result.append(m_nativeLibraries);
+    result.append(m_mavenFiles);
+    for (const auto& agent : m_agents) {
+        result.append(agent.library);
+    }
+    result.append(m_mainJar);
+    return result;
+}
+
 const QList<int>& LaunchProfile::getCompatibleJavaMajors() const
 {
     return m_compatibleJavaMajors;

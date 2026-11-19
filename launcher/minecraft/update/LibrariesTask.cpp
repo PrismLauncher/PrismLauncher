@@ -40,15 +40,7 @@ void LibrariesTask::executeTask()
     };
 
     QStringList failedLocalLibraries;
-    QList<LibraryPtr> libArtifactPool;
-    libArtifactPool.append(profile->getLibraries());
-    libArtifactPool.append(profile->getNativeLibraries());
-    libArtifactPool.append(profile->getMavenFiles());
-    for (const auto& agent : profile->getAgents()) {
-        libArtifactPool.append(agent.library);
-    }
-    libArtifactPool.append(profile->getMainJar());
-    processArtifactPool(libArtifactPool, failedLocalLibraries, inst->getLocalLibraryPath());
+    processArtifactPool(profile->getArtifacts(), failedLocalLibraries, inst->getLocalLibraryPath());
 
     QStringList failedLocalJarMods;
     processArtifactPool(profile->getJarMods(), failedLocalJarMods, inst->jarModsDir());
