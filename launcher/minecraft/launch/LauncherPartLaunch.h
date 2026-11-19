@@ -15,10 +15,11 @@
 
 #pragma once
 
-#include <LoggedProcess.h>
-#include <launch/LaunchStep.h>
-#include <minecraft/auth/AuthSession.h>
+#include <cstdint>
 
+#include "launch/LaunchStep.h"
+#include "launch/SandboxedProcess.h"
+#include "minecraft/auth/AuthSession.h"
 #include "MinecraftTarget.h"
 
 class LauncherPartLaunch : public LaunchStep {
@@ -31,20 +32,22 @@ class LauncherPartLaunch : public LaunchStep {
     virtual bool abort();
     virtual void proceed();
     virtual bool canAbort() const { return true; }
-    void setWorkingDirectory(const QString& wd);
     void setAuthSession(AuthSessionPtr session) { m_session = session; }
 
     void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_targetToJoin = std::move(targetToJoin); }
 
-   private slots:
-    void on_state(LoggedProcess::State state);
-
    private:
-    LoggedProcess m_process;
-    QString m_command;
+    void onStart(std::uint32_t pid);
+
+    void onFinish(std::optional<std::int32_t> exitCode);
+
+    void onFailedToStart(const QString& errorMessage);
+
+    SandboxedProcess m_process;
     AuthSessionPtr m_session;
     QString m_launchScript;
     MinecraftTarget::Ptr m_targetToJoin;
 
     bool mayProceed = false;
+    bool m_killing = false;
 };

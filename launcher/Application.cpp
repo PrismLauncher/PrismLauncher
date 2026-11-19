@@ -770,6 +770,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", false);
 
+        // Sandboxing settings
+        m_settings->registerSetting("SandboxEnabled", false);
+        m_settings->registerSetting("SandboxNetworkAccess", true);
+        m_settings->registerSetting("SandboxFileSystemAccess", "{}");
+
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("CustomOpenALPath", "");

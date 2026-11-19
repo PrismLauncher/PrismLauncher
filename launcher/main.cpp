@@ -33,6 +33,8 @@
  *      limitations under the License.
  */
 
+#include <modrinth_sandbox.h>
+#include <cstddef>
 #include <iostream>
 
 #include "Application.h"
@@ -47,6 +49,19 @@ int main(int argc, char* argv[])
     // used on Windows to attach the standard IO streams
     console::WindowsConsoleGuard _consoleGuard;
 #endif
+
+    bool handledBySandbox = false;
+    if (!modrinth_sandbox_helper_run_default(&handledBySandbox)) {
+        const char* msg = nullptr;
+        std::size_t len = 0;
+        modrinth_sandbox_get_last_error(&msg, &len);
+
+        qFatal() << "Failed to handle modrinth-sandbox-helper command:" << QUtf8StringView(msg, len);
+        return 1;
+    }
+    if (handledBySandbox) {
+        return 0;
+    }
 
     // initialize Qt
     Application app(argc, argv);
