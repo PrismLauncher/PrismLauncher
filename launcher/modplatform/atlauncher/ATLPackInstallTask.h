@@ -94,7 +94,7 @@ class PackInstallTask : public InstanceTask {
     void executeTask() override;
 
    private slots:
-    void onDownloadSucceeded(QByteArray* responsePtr);
+    void onDownloadSucceeded(ATLauncher::PackVersion* responsePtr);
     void onDownloadFailed(QString reason);
     void onDownloadAborted();
 
@@ -103,7 +103,6 @@ class PackInstallTask : public InstanceTask {
 
    private:
     QString getDirForModType(ModType type, const QString& raw);
-    QString getVersionForLoader(const QString& uid);
     static QString detectLibrary(const VersionLibrary& library);
 
     bool createLibrariesComponent(const QString& instanceRoot, PackProfile* profile);
@@ -118,12 +117,20 @@ class PackInstallTask : public InstanceTask {
                      const QMap<QString, QString>& toCopy);
     void install();
 
+    Result<QString> pickLoaderVersion(const Meta::VersionList::Ptr& vlist);
+
+    void prepareMetaTask();
+
    private:
     UserInteractionSupport* m_support;
 
     bool m_abortable = false;
 
     NetJob::Ptr m_jobPtr;
+    Task::Ptr m_metaPtr;
+
+    QString m_loaderUid;
+    QString m_liteLoaderVersion;
 
     InstallMode m_installMode;
     QString m_packName;

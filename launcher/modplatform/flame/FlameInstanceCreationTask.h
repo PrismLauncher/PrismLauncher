@@ -40,6 +40,7 @@
 
 #include "BaseInstance.h"
 #include "InstanceTask.h"
+#include "meta/VersionList.h"
 #include "minecraft/MinecraftInstance.h"
 #include "modplatform/flame/FileResolvingTask.h"
 
@@ -76,13 +77,16 @@ class FlameCreationTask final : public InstanceTask {
     void setupDownloadJob();
     void copyBlockedMods(const QList<BlockedMod>& blockedMods);
     void validateOtherResources();
-    QString getVersionForLoader(const QString& uid, const QString& loaderType, const QString& version, const QString& mcVersion);
+    void onLoaderListLoaded();
     void finishInstall();
 
    private:
     void setManagedPack(BaseInstance* instance);
 
     [[nodiscard]] bool promptForUntrustedMods();
+
+    Result<QString> pickLoaderVersion(const Meta::VersionList::Ptr& vlist);
+    void continueCreateInstance(const QString& loaderVersion);
 
    private:
     QWidget* m_parent = nullptr;
@@ -94,6 +98,8 @@ class FlameCreationTask final : public InstanceTask {
     // Handle to allow aborting
     Task::Ptr m_processUpdateFileInfoJob = nullptr;
     NetJob::Ptr m_filesJob = nullptr;
+
+    QString m_loaderUid, m_loaderType, m_loaderVersion, m_mcVersion;
 
     QString m_managedId, m_managedVersionId;
 
