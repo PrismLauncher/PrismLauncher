@@ -20,6 +20,7 @@
 #include <QString>
 
 struct MinecraftTarget {
+    QString originalAddress;
     QString address;
     quint16 port;
 

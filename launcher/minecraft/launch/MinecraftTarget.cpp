@@ -61,5 +61,5 @@ MinecraftTarget MinecraftTarget::parse(const QString& fullAddress, bool useWorld
         }
     }
 
-    return MinecraftTarget{ realAddress, realPort };
+    return MinecraftTarget{ fullAddress, realAddress, realPort };
 }
