@@ -85,13 +85,7 @@ void LaunchController::decideAccount()
 
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto* accounts = APPLICATION->accounts();
-    const auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
-    const auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
-    if (instanceAccountIndex == -1 || instanceAccountId.isEmpty()) {
-        m_accountToUse = accounts->defaultAccount();
-    } else {
-        m_accountToUse = accounts->at(instanceAccountIndex);
-    }
+    m_accountToUse = m_instance->accountToUse();
 
     if (!accounts->anyAccountIsValid()) {
         // Tell the user they need to log in at least one account in order to play.

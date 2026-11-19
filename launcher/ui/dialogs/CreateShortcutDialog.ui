@@ -191,6 +191,26 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QRadioButton" name="realmTarget">
+        <property name="text">
+         <string>Realm:</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">targetBtnGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="realmSelectionBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
