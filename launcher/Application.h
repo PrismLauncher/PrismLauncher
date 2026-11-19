@@ -51,6 +51,7 @@
 
 #include "minecraft/auth/MinecraftAccount.h"
 
+class LauncherRichPresence;
 class LaunchController;
 class LocalPeer;
 class InstanceWindow;
@@ -257,6 +258,7 @@ class Application : public QApplication {
     std::unique_ptr<TranslationsModel> m_translations;
     std::unique_ptr<GenericPageProvider> m_globalSettingsProvider;
     std::unique_ptr<ThemeManager> m_themeManager;
+    std::unique_ptr<LauncherRichPresence> m_richPresence;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

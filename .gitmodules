@@ -4,3 +4,6 @@
 [submodule "cmake/vcpkg"]
 	path = cmake/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "libraries/discord-presence"]
+	path = libraries/discord-presence
+	url = https://git.eclipse.menu/EclipseMenu/discord-presence

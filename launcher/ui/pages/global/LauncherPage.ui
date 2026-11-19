@@ -41,9 +41,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-654</y>
-        <width>749</width>
-        <height>1448</height>
+        <y>0</y>
+        <width>747</width>
+        <height>1738</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -183,6 +183,13 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="richPresenceCheckBox">
+         <property name="text">
+          <string>Show launcher activity on Discord</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -852,7 +859,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="sortingModeGroup"/>
   <buttongroup name="renamingBehaviorGroup"/>
+  <buttongroup name="sortingModeGroup"/>
  </buttongroups>
 </ui>

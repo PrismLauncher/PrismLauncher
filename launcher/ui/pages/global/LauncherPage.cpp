@@ -79,6 +79,9 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     loadSettings();
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
+
+    connect(ui->richPresenceCheckBox, &QCheckBox::toggled, this,
+            [](const bool toggled) { APPLICATION->settings()->set("EnableRichPresence", toggled); });
 }
 
 LauncherPage::~LauncherPage()
@@ -325,6 +328,8 @@ void LauncherPage::loadSettings()
     }
 
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
+
+    ui->richPresenceCheckBox->setChecked(s->get("EnableRichPresence").toBool());
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());

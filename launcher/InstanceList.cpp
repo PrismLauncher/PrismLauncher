@@ -651,6 +651,8 @@ void InstanceList::add(std::vector<std::unique_ptr<MinecraftInstance>>& t)
         MinecraftInstance* inst = ptr.get();
         m_instances.push_back(std::move(ptr));
         connect(inst, &MinecraftInstance::propertiesChanged, this, [this, inst]() { propertiesChanged(inst); });
+        connect(inst, &MinecraftInstance::runningStatusChanged, this,
+                [this, inst](bool running) { emit runningStatusChanged(inst, running); });
     }
     endInsertRows();
 }
