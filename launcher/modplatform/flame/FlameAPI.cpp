@@ -421,9 +421,5 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(const QLis
         return bestForLoader;
     }
 
-    if (bestMatch.contains(ModLoaderType::Invalid)) {
-        return bestMatch.value(ModLoaderType::Invalid);
-    }
-
     return {};
 }
