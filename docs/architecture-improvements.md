@@ -83,6 +83,8 @@ Add an `AuthProvider` contract containing:
 
 Use static registration initially. Dynamic plugins are unnecessary unless distribution requirements later demand them.
 
+Skeleton: `ModPlatformProvider` (capability flags, page/install/`ResourceAPI` factories, cache key) and `ModPlatformRegistry` with `REGISTER_MOD_PLATFORM` — see `launcher/modplatform/ModPlatformRegistry.h`.
+
 ### P0: Add a global, host-aware work scheduler
 
 The configured download concurrency is applied independently by each `NetJob`. Multiple simultaneous jobs can therefore each consume the full allowance. `ConcurrentTask` also retains task objects and progress state until the containing task is destroyed.

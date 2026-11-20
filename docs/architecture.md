@@ -113,6 +113,8 @@ Platform-specific code is organized under:
 
 Common abstractions include `ResourceAPI`, `ModIndex`, `CheckUpdateTask`, `EnsureMetadataTask`, and `InstanceTask`, although not every platform uses all of them.
 
+Capability-based static registration lives in `modplatform/ModPlatformProvider.h` and `modplatform/ModPlatformRegistry.*`. Providers advertise `ProviderCapability` flags (new-instance page, resource types, optional `ResourceAPI`, install task, cache key) and register with `REGISTER_MOD_PLATFORM`. Dynamic plugins are out of scope for this phase; dialogs will iterate the registry in follow-up work instead of hard-coded `pages.append(...)` lists.
+
 ## Updater
 
 `ExternalUpdater` is the in-process facade. Its platform implementations include `PrismExternalUpdater` and `MacSparkleUpdater`.
