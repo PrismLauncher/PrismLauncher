@@ -40,6 +40,7 @@
 
 #include "BaseInstance.h"
 #include "InstanceTask.h"
+#include "minecraft/ModLoaderType.h"
 #include "minecraft/MinecraftInstance.h"
 #include "modplatform/flame/FileResolvingTask.h"
 
@@ -76,7 +77,7 @@ class FlameCreationTask final : public InstanceTask {
     void setupDownloadJob();
     void copyBlockedMods(const QList<BlockedMod>& blockedMods);
     void validateOtherResources();
-    QString getVersionForLoader(const QString& uid, const QString& loaderType, const QString& version, const QString& mcVersion);
+    QString getVersionForLoader(const QString& uid, ModLoaderType loaderType, const QString& version, const QString& mcVersion);
     void finishInstall();
 
    private:
