@@ -29,7 +29,7 @@ jobs:
           submodules: "true"
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v31
+        uses: cachix/install-nix-action@v32
 
       - name: Run source generators
         # TODO(@getchoo): Figure out how to make this work with PCH
