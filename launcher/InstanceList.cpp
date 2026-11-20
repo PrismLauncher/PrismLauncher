@@ -1137,6 +1137,9 @@ bool InstanceList::commitStagedInstance(const QString& path, const InstanceTask&
     auto shouldOverride = instanceTask.shouldOverride();
 
     QString targetDir = instanceTask.targetDir();
+    if (shouldOverride) {
+        targetDir = rootDirOf(instanceTask.originalInstanceID());
+    }
     if (!targetDir.isEmpty() && !m_instDirs.contains(targetDir)) {
         qCritical() << "Target directory" << targetDir << "for instance is no longer configured or accessible";
         return false;
