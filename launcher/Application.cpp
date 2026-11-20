@@ -313,54 +313,99 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     QCommandLineParser parser;
     parser.setApplicationDescription(BuildConfig.LAUNCHER_DISPLAYNAME);
 
-    parser.addOptions(
-        { { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
-          { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
-          { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
-          { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
-          { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
-          { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
-          { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
-          { "show-window", "Show the main launcher window (useful in combination with --launch)" },
-          { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-          { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
-    // Has to be positional for some OS to handle that properly
-    parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
+    // parser.addOptions(
+    //     { { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
+    //       { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
+    //       { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
+    //       { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
+    //       { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
+    //       { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
+    //       { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
+    //       { "show-window", "Show the main launcher window (useful in combination with --launch)" },
+    //       { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
+    //       { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
+    // // Has to be positional for some OS to handle that properly
+    // parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
+    //
+    // parser.addHelpOption();
+    // parser.addVersionOption();
+    //
+    // parser.process(arguments());
+    //
+    // m_instanceIdToLaunch = parser.value("launch");
+    // m_serverToJoin = parser.value("server");
+    // m_worldToJoin = parser.value("world");
+    // m_profileToUse = parser.value("profile");
+    // if (parser.isSet("offline")) {
+    //     m_launchOffline = true;
+    //     m_offlineName = parser.value("offline");
+    // }
+    // m_liveCheck = parser.isSet("alive");
+    //
+    // m_instanceIdToShowWindowOf = parser.value("show");
+    // m_showMainWindow = parser.isSet("show-window");
 
     parser.addHelpOption();
     parser.addVersionOption();
+    parser.addOptions({
+        { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
+        { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
+        { "show-window", "Show the main launcher window" },
+        { "show", "Opens the window for the specified instance (by instance ID)", "show" },
+    });
 
-    parser.process(arguments());
+    parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
+    parser.addPositionalArgument("command", "The command to execute");
 
-    m_instanceIdToLaunch = parser.value("launch");
-    m_serverToJoin = parser.value("server");
-    m_worldToJoin = parser.value("world");
-    m_profileToUse = parser.value("profile");
-    if (parser.isSet("offline")) {
-        m_launchOffline = true;
-        m_offlineName = parser.value("offline");
+    parser.parse(arguments());
+
+    const QStringList args = parser.positionalArguments();
+    const QString command = args.isEmpty() ? QString() : args.first();
+
+    if (command == "launch") {
+        parser.clearPositionalArguments();
+        parser.addPositionalArgument("launch", "Launch the specified instance");
+        parser.addPositionalArgument("instance", "Instance ID to launch");
+        parser.addOptions(
+            { { { "s", "server" }, "Join the specified server on launch", "address" },
+            { { "w", "world" }, "Join the specified world on launch", "world" },
+            { { "a", "profile" }, "Join with the account specified by the profile name", "profile" },
+            { { "o", "offline" }, "Launch offline, with given player name", "offline" }, } );
+
+        parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
+        parser.process(arguments());
+
+        m_instanceIdToLaunch = args.value(1);
+        m_serverToJoin = parser.value("server");
+        m_worldToJoin = parser.value("world");
+        m_profileToUse = parser.value("profile");
+        if (parser.isSet("offline")) {
+            m_launchOffline = true;
+            m_offlineName = parser.value("offline");
+        }
+
+        if (m_instanceIdToLaunch.isEmpty()) {
+            parser.showHelp(1);
+        }
     }
-    m_liveCheck = parser.isSet("alive");
+    else if (command == "import") {
+        parser.clearPositionalArguments();
+        parser.addPositionalArgument("import", "Import instance or resource from specified local path or URL(s)");
 
+        parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
+        parser.process(arguments());
+
+        for (const auto& url : parser.positionalArguments().sliced(1)) {
+            m_urlsToImport.append(normalizeImportUrl(url));
+        }
+    }
+    else {
+        parser.process(arguments());
+    }
+
+    m_liveCheck = parser.isSet("alive");
     m_instanceIdToShowWindowOf = parser.value("show");
     m_showMainWindow = parser.isSet("show-window");
-
-    for (const auto& url : parser.values("import")) {
-        m_urlsToImport.append(normalizeImportUrl(url));
-    }
-
-    // treat unspecified positional arguments as import urls
-    for (const auto& url : parser.positionalArguments()) {
-        m_urlsToImport.append(normalizeImportUrl(url));
-    }
-
-    // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
-        m_instanceIdToLaunch.isEmpty()) {
-        std::cerr << "--server, --profile and --offline can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
-        return;
-    }
 
     QString origcwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
