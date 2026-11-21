@@ -939,10 +939,18 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
                 return aName.localeAwareCompare(bName) < 0;
             });
             for (auto mod : modList) {
+                const auto fileInfo = mod->fileinfo();
+                auto displayName = fileInfo.completeBaseName();
+                const auto suffix = fileInfo.suffix();
+                // Keep the file extension visible for anything that is not a .jar,
+                // so that non-jar files in the mods folder are distinguishable.
+                if (!suffix.isEmpty() && suffix.compare("jar", Qt::CaseInsensitive) != 0) {
+                    displayName += "." + suffix;
+                }
                 if (mod->enabled()) {
-                    out << u8"  [✔] " + mod->fileinfo().completeBaseName();
+                    out << u8"  [✔] " + displayName;
                 } else {
-                    out << u8"  [✘] " + mod->fileinfo().completeBaseName() + " (disabled)";
+                    out << u8"  [✘] " + displayName + " (disabled)";
                 }
             }
             out << emptyLine;
