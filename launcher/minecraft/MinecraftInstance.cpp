@@ -90,6 +90,7 @@
 #include "AssetsUtils.h"
 #include "MinecraftLoadAndCheck.h"
 #include "PackProfile.h"
+#include "modplatform/ModIndex.h"
 
 #include "tools/BaseProfiler.h"
 
@@ -1110,6 +1111,16 @@ QString MinecraftInstance::getStatusbarDescription()
 
     QString description;
     description.append(tr("Minecraft %1").arg(mcVersion));
+
+    auto modLoaders = m_components->getModLoadersList();
+    if (!modLoaders.isEmpty()) {
+        QStringList loaderNames;
+        for (auto loader : modLoaders) {
+            loaderNames.append(ModPlatform::getModLoaderAsString(loader));
+        }
+        description.append(tr(" (%1)").arg(loaderNames.join(", ")));
+    }
+
     if (m_settings->get("ShowGameTime").toBool()) {
         if (lastTimePlayed() > 0 && lastLaunch() > 0) {
             QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
