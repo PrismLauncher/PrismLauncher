@@ -765,6 +765,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         auto defaultEnableAutoJava = m_settings->get("JavaPath").toString().isEmpty();
         m_settings->registerSetting("AutomaticJavaSwitch", defaultEnableAutoJava);
         m_settings->registerSetting("AutomaticJavaDownload", defaultEnableAutoJava);
+        // Enable automatic updates by default if we're downloading Java
+        m_settings->registerSetting("AutomaticJavaUpdate", m_settings->get("AutomaticJavaDownload").toBool());
         m_settings->registerSetting("UserAskedAboutAutomaticJavaDownload", false);
 
         // Legacy settings

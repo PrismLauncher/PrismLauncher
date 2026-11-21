@@ -63,8 +63,15 @@ AutoInstallJava::AutoInstallJava(LaunchTask* parent)
 void AutoInstallJava::executeTask()
 {
     auto* settings = m_instance->settings();
-    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
-        (settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString()))) {
+
+    const auto autoSwitch = APPLICATION->settings()->get("AutomaticJavaSwitch").toBool();
+    const auto autoDownload = APPLICATION->settings()->get("AutomaticJavaDownload").toBool();
+    const auto alreadyHasJava = settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString());
+    // Only auto-update if:
+    const auto autoUpdate = APPLICATION->settings()->get("AutomaticJavaUpdate").toBool() &&  // If it has been explictly enabled
+                            autoDownload &&                                                  // We are allowed to download Java
+                            settings->get("AutomaticJava").toBool();  // This launch step has (probably) ran before and installed Java
+    if (!autoSwitch || (alreadyHasJava && !autoUpdate)) {
         emitSucceeded();
         return;
     }
@@ -84,7 +91,7 @@ void AutoInstallJava::executeTask()
         setJavaPath(resolved);
         return;
     }
-    if (!APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
+    if (!autoDownload) {
         auto* javas = APPLICATION->javalist();
         m_current_task = javas->getLoadTask();
         connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
@@ -128,13 +135,29 @@ void AutoInstallJava::executeTask()
     auto relativeBinary = FS::PathCombine(wantedJavaName, "bin", JavaUtils::javaExecutable);
     auto wantedJavaPath = javaDir.absoluteFilePath(relativeBinary);
     if (QFileInfo::exists(wantedJavaPath)) {
-        setJavaPathFromPartial();
-        return;
+        if (autoUpdate) {
+            m_installedVersion = JavaVersion(settings->get("JavaVersion").toString());
+        }
+
+        if (m_installedVersion.toString().isEmpty()) {
+            setJavaPathFromPartial();
+            return;
+        }
+
+        emit logLine(tr("Automatic Java updates are enabled"), MessageLevel::Launcher);
     }
     auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
     m_current_task = versionList->getLoadTask();
     connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::tryNextMajorJava);
-    connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::emitFailed);
+    connect(m_current_task.get(), &Task::failed, this, [this](const QString& reason) {
+        // Don't hard-error when we're checking for an update, since we can proceed with the currently installed Java version
+        if (!m_installedVersion.toString().isEmpty()) {
+            emit logLine(tr("Unable to check for Java updates: %1").arg(reason), MessageLevel::Warning);
+            setJavaPathFromPartial();
+        } else {
+            emitFailed(reason);
+        }
+    });
     connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
     connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
     connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
@@ -182,6 +205,18 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
             QDir javaDir(APPLICATION->javaPath());
             auto finalPath = javaDir.absoluteFilePath(java->m_name);
             auto deletePath = [finalPath] { FS::deletePath(finalPath); };
+
+            const auto versionString = m_installedVersion.toString();
+            if (!versionString.isEmpty()) {
+                if (java->version <= m_installedVersion) {
+                    emit logLine(tr("No updates available for Java"), MessageLevel::Launcher);
+                    setJavaPathFromPartial();
+                    return;
+                }
+                emit logLine(tr("Updating Java from version %1 to %2").arg(versionString, java->version.toString()),
+                             MessageLevel::Launcher);
+            }
+
             switch (java->downloadType) {
                 case Java::DownloadType::Manifest:
                     m_current_task = makeShared<Java::ManifestDownloadTask>(java->url, finalPath, java->checksumType, java->checksumHash);

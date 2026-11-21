@@ -37,6 +37,7 @@
 
 #include <launch/LaunchStep.h>
 #include <launch/LaunchTask.h>
+#include "java/JavaVersion.h"
 #include "meta/Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "tasks/Task.h"
@@ -64,4 +65,5 @@ class AutoInstallJava : public LaunchStep {
 
     qsizetype m_majorJavaVersionIndex = 0;
     const QString m_supported_arch;
+    JavaVersion m_installedVersion;
 };

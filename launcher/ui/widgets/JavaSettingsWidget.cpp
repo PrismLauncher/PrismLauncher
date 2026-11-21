@@ -73,8 +73,15 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
                     m_ui->autodownloadJavaCheckBox->setChecked(false);
                 }
             });
+            connect(m_ui->autodownloadJavaCheckBox, &QCheckBox::checkStateChanged, this, [this](bool state) {
+                m_ui->autoupdateJavaCheckBox->setEnabled(state);
+                if (!state) {
+                    m_ui->autoupdateJavaCheckBox->setChecked(false);
+                }
+            });
         } else {
             m_ui->autodownloadJavaCheckBox->hide();
+            m_ui->autoupdateJavaCheckBox->hide();
         }
         connect(m_ui->autodetectJavaCheckBox, &QCheckBox::checkStateChanged, this,
                 [this](bool state) { m_ui->pinnedJavaGroupBox->setEnabled(state); });
@@ -84,6 +91,7 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
         m_ui->skipWizardCheckBox->hide();
         m_ui->autodetectJavaCheckBox->hide();
         m_ui->autodownloadJavaCheckBox->hide();
+        m_ui->autoupdateJavaCheckBox->hide();
         m_ui->pinnedJavaGroupBox->hide();
 
         m_ui->javaInstallationGroupBox->setCheckable(true);
@@ -199,6 +207,8 @@ void JavaSettingsWidget::loadSettings()
         m_ui->autodetectJavaCheckBox->setChecked(settings->get("AutomaticJavaSwitch").toBool());
         m_ui->autodownloadJavaCheckBox->setEnabled(m_ui->autodetectJavaCheckBox->isChecked());
         m_ui->autodownloadJavaCheckBox->setChecked(settings->get("AutomaticJavaDownload").toBool());
+        m_ui->autoupdateJavaCheckBox->setEnabled(m_ui->autodownloadJavaCheckBox->isChecked());
+        m_ui->autoupdateJavaCheckBox->setChecked(settings->get("AutomaticJavaUpdate").toBool());
 
         const auto pinned = Json::toMap(settings->get("PinnedJavaPaths").toString());
         for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
@@ -255,6 +265,7 @@ void JavaSettingsWidget::saveSettings()
         settings->set("IgnoreJavaWizard", m_ui->skipWizardCheckBox->isChecked());
         settings->set("AutomaticJavaSwitch", m_ui->autodetectJavaCheckBox->isChecked());
         settings->set("AutomaticJavaDownload", m_ui->autodownloadJavaCheckBox->isChecked());
+        settings->set("AutomaticJavaUpdate", m_ui->autoupdateJavaCheckBox->isChecked());
 
         QVariantMap pinned;
         for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
