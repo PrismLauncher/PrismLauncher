@@ -197,6 +197,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
     setHidden(true);
     loadVersionList();
     prepareBasicFilter();
+    loadDisclosureFilter();
 }
 
 auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>
@@ -451,6 +452,58 @@ void ModFilterWidget::onReleaseFilterChanged()
     }
 }
 
+void ModFilterWidget::loadDisclosureFilter()
+{
+    // Load persisted exclusion types from settings
+    QString stored = APPLICATION->settings()->get("ModFilterExcludeDisclosureTypes").toString();
+    QStringList storedList = Json::toStringList(stored);
+
+    // Build a set of stored type names for quick lookup
+    QSet<QString> storedNames(storedList.begin(), storedList.end());
+
+    // Set each checkbox based on whether its type name is in the stored set
+    // Block signals to avoid triggering onDisclosureFilterChanged during load
+    auto setCheckbox = [&](QCheckBox* cb, ModPlatform::DisclosureType type) {
+        cb->blockSignals(true);
+        cb->setChecked(storedNames.contains(type.toString()));
+        cb->blockSignals(false);
+    };
+
+    setCheckbox(m_ui->aiContent, ModPlatform::DisclosureType::AIContent);
+    setCheckbox(m_ui->aiContentCode, ModPlatform::DisclosureType::AIContentCode);
+    setCheckbox(m_ui->aiContentAssets, ModPlatform::DisclosureType::AIContentAssets);
+    setCheckbox(m_ui->aiContentText, ModPlatform::DisclosureType::AIContentText);
+    setCheckbox(m_ui->aiContentFunctionality, ModPlatform::DisclosureType::AIContentFunctionality);
+    setCheckbox(m_ui->advertisements, ModPlatform::DisclosureType::Advertisements);
+    setCheckbox(m_ui->epilepsyTriggers, ModPlatform::DisclosureType::EpilepsyTriggers);
+    setCheckbox(m_ui->systemInteractions, ModPlatform::DisclosureType::SystemInteractions);
+    setCheckbox(m_ui->telemetry, ModPlatform::DisclosureType::Telemetry);
+    setCheckbox(m_ui->telemetryOptIn, ModPlatform::DisclosureType::TelemetryOptIn);
+    setCheckbox(m_ui->telemetryOptOut, ModPlatform::DisclosureType::TelemetryOptOut);
+    setCheckbox(m_ui->telemetryAlwaysActive, ModPlatform::DisclosureType::TelemetryAlwaysActive);
+    setCheckbox(m_ui->derivativeWork, ModPlatform::DisclosureType::DerivativeWork);
+    setCheckbox(m_ui->paidFeatures, ModPlatform::DisclosureType::PaidFeatures);
+    setCheckbox(m_ui->archived, ModPlatform::DisclosureType::Archived);
+
+    // Update the filter's exclude list directly
+    m_filter->excludeDisclosureTypes.clear();
+    for (const auto& name : storedList) {
+        auto type = ModPlatform::DisclosureType::fromString(name);
+        if (type.isValid()) {
+            m_filter->excludeDisclosureTypes.push_back(type);
+        }
+    }
+}
+
+void ModFilterWidget::saveDisclosureFilter()
+{
+    QStringList list;
+    for (const auto& type : m_filter->excludeDisclosureTypes) {
+        list.append(type.toString());
+    }
+    APPLICATION->settings()->set("ModFilterExcludeDisclosureTypes", Json::fromStringList(list));
+}
+
 void ModFilterWidget::onDisclosureFilterChanged()
 {
     std::vector<ModPlatform::DisclosureType> exclude;
@@ -482,6 +535,7 @@ void ModFilterWidget::onDisclosureFilterChanged()
     if (m_filterChanged) {
         emit filterChanged();
     }
+    saveDisclosureFilter();
 }
 
 void ModFilterWidget::onShowMoreClicked()

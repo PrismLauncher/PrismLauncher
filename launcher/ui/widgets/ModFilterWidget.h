@@ -116,6 +116,8 @@ class ModFilterWidget : public QTabWidget {
 
     void loadVersionList();
     void prepareBasicFilter();
+    void loadDisclosureFilter();
+    void saveDisclosureFilter();
 
    private slots:
     void onVersionFilterChanged(int);
