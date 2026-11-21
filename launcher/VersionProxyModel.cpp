@@ -51,14 +51,30 @@ class VersionFilterModel : public QSortFilterProxyModel {
         sort(0, Qt::DescendingOrder);
     }
 
+    static QString normalizeVersion(const QString& version)
+    {
+        QString normalized = version;
+        // Remove trailing .0 segments (e.g., "1.9.0" -> "1.9", "1.9.0.0" -> "1.9")
+        while (normalized.endsWith(".0")) {
+            normalized.chop(2);
+        }
+        return normalized;
+    }
+
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
     {
         const auto& filters = m_parent->filters();
         const QString& search = m_parent->search();
         const QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
 
-        if (!search.isEmpty() && !sourceModel()->data(idx, BaseVersionList::VersionRole).toString().contains(search, Qt::CaseInsensitive))
-            return false;
+        if (!search.isEmpty()) {
+            const QString version = sourceModel()->data(idx, BaseVersionList::VersionRole).toString();
+            const QString normalizedVersion = normalizeVersion(version);
+            const QString normalizedSearch = normalizeVersion(search);
+
+            if (!normalizedVersion.contains(normalizedSearch, Qt::CaseInsensitive))
+                return false;
+        }
 
         for (auto it = filters.begin(); it != filters.end(); ++it) {
             auto data = sourceModel()->data(idx, it.key());
