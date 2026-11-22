@@ -20,13 +20,10 @@
 #include <algorithm>
 #include <utility>
 
-#include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlamePackIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"

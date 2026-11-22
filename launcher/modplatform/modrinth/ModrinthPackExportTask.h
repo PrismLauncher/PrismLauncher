@@ -24,7 +24,6 @@
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
 class ModrinthPackExportTask : public Task {

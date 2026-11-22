@@ -8,6 +8,8 @@
 #include <QUrl>
 #include <QUrlQuery>
 #include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui_ManagedPackPage.h"
 
 #include <QAbstractItemView>
@@ -64,7 +66,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
             auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
             auto newUrl = QUrl(decoded);
             if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https")) {
-                QDesktopServices ::openUrl(newUrl);
+                QDesktopServices::openUrl(newUrl);
             }
             return;
         }
