@@ -35,6 +35,7 @@
  */
 
 #include "NewInstanceDialog.h"
+#include "services/IconStore.h"
 #include "Application.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
@@ -71,8 +72,10 @@
 NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
                                      const QString& url,
                                      const QMap<QString, QString>& extraInfo,
+                                     IconStore* icons,
+                                     Meta::Index* metadata,
                                      QWidget* parent)
-    : QDialog(parent), ui(new Ui::NewInstanceDialog), m_instIconKey("default")
+    : QDialog(parent), ui(new Ui::NewInstanceDialog), m_icons(icons), m_metadata(metadata), m_instIconKey("default")
 {
     ui->setupUi(this);
 
@@ -86,7 +89,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     setWindowIcon(QIcon::fromTheme("new"));
 
-    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+    ui->iconButton->setIcon(m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_instIconKey) : QIcon());
 
     QStringList groups = APPLICATION->instances()->getGroups();
     groups.prepend("");
@@ -257,7 +260,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
     m_importVersion.clear();
 
     if (!task) {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+        ui->iconButton->setIcon(m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_instIconKey) : QIcon());
         m_importIcon = false;
     }
 
@@ -281,7 +284,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
     m_importVersion = std::move(version);
 
     if (!task) {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+        ui->iconButton->setIcon(m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_instIconKey) : QIcon());
         m_importIcon = false;
     }
 
@@ -304,11 +307,11 @@ void NewInstanceDialog::setSuggestedIcon(const QString& key)
     m_importIcon = false;
 
     if (key == "default") {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+        ui->iconButton->setIcon(m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_instIconKey) : QIcon());
         return;
     }
 
-    auto icon = APPLICATION->icons()->getIcon(key);
+    auto icon = m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(key) : QIcon();
 
     ui->iconButton->setIcon(icon);
 }
@@ -365,12 +368,12 @@ QString NewInstanceDialog::instDir() const
 void NewInstanceDialog::on_iconButton_clicked()
 {
     importIconNow();  // so the user can switch back
-    IconPickerDialog dlg(this);
+    IconPickerDialog dlg(m_icons, this);
     dlg.execWithSelection(m_instIconKey);
 
     if (dlg.result() == QDialog::Accepted) {
         m_instIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(m_instIconKey));
+        ui->iconButton->setIcon(m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_instIconKey) : QIcon());
         m_importIcon = false;
     }
 }
@@ -384,7 +387,9 @@ void NewInstanceDialog::on_instNameTextBox_textChanged([[maybe_unused]] const QS
 void NewInstanceDialog::importIconNow()
 {
     if (m_importIcon) {
-        APPLICATION->icons()->installIcon(m_importIconPath, m_importIconName);
+        if (m_icons != nullptr && m_icons->list() != nullptr) {
+            m_icons->list()->installIcon(m_importIconPath, m_importIconName);
+        }
         m_instIconKey = m_importIconName.mid(0, m_importIconName.lastIndexOf('.'));
         m_importIcon = false;
     }

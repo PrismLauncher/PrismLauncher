@@ -35,6 +35,7 @@
  */
 
 #include "LaunchController.h"
+#include "services/LauncherWindows.h"
 #include "Application.h"
 #include "launch/steps/PrintServers.h"
 #include "minecraft/auth/AccountData.h"
@@ -104,7 +105,9 @@ void LaunchController::decideAccount()
 
         if (reply == QMessageBox::Yes) {
             // Open the account manager.
-            APPLICATION->ShowGlobalSettings(m_parentWidget, "accounts");
+            if (m_instance->services().windows != nullptr) {
+                m_instance->services().windows->showGlobalSettings(m_parentWidget, "accounts");
+            }
         } else if (reply == QMessageBox::No) {
             // Do not open "profile select" dialog.
             return;
@@ -386,7 +389,9 @@ void LaunchController::launchInstance()
     const auto* console = qobject_cast<InstanceWindow*>(m_parentWidget);
     const auto showConsole = m_instance->settings()->get("ShowConsole").toBool();
     if (!console && showConsole) {
-        APPLICATION->showInstanceWindow(m_instance);
+        if (m_instance->services().windows != nullptr) {
+            m_instance->services().windows->showInstanceWindow(m_instance);
+        }
     }
     connect(m_launcher, &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
     connect(m_launcher, &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
@@ -473,7 +478,9 @@ void LaunchController::onSucceeded()
 void LaunchController::onFailed(QString reason)
 {
     if (m_instance->settings()->get("ShowConsoleOnError").toBool()) {
-        APPLICATION->showInstanceWindow(m_instance, "console");
+        if (m_instance->services().windows != nullptr) {
+            m_instance->services().windows->showInstanceWindow(m_instance, "console");
+        }
     }
     emitFailed(std::move(reason));
 }

@@ -70,9 +70,12 @@ bool isPathTraversal(const QString& basePath, const QString& entryName)
     return !(baseUrl == fullUrl || baseUrl.isParentOf(fullUrl));
 }
 
-Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
+Meta::Version::Ptr getComponentVersion(Meta::Index* index, const QString& uid, const QString& version)
 {
-    return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
+    if (index == nullptr) {
+        return nullptr;
+    }
+    return index->getLoadedVersion(uid, version);
 }
 }  // namespace
 
@@ -163,7 +166,7 @@ void PackInstallTask::onDownloadSucceeded(QByteArray* responsePtr)
         m_support->displayMessage(message);
     }
 
-    auto ver = getComponentVersion("net.minecraft", m_version.minecraft);
+    auto ver = getComponentVersion(m_services.metadata, "net.minecraft", m_version.minecraft);
     if (!ver) {
         emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft", m_version.minecraft));
         return;
@@ -357,7 +360,7 @@ QString PackInstallTask::getDirForModType(ModType type, const QString& raw)
 QString PackInstallTask::getVersionForLoader(const QString& uid)
 {
     if (m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
-        auto vlist = APPLICATION->metadataIndex()->get(uid);
+        auto vlist = m_services.metadata != nullptr ? m_services.metadata->get(uid) : Meta::VersionList::Ptr();
         if (!vlist) {
             emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
             return Q_NULLPTR;
@@ -506,7 +509,7 @@ bool PackInstallTask::createLibrariesComponent(const QString& instanceRoot, Pack
     for (const auto& lib : m_version.libraries) {
         // If the library is LiteLoader, we need to ignore it and handle it separately.
         if (s_liteLoaderMap.contains(lib.md5)) {
-            auto ver = getComponentVersion("com.mumfrey.liteloader", s_liteLoaderMap.value(lib.md5));
+            auto ver = getComponentVersion(m_services.metadata, "com.mumfrey.liteloader", s_liteLoaderMap.value(lib.md5));
             if (ver) {
                 m_componentsToInstall.insert("com.mumfrey.liteloader", ver);
                 continue;
@@ -804,7 +807,7 @@ void PackInstallTask::downloadMods()
             auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
             if (mod.type == ModType::Forge) {
-                auto ver = getComponentVersion("net.minecraftforge", mod.version);
+                auto ver = getComponentVersion(m_services.metadata, "net.minecraftforge", mod.version);
                 if (ver) {
                     m_componentsToInstall.insert("net.minecraftforge", ver);
                     continue;
@@ -873,7 +876,7 @@ void PackInstallTask::downloadMods()
                     auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
                     if (mod.type == ModType::Forge) {
-                        auto ver = getComponentVersion("net.minecraftforge", mod.version);
+                        auto ver = getComponentVersion(m_services.metadata, "net.minecraftforge", mod.version);
                         if (ver) {
                             m_componentsToInstall.insert("net.minecraftforge", ver);
                             continue;

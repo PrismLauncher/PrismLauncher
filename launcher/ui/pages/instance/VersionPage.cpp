@@ -53,6 +53,7 @@
 
 #include "QObjectPtr.h"
 #include "VersionPage.h"
+#include "services/IconStore.h"
 #include "meta/JsonFormat.h"
 #include "tasks/SequentialTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
@@ -109,7 +110,11 @@ class IconProxy : public QIdentityProxyModel {
 
 QIcon VersionPage::icon() const
 {
-    return APPLICATION->icons()->getIcon(m_inst->iconKey());
+    auto* icons = m_inst->services().icons;
+    if (icons == nullptr || icons->list() == nullptr) {
+        return {};
+    }
+    return icons->list()->getIcon(m_inst->iconKey());
 }
 bool VersionPage::shouldDisplay() const
 {

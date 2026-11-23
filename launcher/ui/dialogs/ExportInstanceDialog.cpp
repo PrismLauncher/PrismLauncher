@@ -36,6 +36,8 @@
  */
 
 #include "ExportInstanceDialog.h"
+#include "minecraft/MinecraftInstance.h"
+#include "services/IconStore.h"
 #include <BaseInstance.h>
 #include <MMCZip.h>
 #include <QFileDialog>
@@ -101,7 +103,11 @@ ExportInstanceDialog::~ExportInstanceDialog()
 void SaveIcon(BaseInstance* m_instance)
 {
     auto iconKey = m_instance->iconKey();
-    auto iconList = APPLICATION->icons();
+    auto* mcInstance = dynamic_cast<MinecraftInstance*>(m_instance);
+    auto* iconList = mcInstance != nullptr && mcInstance->services().icons != nullptr ? mcInstance->services().icons->list() : nullptr;
+    if (iconList == nullptr) {
+        return;
+    }
     auto mmcIcon = iconList->icon(iconKey);
     if (!mmcIcon || mmcIcon->isBuiltIn()) {
         return;

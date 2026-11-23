@@ -22,7 +22,11 @@
 #include "BaseInstance.h"
 #include "ui/pages/BasePageProvider.h"
 
+class JavaEnvironment;
 class MinecraftInstance;
+namespace Meta {
+class Index;
+}
 class PageContainer;
 class PackProfile;
 class QDialogButtonBox;
@@ -32,7 +36,11 @@ class InstallDialog final : public QDialog, private BasePageProvider {
     Q_OBJECT
 
    public:
-    explicit InstallDialog(const QString& uid = QString(), MinecraftInstance* instance = nullptr, QWidget* parent = nullptr);
+    explicit InstallDialog(const QString& uid = QString(),
+                           MinecraftInstance* instance = nullptr,
+                           QWidget* parent = nullptr,
+                           Meta::Index* metadata = nullptr,
+                           JavaEnvironment* java = nullptr);
 
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;
@@ -43,5 +51,7 @@ class InstallDialog final : public QDialog, private BasePageProvider {
    private:
     PageContainer* container;
     QDialogButtonBox* buttons;
+    Meta::Index* m_metadata = nullptr;
+    JavaEnvironment* m_java = nullptr;
 };
 }  // namespace Java

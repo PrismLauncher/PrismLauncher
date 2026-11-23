@@ -34,6 +34,9 @@
  */
 
 #include "AutoInstallJava.h"
+#include "meta/Index.h"
+#include "services/JavaEnvironment.h"
+#include "services/LauncherSettings.h"
 #include <QDir>
 #include <QFileInfo>
 #include <memory>
@@ -62,14 +65,19 @@ AutoInstallJava::AutoInstallJava(LaunchTask* parent)
 void AutoInstallJava::executeTask()
 {
     auto settings = m_instance->settings();
-    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
+    auto* launcherSettings = m_instance->services().settings;
+    if (launcherSettings == nullptr || !launcherSettings->get("AutomaticJavaSwitch").toBool() ||
         (settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString()))) {
         emitSucceeded();
         return;
     }
     auto packProfile = m_instance->getPackProfile();
-    if (!APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
-        auto javas = APPLICATION->javalist();
+    if (launcherSettings == nullptr || !launcherSettings->get("AutomaticJavaDownload").toBool()) {
+        auto* javas = m_instance->services().java != nullptr ? m_instance->services().java->installs() : nullptr;
+        if (javas == nullptr) {
+            emitSucceeded();
+            return;
+        }
         m_current_task = javas->getLoadTask();
         connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
             for (auto i = 0; i < javas->count(); i++) {
@@ -108,14 +116,19 @@ void AutoInstallJava::executeTask()
         emitSucceeded();
         return;
     }
-    QDir javaDir(APPLICATION->javaPath());
+    QDir javaDir((m_instance->services().java != nullptr ? m_instance->services().java->javaPath() : QString()));
     auto relativeBinary = FS::PathCombine(wantedJavaName, "bin", JavaUtils::javaExecutable);
     auto wantedJavaPath = javaDir.absoluteFilePath(relativeBinary);
     if (QFileInfo::exists(wantedJavaPath)) {
         setJavaPathFromPartial();
         return;
     }
-    auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
+    auto* metadata = m_instance->services().metadata;
+    if (metadata == nullptr) {
+        emitFailed(tr("No metadata index is available to choose a Java runtime."));
+        return;
+    }
+    auto versionList = metadata->get("net.minecraft.java");
     m_current_task = versionList->getLoadTask();
     connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::tryNextMajorJava);
     connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::emitFailed);
@@ -143,7 +156,7 @@ void AutoInstallJava::setJavaPathFromPartial()
 {
     auto packProfile = m_instance->getPackProfile();
     auto javaName = packProfile->getProfile()->getCompatibleJavaName();
-    QDir javaDir(APPLICATION->javaPath());
+    QDir javaDir((m_instance->services().java != nullptr ? m_instance->services().java->javaPath() : QString()));
     // just checking if the executable is there should suffice
     // but if needed this can be achieved through refreshing the javalist
     // and retrieving the path that contains the java name
@@ -164,7 +177,7 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
     auto runtimes = version->data()->runtimes;
     for (auto java : runtimes) {
         if (java->runtimeOS == m_supported_arch && java->name() == javaName) {
-            QDir javaDir(APPLICATION->javaPath());
+            QDir javaDir((m_instance->services().java != nullptr ? m_instance->services().java->javaPath() : QString()));
             auto final_path = javaDir.absoluteFilePath(java->m_name);
             auto deletePath = [final_path] { FS::deletePath(final_path); };
             switch (java->downloadType) {
@@ -207,7 +220,12 @@ void AutoInstallJava::tryNextMajorJava()
 {
     if (!isRunning())
         return;
-    auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
+    auto* metadata = m_instance->services().metadata;
+    if (metadata == nullptr) {
+        emitFailed(tr("No metadata index is available to choose a Java runtime."));
+        return;
+    }
+    auto versionList = metadata->get("net.minecraft.java");
     auto packProfile = m_instance->getPackProfile();
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     auto majorJavaVersions = packProfile->getProfile()->getCompatibleJavaMajors();
@@ -227,7 +245,12 @@ void AutoInstallJava::tryNextMajorJava()
     if (javaMajor->isLoaded()) {
         downloadJava(javaMajor, wantedJavaName);
     } else {
-        m_current_task = APPLICATION->metadataIndex()->loadVersion("net.minecraft.java", javaMajor->version(), Net::Mode::Online);
+        auto* metadata = m_instance->services().metadata;
+        if (metadata == nullptr) {
+            emitFailed(tr("No metadata index is available to download Java."));
+            return;
+        }
+        m_current_task = metadata->loadVersion("net.minecraft.java", javaMajor->version(), Net::Mode::Online);
         connect(m_current_task.get(), &Task::succeeded, this,
                 [this, javaMajor, wantedJavaName] { downloadJava(javaMajor, wantedJavaName); });
         connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);

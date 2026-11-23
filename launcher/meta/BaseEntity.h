@@ -18,6 +18,7 @@
 #include <QJsonObject>
 #include <QObject>
 
+#include "meta/MetaServices.h"
 #include "net/Mode.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
@@ -45,6 +46,9 @@ class BaseEntity {
     virtual void parse(const QJsonObject& obj) = 0;
     [[nodiscard]] Task::Ptr loadTask(Net::Mode loadType = Net::Mode::Online, bool forceReload = false);
 
+    void setMetaServices(MetaServices* services) { m_metaServices = services; }
+    MetaServices* metaServices() const { return m_metaServices; }
+
    protected:
     QString m_sha256;       // the expected sha256
     QString m_file_sha256;  // the file sha256
@@ -52,6 +56,7 @@ class BaseEntity {
    private:
     LoadStatus m_load_status = LoadStatus::NotLoaded;
     Task::Ptr m_task;
+    MetaServices* m_metaServices = nullptr;
 };
 
 class BaseEntityLoadTask : public Task {

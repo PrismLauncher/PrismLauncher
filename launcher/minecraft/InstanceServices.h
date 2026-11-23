@@ -21,7 +21,10 @@
 #include <QString>
 
 class IconStore;
+class JavaEnvironment;
+class LaunchCoordinator;
 class LauncherSettings;
+class LauncherWindows;
 class NetworkContext;
 
 namespace Meta {
@@ -51,4 +54,7 @@ struct InstanceServices {
     IconStore* icons = nullptr;
     Meta::Index* metadata = nullptr;
     const LauncherRuntimeInfo* runtime = nullptr;
+    LaunchCoordinator* launch = nullptr;
+    LauncherWindows* windows = nullptr;
+    JavaEnvironment* java = nullptr;
 };

@@ -16,7 +16,8 @@
 #include "ui/widgets/JavaWizardWidget.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
-JavaWizardPage::JavaWizardPage(QWidget* parent) : BaseWizardPage(parent)
+JavaWizardPage::JavaWizardPage(JavaEnvironment* java, Meta::Index* metadata, QWidget* parent)
+    : BaseWizardPage(parent), m_java(java), m_metadata(metadata)
 {
     setupUi();
 }
@@ -26,7 +27,7 @@ void JavaWizardPage::setupUi()
     setObjectName(QStringLiteral("javaPage"));
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    m_java_widget = new JavaWizardWidget(this);
+    m_java_widget = new JavaWizardWidget(m_java, m_metadata, this);
     layout->addWidget(m_java_widget);
     setLayout(layout);
 

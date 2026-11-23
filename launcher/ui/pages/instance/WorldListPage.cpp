@@ -36,6 +36,8 @@
  */
 
 #include "WorldListPage.h"
+#include "LaunchCoordinator.h"
+#include "services/LauncherWindows.h"
 #include "AssertHelpers.h"
 #include "Commandline.h"
 #include "minecraft/WorldList.h"
@@ -346,7 +348,11 @@ void WorldListPage::populateWorldToolsMenu()
         noToolsAction->setEnabled(false);
         m_worldToolsMenu->addSeparator();
         auto* settingsAction = m_worldToolsMenu->addAction(tr("Open Settings"));
-        connect(settingsAction, &QAction::triggered, this, [] { APPLICATION->ShowGlobalSettings(nullptr, "external-tools"); });
+        connect(settingsAction, &QAction::triggered, this, [this] {
+            if (m_inst->services().windows != nullptr) {
+                m_inst->services().windows->showGlobalSettings(nullptr, "external-tools");
+            }
+        });
     } else {
         for (auto it = tools.constBegin(); it != tools.constEnd(); ++it) {
             if (ASSERT_NEVER(it.key().isEmpty())) {
@@ -520,7 +526,10 @@ void WorldListPage::on_actionJoin_triggered()
     }
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
     auto* world = static_cast<World*>(worldVariant.value<void*>());
-    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
+    if (m_inst->services().launch != nullptr) {
+        m_inst->services().launch->launch(m_inst, LaunchMode::Normal,
+                                          std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
+    }
 }
 
 #include "WorldListPage.moc"

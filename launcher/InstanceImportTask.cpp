@@ -44,6 +44,8 @@
 #include "archive/ArchiveReader.h"
 #include "archive/ExtractZipTask.h"
 #include "icons/IconList.h"
+#include "services/IconStore.h"
+#include "services/IconStore.h"
 #include "icons/IconUtils.h"
 
 #include "modplatform/flame/FlameInstanceCreationTask.h"
@@ -260,7 +262,7 @@ void InstanceImportTask::extractFinished()
 
 namespace {
 
-bool installIcon(const QString& root, const QString& instIconKey)
+bool installIcon(IconStore* icons, const QString& root, const QString& instIconKey)
 {
     auto importIconPath = IconUtils::findBestIconIn(root, instIconKey);
     if (importIconPath.isNull() || !QFile::exists(importIconPath)) {
@@ -271,7 +273,10 @@ bool installIcon(const QString& root, const QString& instIconKey)
     }
     if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
         // import icon
-        auto* iconList = APPLICATION->icons();
+        auto* iconList = icons != nullptr ? icons->list() : nullptr;
+        if (iconList == nullptr) {
+            return false;
+        }
         if (iconList->iconFileExists(instIconKey)) {
             iconList->deleteIcon(instIconKey);
         }
@@ -315,7 +320,7 @@ void InstanceImportTask::processFlame()
     if (m_instIcon == "default") {
         auto iconKey = QString("Flame_%1_Icon").arg(name());
 
-        if (installIcon(m_stagingPath, iconKey)) {
+        if (installIcon(m_services.icons, m_stagingPath, iconKey)) {
             m_instIcon = iconKey;
         }
     }
@@ -377,7 +382,7 @@ void InstanceImportTask::processMultiMC()
     } else {
         m_instIcon = instance.iconKey();
 
-        installIcon(instance.instanceRoot(), m_instIcon);
+        installIcon(m_services.icons, instance.instanceRoot(), m_instIcon);
     }
     emitSucceeded();
 }
@@ -422,7 +427,7 @@ void InstanceImportTask::processModrinth()
     if (m_instIcon == "default") {
         auto iconKey = QString("Modrinth_%1_Icon").arg(name());
 
-        if (installIcon(m_stagingPath, iconKey)) {
+        if (installIcon(m_services.icons, m_stagingPath, iconKey)) {
             m_instIcon = iconKey;
         }
     }

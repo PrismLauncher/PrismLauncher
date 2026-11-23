@@ -19,11 +19,16 @@ class QLabel;
 class QToolButton;
 class QSpacerItem;
 
+class JavaEnvironment;
+namespace Meta {
+class Index;
+}
+
 class JavaWizardWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit JavaWizardWidget(QWidget* parent);
+    explicit JavaWizardWidget(JavaEnvironment* java, Meta::Index* metadata, QWidget* parent);
     virtual ~JavaWizardWidget();
 
     enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
@@ -100,4 +105,6 @@ class JavaWizardWidget : public QWidget {
     shared_qobject_ptr<JavaChecker> m_checker;
     JavaChecker::Result m_result;
     QTimer* m_memoryTimer;
+    JavaEnvironment* m_java = nullptr;
+    Meta::Index* m_metadata = nullptr;
 };

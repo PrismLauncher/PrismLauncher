@@ -36,7 +36,7 @@
  */
 
 #include "MinecraftInstance.h"
-#include "Application.h"
+#include "LaunchCoordinator.h"
 #include "BuildConfig.h"
 #include "net/HttpMetaCache.h"
 #include "services/IconStore.h"
@@ -334,9 +334,21 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
 
     normalLaunchDemo->setEnabled(supportsDemo());
 
-    connect(normalLaunch, &QAction::triggered, this, [this] { APPLICATION->launch(this); });
-    connect(normalLaunchOffline, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Offline); });
-    connect(normalLaunchDemo, &QAction::triggered, this, [this] { APPLICATION->launch(this, LaunchMode::Demo); });
+    connect(normalLaunch, &QAction::triggered, this, [this] {
+        if (m_services.launch) {
+            m_services.launch->launch(this);
+        }
+    });
+    connect(normalLaunchOffline, &QAction::triggered, this, [this] {
+        if (m_services.launch) {
+            m_services.launch->launch(this, LaunchMode::Offline);
+        }
+    });
+    connect(normalLaunchDemo, &QAction::triggered, this, [this] {
+        if (m_services.launch) {
+            m_services.launch->launch(this, LaunchMode::Demo);
+        }
+    });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
@@ -354,7 +366,10 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     noProfilerAction->setChecked(true);
     profilers->addAction(noProfilerAction);
 
-    for (auto profiler = APPLICATION->profilers().begin(); profiler != APPLICATION->profilers().end(); profiler++) {
+    if (m_services.launch == nullptr) {
+        return;
+    }
+    for (auto profiler = m_services.launch->profilers().begin(); profiler != m_services.launch->profilers().end(); profiler++) {
         QAction* profilerAction = menu->addAction(profiler.value()->name());
         profilers->addAction(profilerAction);
         profilerAction->setData(profiler.key());

@@ -39,6 +39,7 @@
 
 #include "ui/pages/BasePage.h"
 
+class LaunchCoordinator;
 class QTreeWidgetItem;
 
 namespace Ui {
@@ -49,7 +50,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ExternalToolsPage(QWidget* parent = 0);
+    explicit ExternalToolsPage(LaunchCoordinator* launch, QWidget* parent = nullptr);
     ~ExternalToolsPage() override;
 
     QString displayName() const override { return tr("Tools"); }
@@ -73,6 +74,7 @@ class ExternalToolsPage : public QWidget, public BasePage {
 
    private:
     Ui::ExternalToolsPage* m_ui;
+    LaunchCoordinator* m_launch = nullptr;
 
    private slots:
     void on_jprofilerPathBtn_clicked();

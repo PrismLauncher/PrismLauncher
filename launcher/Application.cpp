@@ -41,6 +41,11 @@
  */
 
 #include "Application.h"
+#include "LaunchController.h"
+#include "LaunchCoordinator.h"
+#include "java/JavaInstallList.h"
+#include "services/JavaEnvironment.h"
+#include "services/LauncherWindows.h"
 #include "BuildConfig.h"
 
 #include "DataMigrationTask.h"
@@ -300,6 +305,93 @@ std::tuple<QDateTime, QString, QString, QString, QString> readLockFile(const QSt
     return std::make_tuple(timestamp, from, to, target, dataPath);
 }
 }  // namespace
+
+namespace {
+
+class ApplicationWindows final : public LauncherWindows {
+   public:
+    explicit ApplicationWindows(Application* app) : m_app(app) {}
+
+    void showMainWindow() override { m_app->showMainWindow(); }
+    void showInstanceWindow(MinecraftInstance* instance, const QString& page) override { m_app->showInstanceWindow(instance, page); }
+    void showLogWindow() override { m_app->showLogWindow(); }
+    void showGlobalSettings(QWidget* parent, const QString& page) override { m_app->ShowGlobalSettings(parent, page); }
+
+   private:
+    Application* m_app;
+};
+
+class ApplicationJavaEnvironment final : public JavaEnvironment {
+   public:
+    explicit ApplicationJavaEnvironment(Application* app) : m_app(app) {}
+
+    QString javaPath() const override { return m_app->javaPath(); }
+    JavaInstallList* installs() override { return m_app->javalist(); }
+
+   private:
+    Application* m_app;
+};
+
+}  // namespace
+
+class ApplicationLaunchHost final : public LaunchHost {
+   public:
+    explicit ApplicationLaunchHost(Application* app) : m_app(app) {}
+
+    bool saveInstanceWindow(const QString& instanceId) override
+    {
+        QMutexLocker locker(&m_app->m_instanceExtrasMutex);
+        auto* window = m_app->m_instanceExtras[instanceId].window;
+        locker.unlock();
+        return window == nullptr || window->saveAll();
+    }
+
+    QWidget* instanceWindow(const QString& instanceId) const override
+    {
+        QMutexLocker locker(&m_app->m_instanceExtrasMutex);
+        auto it = m_app->m_instanceExtras.find(instanceId);
+        if (it == m_app->m_instanceExtras.end()) {
+            return nullptr;
+        }
+        return it->second.window;
+    }
+
+    QWidget* mainWindow() const override { return m_app->m_mainWindow; }
+
+    void adoptController(const QString& instanceId, std::unique_ptr<LaunchController> controller) override
+    {
+        QMutexLocker locker(&m_app->m_instanceExtrasMutex);
+        m_app->m_instanceExtras[instanceId].controller = std::move(controller);
+    }
+
+    LaunchController* controller(const QString& instanceId) const override
+    {
+        QMutexLocker locker(&m_app->m_instanceExtrasMutex);
+        auto it = m_app->m_instanceExtras.find(instanceId);
+        if (it == m_app->m_instanceExtras.end()) {
+            return nullptr;
+        }
+        return it->second.controller.get();
+    }
+
+    BaseProfilerFactory* profiler(const QString& id) const override { return m_app->m_profilers.value(id, nullptr).get(); }
+
+    bool isUpdateRunning() const override { return m_app->m_updateRunning; }
+
+    void addRunningInstance() override { m_app->addRunningInstance(); }
+
+    void watch(LaunchController* controller) override
+    {
+        QObject::connect(controller, &LaunchController::finished, m_app, &Application::controllerFinished);
+    }
+
+    LauncherWindows* windows() const override { return m_app->m_windows.get(); }
+
+    const QMap<QString, std::shared_ptr<BaseProfilerFactory>>& profilers() const override { return m_app->m_profilers; }
+
+   private:
+    Application* m_app;
+};
 
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
@@ -925,10 +1017,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<AppearancePage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
-            m_globalSettingsProvider->addPage<JavaPage>();
+            m_globalSettingsProvider->addPageCreator(
+                [this]() { return new JavaPage(m_javaEnvironment.get(), m_launcherSettings.get(), metadataIndex()); });
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
-            m_globalSettingsProvider->addPage<ExternalToolsPage>();
+            m_globalSettingsProvider->addPageCreator([this]() { return new ExternalToolsPage(m_launchCoordinator.get()); });
             m_globalSettingsProvider->addPage<ProxyPage>();
         }
 
@@ -1033,6 +1126,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_launcherSettings = std::make_unique<SettingsObjectLauncherSettings>(m_settings.get(), m_playtimeSettings.get());
         m_networkContext = std::make_unique<SharedNetworkContext>(m_network.get(), m_metacache.get(), m_settings.get());
         m_iconStore = std::make_unique<IconListIconStore>(m_icons.get());
+        m_windows = std::make_unique<ApplicationWindows>(this);
+        m_javaEnvironment = std::make_unique<ApplicationJavaEnvironment>(this);
+        m_launchHost = std::make_unique<ApplicationLaunchHost>(this);
+        m_launchCoordinator = std::make_unique<LaunchCoordinator>(m_launchHost.get());
 
         m_instances.reset(new InstanceList(m_settings.get(), allInstDirs, instanceServices(), this));
         connect(instDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
@@ -1299,7 +1396,7 @@ bool Application::createSetupWizard()
         }
 
         if (javaRequired) {
-            m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+            m_setupWizard->addPage(new JavaWizardPage(m_javaEnvironment.get(), metadataIndex(), m_setupWizard));
         } else if (askjava) {
             m_setupWizard->addPage(new AutoJavaWizardPage(m_setupWizard));
         }
@@ -1539,7 +1636,7 @@ TranslationsModel* Application::translations()
 JavaInstallList* Application::javalist()
 {
     if (!m_javalist) {
-        m_javalist.reset(new JavaInstallList());
+        m_javalist.reset(new JavaInstallList(m_javaEnvironment.get(), m_launcherSettings.get()));
     }
     return m_javalist.get();
 }
@@ -1565,59 +1662,12 @@ bool Application::launch(MinecraftInstance* instance,
                          MinecraftAccountPtr accountToUse,
                          const QString& offlineName)
 {
-    if (m_updateRunning) {
-        qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
-    } else if (instance->canLaunch()) {
-        QMutexLocker locker(&m_instanceExtrasMutex);
-        auto& extras = m_instanceExtras[instance->id()];
-        auto* window = extras.window;
-        if (window) {
-            if (!window->saveAll()) {
-                return false;
-            }
-        }
-        auto& controller = extras.controller;
-        controller = std::make_unique<LaunchController>();
-        controller->setInstance(instance);
-        controller->setLaunchMode(mode);
-        controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
-        controller->setTargetToJoin(std::move(targetToJoin));
-        controller->setAccountToUse(std::move(accountToUse));
-        controller->setOfflineName(offlineName);
-        if (window) {
-            controller->setParentWidget(window);
-        } else if (m_mainWindow) {
-            controller->setParentWidget(m_mainWindow);
-        }
-        connect(controller.get(), &LaunchController::finished, this, &Application::controllerFinished);
-        addRunningInstance();
-        QMetaObject::invokeMethod(controller.get(), &Task::start, Qt::QueuedConnection);
-        return true;
-    } else if (instance->isRunning()) {
-        showInstanceWindow(instance, "console");
-        return true;
-    } else if (instance->canEdit()) {
-        showInstanceWindow(instance);
-        return true;
-    }
-    return false;
+    return m_launchCoordinator->launch(instance, mode, std::move(targetToJoin), std::move(accountToUse), offlineName);
 }
 
 bool Application::kill(BaseInstance* instance)
 {
-    if (!instance->isRunning()) {
-        qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
-        return false;
-    }
-    QMutexLocker locker(&m_instanceExtrasMutex);
-    auto& extras = m_instanceExtras[instance->id()];
-    // NOTE: copy of the shared pointer keeps it alive
-    auto& controller = extras.controller;
-    locker.unlock();
-    if (controller) {
-        return controller->abort();
-    }
-    return true;
+    return m_launchCoordinator->kill(instance);
 }
 
 void Application::closeCurrentWindow()
@@ -1711,7 +1761,8 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow->raise();
         m_mainWindow->activateWindow();
     } else {
-        m_mainWindow = new MainWindow(launcherSettings(), instanceCatalog(), accountService(), networkContext());
+        m_mainWindow = new MainWindow(launcherSettings(), instanceCatalog(), accountService(), networkContext(), m_iconStore.get(),
+                                     m_launchCoordinator.get(), m_windows.get(), metadataIndex(), m_javaEnvironment.get());
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toString().toUtf8()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toString().toUtf8()));
 
@@ -1875,6 +1926,7 @@ Meta::Index* Application::metadataIndex()
     if (!m_metadataIndex) {
         m_metadataIndex.reset(new Meta::Index());
     }
+    m_metadataIndex->bind(m_launcherSettings.get(), m_networkContext.get());
     return m_metadataIndex.get();
 }
 
@@ -1939,7 +1991,10 @@ InstanceServices Application::instanceServices()
              .network = m_networkContext.get(),
              .icons = m_iconStore.get(),
              .metadata = metadataIndex(),
-             .runtime = &m_runtime };
+             .runtime = &m_runtime,
+             .launch = m_launchCoordinator.get(),
+             .windows = m_windows.get(),
+             .java = m_javaEnvironment.get() };
 }
 
 AuthContext Application::authContext() const

@@ -26,7 +26,7 @@
 QString stripVariableEntries(QString name, QString target, QString remove);
 QProcessEnvironment CleanEnviroment();
 QStringList getMinecraftJavaBundle();
-QStringList getPrismJavaBundle();
+QStringList getPrismJavaBundle(const QString& managedJavaDir);
 
 class JavaUtils : public QObject {
     Q_OBJECT
@@ -34,7 +34,7 @@ class JavaUtils : public QObject {
     JavaUtils();
 
     JavaInstallPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");
-    QList<QString> FindJavaPaths();
+    QList<QString> FindJavaPaths(const QString& managedJavaDir = {});
     JavaInstallPtr GetDefaultJava();
 
 #ifdef Q_OS_WIN

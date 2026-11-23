@@ -40,6 +40,7 @@
 
 #include "BuildConfig.h"
 #include "CreateShortcutDialog.h"
+#include "services/IconStore.h"
 #include "ui_CreateShortcutDialog.h"
 
 #include "ui/dialogs/IconPickerDialog.h"
@@ -61,7 +62,8 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
     ui->setupUi(this);
 
     InstIconKey = instance->iconKey();
-    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+    auto* icons = m_instance != nullptr ? m_instance->services().icons : nullptr;
+    ui->iconButton->setIcon(icons != nullptr && icons->list() != nullptr ? icons->list()->getIcon(InstIconKey) : QIcon());
     ui->instNameTextBox->setPlaceholderText(instance->name());
 
     m_QuickJoinSupported = instance && instance->traits().contains("feature:is_quick_play_singleplayer");
@@ -126,12 +128,13 @@ CreateShortcutDialog::~CreateShortcutDialog()
 
 void CreateShortcutDialog::on_iconButton_clicked()
 {
-    IconPickerDialog dlg(this);
+    IconPickerDialog dlg(m_instance != nullptr ? m_instance->services().icons : nullptr, this);
     dlg.execWithSelection(InstIconKey);
 
     if (dlg.result() == QDialog::Accepted) {
         InstIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+        auto* icons = m_instance != nullptr ? m_instance->services().icons : nullptr;
+        ui->iconButton->setIcon(icons != nullptr && icons->list() != nullptr ? icons->list()->getIcon(InstIconKey) : QIcon());
     }
 }
 

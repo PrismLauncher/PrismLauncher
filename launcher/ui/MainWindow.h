@@ -70,6 +70,14 @@ class NetworkContext;
 namespace Ui {
 class MainWindow;
 }
+class IconStore;
+class JavaEnvironment;
+class LaunchCoordinator;
+class LauncherWindows;
+namespace Meta {
+class Index;
+}
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -78,6 +86,11 @@ class MainWindow : public QMainWindow {
                InstanceCatalog* instances,
                AccountService* accounts,
                NetworkContext* network,
+               IconStore* icons,
+               LaunchCoordinator* launch,
+               LauncherWindows* windows,
+               Meta::Index* metadata,
+               JavaEnvironment* java,
                QWidget* parent = nullptr);
     ~MainWindow();
 
@@ -249,6 +262,11 @@ class MainWindow : public QMainWindow {
     InstanceCatalog* m_instances;
     AccountService* m_accounts;
     NetworkContext* m_network;
+    IconStore* m_icons;
+    LaunchCoordinator* m_launch;
+    LauncherWindows* m_windows;
+    Meta::Index* m_metadata;
+    JavaEnvironment* m_java;
 
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;

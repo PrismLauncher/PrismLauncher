@@ -20,13 +20,16 @@
 
 #include <QString>
 
+class IconList;
+
 /**
- * Narrow icon contract for domain code that needs to materialize an icon file.
- * Application owns the IconList; this does not expose the icon model.
+ * Icon contract. Domain code saves a launch icon. UI code uses list() for the model
+ * Application already owns. A null list means icons are unavailable.
  */
 class IconStore {
    public:
     virtual ~IconStore() = default;
 
     virtual void saveIcon(const QString& key, const QString& path, const char* format) const = 0;
+    virtual IconList* list() const = 0;
 };

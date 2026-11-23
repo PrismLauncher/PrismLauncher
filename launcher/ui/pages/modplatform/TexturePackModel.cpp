@@ -6,7 +6,8 @@
 
 #include <utility>
 
-#include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 
 #include "meta/Index.h"
 #include "meta/Version.h"
@@ -19,9 +20,11 @@ TexturePackResourceModel::TexturePackResourceModel(ResourceFolderModel* inst,
                                                    const QString& debugName,
                                                    QString metaEntryBase)
     : ResourcePackResourceModel(inst, api, debugName, std::move(metaEntryBase))
-    , m_version_list(APPLICATION->metadataIndex()->get("net.minecraft"))
+    , m_version_list(inst->instance() != nullptr && inst->instance()->services().metadata != nullptr
+                         ? inst->instance()->services().metadata->get("net.minecraft")
+                         : Meta::VersionList::Ptr())
 {
-    if (!m_version_list->isLoaded()) {
+    if (m_version_list && !m_version_list->isLoaded()) {
         qDebug() << "Loading version list...";
         m_task = m_version_list->getLoadTask();
         if (!m_task->isRunning())
@@ -50,6 +53,9 @@ void waitOnVersionListLoad(Meta::VersionList::Ptr version_list)
 
 ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
 {
+    if (!m_version_list) {
+        return ResourcePackResourceModel::createSearchArguments();
+    }
     if (s_availableVersions.empty())
         waitOnVersionListLoad(m_version_list);
 
@@ -80,7 +86,7 @@ ResourceAPI::VersionSearchArgs TexturePackResourceModel::createVersionsArguments
 {
     auto args = ResourcePackResourceModel::createVersionsArguments(entry);
     args.resourceType = ModPlatform::ResourceType::TexturePack;
-    if (!m_version_list->isLoaded()) {
+    if (!m_version_list || !m_version_list->isLoaded()) {
         qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
         return args;
     }

@@ -19,10 +19,11 @@
 #include <icons/IconList.h>
 #include "Application.h"
 #include "InstanceView.h"
+#include "services/IconStore.h"
 
 #include <QDebug>
 
-InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
+InstanceProxyModel::InstanceProxyModel(IconStore* icons, QObject* parent) : QSortFilterProxyModel(parent), m_icons(icons)
 {
     m_naturalSort.setNumericMode(true);
     m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
@@ -34,7 +35,10 @@ QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
 {
     QVariant data = QSortFilterProxyModel::data(index, role);
     if (role == Qt::DecorationRole) {
-        return QVariant(APPLICATION->icons()->getIcon(data.toString()));
+        if (m_icons != nullptr && m_icons->list() != nullptr) {
+            return QVariant(m_icons->list()->getIcon(data.toString()));
+        }
+        return QVariant();
     }
     return data;
 }

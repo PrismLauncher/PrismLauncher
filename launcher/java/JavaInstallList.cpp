@@ -40,15 +40,16 @@
 #include <QDebug>
 #include <algorithm>
 
-#include "Application.h"
+#include "services/JavaEnvironment.h"
+#include "services/LauncherSettings.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "settings/SettingsObject.h"
 #include "tasks/ConcurrentTask.h"
 
-JavaInstallList::JavaInstallList(QObject* parent, bool onlyManagedVersions)
-    : BaseVersionList(parent), m_only_managed_versions(onlyManagedVersions)
+JavaInstallList::JavaInstallList(JavaEnvironment* java, LauncherSettings* settings, QObject* parent, bool onlyManagedVersions)
+    : BaseVersionList(parent), m_only_managed_versions(onlyManagedVersions), m_java(java), m_settings(settings)
 {}
 
 Task::Ptr JavaInstallList::getLoadTask(bool forceReload)
@@ -159,9 +160,14 @@ void JavaListLoadTask::executeTask()
     setStatus(tr("Detecting Java installations..."));
 
     JavaUtils ju;
-    QList<QString> candidate_paths = m_only_managed_versions ? getPrismJavaBundle() : ju.FindJavaPaths();
+    const QString managedDir = m_list->javaEnvironment() != nullptr ? m_list->javaEnvironment()->javaPath() : QString();
+    QList<QString> candidate_paths = m_only_managed_versions ? getPrismJavaBundle(managedDir) : ju.FindJavaPaths(managedDir);
+    int concurrent = 10;
+    if (auto* settings = m_list->launcherSettings()) {
+        concurrent = settings->get("NumberOfConcurrentTasks").toInt();
+    }
 
-    ConcurrentTask::Ptr job(new ConcurrentTask("Java detection", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+    ConcurrentTask::Ptr job(new ConcurrentTask("Java detection", concurrent));
     m_job.reset(job);
     // HACK: as long as m_list is alive, we will be
     // however, for some reason sometimes we outlive m_list (which javaCheckerFinished accesses)

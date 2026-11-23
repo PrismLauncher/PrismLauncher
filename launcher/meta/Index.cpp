@@ -15,11 +15,11 @@
 
 #include "Index.h"
 
-#include "Application.h"
 #include "JsonFormat.h"
 #include "QObjectPtr.h"
 #include "VersionList.h"
 #include "meta/BaseEntity.h"
+#include "services/LauncherSettings.h"
 #include "tasks/SequentialTask.h"
 
 namespace Meta {
@@ -27,8 +27,33 @@ Index::Index(QObject* parent) : QAbstractListModel(parent) {}
 Index::Index(const QList<VersionList::Ptr>& lists, QObject* parent) : QAbstractListModel(parent), m_lists(lists)
 {
     for (int i = 0; i < m_lists.size(); ++i) {
+        adopt(m_lists.at(i));
         m_uids.insert(m_lists.at(i)->uid(), m_lists.at(i));
         connectVersionList(i, m_lists.at(i));
+    }
+}
+
+void Index::bind(LauncherSettings* settings, NetworkContext* network)
+{
+    m_services.settings = settings;
+    m_services.network = network;
+    setMetaServices(&m_services);
+    for (const auto& list : m_lists) {
+        adopt(list);
+    }
+}
+
+void Index::adopt(const VersionList::Ptr& list)
+{
+    if (!list) {
+        return;
+    }
+    list->setMetaServices(&m_services);
+    list->setIndex(this);
+    for (int i = 0; i < list->count(); ++i) {
+        if (auto version = std::dynamic_pointer_cast<BaseEntity>(list->at(i))) {
+            version->setMetaServices(&m_services);
+        }
     }
 }
 
@@ -85,6 +110,7 @@ VersionList::Ptr Index::get(const QString& uid)
     VersionList::Ptr out = m_uids.value(uid, nullptr);
     if (!out) {
         out = std::make_shared<VersionList>(uid);
+        adopt(out);
         m_uids[uid] = out;
         m_lists.append(out);
     }
@@ -110,6 +136,7 @@ void Index::merge(const std::shared_ptr<Index>& other)
         beginResetModel();
         m_lists = lists;
         for (int i = 0; i < lists.size(); ++i) {
+            adopt(lists.at(i));
             m_uids.insert(lists.at(i)->uid(), lists.at(i));
             connectVersionList(i, lists.at(i));
         }
@@ -120,6 +147,7 @@ void Index::merge(const std::shared_ptr<Index>& other)
                 m_uids[list->uid()]->mergeFromIndex(list);
             } else {
                 beginInsertRows(QModelIndex(), m_lists.size(), m_lists.size());
+                adopt(list);
                 connectVersionList(m_lists.size(), list);
                 m_lists.append(list);
                 m_uids.insert(list->uid(), list);
@@ -136,7 +164,8 @@ void Index::connectVersionList(const int row, const VersionList::Ptr& list)
 
 Task::Ptr Index::loadVersion(const QString& uid, const QString& version, Net::Mode mode, bool force)
 {
-    if (mode == Net::Mode::Offline || !APPLICATION->settings()->get("MetaRefreshOnLaunch").toBool()) {
+    const bool refresh = m_services.settings != nullptr && m_services.settings->get("MetaRefreshOnLaunch").toBool();
+    if (mode == Net::Mode::Offline || !refresh) {
         return get(uid, version)->loadTask(mode);
     }
 

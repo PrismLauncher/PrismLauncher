@@ -40,6 +40,8 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "CopyInstanceDialog.h"
+#include "minecraft/MinecraftInstance.h"
+#include "services/IconStore.h"
 #include "ui_CopyInstanceDialog.h"
 
 #include "ui/dialogs/IconPickerDialog.h"
@@ -59,7 +61,9 @@ CopyInstanceDialog::CopyInstanceDialog(BaseInstance* original, QWidget* parent)
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
     InstIconKey = original->iconKey();
-    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+    auto* mcInstance = dynamic_cast<MinecraftInstance*>(m_original);
+    auto* icons = mcInstance != nullptr ? mcInstance->services().icons : nullptr;
+    ui->iconButton->setIcon(icons != nullptr && icons->list() != nullptr ? icons->list()->getIcon(InstIconKey) : QIcon());
     ui->instNameTextBox->setText(original->name());
     ui->instNameTextBox->setFocus();
 
@@ -207,12 +211,14 @@ void CopyInstanceDialog::updateLinkOptions()
 
 void CopyInstanceDialog::on_iconButton_clicked()
 {
-    IconPickerDialog dlg(this);
+    auto* mcInstance = dynamic_cast<MinecraftInstance*>(m_original);
+    IconPickerDialog dlg(mcInstance != nullptr ? mcInstance->services().icons : nullptr, this);
     dlg.execWithSelection(InstIconKey);
 
     if (dlg.result() == QDialog::Accepted) {
         InstIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+        auto* icons = mcInstance != nullptr ? mcInstance->services().icons : nullptr;
+        ui->iconButton->setIcon(icons != nullptr && icons->list() != nullptr ? icons->list()->getIcon(InstIconKey) : QIcon());
     }
 }
 

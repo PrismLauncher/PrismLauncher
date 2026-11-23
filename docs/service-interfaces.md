@@ -100,5 +100,14 @@ Wrappers do not introduce a second service locator. Do not replace `APPLICATION`
 - `Application::instanceServices()` builds the bundle. The meta cache, settings wrapper, network wrapper, and icon store are created before `InstanceList::loadList()`, because loading an instance copies the pointers. `LauncherRuntimeInfo` is updated in place by `detectLibraries()` and `updateCapabilities()`, so instances see the detected libraries at launch time.
 - `InstanceList` and `InstanceTask` carry the bundle. Every `MinecraftInstance` constructor takes it: instance load, vanilla creation, and the Flame, Modrinth, FTB, legacy FTB, import FTB, ATLauncher, and Technic install tasks.
 - `MinecraftInstance` uses it for native-library arguments, the libraries directory, game-time formatting, mod-metadata indexing, the launch icon, and MangoHud. `PackProfile` no longer includes `Application.h`; components and `ComponentUpdateTask` read the metadata index from the instance. Library, asset, and legacy FML update tasks build their `NetJob`s on the injected network and read URL overrides from the injected settings.
-- `populateLaunchMenu` still calls `APPLICATION->launch()` and `profilers()`. That menu is UI, and launch coordination is R2.1. Java download (`AutoInstallJava`), account claim, and window show/hide on launch stay on `Application` for the same reason.
+- `populateLaunchMenu` calls the injected `LaunchCoordinator` for launch and the profiler list. Java download and window show/hide go through `JavaEnvironment` and `LauncherWindows` (see below). Account claim stays on `Application`.
 - `tests/InstanceServices_test.cpp` checks the injected OpenAL path, the asset URL override, and that a service-less instance still builds arguments.
+
+## Remaining workflow migration (R1)
+
+- `LaunchCoordinator` owns launch and kill. `Application::launch()` / `kill()` delegate to it. Menus, the main window, the instance window, and world/server pages call the coordinator on `InstanceServices`.
+- `LauncherWindows` is the window contract (main window, instance window, log window, global settings). `Application` implements it. Launch steps and settings buttons use the pointer instead of `APPLICATION`.
+- `JavaEnvironment` exposes the managed Java directory and the detected-install list. Java pages, the setup wizard, and `AutoInstallJava` take it. `JavaInstallList` no longer asks `APPLICATION` for the directory or the task concurrency setting.
+- `IconStore::list()` returns the `IconList` the UI already uses as a model. Icon pickers, the instance toolbar, and shortcut creation go through that pointer.
+- Metadata download uses `MetaServices` (settings + network) stored on `Meta::Index` and copied onto version lists and versions. `Application::metadataIndex()` binds it. Version lists load the index they belong to instead of `APPLICATION->metadataIndex()`.
+- Updater, themes, translations, and startup stay on `Application`.

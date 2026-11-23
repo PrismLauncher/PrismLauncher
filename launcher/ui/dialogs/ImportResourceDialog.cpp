@@ -12,7 +12,7 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 
-ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, QWidget* parent)
+ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, IconStore* icons, QWidget* parent)
     : QDialog(parent), ui(new Ui::ImportResourceDialog), m_resource_type(type), m_file_path(file_path)
 {
     ui->setupUi(this);
@@ -34,7 +34,7 @@ ImportResourceDialog::ImportResourceDialog(QString file_path, ModPlatform::Resou
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->setItemDelegate(new ListViewDelegate());
 
-    proxyModel = new InstanceProxyModel(this);
+    proxyModel = new InstanceProxyModel(icons, this);
     proxyModel->setSourceModel(APPLICATION->instances());
     proxyModel->sort(0);
     contentsWidget->setModel(proxyModel);

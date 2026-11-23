@@ -36,6 +36,7 @@
  */
 
 #include "MinecraftSettingsWidget.h"
+#include "services/LauncherWindows.h"
 #include "modplatform/ModIndex.h"
 #include "ui_MinecraftSettingsWidget.h"
 
@@ -527,10 +528,15 @@ void MinecraftSettingsWidget::openGlobalSettings()
 
     qDebug() << id;
 
-    if (id == "javaPage")
-        APPLICATION->ShowGlobalSettings(this, "java-settings");
-    else  // TODO select tab
-        APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
+    if (id == "javaPage") {
+        if (m_instance->services().windows != nullptr) {
+            m_instance->services().windows->showGlobalSettings(this, "java-settings");
+        }
+    } else {  // TODO select tab
+        if (m_instance->services().windows != nullptr) {
+            m_instance->services().windows->showGlobalSettings(this, "minecraft-settings");
+        }
+    }
 }
 
 void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)

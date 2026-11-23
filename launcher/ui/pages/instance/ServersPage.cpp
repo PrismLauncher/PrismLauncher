@@ -36,6 +36,7 @@
  */
 
 #include "ServersPage.h"
+#include "LaunchCoordinator.h"
 #include "Application.h"
 #include "ServerPingTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -762,7 +763,10 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto& address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, LaunchMode::Normal, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false)));
+    if (m_inst->services().launch != nullptr) {
+        m_inst->services().launch->launch(m_inst, LaunchMode::Normal,
+                                          std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false)));
+    }
 }
 
 void ServersPage::on_actionRefresh_triggered()
