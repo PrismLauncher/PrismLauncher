@@ -415,20 +415,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
         parser.process(arguments());
 
-        // TODO: Move to fields
-        QString m_instanceIdToExport;
-        QString m_exportFormat;
-        bool m_exportIncludePaths;
-        QString m_exportName;
-        QString m_exportVersion;
-        bool m_exportMarkAsOptional;
-        QString m_exportAuthor;
-        bool m_exportSetRecommendedMemory;
-        int m_exportRecommendedMemory;
-        QString m_exportSummary;
-        QString m_exportShowFiles;
-        QStringList m_exportExcludePaths;
-
         m_instanceIdToExport = args.value(1);
         if (m_instanceIdToExport.isEmpty()) {
             parser.showHelp(1);

@@ -298,6 +298,18 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     bool m_showMainWindow = false;
+    QString m_instanceIdToExport;
+    QString m_exportFormat;
+    bool m_exportIncludePaths;
+    QString m_exportName;
+    QString m_exportVersion;
+    bool m_exportMarkAsOptional;
+    QString m_exportAuthor;
+    bool m_exportSetRecommendedMemory;
+    int m_exportRecommendedMemory;
+    QString m_exportSummary;
+    QString m_exportShowFiles;
+    QStringList m_exportExcludePaths;
     std::unique_ptr<QFile> logFile;
     std::unique_ptr<LogModel> logModel;
 
