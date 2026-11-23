@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2024 Tayou <git@tayou.org>
  *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2026 JAGUARX CLIENT contributors
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,31 +40,33 @@
 
 QString DarkTheme::id()
 {
+    // Keep the existing ID so saved user preferences continue to select this theme.
     return "dark";
 }
 
 QString DarkTheme::name()
 {
-    return QObject::tr("Dark");
+    return QObject::tr("JAGUARX Dark");
 }
 
 QPalette DarkTheme::colorScheme()
 {
+    // A restrained blue-on-charcoal palette for JAGUARX CLIENT.
     QPalette darkPalette;
-    darkPalette.setColor(QPalette::Window, QColor(49, 49, 49));
-    darkPalette.setColor(QPalette::WindowText, Qt::white);
-    darkPalette.setColor(QPalette::Base, QColor(34, 34, 34));
-    darkPalette.setColor(QPalette::AlternateBase, QColor(42, 42, 42));
-    darkPalette.setColor(QPalette::ToolTipBase, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Window, QColor(25, 30, 40));
+    darkPalette.setColor(QPalette::WindowText, QColor(242, 245, 250));
+    darkPalette.setColor(QPalette::Base, QColor(17, 21, 29));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(30, 37, 49));
+    darkPalette.setColor(QPalette::ToolTipBase, QColor(35, 105, 210));
     darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-    darkPalette.setColor(QPalette::Text, Qt::white);
-    darkPalette.setColor(QPalette::Button, QColor(48, 48, 48));
-    darkPalette.setColor(QPalette::ButtonText, Qt::white);
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-    darkPalette.setColor(QPalette::Link, QColor(47, 163, 198));
-    darkPalette.setColor(QPalette::Highlight, QColor(150, 219, 89));
-    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-    darkPalette.setColor(QPalette::PlaceholderText, Qt::darkGray);
+    darkPalette.setColor(QPalette::Text, QColor(235, 239, 247));
+    darkPalette.setColor(QPalette::Button, QColor(34, 41, 54));
+    darkPalette.setColor(QPalette::ButtonText, QColor(242, 245, 250));
+    darkPalette.setColor(QPalette::BrightText, QColor(255, 96, 96));
+    darkPalette.setColor(QPalette::Link, QColor(92, 163, 255));
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 119, 235));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+    darkPalette.setColor(QPalette::PlaceholderText, QColor(145, 155, 172));
     return fadeInactive(darkPalette, fadeAmount(), fadeColor());
 }
 
@@ -74,7 +77,7 @@ double DarkTheme::fadeAmount()
 
 QColor DarkTheme::fadeColor()
 {
-    return QColor(49, 49, 49);
+    return QColor(25, 30, 40);
 }
 
 bool DarkTheme::hasStyleSheet()
