@@ -6,7 +6,8 @@
 
 #include <utility>
 
-#include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 
 #include "meta/Index.h"
 #include "meta/Version.h"
