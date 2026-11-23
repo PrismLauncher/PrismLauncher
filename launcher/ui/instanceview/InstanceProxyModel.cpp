@@ -17,6 +17,7 @@
 
 #include <BaseInstance.h>
 #include <icons/IconList.h>
+#include "Application.h"
 #include "InstanceView.h"
 #include "services/IconStore.h"
 
