@@ -42,6 +42,8 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QStyle>
+
 #include <expected>
 #include <utility>
 
@@ -253,4 +255,15 @@ QStringList GuiUtil::browseForFiles(const QString& context,
                                     QWidget* parentWidget)
 {
     return browseForFileInternal(context, caption, filter, defaultPath, parentWidget, false);
+}
+
+QColor GuiUtil::selectedItemFg(const QPalette& palette, const QStyle* style)
+{
+    // The Windows styles paint selected item text in the normal text colour
+    // Vista additionally rewrites the highlight itself.
+    const QString styleKey = style->objectName();
+    // a bit fragile if the style names ever change but ok
+    const bool lightSelection = styleKey == QLatin1String("windowsvista") || styleKey == QLatin1String("windows11");
+
+    return lightSelection ? palette.color(QPalette::Text) : palette.color(QPalette::HighlightedText);
 }
