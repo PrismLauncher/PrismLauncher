@@ -1,8 +1,11 @@
 #include "Resource.h"
 
 #include <QFileInfo>
+#include <QCoreApplication>
+#include <QMetaObject>
 #include <QObject>
 #include <QRegularExpression>
+#include <QThreadPool>
 #include <tuple>
 #include <utility>
 

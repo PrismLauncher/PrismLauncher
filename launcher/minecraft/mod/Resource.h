@@ -35,16 +35,13 @@
 
 #pragma once
 
-#include <QApplication>
 #include <QDateTime>
 #include <QFileInfo>
 #include <QIcon>
-#include <QMetaObject>
 #include <QObject>
 #include <QPixmap>
 #include <QPixmapCache>
 #include <QPointer>
-#include <QThreadPool>
 #include <Qt>
 #include <cstdint>
 #include <functional>
