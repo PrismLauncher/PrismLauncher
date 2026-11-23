@@ -87,11 +87,14 @@ bool laxCompare(const QString& fsfilename, const QString& metadataFilename, bool
 
 GetModDependenciesTask::GetModDependenciesTask(MinecraftInstance* instance,
                                                ModFolderModel* folder,
-                                               QList<std::shared_ptr<PackDependency>> selected)
+                                               QList<std::shared_ptr<PackDependency>> selected,
+                                               NetworkContext* network)
     : SequentialTask(tr("Get dependencies"))
     , m_selected(std::move(selected))
     , m_version(mcVersion(instance))
     , m_loaderType(mcLoaders(instance))
+    , m_flameApi(network)
+    , m_modrinthApi(network)
 {
     for (auto* mod : folder->allMods()) {
         m_modsFileNames << mod->fileinfo().fileName();

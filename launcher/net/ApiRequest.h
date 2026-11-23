@@ -52,8 +52,52 @@ inline Request::Ptr makeFile(const QUrl& url,
                                 Request::Options options = Request::Option::NoOptions,
                                 ModrinthDownloadMeta meta = ModrinthDownloadMeta())
 {
+    auto req = Request::makeFile(url, path, options | Request::Option::AddAPIHeaders);
+    if (!meta.isEmpty()) {
+        req->addHeaderProxy(std::make_unique<ApiHeaderProxy>(nullptr, std::move(meta)));
+    }
+    return req;
+}
+
+// Overloads that take provider credentials from an injected NetworkContext.
+
+inline Request::Ptr makeCached(const NetworkContext* network,
+                                  const QUrl& url,
+                                  MetaEntryPtr entry,
+                                  Request::Options options = Request::Option::NoOptions)
+{
+    auto req = Request::makeCached(url, std::move(entry), options);
+    req->addHeaderProxy(std::make_unique<ApiHeaderProxy>(network));
+    return req;
+}
+
+inline std::pair<Request::Ptr, QByteArray*> makeByteArray(const NetworkContext* network,
+                                                             const QUrl& url,
+                                                             Request::Options options = Request::Option::NoOptions)
+{
+    auto result = Request::makeByteArray(url, options);
+    result.first->addHeaderProxy(std::make_unique<ApiHeaderProxy>(network));
+    return result;
+}
+
+inline std::pair<Request::Ptr, QByteArray*> makeByteArray(const NetworkContext* network,
+                                                             const QUrl& url,
+                                                             QByteArray postData,
+                                                             Request::Options options = Request::Option::NoOptions)
+{
+    auto result = Request::makeByteArray(url, std::move(postData), options);
+    result.first->addHeaderProxy(std::make_unique<ApiHeaderProxy>(network));
+    return result;
+}
+
+inline Request::Ptr makeFile(const NetworkContext* network,
+                                const QUrl& url,
+                                const QString& path,
+                                Request::Options options = Request::Option::NoOptions,
+                                ModrinthDownloadMeta meta = ModrinthDownloadMeta())
+{
     auto req = Request::makeFile(url, path, options);
-    req->addHeaderProxy(std::make_unique<ApiHeaderProxy>(std::move(meta)));
+    req->addHeaderProxy(std::make_unique<ApiHeaderProxy>(network, std::move(meta)));
     return req;
 }
 };  // namespace ApiRequest

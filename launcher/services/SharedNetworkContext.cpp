@@ -43,3 +43,21 @@ QString SharedNetworkContext::userAgent() const
     }
     return BuildConfig.USER_AGENT;
 }
+
+QString SharedNetworkContext::flameApiKey() const
+{
+    QString keyOverride = m_settings->get("FlameKeyOverride").toString();
+    if (!keyOverride.isEmpty()) {
+        return keyOverride;
+    }
+    return BuildConfig.FLAME_API_KEY;
+}
+
+QString SharedNetworkContext::modrinthApiToken() const
+{
+    QString tokenOverride = m_settings->get("ModrinthToken").toString();
+    if (!tokenOverride.isEmpty()) {
+        return tokenOverride;
+    }
+    return {};
+}

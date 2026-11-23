@@ -17,15 +17,11 @@
 
 class ModrinthAPI final : public ResourceAPI {
    public:
-    static const ModrinthAPI& get()
-    {
-        static const ModrinthAPI s_instance;
-        return s_instance;
-    }
+    explicit ModrinthAPI(NetworkContext* network) : ResourceAPI(network) {}
 
-    static std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hashFormat);
+    std::pair<Task::Ptr, QByteArray*> currentVersion(const QString& hash, const QString& hashFormat) const;
 
-    static std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat);
+    std::pair<Task::Ptr, QByteArray*> currentVersions(const QStringList& hashes, const QString& hashFormat) const;
 
     std::pair<Task::Ptr, QByteArray*> latestVersion(const QString& hash,
                                                     const QString& hashFormat,

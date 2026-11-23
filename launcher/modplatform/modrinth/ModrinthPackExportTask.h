@@ -27,6 +27,8 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
+class NetworkContext;
+
 class ModrinthPackExportTask : public Task {
     Q_OBJECT
    public:
@@ -36,7 +38,8 @@ class ModrinthPackExportTask : public Task {
                            bool optionalFiles,
                            MinecraftInstance* instance,
                            const QString& output,
-                           MMCZip::FilterFileFunction filter);
+                           MMCZip::FilterFileFunction filter,
+                           NetworkContext* network);
 
    protected:
     void executeTask() override;
@@ -59,6 +62,7 @@ class ModrinthPackExportTask : public Task {
     const QDir gameRoot;
     const QString output;
     const MMCZip::FilterFileFunction filter;
+    ModrinthAPI m_api;
 
     QFileInfoList files;
     QMap<QString, QString> pendingHashes;

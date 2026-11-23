@@ -1,5 +1,4 @@
 #include "FlameCheckUpdate.h"
-#include "Application.h"
 #include "FlameAPI.h"
 #include "FlameModIndex.h"
 
@@ -16,6 +15,7 @@
 #include "modplatform/ModIndex.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
+#include "services/NetworkContext.h"
 #include "tasks/Task.h"
 
 bool FlameCheckUpdate::abort()
@@ -37,7 +37,7 @@ void FlameCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing resources for CurseForge..."));
 
-    auto* netJob = new NetJob("Get latest versions", APPLICATION->network());
+    auto* netJob = new NetJob("Get latest versions", m_api.network()->qnam());
     connect(netJob, &Task::finished, this, &FlameCheckUpdate::collectBlockedMods);
 
     connect(netJob, &Task::progress, this, &FlameCheckUpdate::setProgress);
@@ -46,12 +46,12 @@ void FlameCheckUpdate::executeTask()
     for (auto* resource : m_resources) {
         auto project = std::make_shared<ModPlatform::IndexedPack>();
         project->addonId = resource->metadata()->project_id.toString();
-        auto versionsUrlOptional = FlameAPI::get().getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
+        auto versionsUrlOptional = m_api.getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
         if (!versionsUrlOptional.has_value()) {
             continue;
         }
 
-        auto [task, response] = Net::ApiRequest::makeByteArray(versionsUrlOptional.value());
+        auto [task, response] = Net::ApiRequest::makeByteArray(m_api.network(), versionsUrlOptional.value());
 
         connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response); });
         netJob->addNetAction(task);
@@ -123,7 +123,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QByteArray* 
 
         auto downloadTask = makeShared<ResourceDownloadTask>(pack, latestVer.value(), m_resourceModel, true, "update");
         m_updates.emplace_back(pack->name, resource->metadata()->hash, oldVersion, latestVer->version, latestVer->versionType,
-                               FlameAPI::getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
+                               m_api.getModFileChangelog(latestVer->addonId.toInt(), latestVer->fileId.toInt()),
                                ModPlatform::ResourceProvider::FLAME, downloadTask, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latestVer.value()));
@@ -147,9 +147,9 @@ void FlameCheckUpdate::collectBlockedMods()
         return;
     }
     if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
+        std::tie(projTask, response) = m_api.getProject(*addonIds.begin());
     } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+        std::tie(projTask, response) = m_api.getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds, quickSearch] {

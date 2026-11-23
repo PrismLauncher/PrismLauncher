@@ -17,6 +17,7 @@
  */
 
 #include "ExportPackDialog.h"
+#include "Application.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlamePackExportTask.h"
@@ -180,7 +181,8 @@ void ExportPackDialog::done(int result)
         Task* task;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             task = new ModrinthPackExportTask(name, m_ui->version->text(), m_ui->summary->toPlainText(), m_ui->optionalFiles->isChecked(),
-                                              m_instance, output, std::bind(&FileIgnoreProxy::filterFile, m_proxy, std::placeholders::_1));
+                                              m_instance, output, std::bind(&FileIgnoreProxy::filterFile, m_proxy, std::placeholders::_1),
+                                              APPLICATION->networkContext());
         } else {
             FlamePackExportOptions options{};
 
@@ -193,7 +195,7 @@ void ExportPackDialog::done(int result)
             options.filter = std::bind(&FileIgnoreProxy::filterFile, m_proxy, std::placeholders::_1);
             options.recommendedRAM = m_ui->recommendedMemoryCheckBox->isChecked() ? m_ui->recommendedMemory->value() : 0;
 
-            task = new FlamePackExportTask(std::move(options));
+            task = new FlamePackExportTask(std::move(options), APPLICATION->networkContext(), APPLICATION->launcherSettings());
         }
 
         connect(task, &Task::failed, this,

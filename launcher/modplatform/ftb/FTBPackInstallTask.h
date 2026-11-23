@@ -48,13 +48,16 @@
 #include <QWidget>
 #include <memory>
 
+class LauncherSettings;
+class NetworkContext;
+
 namespace FTB {
 
 class PackInstallTask final : public InstanceTask {
     Q_OBJECT
 
    public:
-    explicit PackInstallTask(Modpack pack, QString version, QWidget* parent = nullptr);
+    PackInstallTask(Modpack pack, QString version, NetworkContext* network, LauncherSettings* settings, QWidget* parent = nullptr);
     ~PackInstallTask() override = default;
 
     bool abort() override;
@@ -93,6 +96,9 @@ class PackInstallTask final : public InstanceTask {
     QList<BlockedMod> m_blockedMods;
 
     std::unique_ptr<MinecraftInstance> m_instance;
+
+    NetworkContext* m_network = nullptr;
+    LauncherSettings* m_launcherSettings = nullptr;
 
     // FIXME: nuke
     QWidget* m_parent;

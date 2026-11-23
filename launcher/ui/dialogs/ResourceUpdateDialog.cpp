@@ -104,7 +104,8 @@ void ResourceUpdateDialog::checkCandidates()
     SequentialTask checkTask(tr("Checking for updates"));
 
     if (!m_modrinthToUpdate.empty()) {
-        m_modrinthCheckTask.reset(new ModrinthCheckUpdate(m_modrinthToUpdate, versions, m_loadersList, m_resourceModel));
+        m_modrinthCheckTask.reset(new ModrinthCheckUpdate(m_modrinthToUpdate, versions, m_loadersList, m_resourceModel,
+                                                          APPLICATION->networkContext(), APPLICATION->launcherSettings()));
         connect(m_modrinthCheckTask.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Resource* resource, const QString& reason, const QUrl& recoverUrl) {
                     m_failedCheckUpdate.append({ resource, reason, recoverUrl });
@@ -113,7 +114,8 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     if (!m_flameToUpdate.empty()) {
-        m_flameCheckTask.reset(new FlameCheckUpdate(m_flameToUpdate, versions, m_loadersList, m_resourceModel));
+        m_flameCheckTask.reset(
+            new FlameCheckUpdate(m_flameToUpdate, versions, m_loadersList, m_resourceModel, APPLICATION->networkContext()));
         connect(m_flameCheckTask.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Resource* resource, const QString& reason, const QUrl& recoverUrl) {
                     m_failedCheckUpdate.append({ resource, reason, recoverUrl });
@@ -216,7 +218,7 @@ void ResourceUpdateDialog::checkCandidates()
         auto* modModel = dynamic_cast<ModFolderModel*>(m_resourceModel);
 
         if (modModel != nullptr) {
-            auto depTask = makeShared<GetModDependenciesTask>(m_instance, modModel, selectedVers);
+            auto depTask = makeShared<GetModDependenciesTask>(m_instance, modModel, selectedVers, APPLICATION->networkContext());
 
             connect(depTask.get(), &Task::failed, this, [this](const QString& reason) {
                 CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
@@ -249,7 +251,7 @@ void ResourceUpdateDialog::checkCandidates()
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME) {
-                    changelog = FlameAPI::getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+                    changelog = APPLICATION->flameAPI()->getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 }
 
                 auto [maybeInstalled, requiredByNames, requiredByIds] = dependencyExtraInfo.value(dep->version.addonId.toString());
@@ -365,7 +367,8 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the modrinth mods
     if (!modrinthTmp.empty()) {
-        auto modrinthTask = makeShared<EnsureMetadataTask>(modrinthTmp, indexDir2, ModPlatform::ResourceProvider::MODRINTH);
+        auto modrinthTask = makeShared<EnsureMetadataTask>(modrinthTmp, indexDir2, APPLICATION->networkContext(),
+                                                           APPLICATION->launcherSettings(), ModPlatform::ResourceProvider::MODRINTH);
         connect(modrinthTask.get(), &EnsureMetadataTask::metadataReady, this,
                 [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(modrinthTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
@@ -383,7 +386,8 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the flame mods
     if (!flameTmp.empty()) {
-        auto flameTask = makeShared<EnsureMetadataTask>(flameTmp, indexDir2, ModPlatform::ResourceProvider::FLAME);
+        auto flameTask = makeShared<EnsureMetadataTask>(flameTmp, indexDir2, APPLICATION->networkContext(), APPLICATION->launcherSettings(),
+                                                        ModPlatform::ResourceProvider::FLAME);
         connect(flameTask.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(flameTask.get(), &EnsureMetadataTask::metadataFailed, this, [this, &shouldTryOthers](Resource* candidate) {
             onMetadataFailed(candidate, shouldTryOthers.find(candidate->internalId()).value(), ModPlatform::ResourceProvider::FLAME);
@@ -431,7 +435,7 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool tryOthers, 
     if (tryOthers) {
         auto indexDir2 = indexDir();
 
-        auto task = makeShared<EnsureMetadataTask>(resource, indexDir2, next(firstChoice));
+        auto task = makeShared<EnsureMetadataTask>(resource, indexDir2, APPLICATION->networkContext(), next(firstChoice));
         connect(task.get(), &EnsureMetadataTask::metadataReady, this, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(task.get(), &EnsureMetadataTask::metadataFailed, this, [this](Resource* candidate) { onMetadataFailed(candidate, false); });
         connect(task.get(), &EnsureMetadataTask::failed, this,

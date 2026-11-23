@@ -360,7 +360,7 @@ GetModDependenciesTask::Ptr ResourceDownloadDialog::getModDependenciesTask()
                 selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
             }
 
-            return makeShared<GetModDependenciesTask>(m_instance, model, selectedVers);
+            return makeShared<GetModDependenciesTask>(m_instance, model, selectedVers, APPLICATION->networkContext());
         }
     }
     return nullptr;

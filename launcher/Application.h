@@ -85,6 +85,8 @@ class LauncherSettings;
 class NetworkContext;
 class InstanceCatalog;
 class AccountService;
+class FlameAPI;
+class ModrinthAPI;
 
 namespace Meta {
 class Index;
@@ -166,6 +168,10 @@ class Application : public QApplication {
 
     /** Narrow network contract for injection; Application owns the wrapper. */
     NetworkContext* networkContext() const { return m_networkContext.get(); }
+
+    /** Provider API clients bound to networkContext(); Application owns them for UI call sites. */
+    FlameAPI* flameAPI() const { return m_flameAPI.get(); }
+    ModrinthAPI* modrinthAPI() const { return m_modrinthAPI.get(); }
 
     Meta::Index* metadataIndex();
 
@@ -288,6 +294,10 @@ class Application : public QApplication {
     std::unique_ptr<NetworkContext> m_networkContext;
     std::unique_ptr<InstanceCatalog> m_instanceCatalog;
     std::unique_ptr<AccountService> m_accountService;
+
+    // Hold a non-owning NetworkContext*; declared after m_networkContext so they are destroyed first.
+    std::unique_ptr<FlameAPI> m_flameAPI;
+    std::unique_ptr<ModrinthAPI> m_modrinthAPI;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

@@ -112,6 +112,8 @@
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
 
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "services/AccountListService.h"
 #include "services/InstanceListCatalog.h"
 #include "services/SettingsObjectLauncherSettings.h"
@@ -1055,6 +1057,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_networkContext = std::make_unique<SharedNetworkContext>(m_network.get(), m_metacache.get(), m_settings.get());
         m_instanceCatalog = std::make_unique<InstanceListCatalog>(m_instances.get());
         m_accountService = std::make_unique<AccountListService>(m_accounts.get());
+        m_flameAPI = std::make_unique<FlameAPI>(m_networkContext.get());
+        m_modrinthAPI = std::make_unique<ModrinthAPI>(m_networkContext.get());
         qInfo() << "<> Service interfaces wired.";
     }
 
@@ -1933,22 +1937,12 @@ QString Application::getMSAClientID()
 
 QString Application::getFlameAPIKey()
 {
-    QString keyOverride = m_settings->get("FlameKeyOverride").toString();
-    if (!keyOverride.isEmpty()) {
-        return keyOverride;
-    }
-
-    return BuildConfig.FLAME_API_KEY;
+    return m_networkContext->flameApiKey();
 }
 
 QString Application::getModrinthAPIToken()
 {
-    QString tokenOverride = m_settings->get("ModrinthToken").toString();
-    if (!tokenOverride.isEmpty()) {
-        return tokenOverride;
-    }
-
-    return {};
+    return m_networkContext->modrinthApiToken();
 }
 
 QString Application::getUserAgent()

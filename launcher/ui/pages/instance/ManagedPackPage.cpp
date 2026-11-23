@@ -240,7 +240,7 @@ void ModrinthManagedPackPage::parseManagedPack()
     };
     callbacks.onFail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.onAbort = [this]() { setFailState(); };
-    m_fetchJob = ModrinthAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+    m_fetchJob = APPLICATION->modrinthAPI()->getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
                                                          .mcVersions = {},
                                                          .loaders = {},
                                                          .resourceType = ModPlatform::ResourceType::Modpack,
@@ -395,7 +395,7 @@ void FlameManagedPackPage::parseManagedPack()
     };
     callbacks.onFail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.onAbort = [this]() { setFailState(); };
-    m_fetchJob = FlameAPI::get().getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
+    m_fetchJob = APPLICATION->flameAPI()->getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
                                                       .mcVersions = {},
                                                       .loaders = {},
                                                       .resourceType = ModPlatform::ResourceType::Modpack,
@@ -420,8 +420,8 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(
+        APPLICATION->flameAPI()->getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
 }

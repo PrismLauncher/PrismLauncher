@@ -7,7 +7,7 @@ This note covers the narrow service contracts introduced for R1 and the rules fo
 | Interface | Purpose | Current wrapper |
 | --- | --- | --- |
 | `LauncherSettings` | Global and playtime settings access | `SettingsObjectLauncherSettings` |
-| `NetworkContext` | Shared `QNetworkAccessManager`, `HttpMetaCache`, user-agent | `SharedNetworkContext` |
+| `NetworkContext` | Shared `QNetworkAccessManager`, `HttpMetaCache`, user-agent, CurseForge key, Modrinth token | `SharedNetworkContext` |
 | `InstanceCatalog` | Instance lookup and lifecycle operations | `InstanceListCatalog` |
 | `AccountService` | Account list, default account, refresh entry points | `AccountListService` |
 
@@ -51,5 +51,15 @@ Wrappers do not introduce a second service locator. Do not replace `APPLICATION`
 
 - Rewriting `APPLICATION->…` call sites (R1.3+)
 - Extracting `AuthFlow` construction into `AccountService`
-- Moving API keys / capability flags onto `NetworkContext`
+- Moving API keys / capability flags onto `NetworkContext` (API keys done in R1.3)
 - Splitting CMake targets by layer (R7)
+
+## Flame / Modrinth migration (R1.3)
+
+- `NetworkContext` exposes `flameApiKey()` and `modrinthApiToken()`. `SharedNetworkContext` owns the lookup (user override, else build-time key); `Application::getFlameAPIKey()` / `getModrinthAPIToken()` delegate to it.
+- `ResourceAPI`, `FlameAPI`, and `ModrinthAPI` take a `NetworkContext*` in their constructor. The `FlameAPI::get()` / `ModrinthAPI::get()` singletons are gone, and the former static network calls (`getFiles`, `matchFingerprints`, `currentVersions`, changelog/description, …) are instance methods.
+- `Net::ApiHeaderProxy` reads credentials from the `NetworkContext` it is given. `Net::ApiRequest` has overloads that take a `NetworkContext*`; provider code uses those. The legacy overloads (`Request::Option::AddAPIHeaders`) still resolve the context from `Application` inside `net/Request.cpp`.
+- Flame/Modrinth tasks receive dependencies through their constructors: `FlameCheckUpdate`, `ModrinthCheckUpdate`, `Flame::FileResolvingTask`, `EnsureMetadataTask`, `FlamePackExportTask`, `ModrinthPackExportTask`, `FlameCreationTask`, `ModrinthCreationTask`, plus `FTB::PackInstallTask` and `GetModDependenciesTask` because they build Flame/Modrinth clients. Tasks hold their API client as a member, not a local, because `ResourceAPI` callbacks capture `this`.
+- `Application` owns one `FlameAPI` and one `ModrinthAPI` (`flameAPI()` / `modrinthAPI()`) for UI pages that keep a long-lived `const ResourceAPI*`. UI and `InstanceImportTask` remain the edge that reads `APPLICATION->networkContext()` / `launcherSettings()`.
+- Result: lines using `APPLICATION` under `launcher/modplatform/` went from 42 to 15, and files including `Application.h` there went from 14 to 5. No Flame/Modrinth code reads network, API keys, or settings through `APPLICATION`. The three remaining Flame/Modrinth uses are `instances()` and `metadataIndex()` (instance and metadata domain, not network/settings). The rest are in ATLauncher, Technic, and legacy FTB.
+- `tests/ModPlatformInjection_test.cpp` checks header injection and job creation with a fake `NetworkContext` and no `Application`.

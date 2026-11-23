@@ -49,7 +49,11 @@
 
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
+#include "net/Request.h"
 #include "tasks/Task.h"
+
+class NetJob;
+class NetworkContext;
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -120,10 +124,21 @@ class ResourceAPI {
     Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
     virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
 
+   public:
+    NetworkContext* network() const { return m_network; }
+
    protected:
+    explicit ResourceAPI(NetworkContext* network) : m_network(network) {}
     ~ResourceAPI() = default;
 
     virtual QString debugName() const { return "External resource API"; }
+
+    /** NetJob on the injected QNAM. */
+    shared_qobject_ptr<NetJob> makeNetJob(const QString& name) const;
+    /** GET request carrying this provider's API credentials. */
+    std::pair<Net::Request::Ptr, QByteArray*> makeApiRequest(const QUrl& url) const;
+    /** POST request carrying this provider's API credentials. */
+    std::pair<Net::Request::Ptr, QByteArray*> makeApiRequest(const QUrl& url, QByteArray postData) const;
 
     static QString mapMCVersionToModrinth(const Version& v);
 
@@ -160,4 +175,7 @@ class ResourceAPI {
     virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
 
     virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
+
+   private:
+    NetworkContext* m_network = nullptr;
 };

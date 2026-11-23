@@ -1,6 +1,9 @@
 #pragma once
 
 #include "modplatform/CheckUpdateTask.h"
+#include "modplatform/flame/FlameAPI.h"
+
+class NetworkContext;
 
 class FlameCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
@@ -9,8 +12,9 @@ class FlameCheckUpdate : public CheckUpdateTask {
     FlameCheckUpdate(QList<Resource*>& resources,
                      std::vector<Version>& mcVersions,
                      QList<ModPlatform::ModLoaderType> loadersList,
-                     ResourceFolderModel* resourceModel)
-        : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel)
+                     ResourceFolderModel* resourceModel,
+                     NetworkContext* network)
+        : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel), m_api(network)
     {}
 
    public slots:
@@ -23,6 +27,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
     void collectBlockedMods();
 
    private:
+    FlameAPI m_api;
     Task::Ptr m_task = nullptr;
 
     QHash<Resource*, QString> m_blocked;

@@ -28,12 +28,12 @@
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
-#include "settings/SettingsObject.h"
+#include "services/LauncherSettings.h"
 #include "tasks/Task.h"
 
-#include "Application.h"
-
-Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess) : m_manifest(toProcess) {}
+Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess, NetworkContext* network, LauncherSettings* settings)
+    : m_manifest(toProcess), m_flameApi(network), m_modrinthApi(network), m_settings(settings)
+{}
 
 bool Flame::FileResolvingTask::abort()
 {
@@ -57,7 +57,7 @@ void Flame::FileResolvingTask::executeTask()
     for (const auto& file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    auto [task, response] = FlameAPI::getFiles(fileIds);
+    auto [task, response] = m_flameApi.getFiles(fileIds);
     m_task = task;
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
@@ -130,7 +130,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
         getFlameProjects();
         return;
     }
-    auto [modrinthTask, modrinthResponse] = ModrinthAPI::currentVersions(hashes, "sha1");
+    auto [modrinthTask, modrinthResponse] = m_modrinthApi.currentVersions(hashes, "sha1");
     m_task = modrinthTask;
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto stepProgress2 = std::make_shared<TaskStepProgress>();
@@ -147,7 +147,7 @@ void Flame::FileResolvingTask::netJobFinished(QByteArray* response)
             getFlameProjects();
             return;
         }
-        if (APPLICATION->settings()->get("FallbackMRBlockedMods").toBool()) {
+        if (m_settings->get("FallbackMRBlockedMods").toBool()) {
             try {
                 auto entries = Json::requireObject(doc);
                 for (auto& out : m_manifest.files) {
@@ -199,7 +199,7 @@ void Flame::FileResolvingTask::getFlameProjects()
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    auto [task, response] = FlameAPI::get().getProjects(addonIds);
+    auto [task, response] = m_flameApi.getProjects(addonIds);
     m_task = task;
 
     auto stepProgress2 = std::make_shared<TaskStepProgress>();

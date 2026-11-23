@@ -107,8 +107,8 @@ Request::Request(const Spec& spec) : m_options(spec.options), m_url(spec.url), m
     }
     m_logCat = logCatForMethod(m_httpMethod);
 #ifdef LAUNCHER_APPLICATION
-    if (spec.options.testFlag(Option::AddAPIHeaders)) {
-        addHeaderProxy(std::make_unique<ApiHeaderProxy>());
+    if (auto* app = APPLICATION_DYN; app != nullptr && spec.options.testFlag(Option::AddAPIHeaders)) {
+        addHeaderProxy(std::make_unique<ApiHeaderProxy>(app->networkContext()));
     }
 #endif
 }

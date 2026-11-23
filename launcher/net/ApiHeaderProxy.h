@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "Application.h"
 #include "BuildConfig.h"
 #include "net/HeaderProxy.h"
+#include "services/NetworkContext.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -55,10 +55,16 @@ struct ModrinthDownloadMeta {
     }
 };
 
+/**
+ * Adds provider credentials (CurseForge key, Modrinth token) and Modrinth download metadata.
+ *
+ * A null NetworkContext adds only the download metadata header.
+ */
 class ApiHeaderProxy : public HeaderProxy {
    public:
-    ApiHeaderProxy() = default;
-    explicit ApiHeaderProxy(ModrinthDownloadMeta meta) : m_meta(std::move(meta)) {}
+    explicit ApiHeaderProxy(const NetworkContext* network, ModrinthDownloadMeta meta = ModrinthDownloadMeta())
+        : m_network(network), m_meta(std::move(meta))
+    {}
     ~ApiHeaderProxy() override = default;
 
    public:
@@ -67,13 +73,17 @@ class ApiHeaderProxy : public HeaderProxy {
         QList<HeaderPair> hdrs;
         const auto host = request.url().host();
 
-        if (APPLICATION->capabilities() & Application::SupportsFlame &&
-            (host == QUrl(BuildConfig.FLAME_BASE_URL).host() || host == BuildConfig.FLAME_DOWNLOAD_HOST)) {
-            hdrs.append({ .headerName = "x-api-key", .headerValue = APPLICATION->getFlameAPIKey().toUtf8() });
-        } else if (host == QUrl(BuildConfig.MODRINTH_PROD_URL).host() || host == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
-            QString token = APPLICATION->getModrinthAPIToken();
-            if (!token.isNull()) {
-                hdrs.append({ .headerName = "Authorization", .headerValue = token.toUtf8() });
+        if (m_network != nullptr) {
+            if (host == QUrl(BuildConfig.FLAME_BASE_URL).host() || host == BuildConfig.FLAME_DOWNLOAD_HOST) {
+                QString key = m_network->flameApiKey();
+                if (!key.isEmpty()) {
+                    hdrs.append({ .headerName = "x-api-key", .headerValue = key.toUtf8() });
+                }
+            } else if (host == QUrl(BuildConfig.MODRINTH_PROD_URL).host() || host == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+                QString token = m_network->modrinthApiToken();
+                if (!token.isNull()) {
+                    hdrs.append({ .headerName = "Authorization", .headerValue = token.toUtf8() });
+                }
             }
         }
 
@@ -84,6 +94,7 @@ class ApiHeaderProxy : public HeaderProxy {
     };
 
    private:
+    const NetworkContext* m_network = nullptr;
     ModrinthDownloadMeta m_meta;
 };
 

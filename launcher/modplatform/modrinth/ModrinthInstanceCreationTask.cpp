@@ -17,6 +17,7 @@
 
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
+#include "services/NetworkContext.h"
 
 #include "modplatform/ModIndex.h"
 #include "settings/INISettingsObject.h"
@@ -248,7 +249,7 @@ void ModrinthCreationTask::createInstance()
     m_newInstance->setName(name());
     m_newInstance->saveNow();
 
-    auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"), APPLICATION->network());
+    auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"), m_network->qnam());
 
     auto rootModpackPath = FS::PathCombine(m_stagingPath, m_rootPath);
     auto rootModpackUrl = QUrl::fromLocalFile(rootModpackPath);
@@ -283,16 +284,16 @@ void ModrinthCreationTask::createInstance()
                                         .dependentOn = !m_managedId.isEmpty() ? m_managedVersionId : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
-        auto dl = Net::ApiRequest::makeFile(downloadUrl, filePath, Net::Request::Option::NoOptions, meta);
+        auto dl = Net::ApiRequest::makeFile(m_network, downloadUrl, filePath, Net::Request::Option::NoOptions, meta);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         downloadMods->addNetAction(dl);
         if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta] {
+            connect(dl.get(), &Task::failed, dl.get(), [&file, filePath, param, downloadMods, meta, network = m_network] {
                 QUrl fallbackUrl = file.downloads.dequeue();
-                auto ndl = Net::ApiRequest::makeFile(fallbackUrl, filePath, Net::Request::Option::NoOptions, meta);
+                auto ndl = Net::ApiRequest::makeFile(network, fallbackUrl, filePath, Net::Request::Option::NoOptions, meta);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 downloadMods->addNetAction(ndl);
                 if (auto shared = param.lock()) {
@@ -444,7 +445,7 @@ bool ModrinthCreationTask::parseManifest(const QString& indexPath, std::vector<F
 void ModrinthCreationTask::ensureMetaLoop()
 {
     const QDir folder = FS::PathCombine(m_newInstance->modsRoot(), ".index");
-    auto ensureMetadataTask = makeShared<EnsureMetadataTask>(m_resources, folder, ModPlatform::ResourceProvider::MODRINTH);
+    auto ensureMetadataTask = makeShared<EnsureMetadataTask>(m_resources, folder, m_network, ModPlatform::ResourceProvider::MODRINTH);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, &ModrinthCreationTask::finishInstall);
     connect(ensureMetadataTask.get(), &Task::failed, this, &ModrinthCreationTask::emitFailed);
     connect(ensureMetadataTask.get(), &Task::aborted, this, &ModrinthCreationTask::emitAborted);
@@ -495,11 +496,16 @@ bool ModrinthCreationTask::promptForUntrustedMods()
 ModrinthCreationTask::ModrinthCreationTask(const QString& stagingPath,
                                            bool trustedSource,
                                            SettingsObject* globalSettings,
+                                           NetworkContext* network,
                                            QWidget* parent,
                                            QString id,
                                            QString versionId,
                                            QString originalInstanceId)
-    : m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
+    : m_parent(parent)
+    , m_trustedSource(trustedSource)
+    , m_network(network)
+    , m_managedId(std::move(id))
+    , m_managedVersionId(std::move(versionId))
 {
     setStagingPath(stagingPath);
     setParentSettings(globalSettings);

@@ -1,6 +1,10 @@
 #pragma once
 
 #include "modplatform/CheckUpdateTask.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
+
+class LauncherSettings;
+class NetworkContext;
 
 class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
@@ -9,7 +13,9 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     ModrinthCheckUpdate(QList<Resource*>& resources,
                         std::vector<Version>& mcVersions,
                         QList<ModPlatform::ModLoaderType> loadersList,
-                        ResourceFolderModel* resourceModel);
+                        ResourceFolderModel* resourceModel,
+                        NetworkContext* network,
+                        LauncherSettings* settings);
 
    public slots:
     bool abort() override;
@@ -21,6 +27,8 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     void checkNextLoader();
 
    private:
+    ModrinthAPI m_api;
+    LauncherSettings* m_settings = nullptr;
     Task::Ptr m_job = nullptr;
     QHash<QString, Resource*> m_mappings;
     QString m_hashType;

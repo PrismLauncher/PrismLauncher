@@ -4,6 +4,8 @@
 
 #include "FlameResourceModels.h"
 
+#include "Application.h"
+
 #include "Json.h"
 
 #include "minecraft/MinecraftInstance.h"
@@ -19,7 +21,7 @@ static bool isOptedOut(const ModPlatform::IndexedVersion& ver)
 }
 
 FlameTexturePackModel::FlameTexturePackModel(ResourceFolderModel* resourceList)
-    : TexturePackResourceModel(resourceList, &FlameAPI::get(), Flame::debugName(), Flame::metaEntryBase())
+    : TexturePackResourceModel(resourceList, APPLICATION->flameAPI(), Flame::debugName(), Flame::metaEntryBase())
 {}
 
 ResourceAPI::SearchArgs FlameTexturePackModel::createSearchArguments()

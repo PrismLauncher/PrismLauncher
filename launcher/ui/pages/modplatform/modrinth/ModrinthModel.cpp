@@ -175,7 +175,7 @@ void ModpackListModel::performPaginatedSearch()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = ModrinthAPI::get().getProjectInfo({ project }, callbacks, false); job) {
+            if (auto job = APPLICATION->modrinthAPI()->getProjectInfo({ project }, callbacks, false); job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }
@@ -194,7 +194,7 @@ void ModpackListModel::performPaginatedSearch()
         searchRequestFailed("Aborted", 0);
     };
 
-    auto netJob = ModrinthAPI::get().searchProjects(
+    auto netJob = APPLICATION->modrinthAPI()->searchProjects(
         {
             .type = ModPlatform::ResourceType::Modpack,
             .offset = m_nextSearchOffset,

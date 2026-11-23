@@ -7,14 +7,29 @@
 #include <QDir>
 
 #include "minecraft/mod/Resource.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
+
+class LauncherSettings;
+class NetworkContext;
 
 class EnsureMetadataTask : public Task {
     Q_OBJECT
 
    public:
-    EnsureMetadataTask(Resource*, const QDir&, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QList<Resource*>&, const QDir&, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QHash<QString, Resource*>&, const QDir&, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(Resource*,
+                       const QDir&,
+                       NetworkContext* network,
+                       ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(QList<Resource*>&,
+                       const QDir&,
+                       NetworkContext* network,
+                       LauncherSettings* settings,
+                       ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(QHash<QString, Resource*>&,
+                       const QDir&,
+                       NetworkContext* network,
+                       ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
 
     ~EnsureMetadataTask() override = default;
 
@@ -54,6 +69,8 @@ class EnsureMetadataTask : public Task {
     QHash<QString, Resource*> m_resources;
     QDir m_indexDir;
     ModPlatform::ResourceProvider m_provider;
+    FlameAPI m_flameApi;
+    ModrinthAPI m_modrinthApi;
 
     QHash<QString, ModPlatform::IndexedVersion> m_tempVersions;
     Task::Ptr m_hashingTask;
