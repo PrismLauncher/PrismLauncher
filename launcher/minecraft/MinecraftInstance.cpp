@@ -78,12 +78,12 @@
 
 #include "icons/IconList.h"
 
+#include "mod/DataPackFolderModel.h"
 #include "mod/Mod.h"
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/ShaderPackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
-#include "mod/DataPackFolderModel.h"
 
 #include "WorldList.h"
 
@@ -535,12 +535,21 @@ QStringList MinecraftInstance::extraArguments()
     if (!jarMods.isEmpty()) {
         list.append({ "-Dfml.ignoreInvalidMinecraftCertificates=true", "-Dfml.ignorePatchDiscrepancies=true" });
     }
-    auto addn = m_components->getProfile()->getAddnJvmArguments();
+    auto addn = m_components->getProfile()->getJvmArguments();
     if (!addn.isEmpty()) {
         QMap<QString, QString> tokenMapping = makeProfileVarMapping(m_components->getProfile());
 
-        for (const QString& item : addn) {
-            list.append(replaceTokensIn(item, tokenMapping));
+        for (const auto& item : addn) {
+            const RuleContext ctx{
+                .runtime = &m_runtimeContext,
+            };
+            if (Rule::applyRuleset(item.rules, ctx) != Rule::Action::Allow) {
+                continue;
+            }
+
+            for (const auto& val : item.value) {
+                list.append(replaceTokensIn(val, tokenMapping));
+            }
         }
     }
     auto agents = m_components->getProfile()->getAgents();
@@ -767,29 +776,17 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
     return env;
 }
 
-QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) const
+QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
 {
+    QStringList args;
+
     auto profile = m_components->getProfile();
-    auto args = profile->getMinecraftArguments().split(' ', Qt::SkipEmptyParts);
+
     for (auto tweaker : profile->getTweakers()) {
         args << "--tweakClass" << tweaker;
     }
 
-    if (targetToJoin) {
-        if (!targetToJoin->address.isEmpty()) {
-            if (profile->hasTrait("feature:is_quick_play_multiplayer")) {
-                args << "--quickPlayMultiplayer" << targetToJoin->address + ':' + QString::number(targetToJoin->port);
-            } else {
-                args << "--server" << targetToJoin->address;
-                args << "--port" << QString::number(targetToJoin->port);
-            }
-        } else if (!targetToJoin->world.isEmpty() && profile->hasTrait("feature:is_quick_play_singleplayer")) {
-            args << "--quickPlaySingleplayer" << targetToJoin->world;
-        }
-    }
-
     QMap<QString, QString> tokenMapping = makeProfileVarMapping(profile);
-
     // yggdrasil!
     if (session) {
         // token_mapping["auth_username"] = session->username;
@@ -799,15 +796,44 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         tokenMapping["auth_uuid"] = session->uuid;
         tokenMapping["user_properties"] = session->serializeUserProperties();
         tokenMapping["user_type"] = session->user_type;
+    }
 
-        if (session->launchMode == LaunchMode::Demo) {
-            args << "--demo";
+    QSet<QString> features;
+    if (auto dimensions = getWindowDimensions(); dimensions.has_value()) {
+        features.insert("has_custom_resolution");
+        tokenMapping["resolution_width"] = QString::number(dimensions->first);
+        tokenMapping["resolution_height"] = QString::number(dimensions->second);
+    }
+    if (targetToJoin) {
+        if (!targetToJoin->address.isEmpty()) {
+            features.insert("is_quick_play_multiplayer");
+            tokenMapping["quickPlayMultiplayer"] = targetToJoin->address + ':' + QString::number(targetToJoin->port);
+            // NOTE: Prism-specific extension to support joining servers on older versions too
+            tokenMapping["quickPlayMultiplayer_address"] = targetToJoin->address;
+            tokenMapping["quickPlayMultiplayer_port"] = targetToJoin->port;
+        } else if (!targetToJoin->world.isEmpty()) {
+            features.insert("is_quick_play_singleplayer");
+            tokenMapping["quickPlaySingleplayer"] = targetToJoin->world;
+        }
+    }
+    if (session != nullptr && session->launchMode == LaunchMode::Demo) {
+        features.insert("is_demo_user");
+    }
+
+    for (const auto& arg : profile->getGameArguments()) {
+        const RuleContext ctx{
+            .runtime = &m_runtimeContext,
+            .features = &features,
+        };
+        if (Rule::applyRuleset(arg.rules, ctx) != Rule::Action::Allow) {
+            continue;
+        }
+
+        for (const auto& val : arg.value) {
+            args << replaceTokensIn(val, tokenMapping);
         }
     }
 
-    for (int i = 0; i < args.length(); i++) {
-        args[i] = replaceTokensIn(args[i], tokenMapping);
-    }
     return args;
 }
 
@@ -830,7 +856,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
         launchScript += "appletClass " + appletClass + "\n";
     }
 
-    if (targetToJoin) {
+    if (targetToJoin != nullptr) {
         if (!targetToJoin->address.isEmpty()) {
             launchScript += "serverAddress " + targetToJoin->address + "\n";
             launchScript += "serverPort " + QString::number(targetToJoin->port) + "\n";
@@ -840,39 +866,19 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
     }
 
     // generic minecraft params
-    for (auto param : processMinecraftArgs(session, nullptr /* When using a launch script, the server parameters are handled by it*/
-                                           )) {
+    for (auto param : processMinecraftArgs(session, targetToJoin)) {
         launchScript += "param " + param + "\n";
     }
 
     // window size, title and state, legacy
     {
-        QString windowParams;
-        if (settings()->get("LaunchMaximized").toBool()) {
-            // FIXME doesn't support maximisation
-            if (!isLegacy()) {
-                auto screen = QGuiApplication::primaryScreen();
-                auto screenGeometry = screen->availableSize();
-
-                // small hack to get the widow decorations
-                for (auto w : QApplication::topLevelWidgets()) {
-                    auto mainWindow = qobject_cast<QMainWindow*>(w);
-                    if (mainWindow) {
-                        auto m = mainWindow->windowHandle()->frameMargins();
-                        screenGeometry = screenGeometry.shrunkBy(m);
-                        break;
-                    }
-                }
-
-                windowParams = QString("%1x%2").arg(screenGeometry.width()).arg(screenGeometry.height());
-            } else {
-                windowParams = "maximized";
-            }
-        } else {
-            windowParams =
-                QString("%1x%2").arg(settings()->get("MinecraftWinWidth").toInt()).arg(settings()->get("MinecraftWinHeight").toInt());
-        }
         launchScript += "windowTitle " + windowTitle() + "\n";
+
+        QString windowParams = "maximized";
+        if (auto dimensions = getWindowDimensions(); dimensions.has_value()) {
+            windowParams = QString("%1x%2").arg(dimensions->first).arg(dimensions->second);
+        }
+
         launchScript += "windowParams " + windowParams + "\n";
     }
 
@@ -908,7 +914,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftT
     return launchScript;
 }
 
-QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
+QStringList MinecraftInstance::verboseDescription(MinecraftTarget::Ptr targetToJoin)
 {
     constexpr auto indent = "  ";
     constexpr auto emptyLine = "";
@@ -1369,6 +1375,30 @@ QList<Mod*> MinecraftInstance::getJarMods() const
         mods.push_back(new Mod(QFileInfo(jar[0])));
     }
     return mods;
+}
+
+std::optional<std::pair<int, int>> MinecraftInstance::getWindowDimensions()
+{
+    if (!settings()->get("LaunchMaximized").toBool()) {
+        return { { settings()->get("MinecraftWinWidth").toInt(), settings()->get("MinecraftWinHeight").toInt() } };
+    }
+    if (isLegacy()) {
+        return {};
+    }
+    auto* screen = QGuiApplication::primaryScreen();
+    auto screenGeometry = screen->availableSize();
+
+    // small hack to get the widow decorations
+    for (auto* w : QApplication::topLevelWidgets()) {
+        auto* mainWindow = qobject_cast<QMainWindow*>(w);
+        if (mainWindow) {
+            auto m = mainWindow->windowHandle()->frameMargins();
+            screenGeometry = screenGeometry.shrunkBy(m);
+            break;
+        }
+    }
+
+    return { { screenGeometry.width(), screenGeometry.height() } };
 }
 
 #include "MinecraftInstance.moc"

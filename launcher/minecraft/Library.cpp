@@ -238,7 +238,7 @@ QList<Net::Request::Ptr> Library::getDownloads(const RuntimeContext& runtimeCont
  */
 bool Library::isActive(const RuntimeContext& runtimeContext) const
 {
-    bool result = Rule::applyRuleset(m_rules, { .runtime = runtimeContext }) == Rule::Action::Allow;
+    bool result = Rule::applyRuleset(m_rules, { .runtime = &runtimeContext }) == Rule::Action::Allow;
     if (isNative()) {
         result = result && !getCompatibleNative(runtimeContext).isNull();
     }

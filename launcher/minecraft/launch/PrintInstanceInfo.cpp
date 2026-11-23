@@ -79,6 +79,6 @@ void PrintInstanceInfo::executeTask()
     log << "";
 
     logLines(log, MessageLevel::Launcher);
-    logLines(instance->verboseDescription(m_session, m_targetToJoin), MessageLevel::Launcher);
+    logLines(instance->verboseDescription(m_targetToJoin), MessageLevel::Launcher);
     emitSucceeded();
 }

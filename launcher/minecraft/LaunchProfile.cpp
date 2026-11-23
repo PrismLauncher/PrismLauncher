@@ -41,8 +41,8 @@ void LaunchProfile::clear()
     m_minecraftVersion.clear();
     m_minecraftVersionType.clear();
     m_minecraftAssets.reset();
-    m_minecraftArguments.clear();
-    m_addnJvmArguments.clear();
+    m_gameArguments.clear();
+    m_jvmArguments.clear();
     m_tweakers.clear();
     m_mainClass.clear();
     m_appletClass.clear();
@@ -77,14 +77,14 @@ void LaunchProfile::applyMainClass(const QString& mainClass)
     applyString(mainClass, this->m_mainClass);
 }
 
-void LaunchProfile::applyMinecraftArguments(const QString& minecraftArguments)
+void LaunchProfile::applyGameArguments(const QList<RuleGuardedStrings>& gameArguments)
 {
-    applyString(minecraftArguments, this->m_minecraftArguments);
+    m_gameArguments.append(gameArguments);
 }
 
-void LaunchProfile::applyAddnJvmArguments(const QStringList& addnJvmArguments)
+void LaunchProfile::applyJvmArguments(const QList<RuleGuardedStrings>& jvmArguments)
 {
-    this->m_addnJvmArguments.append(addnJvmArguments);
+    m_jvmArguments.append(jvmArguments);
 }
 
 void LaunchProfile::applyMinecraftVersionType(const QString& type)
@@ -300,14 +300,14 @@ std::shared_ptr<MojangAssetIndexInfo> LaunchProfile::getMinecraftAssets() const
     return m_minecraftAssets;
 }
 
-QString LaunchProfile::getMinecraftArguments() const
+const QList<RuleGuardedStrings>& LaunchProfile::getGameArguments() const
 {
-    return m_minecraftArguments;
+    return m_gameArguments;
 }
 
-const QStringList& LaunchProfile::getAddnJvmArguments() const
+const QList<RuleGuardedStrings>& LaunchProfile::getJvmArguments() const
 {
-    return m_addnJvmArguments;
+    return m_jvmArguments;
 }
 
 const QList<LibraryPtr>& LaunchProfile::getJarMods() const

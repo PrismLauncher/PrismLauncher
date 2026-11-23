@@ -62,7 +62,7 @@ class NullInstance : public BaseInstance {
     bool canEdit() const override { return false; }
     bool canLaunch() const override { return false; }
     void populateLaunchMenu(QMenu* menu) override {}
-    QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) override
+    QStringList verboseDescription(MinecraftTarget::Ptr targetToJoin) override
     {
         QStringList out;
         out << "Null instance - placeholder.";

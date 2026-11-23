@@ -124,7 +124,7 @@ class MinecraftInstance : public BaseInstance {
     QList<Task::Ptr> createUpdateTask() override;
     LaunchTask* createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) override;
     QStringList extraArguments() override;
-    QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) override;
+    QStringList verboseDescription(MinecraftTarget::Ptr targetToJoin) override;
     QList<Mod*> getJarMods() const;
     QString createLaunchScript(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin);
     /// get arguments passed to java
@@ -151,15 +151,16 @@ class MinecraftInstance : public BaseInstance {
     virtual QString getMainClass() const;
 
     // FIXME: remove
-    virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) const;
+    QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin);
 
     virtual JavaVersion getJavaVersion();
 
-   protected:
+   private:
     QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
     QMap<QString, QString> makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const;
 
-   protected:  // data
+    std::optional<std::pair<int, int>> getWindowDimensions();
+
     std::unique_ptr<PackProfile> m_components;
     std::unique_ptr<ModFolderModel> m_loader_mod_list;
     std::unique_ptr<ModFolderModel> m_core_mod_list;

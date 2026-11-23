@@ -122,7 +122,88 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
 
     out->version = root.value("version").toString();
 
-    TRY(MojangVersionFormat::readVersionProperties(root, out.get()))
+    if (root.contains("+traits")) {
+        TRY_INTO(const auto& arr, requireArray(root.value("+traits")))
+        for (auto tweakerVal : arr) {
+            TRY_INTO(const auto& v, requireString(tweakerVal))
+            out->traits.insert(v);
+        }
+    }
+
+    TRY_INTO(const auto& mojangResult, MojangVersionFormat::readVersionProperties(root, out.get()))
+    if (mojangResult.legacyGameArgs) {
+        out->clearGameArguments = true;
+
+        // NOTE: the old format doesn't support conditional arguments, meaning many arguments are missed
+        // replicate the old hardcoded behaviour of the launcher
+
+        if (!out->traits.contains("legacyLaunch")) {
+            // NOTE: these were not added by the LegacyLauncher class which this trait invokes, so don't add them here either
+            out->gameArguments.append({
+                .value = { "--width", "${resolution_width}", "--height", "${resolution_height}" },
+                .rules = {
+                    {
+                        .action = Rule::Action::Allow,
+                        .features = { { "has_custom_resolution", true } },
+                    },
+                },
+            });
+
+            // NOTE: All the trait feature:is_quick_play_multiplayer indicates is that the source Mojang JSON included a check in
+            // arguments.game for is_quick_play_multiplayer.
+            // However, to previous versions of the launcher what this means is that quick play is supported through --quickPlay flags (even
+            // if checking this feature is a perfectly valid way to implement the --server flag too).
+            if (out->traits.contains("feature:is_quick_play_multiplayer")) {
+                out->gameArguments.append({
+                    .value = { "--quickPlayMultiplayer", "${quickPlayMultiplayer}" },
+                    .rules = {
+                        {
+                            .action = Rule::Action::Allow,
+                            .features = { { "is_quick_play_multiplayer", true } },
+                        },
+                    },
+                });
+            } else {
+                out->gameArguments.append({
+                    .value = { "--server", "${quickPlayMultiplayer_address}", "--port", "${quickPlayMultiplayer_port}" },
+                    .rules = {
+                        {
+                            .action = Rule::Action::Allow,
+                            .features = { {"is_quick_play_multiplayer", true} },
+                        },
+                    },
+                });
+            }
+
+        }
+
+        out->gameArguments.append({
+            {
+                .value = {"--demo"},
+                .rules = {
+                    {
+                        .action = Rule::Action::Allow,
+                        .features = { { "is_demo_user", true } },
+                    },
+                },
+            },
+        });
+    } else if (root.contains("arguments")) {
+        TRY_INTO(const auto& argumentsObj, requireObject(root, "arguments"));
+        if (argumentsObj.contains("clearGame")) {
+            TRY_INTO(out->clearGameArguments, requireBoolean(argumentsObj, "clearGame"));
+        }
+    }
+
+    // NOTE: this key purely for backwards compatibility
+    // use arguments.jvm instead
+    if (out->jvmArguments.isEmpty() && root.contains("+jvmArgs")) {
+        TRY_INTO(const auto& arr, requireArray(root.value("+jvmArgs")))
+        for (auto arg : arr) {
+            TRY_INTO(const auto& v, requireString(arg))
+            out->jvmArguments.append({ .value = { v } });
+        }
+    }
 
     // added for legacy Minecraft window embedding, TODO: remove
     TRY_INTO(out->appletClass, optionalString(root, "appletClass"))
@@ -132,22 +213,6 @@ Result<VersionFilePtr> OneSixVersionFormat::versionFileFromJson(const QJsonDocum
         for (auto tweakerVal : arr) {
             TRY_INTO(const auto& v, requireString(tweakerVal))
             out->addTweakers.append(v);
-        }
-    }
-
-    if (root.contains("+traits")) {
-        TRY_INTO(const auto& arr, requireArray(root.value("+traits")))
-        for (auto tweakerVal : arr) {
-            TRY_INTO(const auto& v, requireString(tweakerVal))
-            out->traits.insert(v);
-        }
-    }
-
-    if (root.contains("+jvmArgs")) {
-        TRY_INTO(const auto& arr, requireArray(root.value("+jvmArgs")))
-        for (auto arg : arr) {
-            TRY_INTO(const auto& v, requireString(arg))
-            out->addnJvmArguments.append(v);
         }
     }
 
@@ -308,6 +373,11 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     Meta::serializeFormatVersion(root, 1);
 
     MojangVersionFormat::writeVersionProperties(patch.get(), root);
+    if (patch->clearGameArguments) {
+        QJsonObject argumentsObj = root["arguments"].toObject();
+        argumentsObj["clearGame"] = true;
+        root["arguments"] = argumentsObj;
+    }
 
     if (patch->mainJar) {
         root.insert("mainJar", libraryToJson(patch->mainJar.get()));
@@ -315,7 +385,6 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr& patch
     writeString(root, "appletClass", patch->appletClass);
     writeStringList(root, "+tweakers", patch->addTweakers);
     writeStringList(root, "+traits", patch->traits.values());
-    writeStringList(root, "+jvmArgs", patch->addnJvmArguments);
     if (!patch->agents.isEmpty()) {
         QJsonArray array;
         for (const auto& value : patch->agents) {
