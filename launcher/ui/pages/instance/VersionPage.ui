@@ -146,6 +146,12 @@
    <property name="toolTip">
     <string>Remove selected component from the instance.</string>
    </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ShortcutContext::WidgetShortcut</enum>
+   </property>
   </action>
   <action name="actionCustomize">
    <property name="text">
