@@ -286,7 +286,7 @@ QString FlameCreationTask::getVersionForLoader(const QString& uid,
                                                const QString& mcVersion)
 {
     if (loaderVersion == "recommended") {
-        auto vlist = APPLICATION->metadataIndex()->get(uid);
+        auto vlist = m_services.metadata != nullptr ? m_services.metadata->get(uid) : Meta::VersionList::Ptr();
         if (!vlist) {
             emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
             return {};

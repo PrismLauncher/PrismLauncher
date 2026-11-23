@@ -18,11 +18,13 @@
 #include <QCollator>
 #include <QSortFilterProxyModel>
 
+class IconStore;
+
 class InstanceProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    InstanceProxyModel(QObject* parent = 0);
+    InstanceProxyModel(IconStore* icons, QObject* parent = nullptr);
 
    protected:
     QVariant data(const QModelIndex& index, int role) const override;
@@ -31,4 +33,5 @@ class InstanceProxyModel : public QSortFilterProxyModel {
 
    private:
     QCollator m_naturalSort;
+    IconStore* m_icons = nullptr;
 };

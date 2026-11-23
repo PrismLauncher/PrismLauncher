@@ -43,6 +43,11 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "LaunchCoordinator.h"
+#include "meta/Index.h"
+#include "services/IconStore.h"
+#include "services/JavaEnvironment.h"
+#include "services/LauncherWindows.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -154,8 +159,23 @@ MainWindow::MainWindow(LauncherSettings* settings,
                        InstanceCatalog* instances,
                        AccountService* accounts,
                        NetworkContext* network,
+                       IconStore* icons,
+                       LaunchCoordinator* launch,
+                       LauncherWindows* windows,
+                       Meta::Index* metadata,
+                       JavaEnvironment* java,
                        QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), m_settings(settings), m_instances(instances), m_accounts(accounts), m_network(network)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , m_settings(settings)
+    , m_instances(instances)
+    , m_accounts(accounts)
+    , m_network(network)
+    , m_icons(icons)
+    , m_launch(launch)
+    , m_windows(windows)
+    , m_metadata(metadata)
+    , m_java(java)
 {
     ui->setupUi(this);
 
@@ -251,7 +271,11 @@ MainWindow::MainWindow(LauncherSettings* settings,
     }
 
     {  // logs viewing
-        connect(ui->actionViewLog, &QAction::triggered, this, [] { APPLICATION->showLogWindow(); });
+        connect(ui->actionViewLog, &QAction::triggered, this, [this] {
+            if (m_windows) {
+                m_windows->showLogWindow();
+            }
+        });
     }
 
     // add the toolbar toggles to the view menu
@@ -332,7 +356,7 @@ MainWindow::MainWindow(LauncherSettings* settings,
         connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
         connect(view, &InstanceView::droppedURLs, this, &MainWindow::processURLs, Qt::QueuedConnection);
 
-        proxymodel = new InstanceProxyModel(this);
+        proxymodel = new InstanceProxyModel(m_icons, this);
         InstanceList* instanceModel = m_instances->model();
         proxymodel->setSourceModel(instanceModel);
         proxymodel->sort(0);
@@ -375,7 +399,9 @@ MainWindow::MainWindow(LauncherSettings* settings,
     connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
 
     // track icon changes and update the toolbar!
-    connect(APPLICATION->icons(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
+    if (m_icons != nullptr && m_icons->list() != nullptr) {
+        connect(m_icons->list(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
+    }
 
     // model reset -> selection is invalid. All the instance pointers are wrong.
     connect(m_instances->model(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
@@ -931,7 +957,7 @@ void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& e
         groupName = m_settings->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
+    NewInstanceDialog newInstDlg(groupName, url, extra_info, m_icons, m_metadata, this);
     if (!newInstDlg.exec())
         return;
 
@@ -1212,11 +1238,11 @@ void MainWindow::on_actionChangeInstIcon_triggered()
     if (!m_selectedInstance)
         return;
 
-    IconPickerDialog dlg(this);
+    IconPickerDialog dlg(m_icons, this);
     dlg.execWithSelection(m_selectedInstance->iconKey());
     if (dlg.result() == QDialog::Accepted) {
         m_selectedInstance->setIconKey(dlg.selectedIconKey);
-        auto icon = APPLICATION->icons()->getIcon(dlg.selectedIconKey);
+        auto icon = m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(dlg.selectedIconKey) : QIcon();
         ui->actionChangeInstIcon->setIcon(icon);
         changeIconButton->setIcon(icon);
     }
@@ -1225,7 +1251,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 void MainWindow::iconUpdated(QString icon)
 {
     if (icon == m_currentInstIcon) {
-        auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+        auto new_icon = m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_currentInstIcon) : QIcon();
         ui->actionChangeInstIcon->setIcon(new_icon);
         changeIconButton->setIcon(new_icon);
     }
@@ -1234,7 +1260,7 @@ void MainWindow::iconUpdated(QString icon)
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
     m_currentInstIcon = new_icon;
-    auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+    auto icon = m_icons != nullptr && m_icons->list() != nullptr ? m_icons->list()->getIcon(m_currentInstIcon) : QIcon();
     ui->actionChangeInstIcon->setIcon(icon);
     changeIconButton->setIcon(icon);
 }
@@ -1348,7 +1374,9 @@ void MainWindow::on_actionViewCatPackFolder_triggered()
 
 void MainWindow::on_actionViewIconsFolder_triggered()
 {
-    DesktopServices::openPath(APPLICATION->icons()->getDirectory(), true);
+    if (m_icons != nullptr && m_icons->list() != nullptr) {
+        DesktopServices::openPath(m_icons->list()->getDirectory(), true);
+    }
 }
 
 void MainWindow::on_actionViewLogsFolder_triggered()
@@ -1358,7 +1386,9 @@ void MainWindow::on_actionViewLogsFolder_triggered()
 
 void MainWindow::on_actionViewJavaFolder_triggered()
 {
-    DesktopServices::openPath(APPLICATION->javaPath(), true);
+    if (m_java != nullptr) {
+        DesktopServices::openPath(m_java->javaPath(), true);
+    }
 }
 
 void MainWindow::refreshInstances()
@@ -1377,7 +1407,9 @@ void MainWindow::checkForUpdates()
 
 void MainWindow::on_actionSettings_triggered()
 {
-    APPLICATION->ShowGlobalSettings(this, "global-settings");
+    if (m_windows != nullptr) {
+        m_windows->showGlobalSettings(this, "global-settings");
+    }
 }
 
 void MainWindow::globalSettingsClosed()
@@ -1401,7 +1433,9 @@ void MainWindow::on_actionEditInstance_triggered()
         return;
 
     if (m_selectedInstance->canEdit()) {
-        APPLICATION->showInstanceWindow(m_selectedInstance);
+        if (m_windows != nullptr) {
+            m_windows->showInstanceWindow(m_selectedInstance);
+        }
     } else {
         CustomMessageBox::selectable(this, tr("Instance not editable"),
                                      tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
@@ -1422,7 +1456,9 @@ void MainWindow::on_actionManageSkins_triggered()
 
 void MainWindow::on_actionManageAccounts_triggered()
 {
-    APPLICATION->ShowGlobalSettings(this, "accounts");
+    if (m_windows != nullptr) {
+        m_windows->showGlobalSettings(this, "accounts");
+    }
 }
 
 void MainWindow::on_actionReportBug_triggered()
@@ -1616,7 +1652,9 @@ void MainWindow::instanceActivated(QModelIndex index)
 
     if (m_settings->get("EditInstanceOnDoubleClick").toBool()) {
         if (inst->canEdit()) {
-            APPLICATION->showInstanceWindow(inst);
+            if (m_windows != nullptr) {
+                m_windows->showInstanceWindow(inst);
+            }
         } else {
             CustomMessageBox::selectable(
                 this, tr("Instance not editable"),
@@ -1625,20 +1663,26 @@ void MainWindow::instanceActivated(QModelIndex index)
         }
         return;
     }
-    APPLICATION->launch(inst);
+    if (m_launch != nullptr) {
+        m_launch->launch(inst);
+    }
 }
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
     if (m_selectedInstance && !m_selectedInstance->isRunning()) {
-        APPLICATION->launch(m_selectedInstance);
+        if (m_launch != nullptr) {
+            m_launch->launch(m_selectedInstance);
+        }
     }
 }
 
 void MainWindow::on_actionKillInstance_triggered()
 {
     if (m_selectedInstance && m_selectedInstance->isRunning()) {
-        APPLICATION->kill(m_selectedInstance);
+        if (m_launch != nullptr) {
+            m_launch->kill(m_selectedInstance);
+        }
     }
 }
 

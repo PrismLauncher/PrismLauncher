@@ -47,10 +47,12 @@
 #include "Application.h"
 #include "Commandline.h"
 #include "Json.h"
+#include "LaunchCoordinator.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 
-ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), m_ui(new Ui::ExternalToolsPage)
+ExternalToolsPage::ExternalToolsPage(LaunchCoordinator* launch, QWidget* parent)
+    : QWidget(parent), m_ui(new Ui::ExternalToolsPage), m_launch(launch)
 {
     m_ui->setupUi(this);
 
@@ -160,7 +162,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
             break;
         }
         QString cookedDir = FS::NormalizePath(rawDir);
-        if (!APPLICATION->profilers()["jprofiler"]->check(cookedDir, &error)) {
+        if (!m_launch->profilers()["jprofiler"]->check(cookedDir, &error)) {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
             continue;
         }
@@ -172,7 +174,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
 void ExternalToolsPage::on_jprofilerCheckBtn_clicked()
 {
     QString error;
-    if (!APPLICATION->profilers()["jprofiler"]->check(m_ui->jprofilerPathEdit->text(), &error)) {
+    if (!m_launch->profilers()["jprofiler"]->check(m_ui->jprofilerPathEdit->text(), &error)) {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
     } else {
         QMessageBox::information(this, tr("OK"), tr("JProfiler setup seems to be OK"));
@@ -189,7 +191,7 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
             break;
         }
         QString cookedDir = FS::NormalizePath(rawDir);
-        if (!APPLICATION->profilers()["jvisualvm"]->check(cookedDir, &error)) {
+        if (!m_launch->profilers()["jvisualvm"]->check(cookedDir, &error)) {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
             continue;
         }
@@ -201,7 +203,7 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
 void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
 {
     QString error;
-    if (!APPLICATION->profilers()["jvisualvm"]->check(m_ui->jvisualvmPathEdit->text(), &error)) {
+    if (!m_launch->profilers()["jvisualvm"]->check(m_ui->jvisualvmPathEdit->text(), &error)) {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking VisualVM install:\n%1").arg(error));
     } else {
         QMessageBox::information(this, tr("OK"), tr("VisualVM setup seems to be OK"));

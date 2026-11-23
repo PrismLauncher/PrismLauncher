@@ -18,7 +18,6 @@
 #include <QDateTime>
 #include <algorithm>
 
-#include "Application.h"
 #include "Index.h"
 #include "JsonFormat.h"
 #include "Version.h"
@@ -35,7 +34,9 @@ VersionList::VersionList(const QString& uid, QObject* parent) : BaseVersionList(
 Task::Ptr VersionList::getLoadTask(bool forceReload)
 {
     auto loadTask = makeShared<SequentialTask>(tr("Load meta for %1", "This is for the task name that loads the meta index.").arg(m_uid));
-    loadTask->addTask(APPLICATION->metadataIndex()->loadTask(Net::Mode::Online, forceReload));
+    if (m_index != nullptr) {
+        loadTask->addTask(m_index->loadTask(Net::Mode::Online, forceReload));
+    }
     loadTask->addTask(this->loadTask(Net::Mode::Online, forceReload));
     return loadTask;
 }
@@ -260,6 +261,7 @@ void VersionList::merge(const VersionList::Ptr& other)
 
 void VersionList::setupAddedVersion(const int row, const Version::Ptr& version)
 {
+    version->setMetaServices(metaServices());
     disconnect(version.get(), &Version::requiresChanged, this, nullptr);
     disconnect(version.get(), &Version::timeChanged, this, nullptr);
     disconnect(version.get(), &Version::typeChanged, this, nullptr);

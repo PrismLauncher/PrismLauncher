@@ -24,6 +24,8 @@
 
 namespace Meta {
 
+class Index;
+
 class VersionList : public BaseVersionList, public BaseEntity {
     Q_OBJECT
     Q_PROPERTY(QString uid READ uid CONSTANT)
@@ -69,6 +71,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
 
    public:  // for usage only by parsers
     void setName(const QString& name);
+    void setIndex(Index* index) { m_index = index; }
     void setVersions(const QList<Version::Ptr>& versions);
     void merge(const VersionList::Ptr& other);
     void mergeFromIndex(const VersionList::Ptr& other);
@@ -88,6 +91,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
     QHash<QString, Version::Ptr> m_lookup;
     QString m_uid;
     QString m_name;
+    Index* m_index = nullptr;
 
     Version::Ptr m_recommended;
 

@@ -36,6 +36,7 @@
  */
 
 #include "JavaSettingsWidget.h"
+#include "services/JavaEnvironment.h"
 
 #include <QFileDialog>
 #include <QFileInfo>
@@ -268,7 +269,8 @@ void JavaSettingsWidget::onJavaAutodetect()
         return;
     }
 
-    VersionSelectDialog versionDialog(APPLICATION->javalist(), tr("Select a Java version"), this, true);
+    auto* javas = m_instance != nullptr && m_instance->services().java != nullptr ? m_instance->services().java->installs() : nullptr;
+    VersionSelectDialog versionDialog(javas, tr("Select a Java version"), this, true);
     versionDialog.setResizeOn(2);
     versionDialog.exec();
 

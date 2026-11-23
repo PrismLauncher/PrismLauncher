@@ -35,6 +35,8 @@
  */
 
 #include "JavaPage.h"
+#include "services/JavaEnvironment.h"
+#include "services/LauncherSettings.h"
 #include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "java/JavaInstall.h"
@@ -58,12 +60,13 @@
 #include "Application.h"
 #include "settings/SettingsObject.h"
 
-JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
+JavaPage::JavaPage(JavaEnvironment* java, LauncherSettings* settings, Meta::Index* metadata, QWidget* parent)
+    : QWidget(parent), ui(new Ui::JavaPage), m_java(java), m_settings(settings), m_metadata(metadata)
 {
     ui->setupUi(this);
 
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
-        ui->managedJavaList->initialize(new JavaInstallList(this, true));
+        ui->managedJavaList->initialize(new JavaInstallList(m_java, m_settings, this, true));
         ui->managedJavaList->setResizeOn(2);
         ui->managedJavaList->selectCurrent();
         ui->managedJavaList->setEmptyString(tr("No managed Java versions are installed"));
@@ -85,13 +88,13 @@ void JavaPage::retranslate()
 bool JavaPage::apply()
 {
     ui->javaSettings->saveSettings();
-    JavaCommon::checkJVMArgs(APPLICATION->settings()->get("JvmArgs").toString(), this);
+    JavaCommon::checkJVMArgs(m_settings != nullptr ? m_settings->get("JvmArgs").toString() : QString(), this);
     return true;
 }
 
 void JavaPage::on_downloadJavaButton_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, nullptr, this);
+    auto jdialog = new Java::InstallDialog({}, nullptr, this, m_metadata, m_java);
     jdialog->exec();
     ui->managedJavaList->loadList();
 }
@@ -103,7 +106,7 @@ void JavaPage::on_removeJavaButton_clicked()
     if (!dcast) {
         return;
     }
-    QDir dir(APPLICATION->javaPath());
+    QDir dir(m_java != nullptr ? m_java->javaPath() : QString());
 
     auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     for (auto& entry : entries) {

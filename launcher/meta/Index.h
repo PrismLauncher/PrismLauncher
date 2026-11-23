@@ -18,9 +18,12 @@
 #include <QAbstractListModel>
 
 #include "BaseEntity.h"
+#include "meta/MetaServices.h"
 #include "meta/VersionList.h"
 #include "net/Mode.h"
 
+class LauncherSettings;
+class NetworkContext;
 class Task;
 
 namespace Meta {
@@ -53,6 +56,9 @@ class Index : public QAbstractListModel, public BaseEntity {
     // this blocks until the version is loaded
     Version::Ptr getLoadedVersion(const QString& uid, const QString& version);
 
+    /** Settings and network shared with every list and version this index creates. */
+    void bind(LauncherSettings* settings, NetworkContext* network);
+
    public:  // for usage by parsers only
     void merge(const std::shared_ptr<Index>& other);
 
@@ -62,7 +68,9 @@ class Index : public QAbstractListModel, public BaseEntity {
    private:
     QList<VersionList::Ptr> m_lists;
     QHash<QString, VersionList::Ptr> m_uids;
+    MetaServices m_services;
 
     void connectVersionList(int row, const VersionList::Ptr& list);
+    void adopt(const VersionList::Ptr& list);
 };
 }  // namespace Meta

@@ -33,6 +33,8 @@ class IconListIconStore : public IconStore {
         }
     }
 
+    IconList* list() const override { return m_icons; }
+
    private:
     IconList* m_icons;
 };

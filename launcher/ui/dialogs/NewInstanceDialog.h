@@ -44,6 +44,11 @@ namespace Ui {
 class NewInstanceDialog;
 }
 
+class IconStore;
+namespace Meta {
+class Index;
+}
+
 class PageContainer;
 class QDialogButtonBox;
 class ImportPage;
@@ -54,8 +59,10 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
 
    public:
     explicit NewInstanceDialog(const QString& initialGroup,
-                               const QString& url = QString(),
-                               const QMap<QString, QString>& extraInfo = {},
+                               const QString& url,
+                               const QMap<QString, QString>& extraInfo,
+                               IconStore* icons,
+                               Meta::Index* metadata,
                                QWidget* parent = nullptr);
     ~NewInstanceDialog() override;
 
@@ -75,6 +82,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     QString instGroup() const;
     QString iconKey() const;
     QString instDir() const;
+    IconStore* icons() const { return m_icons; }
+    Meta::Index* metadata() const { return m_metadata; }
     void refreshInstDirBox();
 
    public slots:
@@ -92,6 +101,8 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
 
    private:
     Ui::NewInstanceDialog* ui = nullptr;
+    IconStore* m_icons = nullptr;
+    Meta::Index* m_metadata = nullptr;
     PageContainer* m_container = nullptr;
     QDialogButtonBox* m_buttons = nullptr;
 

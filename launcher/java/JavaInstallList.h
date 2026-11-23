@@ -26,14 +26,19 @@
 
 #include "QObjectPtr.h"
 
+class JavaEnvironment;
 class JavaListLoadTask;
+class LauncherSettings;
 
 class JavaInstallList : public BaseVersionList {
     Q_OBJECT
     enum class Status { NotDone, InProgress, Done };
 
    public:
-    explicit JavaInstallList(QObject* parent = 0, bool onlyManagedVersions = false);
+    explicit JavaInstallList(JavaEnvironment* java, LauncherSettings* settings, QObject* parent = nullptr, bool onlyManagedVersions = false);
+
+    JavaEnvironment* javaEnvironment() const { return m_java; }
+    LauncherSettings* launcherSettings() const { return m_settings; }
 
     Task::Ptr getLoadTask(bool forceReload = false) override;
     bool isLoaded() override;
@@ -56,6 +61,8 @@ class JavaInstallList : public BaseVersionList {
     shared_qobject_ptr<JavaListLoadTask> m_load_task;
     QList<BaseVersion::Ptr> m_vlist;
     bool m_only_managed_versions;
+    JavaEnvironment* m_java = nullptr;
+    LauncherSettings* m_settings = nullptr;
 };
 
 class JavaListLoadTask : public Task {

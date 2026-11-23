@@ -27,9 +27,10 @@
 #include "net/Mode.h"
 #include "net/NetJob.h"
 
-#include "Application.h"
 #include "BuildConfig.h"
-#include "settings/SettingsObject.h"
+#include "net/HttpMetaCache.h"
+#include "services/LauncherSettings.h"
+#include "services/NetworkContext.h"
 #include "tasks/Task.h"
 
 namespace {
@@ -65,8 +66,10 @@ namespace Meta {
 
 QUrl BaseEntity::url() const
 {
-    auto* s = APPLICATION->settings();
-    QString metaOverride = s->get("MetaURLOverride").toString();
+    QString metaOverride;
+    if (m_metaServices != nullptr && m_metaServices->settings != nullptr) {
+        metaOverride = m_metaServices->settings->get("MetaURLOverride").toString();
+    }
     if (metaOverride.isEmpty()) {
         return QUrl(BuildConfig.META_URL).resolved(localFilename());
     }
@@ -148,9 +151,17 @@ void BaseEntityLoadTask::executeTask()
         emitSucceeded();
         return;
     }
-    m_task.reset(new NetJob(QObject::tr("Download of meta file %1").arg(m_entity->localFilename()), APPLICATION->network()));
+    auto* services = m_entity->metaServices();
+    auto* network = services != nullptr ? services->network : nullptr;
+    auto* qnam = network != nullptr ? network->qnam() : nullptr;
+    auto* cache = network != nullptr ? network->httpMetaCache() : nullptr;
+    if (qnam == nullptr || cache == nullptr) {
+        emitFailed(tr("No network is available to download metadata."));
+        return;
+    }
+    m_task.reset(new NetJob(QObject::tr("Download of meta file %1").arg(m_entity->localFilename()), qnam));
     auto url = m_entity->url();
-    auto entry = APPLICATION->metacache()->resolveEntry("meta", m_entity->localFilename());
+    auto entry = cache->resolveEntry("meta", m_entity->localFilename());
     if (m_force_reload) {
         // clear validators so manual refreshes fetch a fresh body
         entry->setETag({});

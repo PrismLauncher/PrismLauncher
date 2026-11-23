@@ -249,7 +249,7 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(std::uint32_t keyType, 
     return javas;
 }
 
-QList<QString> JavaUtils::FindJavaPaths()
+QList<QString> JavaUtils::FindJavaPaths(const QString& managedJavaDir)
 {
     QList<JavaInstallPtr> java_candidates;
 
@@ -357,14 +357,14 @@ QList<QString> JavaUtils::FindJavaPaths()
     }
 
     candidates.append(getMinecraftJavaBundle());
-    candidates.append(getPrismJavaBundle());
+    candidates.append(getPrismJavaBundle(managedJavaDir));
     candidates = addJavasFromEnv(candidates);
     candidates.removeDuplicates();
     return candidates;
 }
 
 #elif defined(Q_OS_MAC)
-QList<QString> JavaUtils::FindJavaPaths()
+QList<QString> JavaUtils::FindJavaPaths(const QString& managedJavaDir)
 {
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
@@ -411,14 +411,14 @@ QList<QString> JavaUtils::FindJavaPaths()
     }
 
     javas.append(getMinecraftJavaBundle());
-    javas.append(getPrismJavaBundle());
+    javas.append(getPrismJavaBundle(managedJavaDir));
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
 }
 
 #elif defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
-QList<QString> JavaUtils::FindJavaPaths()
+QList<QString> JavaUtils::FindJavaPaths(const QString& managedJavaDir)
 {
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
@@ -495,13 +495,13 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs(FS::PathCombine(gradleUserHome, "jdks"));
 
     javas.append(getMinecraftJavaBundle());
-    javas.append(getPrismJavaBundle());
+    javas.append(getPrismJavaBundle(managedJavaDir));
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
 }
 #else
-QList<QString> JavaUtils::FindJavaPaths()
+QList<QString> JavaUtils::FindJavaPaths(const QString& managedJavaDir)
 {
     qDebug() << "Unknown operating system build - defaulting to \"java\"";
 
@@ -509,7 +509,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     javas.append(this->GetDefaultJava()->path);
 
     javas.append(getMinecraftJavaBundle());
-    javas.append(getPrismJavaBundle());
+    javas.append(getPrismJavaBundle(managedJavaDir));
     javas.removeDuplicates();
     return addJavasFromEnv(javas);
 }
@@ -570,7 +570,7 @@ const QString JavaUtils::javaExecutable = "javaw.exe";
 const QString JavaUtils::javaExecutable = "java";
 #endif
 
-QStringList getPrismJavaBundle()
+QStringList getPrismJavaBundle(const QString& managedJavaDir)
 {
     QList<QString> javas;
 
@@ -589,7 +589,9 @@ QStringList getPrismJavaBundle()
         }
     };
 
-    scanJavaDir(APPLICATION->javaPath());
+    if (!managedJavaDir.isEmpty()) {
+        scanJavaDir(managedJavaDir);
+    }
 
     return javas;
 }

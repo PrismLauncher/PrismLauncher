@@ -432,6 +432,10 @@ set(SERVICE_SOURCES
     services/AccountListService.cpp
     services/IconStore.h
     services/IconListIconStore.h
+    services/LauncherWindows.h
+    services/JavaEnvironment.h
+    LaunchCoordinator.h
+    LaunchCoordinator.cpp
 )
 
 set(JAVA_SOURCES

@@ -42,7 +42,12 @@
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/JavaSettingsWidget.h"
 
+class JavaEnvironment;
+class LauncherSettings;
 class SettingsObject;
+namespace Meta {
+class Index;
+}
 
 namespace Ui {
 class JavaPage;
@@ -52,7 +57,7 @@ class JavaPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit JavaPage(QWidget* parent = 0);
+    explicit JavaPage(JavaEnvironment* java, LauncherSettings* settings, Meta::Index* metadata, QWidget* parent = nullptr);
     ~JavaPage();
 
     QString displayName() const override { return tr("Java"); }
@@ -70,4 +75,7 @@ class JavaPage : public QWidget, public BasePage {
 
    private:
     Ui::JavaPage* ui;
+    JavaEnvironment* m_java = nullptr;
+    LauncherSettings* m_settings = nullptr;
+    Meta::Index* m_metadata = nullptr;
 };

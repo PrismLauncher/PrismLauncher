@@ -19,9 +19,8 @@
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 
-#include "Application.h"
-
 #include "IconPickerDialog.h"
+#include "services/IconStore.h"
 #include "ui_IconPickerDialog.h"
 
 #include "ui/instanceview/InstanceDelegate.h"
@@ -95,7 +94,7 @@ private:
     IconPickerDialog::IconPickerCategory m_category = IconPickerDialog::Any;
 };
 
-IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog)
+IconPickerDialog::IconPickerDialog(IconStore* icons, QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog), m_icons(icons)
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
@@ -123,7 +122,7 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     }
 
     proxyModel = new IconProxyModel(this);
-    proxyModel->setSourceModel(APPLICATION->icons());
+    proxyModel->setSourceModel(iconList());
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     ui->iconView->setModel(proxyModel);
 
@@ -172,7 +171,14 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
         filterIconsByCategory(category);
     });
     // Prevent incorrect indices from e.g. filesystem changes
-    connect(APPLICATION->icons(), &IconList::iconUpdated, this, [this]() { proxyModel->invalidate(); });
+    if (auto* icons = iconList()) {
+        connect(icons, &IconList::iconUpdated, this, [this]() { proxyModel->invalidate(); });
+    }
+}
+
+IconList* IconPickerDialog::iconList() const
+{
+    return m_icons != nullptr ? m_icons->list() : nullptr;
 }
 
 bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)
@@ -203,15 +209,21 @@ void IconPickerDialog::addNewIcon()
     //: The type of icon files
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
-    APPLICATION->icons()->installIcons(fileNames);
+    if (auto* icons = iconList()) {
+        icons->installIcons(fileNames);
+    }
 }
 
 void IconPickerDialog::removeSelectedIcon()
 {
-    if (APPLICATION->icons()->trashIcon(selectedIconKey))
+    auto* icons = iconList();
+    if (icons == nullptr) {
+        return;
+    }
+    if (icons->trashIcon(selectedIconKey))
         return;
 
-    APPLICATION->icons()->deleteIcon(selectedIconKey);
+    icons->deleteIcon(selectedIconKey);
 }
 
 void IconPickerDialog::activated(QModelIndex index)
@@ -229,12 +241,16 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
     if (!key.isEmpty()) {
         selectedIconKey = key;
     }
-    buttonRemove->setEnabled(APPLICATION->icons()->iconFileExists(selectedIconKey));
+    auto* icons = iconList();
+    buttonRemove->setEnabled(icons != nullptr && icons->iconFileExists(selectedIconKey));
 }
 
 int IconPickerDialog::execWithSelection(QString selection)
 {
-    auto list = APPLICATION->icons();
+    auto* list = iconList();
+    if (list == nullptr) {
+        return QDialog::exec();
+    }
     auto contentsWidget = ui->iconView;
     selectedIconKey = selection;
 
@@ -259,7 +275,9 @@ IconPickerDialog::~IconPickerDialog()
 
 void IconPickerDialog::openFolder()
 {
-    DesktopServices::openPath(APPLICATION->icons()->iconDirectory(selectedIconKey), true);
+    if (auto* icons = iconList()) {
+        DesktopServices::openPath(icons->iconDirectory(selectedIconKey), true);
+    }
 }
 
 void IconPickerDialog::filterIcons(const QString& query)

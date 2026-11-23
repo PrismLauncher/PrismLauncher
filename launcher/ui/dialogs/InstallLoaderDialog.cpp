@@ -35,7 +35,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     Q_OBJECT
    public:
     InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, const Version& oldestVersion, PackProfile* profile)
-        : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
+        : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name), m_profile(profile)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
@@ -57,7 +57,8 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
         if (loaded)
             return;
 
-        const auto versions = APPLICATION->metadataIndex()->get(uid);
+        auto* index = m_profile != nullptr && m_profile->instance() != nullptr ? m_profile->instance()->services().metadata : nullptr;
+        const auto versions = index != nullptr ? index->get(uid) : Meta::VersionList::Ptr();
         if (!versions)
             return;
 
@@ -75,6 +76,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     const QString uid;
     const QString iconName;
     const QString name;
+    PackProfile* m_profile = nullptr;
     bool loaded = false;
 };
 

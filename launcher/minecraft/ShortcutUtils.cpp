@@ -36,6 +36,8 @@
  */
 
 #include "ShortcutUtils.h"
+#include "minecraft/MinecraftInstance.h"
+#include "services/IconStore.h"
 
 #include "FileSystem.h"
 
@@ -54,9 +56,14 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
 
     QString appPath = QApplication::applicationFilePath();
-    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
+    auto* mcInstance = dynamic_cast<MinecraftInstance*>(shortcut.instance);
+    auto* iconList = mcInstance != nullptr && mcInstance->services().icons != nullptr ? mcInstance->services().icons->list() : nullptr;
+    if (iconList == nullptr) {
+        return false;
+    }
+    auto icon = iconList->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
     if (icon == nullptr) {
-        icon = APPLICATION->icons()->icon("grass");
+        icon = iconList->icon("grass");
     }
     QString iconPath;
     QStringList args;

@@ -105,8 +105,16 @@ class Index;
 #endif
 #define APPLICATION_DYN (dynamic_cast<Application*>(QCoreApplication::instance()))
 
+class JavaEnvironment;
+class LaunchCoordinator;
+class LaunchHost;
+class LauncherWindows;
+class ApplicationLaunchHost;
+
 class Application : public QApplication {
     Q_OBJECT
+    friend class ApplicationLaunchHost;
+
    public:
     enum Status : std::uint8_t { StartingUp, Failed, Succeeded, Initialized };
 
@@ -181,6 +189,10 @@ class Application : public QApplication {
     /** Dependencies for MinecraftInstance load and launch. */
     InstanceServices instanceServices();
     const LauncherRuntimeInfo& runtime() const { return m_runtime; }
+
+    LaunchCoordinator* launchCoordinator() const { return m_launchCoordinator.get(); }
+    LauncherWindows* launcherWindows() const { return m_windows.get(); }
+    JavaEnvironment* javaEnvironment() const { return m_javaEnvironment.get(); }
 
     Meta::Index* metadataIndex();
 
@@ -305,6 +317,10 @@ class Application : public QApplication {
     std::unique_ptr<OAuthCallbackRelay> m_oauthCallbacks;
     std::unique_ptr<InstanceCatalog> m_instanceCatalog;
     std::unique_ptr<AccountService> m_accountService;
+    std::unique_ptr<LauncherWindows> m_windows;
+    std::unique_ptr<JavaEnvironment> m_javaEnvironment;
+    std::unique_ptr<LaunchHost> m_launchHost;
+    std::unique_ptr<LaunchCoordinator> m_launchCoordinator;
 
     // Hold a non-owning NetworkContext*; declared after m_networkContext so they are destroyed first.
     std::unique_ptr<FlameAPI> m_flameAPI;

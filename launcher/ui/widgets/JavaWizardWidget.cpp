@@ -22,6 +22,7 @@
 #include "java/JavaUtils.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "services/JavaEnvironment.h"
 #include "ui/java/InstallJavaDialog.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
@@ -29,7 +30,8 @@
 #include "BuildConfig.h"
 #include "HardwareInfo.h"
 
-JavaWizardWidget::JavaWizardWidget(QWidget* parent) : QWidget(parent)
+JavaWizardWidget::JavaWizardWidget(JavaEnvironment* java, Meta::Index* metadata, QWidget* parent)
+    : QWidget(parent), m_java(java), m_metadata(metadata)
 {
     m_availableMemory = HardwareInfo::totalRamMiB();
 
@@ -185,7 +187,9 @@ void JavaWizardWidget::setupUi()
 
 void JavaWizardWidget::initialize()
 {
-    m_versionWidget->initialize(APPLICATION->javalist());
+    if (m_java != nullptr) {
+        m_versionWidget->initialize(m_java->installs());
+    }
     m_versionWidget->selectSearch();
     m_versionWidget->setResizeOn(2);
     auto s = APPLICATION->settings();
@@ -358,7 +362,7 @@ void JavaWizardWidget::on_javaBrowseBtn_clicked()
 
 void JavaWizardWidget::javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, nullptr, this);
+    auto jdialog = new Java::InstallDialog({}, nullptr, this, m_metadata, m_java);
     jdialog->exec();
 }
 

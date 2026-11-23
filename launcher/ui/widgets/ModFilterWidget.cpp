@@ -212,7 +212,10 @@ ModFilterWidget::~ModFilterWidget()
 
 void ModFilterWidget::loadVersionList()
 {
-    m_versionList = APPLICATION->metadataIndex()->get("net.minecraft");
+    if (m_instance == nullptr || m_instance->services().metadata == nullptr) {
+        return;
+    }
+    m_versionList = m_instance->services().metadata->get("net.minecraft");
     if (!m_versionList->isLoaded()) {
         QEventLoop loadVersionListLoop;
 

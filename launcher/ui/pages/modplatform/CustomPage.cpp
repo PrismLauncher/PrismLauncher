@@ -70,7 +70,10 @@ CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(par
 void CustomPage::openedImpl()
 {
     if (!initialized) {
-        auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
+        auto vlist = dialog->metadata() != nullptr ? dialog->metadata()->get("net.minecraft") : Meta::VersionList::Ptr();
+        if (!vlist) {
+            return;
+        }
         ui->versionList->initialize(vlist.get());
         initialized = true;
     } else {
@@ -148,7 +151,10 @@ void CustomPage::loaderFilterChanged()
         m_selectedLoader = "com.mumfrey.liteloader";
     }
 
-    auto vlist = APPLICATION->metadataIndex()->get(m_selectedLoader);
+    auto vlist = dialog->metadata() != nullptr ? dialog->metadata()->get(m_selectedLoader) : Meta::VersionList::Ptr();
+    if (!vlist) {
+        return;
+    }
     ui->loaderVersionList->initialize(vlist.get());
     ui->loaderVersionList->selectRecommended();
     ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));

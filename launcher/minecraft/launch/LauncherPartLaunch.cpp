@@ -39,6 +39,7 @@
 #include <QStandardPaths>
 
 #include "Application.h"
+#include "services/LauncherWindows.h"
 #include "FileSystem.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
@@ -178,7 +179,9 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::Finished: {
             auto* instance = m_parent->instance();
             if (instance->settings()->get("CloseAfterLaunch").toBool()) {
-                APPLICATION->showMainWindow();
+                if (instance->services().windows != nullptr) {
+                    instance->services().windows->showMainWindow();
+                }
             }
 
             m_parent->setPid(-1);

@@ -35,6 +35,7 @@
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 #include "minecraft/MinecraftInstance.h"
+#include "services/JavaEnvironment.h"
 #include "minecraft/PackProfile.h"
 #include "tasks/SequentialTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -47,8 +48,8 @@ class InstallJavaPage : public QWidget, public BasePage {
    public:
     Q_OBJECT
    public:
-    explicit InstallJavaPage(const QString& id, const QString& iconName, const QString& name, QWidget* parent = nullptr)
-        : QWidget(parent), uid(id), iconName(iconName), name(name)
+    explicit InstallJavaPage(const QString& id, const QString& iconName, const QString& name, Meta::Index* metadata, QWidget* parent = nullptr)
+        : QWidget(parent), uid(id), iconName(iconName), name(name), m_metadata(metadata)
     {
         setObjectName(QStringLiteral("VersionSelectWidget"));
         horizontalLayout = new QHBoxLayout(this);
@@ -103,7 +104,7 @@ class InstallJavaPage : public QWidget, public BasePage {
         if (loaded)
             return;
 
-        const auto versions = APPLICATION->metadataIndex()->get(uid);
+        const auto versions = m_metadata != nullptr ? m_metadata->get(uid) : Meta::VersionList::Ptr();
         if (!versions)
             return;
 
@@ -152,6 +153,7 @@ class InstallJavaPage : public QWidget, public BasePage {
     const QString uid;
     const QString iconName;
     const QString name;
+    Meta::Index* m_metadata = nullptr;
     bool loaded = false;
 
     QHBoxLayout* horizontalLayout = nullptr;
@@ -182,8 +184,12 @@ QStringList getRecommendedJavaVersionsFromVersionList(Meta::VersionList::Ptr lis
     return recommendedJavas;
 }
 
-InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QWidget* parent)
-    : QDialog(parent), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
+InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QWidget* parent, Meta::Index* metadata, JavaEnvironment* java)
+    : QDialog(parent)
+    , container(new PageContainer(this, QString(), this))
+    , buttons(new QDialogButtonBox(this))
+    , m_metadata(instance != nullptr && instance->services().metadata != nullptr ? instance->services().metadata : metadata)
+    , m_java(instance != nullptr && instance->services().java != nullptr ? instance->services().java : java)
 {
     auto layout = new QVBoxLayout(this);
     // small margins look ugly on macOS on modal windows
@@ -242,7 +248,7 @@ InstallDialog::InstallDialog(const QString& uid, MinecraftInstance* instance, QW
             }
         }
     } else {
-        const auto versions = APPLICATION->metadataIndex()->get("net.minecraft.java");
+        const auto versions = m_metadata != nullptr ? m_metadata->get("net.minecraft.java") : Meta::VersionList::Ptr();
         if (versions) {
             if (versions->isLoaded()) {
                 recommendedJavas = getRecommendedJavaVersionsFromVersionList(versions);
@@ -283,16 +289,16 @@ QList<BasePage*> InstallDialog::getPages()
 {
     return {
         // Mojang
-        new InstallJavaPage("net.minecraft.java", "mojang", tr("Mojang")),
+        new InstallJavaPage("net.minecraft.java", "mojang", tr("Mojang"), m_metadata),
         // Adoptium
-        new InstallJavaPage("net.adoptium.java", "adoptium", tr("Adoptium")),
+        new InstallJavaPage("net.adoptium.java", "adoptium", tr("Adoptium"), m_metadata),
         // Azul
-        new InstallJavaPage("com.azul.java", "azul", tr("Azul Zulu")),
+        new InstallJavaPage("com.azul.java", "azul", tr("Azul Zulu"), m_metadata),
         // IBM
 	/* Must watch out in case the AdoptOpenJDK infrastructure is deprecated.
         In case of happening, IBM does not seem to provide as of today (03/2026) an API like Adoptium does and rather uses GitHub directly in its website: `developer.ibm.com`.
         GitHub is known for rate limiting requests that do not use an API key from an account. */
-        new InstallJavaPage("com.ibm.java", "openj9_hex_custom", tr("IBM Semeru Open")),
+        new InstallJavaPage("com.ibm.java", "openj9_hex_custom", tr("IBM Semeru Open"), m_metadata),
     };
 }
 
@@ -314,7 +320,7 @@ void InstallDialog::done(int result)
             auto meta = std::dynamic_pointer_cast<Java::Metadata>(page->selectedVersion());
             if (meta) {
                 Task::Ptr task;
-                auto final_path = FS::PathCombine(APPLICATION->javaPath(), meta->m_name);
+                auto final_path = FS::PathCombine(m_java != nullptr ? m_java->javaPath() : QString(), meta->m_name);
                 auto deletePath = [final_path] { FS::deletePath(final_path); };
                 switch (meta->downloadType) {
                     case Java::DownloadType::Manifest:
