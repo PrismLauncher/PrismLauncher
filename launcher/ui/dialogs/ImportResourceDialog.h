@@ -10,11 +10,13 @@ namespace Ui {
 class ImportResourceDialog;
 }
 
+class IconStore;
+
 class ImportResourceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, QWidget* parent = nullptr);
+    explicit ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, IconStore* icons, QWidget* parent = nullptr);
     ~ImportResourceDialog() override;
     QString selectedInstanceKey;
 

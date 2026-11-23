@@ -1181,7 +1181,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 ->show();
             continue;
         }
-        ImportResourceDialog dlg(localFileName, type, this);
+        ImportResourceDialog dlg(localFileName, type, m_icons, this);
 
         if (dlg.exec() != QDialog::Accepted)
             continue;
