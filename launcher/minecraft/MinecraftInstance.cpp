@@ -219,6 +219,11 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("LowMemWarning"), memorySetting);
 
+        auto sandboxOverride = m_settings->registerSetting("OverrideSandbox", false);
+        m_settings->registerOverride(global_settings->getSetting("SandboxEnabled"), sandboxOverride);
+        m_settings->registerOverride(global_settings->getSetting("SandboxNetworkAccess"), sandboxOverride);
+        m_settings->registerOverride(global_settings->getSetting("SandboxFileSystemAccess"), sandboxOverride);
+
         // Native library workarounds
         auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
         m_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
@@ -692,7 +697,8 @@ QMap<QString, QString> MinecraftInstance::getVariables()
 QProcessEnvironment MinecraftInstance::createEnvironment()
 {
     // prepare the process environment
-    QProcessEnvironment env = CleanEnviroment();
+    // NOTE: for now not using system environment so modrinth-sandbox can handle env passthrough itself
+    QProcessEnvironment env;
 
     // export some infos
     auto variables = getVariables();
@@ -1254,7 +1260,6 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     {
         // actually launch the game
         auto step = makeShared<LauncherPartLaunch>(pptr);
-        step->setWorkingDirectory(gameRoot());
         step->setAuthSession(session);
         step->setTargetToJoin(targetToJoin);
         process->appendStep(step);

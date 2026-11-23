@@ -78,6 +78,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
 
         m_ui->consoleSettingsBox->setCheckable(true);
         m_ui->windowSizeGroupBox->setCheckable(true);
+        m_ui->sandboxingGroupBox->setCheckable(true);
         m_ui->nativeWorkaroundsGroupBox->setCheckable(true);
         m_ui->perfomanceGroupBox->setCheckable(true);
         m_ui->gameTimeGroupBox->setCheckable(true);
@@ -128,6 +129,13 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
             m_ui->latestMCVersionGroupBox->setChecked(m_instance->settings()->get("UseLatestMinecraftVersion").toBool());
         });
+
+        // NOTE: the double toggles might be confusing so try to make them as clear as possible
+        m_ui->sandboxingGroupBox->setTitle(tr("Override sandboxing settings for this instance"));
+        m_ui->enableSandboxingCheckBox->setText(tr("Enable sandboxing"));
+        m_ui->sandboxingSettings->setEnabled(false);
+        connect(m_ui->enableSandboxingCheckBox, &QCheckBox::checkStateChanged, this,
+                [this](Qt::CheckState state) { m_ui->sandboxingSettings->setEnabled(state == Qt::Checked); });
     }
 
     m_ui->maximizedWarning->hide();
@@ -206,6 +214,12 @@ void MinecraftSettingsWidget::loadSettings()
     // Environment variables
     m_ui->environmentVariables->initialize(m_instance != nullptr, m_instance == nullptr || settings->get("OverrideEnv").toBool(),
                                            Json::toMap(settings->get("Env").toString()));
+
+    // Sandboxing
+    m_ui->sandboxingGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideSandbox").toBool());
+    m_ui->enableSandboxingCheckBox->setChecked(settings->get("SandboxEnabled").toBool());
+    m_ui->enableSandboxNetworkCheckBox->setChecked(settings->get("SandboxNetworkAccess").toBool());
+    m_ui->sandboxingFileSystemAccess->load(Json::toMap(settings->get("SandboxFileSystemAccess").toString()));
 
     // Legacy Tweaks
     m_ui->legacySettingsGroupBox->setChecked(m_instance == nullptr || settings->get("OverrideLegacySettings").toBool());
@@ -409,6 +423,23 @@ void MinecraftSettingsWidget::saveSettings()
         settings->set("Env", Json::fromMap(m_ui->environmentVariables->value()));
     } else {
         settings->reset("Env");
+    }
+
+    // Sandboxing
+    const bool sandboxing = m_instance == nullptr || m_ui->sandboxingGroupBox->isChecked();
+
+    if (m_instance != nullptr) {
+        settings->set("OverrideSandbox", sandboxing);
+    }
+
+    if (sandboxing) {
+        settings->set("SandboxEnabled", m_ui->enableSandboxingCheckBox->isChecked());
+        settings->set("SandboxNetworkAccess", m_ui->enableSandboxNetworkCheckBox->isChecked());
+        settings->set("SandboxFileSystemAccess", Json::fromMap(m_ui->sandboxingFileSystemAccess->save()));
+    } else {
+        settings->reset("SandboxEnabled");
+        settings->reset("SandboxNetworkAccess");
+        settings->reset("SandboxFileSystemAccess");
     }
 
     // Workarounds
