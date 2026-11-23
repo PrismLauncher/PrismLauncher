@@ -34,6 +34,8 @@ class SharedNetworkContext : public NetworkContext {
     QNetworkAccessManager* qnam() override;
     HttpMetaCache* httpMetaCache() override;
     QString userAgent() const override;
+    QString flameApiKey() const override;
+    QString modrinthApiToken() const override;
 
    private:
     QNetworkAccessManager* m_nam = nullptr;

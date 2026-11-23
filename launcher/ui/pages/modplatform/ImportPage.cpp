@@ -36,6 +36,8 @@
 
 #include "ImportPage.h"
 
+#include "Application.h"
+
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
@@ -132,7 +134,7 @@ void ImportPage::updateState()
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
 
-            auto [job, array] = FlameAPI::getFile(addonId, fileId);
+            auto [job, array] = APPLICATION->flameAPI()->getFile(addonId, fileId);
 
             connect(job.get(), &NetJob::failed, this, [this](const QString& reason) {
                 CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();

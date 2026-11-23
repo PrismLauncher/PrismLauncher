@@ -21,6 +21,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -28,13 +29,13 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
-#include "Application.h"
 #include "Json.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "services/LauncherSettings.h"
 #include "tasks/Task.h"
 
 #include "archive/ExportToZipTask.h"
@@ -42,8 +43,8 @@
 const QString FlamePackExportTask::TEMPLATE = "<li><a href=\"{url}\">{name}{authors}</a></li>\n";
 const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 
-FlamePackExportTask::FlamePackExportTask(FlamePackExportOptions&& options)
-    : m_options(std::move(options)), m_gameRoot(m_options.instance->gameRoot())
+FlamePackExportTask::FlamePackExportTask(FlamePackExportOptions&& options, NetworkContext* network, LauncherSettings* settings)
+    : m_options(std::move(options)), m_gameRoot(m_options.instance->gameRoot()), m_api(network), m_settings(settings)
 {}
 
 void FlamePackExportTask::executeTask()
@@ -86,7 +87,7 @@ void FlamePackExportTask::collectHashes()
     setStatus(tr("Finding file hashes..."));
     setProgress(1, 5);
     auto allMods = m_options.instance->loaderModList()->allMods();
-    ConcurrentTask::Ptr hashingTask(new ConcurrentTask("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
+    ConcurrentTask::Ptr hashingTask(new ConcurrentTask("MakeHashesTask", m_settings->get("NumberOfConcurrentTasks").toInt()));
     task.reset(hashingTask);
     for (const QFileInfo& file : m_files) {
         const QString relative = m_gameRoot.relativeFilePath(file.absoluteFilePath());
@@ -173,7 +174,7 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto [matchTask, response] = FlameAPI::matchFingerprints(fingerprints);
+    auto [matchTask, response] = m_api.matchFingerprints(fingerprints);
     task = matchTask;
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
@@ -252,9 +253,9 @@ void FlamePackExportTask::getProjectsInfo()
         buildZip();
         return;
     } else if (addonIds.size() == 1) {
-        std::tie(projTask, response) = FlameAPI::get().getProject(*addonIds.begin());
+        std::tie(projTask, response) = m_api.getProject(*addonIds.begin());
     } else {
-        std::tie(projTask, response) = FlameAPI::get().getProjects(addonIds);
+        std::tie(projTask, response) = m_api.getProjects(addonIds);
     }
 
     connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {

@@ -1,5 +1,4 @@
 #include "ModrinthCheckUpdate.h"
-#include "Application.h"
 #include "ModrinthAPI.h"
 #include "ModrinthPackIndex.h"
 
@@ -11,13 +10,18 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 
+#include "services/LauncherSettings.h"
 #include "tasks/ConcurrentTask.h"
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Resource*>& resources,
                                          std::vector<Version>& mcVersions,
                                          QList<ModPlatform::ModLoaderType> loadersList,
-                                         ResourceFolderModel* resourceModel)
+                                         ResourceFolderModel* resourceModel,
+                                         NetworkContext* network,
+                                         LauncherSettings* settings)
     : CheckUpdateTask(resources, mcVersions, std::move(loadersList), resourceModel)
+    , m_api(network)
+    , m_settings(settings)
     , m_hashType(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
 {
     if (!m_loadersList.isEmpty()) {  // this is for mods so append all the other posible loaders to the initial list
@@ -52,7 +56,7 @@ void ModrinthCheckUpdate::executeTask()
     setProgress(0, ((m_loadersList.isEmpty() ? 1 : m_loadersList.length()) * 2) + 1);
 
     auto hashingTask =
-        makeShared<ConcurrentTask>("MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+        makeShared<ConcurrentTask>("MakeModrinthHashesTask", m_settings->get("NumberOfConcurrentTasks").toInt());
     bool startHasing = false;
     for (auto* resource : m_resources) {
         auto hash = resource->metadata()->hash;
@@ -104,7 +108,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
         return;
     }
 
-    auto [job, response] = ModrinthAPI::get().latestVersions(hashes, m_hashType, m_gameVersions, loader);
+    auto [job, response] = m_api.latestVersions(hashes, m_hashType, m_gameVersions, loader);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 

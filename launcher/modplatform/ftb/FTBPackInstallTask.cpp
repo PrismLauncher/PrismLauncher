@@ -38,6 +38,7 @@
 
 #include "FTBPackInstallTask.h"
 
+#include <QCoreApplication>
 #include <utility>
 
 #include "FileSystem.h"
@@ -49,14 +50,14 @@
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
-#include "Application.h"
 #include "BuildConfig.h"
+#include "services/NetworkContext.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 
 namespace FTB {
 
-PackInstallTask::PackInstallTask(Modpack pack, QString version, QWidget* parent)
-    : m_pack(std::move(pack)), m_versionName(std::move(version)), m_parent(parent)
+PackInstallTask::PackInstallTask(Modpack pack, QString version, NetworkContext* network, LauncherSettings* settings, QWidget* parent)
+    : m_pack(std::move(pack)), m_versionName(std::move(version)), m_network(network), m_launcherSettings(settings), m_parent(parent)
 {}
 
 bool PackInstallTask::abort()
@@ -93,7 +94,7 @@ void PackInstallTask::executeTask()
 
     const auto& version = *versionIt;
 
-    auto netJob = makeShared<NetJob>("FTB::VersionFetch", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("FTB::VersionFetch", m_network->qnam());
 
     auto searchUrl = QString(BuildConfig.FTB_API_BASE_URL + "/modpack/%1/%2").arg(m_pack.id).arg(version.id);
 
@@ -166,7 +167,7 @@ void PackInstallTask::resolveMods()
         }
     }
 
-    m_modIdResolverTask.reset(new Flame::FileResolvingTask(manifest));
+    m_modIdResolverTask.reset(new Flame::FileResolvingTask(manifest, m_network, m_launcherSettings));
 
     connect(m_modIdResolverTask.get(), &Flame::FileResolvingTask::succeeded, this, &PackInstallTask::onResolveModsSucceeded);
     connect(m_modIdResolverTask.get(), &Flame::FileResolvingTask::failed, this, &PackInstallTask::onResolveModsFailed);
@@ -304,7 +305,7 @@ void PackInstallTask::downloadPack()
     setStatus(tr("Downloading mods..."));
     setAbortable(false);
 
-    auto jobPtr = makeShared<NetJob>(tr("Mod download"), APPLICATION->network());
+    auto jobPtr = makeShared<NetJob>(tr("Mod download"), m_network->qnam());
     for (const auto& file : m_version.files) {
         if (file.serverOnly || file.url.isEmpty()) {
             continue;

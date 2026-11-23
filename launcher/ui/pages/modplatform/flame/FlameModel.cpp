@@ -184,7 +184,7 @@ void ListModel::performPaginatedSearch()
             };
             auto project = std::make_shared<ModPlatform::IndexedPack>();
             project->addonId = projectId;
-            if (auto job = FlameAPI::get().getProjectInfo({ project }, std::move(callbacks), false); job) {
+            if (auto job = APPLICATION->flameAPI()->getProjectInfo({ project }, std::move(callbacks), false); job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }
@@ -203,7 +203,7 @@ void ListModel::performPaginatedSearch()
         searchRequestFailed("Aborted");
     };
 
-    auto netJob = FlameAPI::get().searchProjects(
+    auto netJob = APPLICATION->flameAPI()->searchProjects(
         { ModPlatform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders, m_filter->versions,
           ModPlatform::SideType::NoSide, m_filter->categoryIds, m_filter->openSource },
         std::move(callbacks));

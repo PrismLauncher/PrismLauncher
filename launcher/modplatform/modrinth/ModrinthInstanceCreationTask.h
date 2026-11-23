@@ -12,6 +12,7 @@
 #include "BaseInstance.h"
 #include "InstanceTask.h"
 
+class NetworkContext;
 class Resource;
 
 class ModrinthCreationTask final : public InstanceTask {
@@ -29,6 +30,7 @@ class ModrinthCreationTask final : public InstanceTask {
     ModrinthCreationTask(const QString& stagingPath,
                          bool trustedSource,
                          SettingsObject* globalSettings,
+                         NetworkContext* network,
                          QWidget* parent,
                          QString id,
                          QString versionId = {},
@@ -54,6 +56,7 @@ class ModrinthCreationTask final : public InstanceTask {
    private:
     QWidget* m_parent = nullptr;
     bool m_trustedSource;
+    NetworkContext* m_network = nullptr;
 
     QString m_minecraftVersion, m_fabricVersion, m_quiltVersion, m_forgeVersion, m_neoForgeVersion;
     QString m_managedId, m_managedVersionId, m_managedName;

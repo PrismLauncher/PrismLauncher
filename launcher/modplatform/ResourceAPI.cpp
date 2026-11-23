@@ -2,13 +2,28 @@
 
 #include <algorithm>
 
-#include "Application.h"
 #include "Json.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
 
 #include "net/ApiRequest.h"
+#include "services/NetworkContext.h"
+
+shared_qobject_ptr<NetJob> ResourceAPI::makeNetJob(const QString& name) const
+{
+    return makeShared<NetJob>(name, m_network->qnam());
+}
+
+std::pair<Net::Request::Ptr, QByteArray*> ResourceAPI::makeApiRequest(const QUrl& url) const
+{
+    return Net::ApiRequest::makeByteArray(m_network, url);
+}
+
+std::pair<Net::Request::Ptr, QByteArray*> ResourceAPI::makeApiRequest(const QUrl& url, QByteArray postData) const
+{
+    return Net::ApiRequest::makeByteArray(m_network, url, std::move(postData));
+}
 
 Task::Ptr ResourceAPI::searchProjects(const SearchArgs& args, const Callback<QList<ModPlatform::IndexedPack::Ptr>>& callbacks) const
 {
@@ -20,9 +35,9 @@ Task::Ptr ResourceAPI::searchProjects(const SearchArgs& args, const Callback<QLi
 
     const auto& searchUrl = searchUrlOptional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
+    auto netJob = makeNetJob(QString("%1::Search").arg(debugName()));
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(searchUrl));
+    auto [action, response] = makeApiRequest(QUrl(searchUrl));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks] {
@@ -89,9 +104,9 @@ Task::Ptr ResourceAPI::getProjectVersions(const VersionSearchArgs& args,
 
     const auto& versionsUrl = versionsUrlOptional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack->name), APPLICATION->network());
+    auto netJob = makeNetJob(QString("%1::Versions").arg(args.pack->name));
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
+    auto [action, response] = makeApiRequest(versionsUrl);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
@@ -216,8 +231,8 @@ Task::Ptr ResourceAPI::getDependencyVersion(const DependencySearchArgs& args, co
 
     const auto& versionsUrl = versionsUrlOptional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(versionsUrl);
+    auto netJob = makeNetJob(QString("%1::Dependency").arg(args.dependency.addonId.toString()));
+    auto [action, response] = makeApiRequest(versionsUrl);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [this, response, callbacks, args] {
@@ -308,10 +323,10 @@ std::pair<Task::Ptr, QByteArray*> ResourceAPI::getProject(const QString& addonId
 
     const auto& projectUrl = projectUrlOptional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
+    auto netJob = makeNetJob(QString("%1::GetProject").arg(addonId));
     netJob->setAskRetry(askRetry);
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QUrl(projectUrl));
+    auto [action, response] = makeApiRequest(QUrl(projectUrl));
     netJob->addNetAction(action);
 
     return { netJob, response };

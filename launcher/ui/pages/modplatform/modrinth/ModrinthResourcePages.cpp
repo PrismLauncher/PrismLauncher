@@ -38,6 +38,8 @@
 
 #include "ModrinthResourcePages.h"
 
+#include "Application.h"
+
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -57,27 +59,27 @@ static ResourceProviderData prepareModrinth()
 
 ShaderPackResourcePage* Modrinth::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ShaderPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return new ShaderPackResourcePage(dialog, instance, prepareModrinth(), APPLICATION->modrinthAPI());
 }
 
 DataPackResourcePage* Modrinth::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new DataPackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return new DataPackResourcePage(dialog, instance, prepareModrinth(), APPLICATION->modrinthAPI());
 }
 
 ResourcePackResourcePage* Modrinth::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ResourcePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return new ResourcePackResourcePage(dialog, instance, prepareModrinth(), APPLICATION->modrinthAPI());
 }
 
 TexturePackResourcePage* Modrinth::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new TexturePackResourcePage(dialog, instance, prepareModrinth(), &ModrinthAPI::get());
+    return new TexturePackResourcePage(dialog, instance, prepareModrinth(), APPLICATION->modrinthAPI());
 }
 
 ModPage* Modrinth::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ModPage(dialog, instance, prepareModrinth(), &ModrinthAPI::get(),
+    return new ModPage(dialog, instance, prepareModrinth(), APPLICATION->modrinthAPI(),
                        ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true));
 }
 }  // namespace ResourceDownload

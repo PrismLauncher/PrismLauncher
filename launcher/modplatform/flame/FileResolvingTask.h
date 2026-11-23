@@ -18,13 +18,18 @@
 #pragma once
 
 #include "PackManifest.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
+
+class LauncherSettings;
+class NetworkContext;
 
 namespace Flame {
 class FileResolvingTask : public Task {
     Q_OBJECT
    public:
-    explicit FileResolvingTask(Flame::Manifest& toProcess);
+    FileResolvingTask(Flame::Manifest& toProcess, NetworkContext* network, LauncherSettings* settings);
     ~FileResolvingTask() override = default;
 
     bool canAbort() const override { return true; }
@@ -43,6 +48,9 @@ class FileResolvingTask : public Task {
 
    private: /* data */
     Flame::Manifest m_manifest;
+    FlameAPI m_flameApi;
+    ModrinthAPI m_modrinthApi;
+    LauncherSettings* m_settings = nullptr;
     Task::Ptr m_task;
 };
 }  // namespace Flame

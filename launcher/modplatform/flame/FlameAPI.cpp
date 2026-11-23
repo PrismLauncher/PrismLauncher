@@ -3,18 +3,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "FlameAPI.h"
+#include <QEventLoop>
+#include <QHash>
 #include <optional>
 #include "BuildConfig.h"
 
-#include "Application.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "net/ApiRequest.h"
 #include "net/NetJob.h"
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints)
+std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>& fingerprints) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
+    auto netJob = makeNetJob(QString("Flame::MatchFingerprints"));
 
     QJsonObject bodyObj;
     QJsonArray fingerprintsArr;
@@ -26,19 +27,19 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::matchFingerprints(const QList<uint>&
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/fingerprints"), bodyRaw);
+    auto [action, response] = makeApiRequest(QString(BuildConfig.FLAME_BASE_URL + "/fingerprints"), bodyRaw);
     netJob->addNetAction(action);
 
     return { netJob, response };
 }
 
-QString FlameAPI::getModFileChangelog(int modId, int fileId)
+QString FlameAPI::getModFileChangelog(int modId, int fileId) const
 {
     QEventLoop lock;
     QString changelog;
 
-    auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(
+    auto netJob = makeNetJob(QString("Flame::FileChangelog"));
+    auto [action, response] = makeApiRequest(
         QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog")
             .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))));
     netJob->addNetAction(action);
@@ -66,14 +67,14 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     return changelog;
 }
 
-QString FlameAPI::getModDescription(int modId)
+QString FlameAPI::getModDescription(int modId) const
 {
     QEventLoop lock;
     QString description;
 
-    auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
+    auto netJob = makeNetJob(QString("Flame::ModDescription"));
     auto [action, response] =
-        Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
+        makeApiRequest(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(QString::number(modId)));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, netJob.get(), [&netJob, response, &description] {
@@ -101,7 +102,7 @@ QString FlameAPI::getModDescription(int modId)
 
 std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
+    auto netJob = makeNetJob(QString("Flame::GetProjects"));
 
     QJsonObject bodyObj;
     QJsonArray addonsArr;
@@ -113,7 +114,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) co
 
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods"), bodyRaw);
+    auto [action, response] = makeApiRequest(QString(BuildConfig.FLAME_BASE_URL + "/mods"), bodyRaw);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [bodyRaw] { qDebug() << bodyRaw; });
@@ -121,9 +122,9 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getProjects(QStringList addonIds) co
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
+std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
+    auto netJob = makeNetJob(QString("Flame::GetFiles"));
 
     QJsonObject bodyObj;
     QJsonArray filesArr;
@@ -136,7 +137,7 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
     QJsonDocument body(bodyObj);
     auto bodyRaw = body.toJson();
 
-    auto [action, response] = Net::ApiRequest::makeByteArray(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), bodyRaw);
+    auto [action, response] = makeApiRequest(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), bodyRaw);
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::failed, netJob.get(), [bodyRaw] { qDebug() << bodyRaw; });
@@ -144,11 +145,11 @@ std::pair<Task::Ptr, QByteArray*> FlameAPI::getFiles(const QStringList& fileIds)
     return { netJob, response };
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId)
+std::pair<Task::Ptr, QByteArray*> FlameAPI::getFile(const QString& addonId, const QString& fileId) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
+    auto netJob = makeNetJob(QString("Flame::GetFile"));
     auto [action, response] =
-        Net::ApiRequest::makeByteArray(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
+        makeApiRequest(QUrl(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(addonId, fileId)));
     netJob->addNetAction(action);
 
     QObject::connect(netJob.get(), &NetJob::failed, netJob.get(),
@@ -197,10 +198,10 @@ ModPlatform::ResourceType FlameAPI::getResourceType(int classId)
     return ModPlatform::ResourceType::Unknown;
 }
 
-std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type)
+std::pair<Task::Ptr, QByteArray*> FlameAPI::getCategories(ModPlatform::ResourceType type) const
 {
-    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto [action, response] = Net::ApiRequest::makeByteArray(
+    auto netJob = makeNetJob(QString("Flame::GetCategories"));
+    auto [action, response] = makeApiRequest(
         QUrl(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(getClassId(type))));
     netJob->addNetAction(action);
     QObject::connect(netJob.get(), &Task::failed, netJob.get(),

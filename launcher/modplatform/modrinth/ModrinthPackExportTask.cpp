@@ -43,7 +43,8 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                bool optionalFiles,
                                                MinecraftInstance* instance,
                                                const QString& output,
-                                               MMCZip::FilterFileFunction filter)
+                                               MMCZip::FilterFileFunction filter,
+                                               NetworkContext* network)
     : name(name)
     , version(version)
     , summary(summary)
@@ -52,6 +53,7 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(std::move(filter))
+    , m_api(network)
 {}
 
 void ModrinthPackExportTask::executeTask()
@@ -154,7 +156,7 @@ void ModrinthPackExportTask::makeApiRequest()
         buildZip();
     } else {
         setStatus(tr("Finding versions for hashes..."));
-        auto [versionsTask, response] = ModrinthAPI::get().currentVersions(pendingHashes.values(), "sha512");
+        auto [versionsTask, response] = m_api.currentVersions(pendingHashes.values(), "sha512");
         task = versionsTask;
         connect(task.get(), &Task::succeeded, this, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);

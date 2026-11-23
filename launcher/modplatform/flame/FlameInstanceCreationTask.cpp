@@ -67,6 +67,8 @@
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "net/ApiRequest.h"
+#include "services/LauncherSettings.h"
+#include "services/NetworkContext.h"
 #include "ui/dialogs/UntrustedModsDialog.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
@@ -212,7 +214,7 @@ void FlameCreationTask::executeTask()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto [job, rawResponse] = FlameAPI::getFiles(fileIds);
+        auto [job, rawResponse] = m_api.getFiles(fileIds);
 
         connect(job.get(), &Task::succeeded, this,
                 [this, rawResponse, fileIds, oldInstDir, oldFiles, oldMinecraftDir, createInst]() mutable {
@@ -486,7 +488,7 @@ void FlameCreationTask::createInstance()
         const uint64_t max = sysMiB * 0.9;
 
         if (static_cast<uint64_t>(recommendedRAM) > max) {
-            logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAMâ€”reducing it from %1 MiB to %2 MiB!")
+            logWarning(tr("The recommended memory of the modpack exceeds 90% of your system RAM—reducing it from %1 MiB to %2 MiB!")
                            .arg(recommendedRAM)
                            .arg(max));
             recommendedRAM = max;
@@ -517,7 +519,7 @@ void FlameCreationTask::createInstance()
 
     m_newInstance->setName(name());
 
-    m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack));
+    m_modIdResolver.reset(new Flame::FileResolvingTask(m_pack, m_network, m_launcherSettings));
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, this, &FlameCreationTask::idResolverSucceeded);
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, this, [this](const QString& reason) {
         m_modIdResolver.reset();
@@ -605,7 +607,7 @@ void FlameCreationTask::idResolverSucceeded()
 
 void FlameCreationTask::setupDownloadJob()
 {
-    m_filesJob.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
+    m_filesJob.reset(new NetJob(tr("Mod Download Flame"), m_network->qnam()));
     auto results = m_modIdResolver->getResults().files;
 
     for (const auto& result : results) {
@@ -622,7 +624,7 @@ void FlameCreationTask::setupDownloadJob()
 
         if (!result.version.downloadUrl.isEmpty()) {
             qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
-            auto dl = Net::ApiRequest::makeFile(result.version.downloadUrl, path);
+            auto dl = Net::ApiRequest::makeFile(m_network, result.version.downloadUrl, path);
             m_filesJob->addNetAction(dl);
         }
     }
@@ -757,7 +759,7 @@ void FlameCreationTask::validateOtherResources()
         }
     }
     // TODO make this work with other sorts of resource
-    auto task = makeShared<ConcurrentTask>("CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+    auto task = makeShared<ConcurrentTask>("CreateModMetadata", m_launcherSettings->get("NumberOfConcurrentTasks").toInt());
     auto results = m_modIdResolver->getResults().files;
     auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
     for (const auto& file : results) {

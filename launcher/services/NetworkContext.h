@@ -24,7 +24,8 @@ class HttpMetaCache;
 class QNetworkAccessManager;
 
 /**
- * Narrow network contract: shared QNAM, HTTP meta-cache, and user-agent.
+ * Narrow network contract: shared QNAM, HTTP meta-cache, user-agent, and
+ * provider API credentials.
  *
  * Does not own the network stack; Application does. Inject this into NetJob
  * creators and API clients instead of reading APPLICATION->network().
@@ -36,4 +37,9 @@ class NetworkContext {
     virtual QNetworkAccessManager* qnam() = 0;
     virtual HttpMetaCache* httpMetaCache() = 0;
     virtual QString userAgent() const = 0;
+
+    /** CurseForge API key (user override, else build-time key). Empty disables Flame. */
+    virtual QString flameApiKey() const = 0;
+    /** Modrinth personal access token, or a null string when none is configured. */
+    virtual QString modrinthApiToken() const = 0;
 };

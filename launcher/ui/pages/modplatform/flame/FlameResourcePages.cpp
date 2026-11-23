@@ -39,6 +39,8 @@
 
 #include "FlameResourcePages.h"
 
+#include "Application.h"
+
 #include "modplatform/flame/FlameAPI.h"
 
 #include "FlameResourceModels.h"
@@ -59,28 +61,28 @@ static ResourceProviderData prepareFlame()
 
 ShaderPackResourcePage* Flame::createShaderPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ShaderPackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
+    return new ShaderPackResourcePage(dialog, instance, prepareFlame(), APPLICATION->flameAPI());
 }
 
 DataPackResourcePage* Flame::createDataPackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new DataPackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
+    return new DataPackResourcePage(dialog, instance, prepareFlame(), APPLICATION->flameAPI());
 }
 
 ResourcePackResourcePage* Flame::createResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ResourcePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get());
+    return new ResourcePackResourcePage(dialog, instance, prepareFlame(), APPLICATION->flameAPI());
 }
 
 TexturePackResourcePage* Flame::createTexturePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new TexturePackResourcePage(dialog, instance, prepareFlame(), &FlameAPI::get(),
+    return new TexturePackResourcePage(dialog, instance, prepareFlame(), APPLICATION->flameAPI(),
                                        new FlameTexturePackModel(dialog->getBaseModel()));
 }
 
 ModPage* Flame::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
-    return new ModPage(dialog, instance, prepareFlame(), &FlameAPI::get(),
+    return new ModPage(dialog, instance, prepareFlame(), APPLICATION->flameAPI(),
                        ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), false));
 }
 }  // namespace ResourceDownload

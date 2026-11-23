@@ -64,9 +64,9 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     }
 }
 
-void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
+void FlameMod::loadBody(ModPlatform::IndexedPack& pack, const FlameAPI& api)
 {
-    pack.extraData.body = FlameAPI::getModDescription(pack.addonId.toInt());
+    pack.extraData.body = api.getModDescription(pack.addonId.toInt());
 
     if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty()) {
         pack.extraDataLoaded = true;
@@ -111,7 +111,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
     pack.versionsLoaded = true;
 }
 
-auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog) -> ModPlatform::IndexedVersion
+auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, const FlameAPI* changelogApi) -> ModPlatform::IndexedVersion
 {
     auto versionArray = Json::requireArray(obj, "gameVersions");
 
@@ -213,8 +213,8 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog) -> M
         file.dependencies.append(dependency);
     }
 
-    if (loadChangelog) {
-        file.changelog = FlameAPI::getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+    if (changelogApi != nullptr) {
+        file.changelog = changelogApi->getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
     }
 
     return file;

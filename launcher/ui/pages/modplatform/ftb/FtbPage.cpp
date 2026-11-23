@@ -43,6 +43,7 @@
 #include "modplatform/ftb/FTBPackInstallTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
+#include "Application.h"
 #include "Markdown.h"
 
 FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), m_ui(new Ui::FtbPage), m_dialog(dialog)
@@ -130,7 +131,9 @@ void FtbPage::suggestCurrent()
         return;
     }
 
-    m_dialog->setSuggestedPack(m_selected.name, m_selectedVersion, new FTB::PackInstallTask(m_selected, m_selectedVersion, this));
+    auto* task =
+        new FTB::PackInstallTask(m_selected, m_selectedVersion, APPLICATION->networkContext(), APPLICATION->launcherSettings(), this);
+    m_dialog->setSuggestedPack(m_selected.name, m_selectedVersion, task);
     for (auto art : m_selected.art) {
         if (art.type == "square") {
             auto editedLogoName = "ftb_" + m_selected.safeName;

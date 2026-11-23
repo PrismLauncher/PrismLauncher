@@ -47,6 +47,9 @@
 
 #include "ui/dialogs/BlockedModsDialog.h"
 
+class LauncherSettings;
+class NetworkContext;
+
 class FlameCreationTask final : public InstanceTask {
     Q_OBJECT
 
@@ -54,11 +57,19 @@ class FlameCreationTask final : public InstanceTask {
     FlameCreationTask(const QString& stagingPath,
                       bool trustedSource,
                       SettingsObject* globalSettings,
+                      NetworkContext* network,
+                      LauncherSettings* launcherSettings,
                       QWidget* parent,
                       QString id,
                       QString versionId,
                       const QString& originalInstanceId = {})
-        : m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
+        : m_parent(parent)
+        , m_trustedSource(trustedSource)
+        , m_network(network)
+        , m_launcherSettings(launcherSettings)
+        , m_api(network)
+        , m_managedId(std::move(id))
+        , m_managedVersionId(std::move(versionId))
     {
         setStagingPath(stagingPath);
         setParentSettings(globalSettings);
@@ -87,6 +98,9 @@ class FlameCreationTask final : public InstanceTask {
    private:
     QWidget* m_parent = nullptr;
     bool m_trustedSource;
+    NetworkContext* m_network = nullptr;
+    LauncherSettings* m_launcherSettings = nullptr;
+    FlameAPI m_api;
 
     shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
     Flame::Manifest m_pack;

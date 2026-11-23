@@ -24,6 +24,9 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "tasks/Task.h"
 
+class LauncherSettings;
+class NetworkContext;
+
 struct FlamePackExportOptions {
     QString name;
     QString version;
@@ -38,7 +41,7 @@ struct FlamePackExportOptions {
 class FlamePackExportTask : public Task {
     Q_OBJECT
    public:
-    FlamePackExportTask(FlamePackExportOptions&& options);
+    FlamePackExportTask(FlamePackExportOptions&& options, NetworkContext* network, LauncherSettings* settings);
 
    protected:
     void executeTask() override;
@@ -69,6 +72,8 @@ class FlamePackExportTask : public Task {
 
     FlamePackExportOptions m_options;
     QDir m_gameRoot;
+    FlameAPI m_api;
+    LauncherSettings* m_settings = nullptr;
 
     QFileInfoList m_files;
     QMap<QString, HashInfo> pendingHashes{};

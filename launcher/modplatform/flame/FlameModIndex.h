@@ -6,11 +6,14 @@
 
 #include "modplatform/ModIndex.h"
 
+class FlameAPI;
+
 namespace FlameMod {
 
 void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj);
 void loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj);
-void loadBody(ModPlatform::IndexedPack& pack);
+void loadBody(ModPlatform::IndexedPack& pack, const FlameAPI& api);
 void loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr);
-ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, bool loadChangelog = false);
+/** Pass changelogApi to also fetch the file changelog (blocking network call). */
+ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, const FlameAPI* changelogApi = nullptr);
 }  // namespace FlameMod

@@ -34,6 +34,8 @@
  */
 
 #include "FlamePage.h"
+
+#include "Application.h"
 #include "Version.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
@@ -195,7 +197,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = FlameAPI::get().getProjectVersions(
+        auto netJob = APPLICATION->flameAPI()->getProjectVersions(
             { .pack = m_current, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::Modpack }, callbacks);
 
         m_job = netJob;
@@ -298,7 +300,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += FlameAPI::getModDescription(m_current->addonId.toInt()).toUtf8();
+    text += APPLICATION->flameAPI()->getModDescription(m_current->addonId.toInt()).toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();
@@ -326,10 +328,10 @@ void FlamePage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
-    auto [task, response] = FlameAPI::getCategories(ModPlatform::ResourceType::Modpack);
+    auto [task, response] = APPLICATION->flameAPI()->getCategories(ModPlatform::ResourceType::Modpack);
     m_categoriesTask = task;
     connect(m_categoriesTask.get(), &Task::succeeded, this, [this, response]() {
-        auto categories = FlameAPI::get().loadModCategories(*response);
+        auto categories = APPLICATION->flameAPI()->loadModCategories(*response);
         m_filterWidget->setCategories(categories);
     });
     m_categoriesTask->start();
