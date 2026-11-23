@@ -300,6 +300,7 @@ class Application : public QApplication {
     bool m_showMainWindow = false;
     QString m_instanceIdToExport;
     QString m_exportFormat;
+    QString m_exportOutputPath;
     bool m_exportIncludePaths;
     QString m_exportName;
     QString m_exportVersion;

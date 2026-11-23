@@ -1873,12 +1873,14 @@ void MainWindow::handleInstanceRename(const QString& before, const QString& afte
     }
 }
 
-void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include)
+void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include, QString output)
 {
     const auto name = FS::RemoveInvalidFilenameChars(instance->name());
 
-    const QString output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(instance->name()),
+    if (output.isEmpty()) {
+        output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(instance->name()),
                                                         FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr);
+    }
     if (output.isEmpty()) {
         return;
     }

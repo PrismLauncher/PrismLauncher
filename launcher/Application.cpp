@@ -402,10 +402,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         parser.addPositionalArgument("paths", "Paths within the instance to exclude from the export", "[paths]");
         parser.addOptions({
             { { "f", "format" }, "Format to export as. Options: prismzip (default), curseforgezip, mrpack", "format", "prismzip" },
+            { { "o", "output" }, "Location to output exported instance to. If unset, opens file picker dialog.", "path" },
             { { "i", "include" }, "Treat paths as a list of paths to include instead of exclude" },
             { { "n", "name" }, "Set name of the exported pack (only for curseforgezip and mrpack formats)", "name" },
             { { "e", "export-version" }, "Set version of the exported pack (only for curseforgezip and mrpack formats)", "version"},
-            { { "o", "optional" }, "Mark excluded paths as optional (only for curseforgezip and mrpack formats)" },
+            { { "p", "optional" }, "Mark excluded paths as optional (only for curseforgezip and mrpack formats)" },
             { { "a", "author" }, "Set author of the exported pack (only for curseforgezip format)", "author" },
             { { "m", "memory" }, "Set recommended memory of the exported pack, in MiB (only for curseforgezip format)", "memory" },
             { { "s", "summary" }, "Set summary of the exported pack (only for mrpack format)", "summary" },
@@ -426,6 +427,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_status = Failed;
             return;
         }
+        m_exportOutputPath = parser.value("output");
         m_exportIncludePaths = parser.isSet("include");
         m_exportName = parser.value("name");
         m_exportVersion = parser.value("export-version");
@@ -1567,7 +1569,7 @@ void Application::performMainStartupAction()
     if (!m_instanceIdToExport.isEmpty()) {
         qDebug() << "<> Exporting instance id:" << m_instanceIdToExport;
         if (m_exportFormat == "prismzip") {
-            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths);
+            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths, m_exportOutputPath);
         }
     }
 }
