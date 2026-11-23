@@ -1,3 +1,8 @@
+#include "AuthSteps_test.h"
+
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTest>
@@ -62,16 +67,16 @@ class CannedReply : public QNetworkReply {
     qint64 m_offset = 0;
 };
 
+struct SentRequest {
+    QUrl url;
+    QByteArray body;
+};
+
 /** Answers requests from a URL -> body table and records what was sent. */
 class CannedNetworkAccessManager : public QNetworkAccessManager {
    public:
-    struct Sent {
-        QUrl url;
-        QByteArray body;
-    };
-
     QHash<QUrl, QByteArray> responses;
-    QList<Sent> sent;
+    QList<SentRequest> sent;
 
    protected:
     QNetworkReply* createRequest(Operation op, const QNetworkRequest& request, QIODevice* outgoingData) override
@@ -116,113 +121,111 @@ class FakeLauncherSettings : public LauncherSettings {
     QVariantMap values;
 };
 
+QByteArray cannedJson(const QJsonObject& object)
+{
+    return QJsonDocument(object).toJson(QJsonDocument::Compact);
+}
+
 }  // namespace
 
-class AuthStepsTest : public QObject {
-    Q_OBJECT
+void AuthStepsTest::test_msaClientIdFromInjectedSettings()
+{
+    FakeLauncherSettings settings;
+    AuthContext context{ .settings = &settings };
+    QCOMPARE(context.msaClientId(), BuildConfig.MSA_CLIENT_ID);
 
-   private slots:
-    void test_msaClientIdFromInjectedSettings()
-    {
-        FakeLauncherSettings settings;
-        AuthContext context{ .settings = &settings };
-        QCOMPARE(context.msaClientId(), BuildConfig.MSA_CLIENT_ID);
+    settings.values["MSAClientIDOverride"] = "override-client-id";
+    QCOMPARE(context.msaClientId(), QString("override-client-id"));
 
-        settings.values["MSAClientIDOverride"] = "override-client-id";
-        QCOMPARE(context.msaClientId(), QString("override-client-id"));
+    AuthContext noSettings;
+    QCOMPARE(noSettings.msaClientId(), BuildConfig.MSA_CLIENT_ID);
+}
 
-        AuthContext noSettings;
-        QCOMPARE(noSettings.msaClientId(), BuildConfig.MSA_CLIENT_ID);
-    }
+void AuthStepsTest::test_offlineFlowSucceedsWithoutServices()
+{
+    AccountData data;
+    data.type = AccountType::Offline;
 
-    void test_offlineFlowSucceedsWithoutServices()
-    {
-        AccountData data;
-        data.type = AccountType::Offline;
+    AuthFlow flow(&data, AuthContext{}, AuthFlow::Action::Login);
+    flow.start();
 
-        AuthFlow flow(&data, AuthContext{}, AuthFlow::Action::Login);
-        flow.start();
+    QVERIFY(flow.wasSuccessful());
+    QCOMPARE(flow.taskState(), AccountTaskState::STATE_SUCCEEDED);
+    QCOMPARE(data.accountState, AccountState::Online);
+}
 
-        QVERIFY(flow.wasSuccessful());
-        QCOMPARE(flow.taskState(), AccountTaskState::STATE_SUCCEEDED);
-        QCOMPARE(data.accountState, AccountState::Online);
-    }
+void AuthStepsTest::test_refreshWithChangedClientIdIsDisabled()
+{
+    FakeNetworkContext network;
+    FakeLauncherSettings settings;
+    settings.values["MSAClientIDOverride"] = "new-client-id";
 
-    void test_refreshWithChangedClientIdIsDisabled()
-    {
-        FakeNetworkContext network;
-        FakeLauncherSettings settings;
-        settings.values["MSAClientIDOverride"] = "new-client-id";
+    AccountData data;
+    data.type = AccountType::MSA;
+    data.msaClientID = "old-client-id";
+    data.msaToken.refresh_token = "refresh-token";
 
-        AccountData data;
-        data.type = AccountType::MSA;
-        data.msaClientID = "old-client-id";
-        data.msaToken.refresh_token = "refresh-token";
+    AuthFlow flow(&data, AuthContext{ .network = &network, .settings = &settings }, AuthFlow::Action::Refresh);
+    flow.start();
 
-        AuthFlow flow(&data, AuthContext{ .network = &network, .settings = &settings }, AuthFlow::Action::Refresh);
-        flow.start();
+    QVERIFY(!flow.wasSuccessful());
+    QCOMPARE(flow.taskState(), AccountTaskState::STATE_DISABLED);
+    QCOMPARE(data.accountState, AccountState::Disabled);
+    QVERIFY(network.nam.sent.isEmpty());
+}
 
-        QVERIFY(!flow.wasSuccessful());
-        QCOMPARE(flow.taskState(), AccountTaskState::STATE_DISABLED);
-        QCOMPARE(data.accountState, AccountState::Disabled);
-        QVERIFY(network.nam.sent.isEmpty());
-    }
+void AuthStepsTest::test_xboxUserStepUsesInjectedNetwork()
+{
+    FakeNetworkContext network;
+    network.nam.responses[QUrl("https://user.auth.xboxlive.com/user/authenticate")] = cannedJson({
+        { "IssueInstant", "2026-11-23T08:00:00.0000000Z" },
+        { "NotAfter", "2026-12-07T08:00:00.0000000Z" },
+        { "Token", "xbox-user-token" },
+        { "DisplayClaims", QJsonObject{ { "xui", QJsonArray{ QJsonObject{ { "uhs", "user-hash" } } } } } },
+    });
 
-    void test_xboxUserStepUsesInjectedNetwork()
-    {
-        FakeNetworkContext network;
-        network.nam.responses[QUrl("https://user.auth.xboxlive.com/user/authenticate")] = R"({
-            "IssueInstant": "2026-11-23T08:00:00.0000000Z",
-            "NotAfter": "2026-12-07T08:00:00.0000000Z",
-            "Token": "xbox-user-token",
-            "DisplayClaims": { "xui": [ { "uhs": "user-hash" } ] }
-        })";
+    AccountData data;
+    data.type = AccountType::MSA;
+    data.msaToken.token = "msa-access-token";
 
-        AccountData data;
-        data.type = AccountType::MSA;
-        data.msaToken.token = "msa-access-token";
+    XboxUserStep step(&data, &network);
+    std::optional<AccountTaskState> result;
+    connect(&step, &AuthStep::finished, this, [&result](AccountTaskState state, QString) { result = state; });
+    step.perform();
 
-        XboxUserStep step(&data, &network);
-        std::optional<AccountTaskState> result;
-        connect(&step, &AuthStep::finished, this, [&result](AccountTaskState state, QString) { result = state; });
-        step.perform();
+    QTRY_VERIFY(result.has_value());
+    QCOMPARE(*result, AccountTaskState::STATE_WORKING);
+    QCOMPARE(data.userToken.token, QString("xbox-user-token"));
+    QCOMPARE(data.userToken.extra.value("uhs").toString(), QString("user-hash"));
 
-        QTRY_VERIFY(result.has_value());
-        QCOMPARE(*result, AccountTaskState::STATE_WORKING);
-        QCOMPARE(data.userToken.token, QString("xbox-user-token"));
-        QCOMPARE(data.userToken.extra.value("uhs").toString(), QString("user-hash"));
+    QCOMPARE(network.nam.sent.size(), 1);
+    QVERIFY(network.nam.sent.first().body.contains("d=msa-access-token"));
+}
 
-        QCOMPARE(network.nam.sent.size(), 1);
-        QVERIFY(network.nam.sent.first().body.contains("d=msa-access-token"));
-    }
+void AuthStepsTest::test_deviceCodeStepSendsInjectedClientId()
+{
+    FakeNetworkContext network;
+    network.nam.responses[QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode")] = cannedJson({
+        { "device_code", "device-code" },
+        { "user_code", "USER-CODE" },
+        { "verification_uri", "https://microsoft.com/link" },
+        { "expires_in", 900 },
+        { "interval", 5 },
+    });
 
-    void test_deviceCodeStepSendsInjectedClientId()
-    {
-        FakeNetworkContext network;
-        network.nam.responses[QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode")] = R"({
-            "device_code": "device-code",
-            "user_code": "USER-CODE",
-            "verification_uri": "https://microsoft.com/link",
-            "expires_in": 900,
-            "interval": 5
-        })";
+    AccountData data;
+    data.type = AccountType::MSA;
 
-        AccountData data;
-        data.type = AccountType::MSA;
+    MSADeviceCodeStep step(&data, &network, "injected-client-id");
+    QString userCode;
+    connect(&step, &MSADeviceCodeStep::authorizeWithBrowser, this, [&userCode](QString, QString code, int) { userCode = code; });
+    step.perform();
 
-        MSADeviceCodeStep step(&data, &network, "injected-client-id");
-        QString userCode;
-        connect(&step, &MSADeviceCodeStep::authorizeWithBrowser, this, [&userCode](QString, QString code, int) { userCode = code; });
-        step.perform();
+    QTRY_COMPARE(userCode, QString("USER-CODE"));
+    step.abort();
 
-        QTRY_COMPARE(userCode, QString("USER-CODE"));
-        step.abort();
-
-        QCOMPARE(network.nam.sent.size(), 1);
-        QVERIFY(network.nam.sent.first().body.contains("client_id=injected-client-id"));
-    }
-};
+    QCOMPARE(network.nam.sent.size(), 1);
+    QVERIFY(network.nam.sent.first().body.contains("client_id=injected-client-id"));
+}
 
 QTEST_GUILESS_MAIN(AuthStepsTest)
-
-#include "AuthSteps_test.moc"
