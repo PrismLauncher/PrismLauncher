@@ -92,6 +92,9 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
+
+#include <QFileSystemModel>
+
 #include "InstanceWindow.h"
 
 #include "ui/dialogs/AboutDialog.h"
@@ -135,6 +138,7 @@
 #include "Json.h"
 
 #include "MMCTime.h"
+#include "archive/ExportToZipTask.h"
 
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
@@ -1867,4 +1871,67 @@ void MainWindow::handleInstanceRename(const QString& before, const QString& afte
     if (syncGroup) {
         APPLICATION->instances()->setInstanceGroup(newID, origGroup);
     }
+}
+
+void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include)
+{
+    const auto name = FS::RemoveInvalidFilenameChars(instance->name());
+
+    const QString output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(instance->name()),
+                                                        FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr);
+    if (output.isEmpty()) {
+        return;
+    }
+
+    // Save icon
+    const auto iconKey = instance->iconKey();
+    const auto *iconList = APPLICATION->icons();
+    const auto *mmcIcon = iconList->icon(iconKey);
+    if (mmcIcon && !mmcIcon->isBuiltIn()) {
+        const auto iconPath = mmcIcon->getFilePath();
+        if (!iconPath.isNull()) {
+            QFileInfo const inInfo(iconPath);
+            FS::copy(iconPath, FS::PathCombine(instance->instanceRoot(), inInfo.fileName()))();
+        } else {
+            const auto& image = mmcIcon->m_images[mmcIcon->type()];
+            const auto& icon = image.icon;
+            auto sizes = icon.availableSizes();
+            if (!sizes.empty()) {
+                const auto areaOf = [](const QSize size) { return size.width() * size.height(); };
+                QSize largest = sizes[0];
+                // find variant with the largest area
+                for (const auto size : sizes) {
+                    if (areaOf(largest) < areaOf(size)) {
+                        largest = size;
+                    }
+                }
+                const auto pixmap = icon.pixmap(largest);
+                pixmap.save(FS::PathCombine(instance->instanceRoot(), iconKey + ".png"));
+            }
+        }
+    }
+
+    auto files = QFileInfoList();
+    const auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
+    const auto filterFunction = [](const QFileInfo& fileInfo) -> bool {
+        // Ignore paths: "logs", "crash-reports", ".cache", ".fabric", ".quilt"
+        // Ignore names: ".DS_Store", "thumbs.db", "Thumbs.db"
+        // Load from .packignore (capture variable)
+
+        return false;
+    };
+    if (!MMCZip::collectFileListRecursively(instance->instanceRoot(), nullptr, &files, filterFunction)) {
+        QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
+        return;
+    }
+
+    const auto task = makeShared<MMCZip::ExportToZipTask>(output, instance->instanceRoot(), files, "", true);
+
+    connect(task.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
+
+    ProgressDialog progress(this);
+    progress.showSkipButton();
+    progress.execWithTask(task.get());
 }

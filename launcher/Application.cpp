@@ -1553,7 +1553,7 @@ void Application::performMainStartupAction()
         qDebug() << "<> Updater started.";
     }
 
-    {  // delete instances tmp dirctory
+    {  // delete instances tmp directory
         auto instDir = m_settings->get("InstanceDir").toString();
         const QString tempRoot = FS::PathCombine(instDir, ".tmp");
         FS::deletePath(tempRoot);
@@ -1562,6 +1562,13 @@ void Application::performMainStartupAction()
     if (!m_urlsToImport.isEmpty()) {
         qDebug() << "<> Importing from url:" << m_urlsToImport;
         m_mainWindow->processURLs(m_urlsToImport);
+    }
+
+    if (!m_instanceIdToExport.isEmpty()) {
+        qDebug() << "<> Exporting instance id:" << m_instanceIdToExport;
+        if (m_exportFormat == "prismzip") {
+            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths);
+        }
     }
 }
 
