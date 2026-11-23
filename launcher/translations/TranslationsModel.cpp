@@ -78,6 +78,8 @@ struct Language {
         QString result;
         if (key == "es_UY") {
             result = u8"Español de Latinoamérica";
+        } else if (key == "es_AR") {
+            result = u8"Español de Argentina";
         } else if (key == "en_NZ") {
             result = u8"New Zealand English";  // No idea why qt translates this to just english and not to New Zealand English
         } else if (key == "en@pirate" || key == "en_US@pirate") {
