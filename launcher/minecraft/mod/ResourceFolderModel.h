@@ -200,6 +200,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void updateFinished();
     void parseFinished();
     void sizeHintChanged();
+    void iconChanged(int row);
 
    protected:
     [[nodiscard]] virtual Task* createPreUpdateTask() { return nullptr; }

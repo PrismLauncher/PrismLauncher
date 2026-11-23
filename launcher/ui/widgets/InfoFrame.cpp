@@ -76,7 +76,7 @@ InfoFrame::~InfoFrame()
     delete ui;
 }
 
-void InfoFrame::updateWithMod(const Mod& m)
+void InfoFrame::updateWithMod(Mod& m)
 {
     QString text = "";
     QString name = "";
@@ -102,7 +102,13 @@ void InfoFrame::updateWithMod(const Mod& m)
         setDescription(renderColorCodes(m.description()));
     }
 
-    setImage(m.icon({ 64, 64 }, Qt::KeepAspectRatio));
+    const auto pixmap = m.icon({ 64, 64 });
+    if (pixmap.isNull()) {
+        m.loadIcon();
+        setImage(m.fallbackIcon().pixmap({ 64, 64 }));
+    } else {
+        setImage(pixmap);
+    }
 
     auto licenses = m.licenses();
     QString licenseText = "";
@@ -210,25 +216,25 @@ QString InfoFrame::renderColorCodes(QString input)
     return html;
 }
 
-void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
+void InfoFrame::updateWithDataPack(DataPack& data_pack)
 {
-    QString name = renderColorCodes(resource_pack.name());
+    QString name = renderColorCodes(data_pack.name());
 
-    const QString homepage = resource_pack.homepage();
+    const QString homepage = data_pack.homepage();
     if (!homepage.isEmpty()) {
         name = "<a href=\"" + homepage + "\">" + name + "</a>";
     }
 
     setName(name);
-    setDescription(renderColorCodes(resource_pack.description()));
-    setImage(resource_pack.image({ 64, 64 }, Qt::KeepAspectRatio));
-}
-
-void InfoFrame::updateWithDataPack(DataPack& data_pack)
-{
-    setName(renderColorCodes(data_pack.name()));
     setDescription(renderColorCodes(data_pack.description()));
-    setImage(data_pack.image({ 64, 64 }, Qt::KeepAspectRatio));
+
+    const auto pixmap = data_pack.icon({ 64, 64 });
+    if (pixmap.isNull()) {
+        data_pack.loadIcon();
+        setImage(data_pack.fallbackIcon().pixmap({ 64, 64 }));
+    } else {
+        setImage(pixmap);
+    }
 }
 
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
@@ -242,7 +248,14 @@ void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 
     setName(name);
     setDescription(renderColorCodes(texture_pack.description()));
-    setImage(texture_pack.image({ 64, 64 }, Qt::KeepAspectRatio));
+
+    const auto pixmap = texture_pack.icon({ 64, 64 });
+    if (pixmap.isNull()) {
+        texture_pack.loadIcon();
+        setImage(texture_pack.fallbackIcon().pixmap({ 64, 64 }));
+    } else {
+        setImage(pixmap);
+    }
 }
 
 void InfoFrame::clear()

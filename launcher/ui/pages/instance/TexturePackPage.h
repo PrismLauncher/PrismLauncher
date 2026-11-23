@@ -58,7 +58,7 @@ class TexturePackPage : public ExternalResourcesPage {
     bool shouldDisplay() const override { return m_instance->traits().contains("texturepacks"); }
 
    public slots:
-    void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
+    void updateFrame(const QModelIndex& current) override;
     void downloadTexturePacks();
     void downloadDialogFinished(int result);
     void updateTexturePacks();

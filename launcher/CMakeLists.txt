@@ -91,8 +91,6 @@ set(CORE_SOURCES
     MMCTime.h
     MMCTime.cpp
 
-    MTPixmapCache.h
-
     # Assertion helper
     AssertHelpers.h
 )
