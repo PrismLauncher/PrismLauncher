@@ -40,7 +40,19 @@ class FakeLauncherSettings : public LauncherSettings {
 
 void registerGlobals(INISettingsObject& global)
 {
-    const char* keys[] = { "JavaPath",
+    const char* keys[] = { "ShowGameTime",
+                           "RecordGameTime",
+                           "PreLoadCommand",
+                           "PreLaunchCommand",
+                           "WrapperCommand",
+                           "PostExitCommand",
+                           "ShowConsole",
+                           "AutoCloseConsole",
+                           "ShowConsoleOnError",
+                           "LogPrePostOutput",
+                           "ConsoleMaxLines",
+                           "ConsoleOverflowStop",
+                           "JavaPath",
                            "JvmArgs",
                            "IgnoreJavaCompatibility",
                            "JavaSignature",
