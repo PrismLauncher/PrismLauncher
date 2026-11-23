@@ -4,15 +4,19 @@
 #include <QJsonParseError>
 #include <utility>
 
-#include "Application.h"
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
 #include "net/Request.h"
+#include "services/NetworkContext.h"
 
-XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
-    : AuthStep(data), m_token(token), m_relyingParty(std::move(relyingParty)), m_authorizationKind(std::move(authorizationKind))
+XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data,
+                                             NetworkContext* network,
+                                             Token* token,
+                                             QString relyingParty,
+                                             QString authorizationKind)
+    : AuthStep(data, network), m_token(token), m_relyingParty(std::move(relyingParty)), m_authorizationKind(std::move(authorizationKind))
 {}
 
 QString XboxAuthorizationStep::describe()
@@ -45,7 +49,7 @@ void XboxAuthorizationStep::perform()
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("XboxAuthorizationStep", APPLICATION->network()));
+    m_task.reset(new NetJob("XboxAuthorizationStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 

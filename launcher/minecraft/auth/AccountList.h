@@ -62,7 +62,7 @@ class AccountList : public QAbstractListModel {
         NUM_COLUMNS
     };
 
-    explicit AccountList(QObject* parent = 0);
+    explicit AccountList(AuthContext authContext, QObject* parent = nullptr);
     virtual ~AccountList() noexcept;
 
     const MinecraftAccountPtr at(int i) const;
@@ -147,6 +147,7 @@ class AccountList : public QAbstractListModel {
     QTimer* m_refreshTimer;
     QTimer* m_nextTimer;
     shared_qobject_ptr<AuthFlow> m_currentTask;
+    AuthContext m_authContext;
 
     /*!
      * Called whenever the list changes.

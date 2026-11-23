@@ -39,10 +39,13 @@
 #include "minecraft/auth/AuthStep.h"
 
 #include <QtNetworkAuth/qoauth2authorizationcodeflow.h>
+
+struct AuthContext;
+
 class MSAStep : public AuthStep {
     Q_OBJECT
    public:
-    explicit MSAStep(AccountData* data, bool silent = false);
+    MSAStep(AccountData* data, const AuthContext& context, bool silent = false);
     virtual ~MSAStep() noexcept = default;
 
     void perform() override;

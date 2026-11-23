@@ -44,7 +44,7 @@
 class MSADeviceCodeStep : public AuthStep {
     Q_OBJECT
    public:
-    explicit MSADeviceCodeStep(AccountData* data);
+    MSADeviceCodeStep(AccountData* data, NetworkContext* network, QString clientId);
     virtual ~MSADeviceCodeStep() noexcept = default;
 
     void perform() override;

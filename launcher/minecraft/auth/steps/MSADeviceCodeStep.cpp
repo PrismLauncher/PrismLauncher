@@ -38,14 +38,14 @@
 #include <QDateTime>
 #include <QUrlQuery>
 
-#include "Application.h"
 #include "Json.h"
 #include "net/RawHeaderProxy.h"
+#include "services/NetworkContext.h"
 
 // https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-device-code
-MSADeviceCodeStep::MSADeviceCodeStep(AccountData* data) : AuthStep(data)
+MSADeviceCodeStep::MSADeviceCodeStep(AccountData* data, NetworkContext* network, QString clientId)
+    : AuthStep(data, network), m_clientId(std::move(clientId))
 {
-    m_clientId = APPLICATION->getMSAClientID();
     connect(&m_expiration_timer, &QTimer::timeout, this, &MSADeviceCodeStep::abort);
     connect(&m_pool_timer, &QTimer::timeout, this, &MSADeviceCodeStep::authenticateUser);
 }
@@ -71,7 +71,7 @@ void MSADeviceCodeStep::perform()
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("MSADeviceCodeStep", APPLICATION->network()));
+    m_task.reset(new NetJob("MSADeviceCodeStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
@@ -187,7 +187,7 @@ void MSADeviceCodeStep::authenticateUser()
 
     connect(m_request.get(), &Task::finished, this, [this, response] { authenticationFinished(response); });
 
-    m_request->setNetwork(APPLICATION->network());
+    m_request->setNetwork(m_network->qnam());
     m_request->start();
 }
 

@@ -9,7 +9,7 @@ class MinecraftProfileStep : public AuthStep {
     Q_OBJECT
 
    public:
-    explicit MinecraftProfileStep(AccountData* data);
+    MinecraftProfileStep(AccountData* data, NetworkContext* network);
     virtual ~MinecraftProfileStep() noexcept = default;
 
     void perform() override;

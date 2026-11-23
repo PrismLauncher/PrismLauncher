@@ -1017,16 +1017,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInfo() << "<> Instances loaded.";
     }
 
-    // and accounts
-    {
-        m_accounts.reset(new AccountList(this));
-        qInfo() << "Loading accounts...";
-        m_accounts->setListFilePath("accounts.json", true);
-        m_accounts->loadList();
-        m_accounts->fillQueue();
-        qInfo() << "<> Accounts loaded.";
-    }
-
     // init the http meta cache
     {
         m_metacache.reset(new HttpMetaCache("metacache"));
@@ -1055,11 +1045,23 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         m_launcherSettings = std::make_unique<SettingsObjectLauncherSettings>(m_settings.get(), m_playtimeSettings.get());
         m_networkContext = std::make_unique<SharedNetworkContext>(m_network.get(), m_metacache.get(), m_settings.get());
+        m_oauthCallbacks = std::make_unique<OAuthCallbackRelay>();
+        connect(this, &Application::oauthReplyRecieved, m_oauthCallbacks.get(), &OAuthCallbackRelay::replyReceived);
         m_instanceCatalog = std::make_unique<InstanceListCatalog>(m_instances.get());
-        m_accountService = std::make_unique<AccountListService>(m_accounts.get());
         m_flameAPI = std::make_unique<FlameAPI>(m_networkContext.get());
         m_modrinthAPI = std::make_unique<ModrinthAPI>(m_networkContext.get());
         qInfo() << "<> Service interfaces wired.";
+    }
+
+    // and accounts; the refresh queue starts immediately, so the auth context must already be wired
+    {
+        m_accounts.reset(new AccountList(authContext(), this));
+        m_accountService = std::make_unique<AccountListService>(m_accounts.get());
+        qInfo() << "Loading accounts...";
+        m_accounts->setListFilePath("accounts.json", true);
+        m_accounts->loadList();
+        m_accounts->fillQueue();
+        qInfo() << "<> Accounts loaded.";
     }
 
     // load translations
@@ -1927,12 +1929,16 @@ QString Application::getJarPath(const QString& jarFile)
 
 QString Application::getMSAClientID()
 {
-    QString clientIDOverride = m_settings->get("MSAClientIDOverride").toString();
-    if (!clientIDOverride.isEmpty()) {
-        return clientIDOverride;
-    }
+    return authContext().msaClientId();
+}
 
-    return BuildConfig.MSA_CLIENT_ID;
+AuthContext Application::authContext() const
+{
+    return AuthContext{ .network = m_networkContext.get(),
+                        .settings = m_launcherSettings.get(),
+                        .oauthCallbacks = m_oauthCallbacks.get(),
+                        .portable = m_portable,
+                        .desktopFileName = desktopFileName() };
 }
 
 QString Application::getFlameAPIKey()

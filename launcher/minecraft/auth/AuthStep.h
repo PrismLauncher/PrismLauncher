@@ -5,6 +5,8 @@
 #include "QObjectPtr.h"
 #include "minecraft/auth/AccountData.h"
 
+class NetworkContext;
+
 /**
  * Enum for describing the state of the current task.
  * Used by the getStateMessage function to determine what the status message should be.
@@ -26,7 +28,7 @@ class AuthStep : public QObject {
    public:
     using Ptr = shared_qobject_ptr<AuthStep>;
 
-    explicit AuthStep(AccountData* data) : QObject(nullptr), m_data(data) {};
+    AuthStep(AccountData* data, NetworkContext* network) : QObject(nullptr), m_data(data), m_network(network) {};
     virtual ~AuthStep() noexcept = default;
 
     virtual QString describe() = 0;
@@ -40,4 +42,5 @@ class AuthStep : public QObject {
 
    protected:
     AccountData* m_data;
+    NetworkContext* m_network;
 };

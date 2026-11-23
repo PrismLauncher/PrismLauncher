@@ -9,7 +9,7 @@ class EntitlementsStep : public AuthStep {
     Q_OBJECT
 
    public:
-    explicit EntitlementsStep(AccountData* data);
+    EntitlementsStep(AccountData* data, NetworkContext* network);
     virtual ~EntitlementsStep() noexcept = default;
 
     void perform() override;

@@ -173,6 +173,9 @@ class Application : public QApplication {
     FlameAPI* flameAPI() const { return m_flameAPI.get(); }
     ModrinthAPI* modrinthAPI() const { return m_modrinthAPI.get(); }
 
+    /** Dependencies for MinecraftAccount::login()/refresh(), bound to the services above. */
+    AuthContext authContext() const;
+
     Meta::Index* metadataIndex();
 
     void updateCapabilities();
@@ -292,6 +295,7 @@ class Application : public QApplication {
     // concrete members above so they are destroyed first on shutdown.
     std::unique_ptr<LauncherSettings> m_launcherSettings;
     std::unique_ptr<NetworkContext> m_networkContext;
+    std::unique_ptr<OAuthCallbackRelay> m_oauthCallbacks;
     std::unique_ptr<InstanceCatalog> m_instanceCatalog;
     std::unique_ptr<AccountService> m_accountService;
 

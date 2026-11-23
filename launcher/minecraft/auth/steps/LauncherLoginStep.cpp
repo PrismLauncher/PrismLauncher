@@ -3,14 +3,14 @@
 #include <QNetworkRequest>
 #include <QUrl>
 
-#include "Application.h"
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
 #include "net/Request.h"
+#include "services/NetworkContext.h"
 
-LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {}
+LauncherLoginStep::LauncherLoginStep(AccountData* data, NetworkContext* network) : AuthStep(data, network) {}
 
 QString LauncherLoginStep::describe()
 {
@@ -41,7 +41,7 @@ void LauncherLoginStep::perform()
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("LauncherLoginStep", APPLICATION->network()));
+    m_task.reset(new NetJob("LauncherLoginStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 

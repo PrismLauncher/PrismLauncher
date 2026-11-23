@@ -95,9 +95,9 @@ class MinecraftAccount : public QObject, public Usable {
     QJsonObject saveToJson() const;
 
    public: /* manipulation */
-    shared_qobject_ptr<AuthFlow> login(bool useDeviceCode = false);
+    shared_qobject_ptr<AuthFlow> login(const AuthContext& context, bool useDeviceCode = false);
 
-    shared_qobject_ptr<AuthFlow> refresh();
+    shared_qobject_ptr<AuthFlow> refresh(const AuthContext& context);
 
     shared_qobject_ptr<AuthFlow> currentTask();
 

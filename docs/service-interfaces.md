@@ -58,7 +58,7 @@ Wrappers do not introduce a second service locator. Do not replace `APPLICATION`
 | Remaining use | Call sites | Owner |
 | --- | --- | --- |
 | `launch()`, `kill()` | double-click, Launch, Kill actions | R2.1 LaunchCoordinator (#15) |
-| `oauthReplyRecieved` signal | `processURLs()` OAuth callback URLs | R2.3 Account / OAuth coordinator (#17) |
+| `oauthReplyRecieved` signal | `processURLs()` OAuth callback URLs (forwarded to auth via `OAuthCallbackRelay` since R1.4) | R2.3 Account / OAuth coordinator (#17) |
 | `ShowGlobalSettings()`, `globalSettingsApplied` | Settings and Manage Accounts actions, settings-closed refresh | R2.4 thin Application/MainWindow (#18) |
 | `showInstanceWindow()`, `showLogWindow()`, `closeCurrentWindow()`, `quit()` | Edit Instance, View Log, close and quit shortcuts | R2.4 thin Application/MainWindow (#18) |
 | `updaterEnabled()`, `updatesAreAllowed()`, `updater()`, `triggerUpdateCheck()` | update menu visibility and Check for Updates | R2.4 thin Application/MainWindow (#18) |
@@ -82,3 +82,14 @@ Wrappers do not introduce a second service locator. Do not replace `APPLICATION`
 - `Application` owns one `FlameAPI` and one `ModrinthAPI` (`flameAPI()` / `modrinthAPI()`) for UI pages that keep a long-lived `const ResourceAPI*`. UI and `InstanceImportTask` remain the edge that reads `APPLICATION->networkContext()` / `launcherSettings()`.
 - Result: lines using `APPLICATION` under `launcher/modplatform/` went from 42 to 15, and files including `Application.h` there went from 14 to 5. No Flame/Modrinth code reads network, API keys, or settings through `APPLICATION`. The three remaining Flame/Modrinth uses are `instances()` and `metadataIndex()` (instance and metadata domain, not network/settings). The rest are in ATLauncher, Technic, and legacy FTB.
 - `tests/ModPlatformInjection_test.cpp` checks header injection and job creation with a fake `NetworkContext` and no `Application`.
+
+## Auth step migration (R1.4)
+
+- `AuthContext` (`minecraft/auth/AuthContext.h`) bundles the auth pipeline's dependencies: `NetworkContext*`, `LauncherSettings*` (for `MSAClientIDOverride`), an `OAuthCallbackRelay*` for custom-scheme OAuth redirects, the portable flag, and the desktop file name. `msaClientId()` resolves the override, else the build-time ID; `Application::getMSAClientID()` delegates to it.
+- `Application::authContext()` builds the context from its own services. `OAuthCallbackRelay` is owned by `Application` and forwards `oauthReplyRecieved`, so `MainWindow` still emits the same signal.
+- `AuthStep` takes a `NetworkContext*`; every step builds its `NetJob` (or the OAuth flow's network manager) on it. `MSAStep` takes the whole `AuthContext`; `MSADeviceCodeStep` takes the network and an already-resolved client ID. With no relay, `MSAStep` uses the loopback HTTP redirect.
+- `AuthFlow`, `MinecraftAccount::login()` / `refresh()`, and `AccountList` take an `AuthContext`. `Application` now builds `AccountList` (and `AccountListService`) after the service wrappers, because `fillQueue()` starts a refresh immediately. UI dialogs and `LaunchController` pass `APPLICATION->authContext()`.
+- `Net::Request` falls back to the build-time user agent and the default transfer timeout when there is no `Application`, so requests run in plain `QCoreApplication` tests.
+- `Net::Request` again records `Succeeded` on a successful download. The `std::expected` sink refactor (`bb27d2e13`) had dropped that, so `wasSuccessful()` was false for good responses and the MSA device-code step rejected them. The device-code test covers this.
+- Result: `launcher/minecraft/auth/` has no `APPLICATION` uses or `Application.h` includes (previously 14 lines across 9 files).
+- `tests/AuthSteps_test.cpp` runs the offline flow, the client-ID-changed refresh path, `XboxUserStep`, and `MSADeviceCodeStep` against a fake `NetworkContext` whose network manager returns canned replies.

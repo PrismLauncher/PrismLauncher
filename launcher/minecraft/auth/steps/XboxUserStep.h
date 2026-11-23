@@ -9,7 +9,7 @@ class XboxUserStep : public AuthStep {
     Q_OBJECT
 
    public:
-    explicit XboxUserStep(AccountData* data);
+    XboxUserStep(AccountData* data, NetworkContext* network);
     virtual ~XboxUserStep() noexcept = default;
 
     void perform() override;

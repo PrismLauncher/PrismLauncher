@@ -316,7 +316,7 @@ void SkinManageDialog::accept()
         skinUpload->addNetAction(makeCapeChangeRequest(m_acct->accessToken(), selectedCape));
     }
 
-    skinUpload->addTask(m_acct->refresh().staticCast<Task>());
+    skinUpload->addTask(m_acct->refresh(APPLICATION->authContext()).staticCast<Task>());
     if (prog.execWithTask(skinUpload.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to upload skin!"), QMessageBox::Warning)->exec();
         reject();
@@ -331,7 +331,7 @@ void SkinManageDialog::on_resetBtn_clicked()
     ProgressDialog prog(this);
     NetJob::Ptr skinReset{ new NetJob(tr("Reset skin"), APPLICATION->network(), 1) };
     skinReset->addNetAction(makeSkinDeleteRequest(m_acct->accessToken()));
-    skinReset->addTask(m_acct->refresh().staticCast<Task>());
+    skinReset->addTask(m_acct->refresh(APPLICATION->authContext()).staticCast<Task>());
     if (prog.execWithTask(skinReset.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
         reject();
