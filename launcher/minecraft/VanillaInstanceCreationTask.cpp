@@ -16,7 +16,7 @@ void VanillaCreationTask::executeTask()
     setStatus(tr("Creating instance from version %1").arg(m_version->name()));
 
     m_instance = std::make_unique<MinecraftInstance>(
-        m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")), m_stagingPath);
+        m_globalSettings, std::make_unique<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg")), m_stagingPath, m_services);
     {
         const SettingsObject::Lock lock(m_instance->settings());
 

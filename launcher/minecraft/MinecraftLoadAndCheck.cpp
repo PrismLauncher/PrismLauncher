@@ -1,6 +1,6 @@
 #include "MinecraftLoadAndCheck.h"
-#include "Application.h"
 #include "MinecraftInstance.h"
+#include "services/LauncherSettings.h"
 #include "PackProfile.h"
 
 MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance* inst, Net::Mode netmode) : m_inst(inst), m_netmode(netmode) {}
@@ -11,7 +11,9 @@ void MinecraftLoadAndCheck::executeTask()
     auto* components = m_inst->getPackProfile();
     if (m_netmode == Net::Mode::Online && m_inst->settings()->get("UseLatestMinecraftVersion").toBool()) {
         auto releaseType = m_inst->settings()->get("UseLatestMinecraftVersionType").toString();
-        if (components->updateLatestMinecraft(releaseType == "release") && APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() &&
+        auto* launcherSettings = m_inst->services().settings;
+        bool automaticJavaSwitch = launcherSettings != nullptr && launcherSettings->get("AutomaticJavaSwitch").toBool();
+        if (components->updateLatestMinecraft(releaseType == "release") && automaticJavaSwitch &&
             m_inst->settings()->get("AutomaticJava").toBool() && m_inst->settings()->get("OverrideJavaLocation").toBool()) {
             m_inst->settings()->set("OverrideJavaLocation", false);
             m_inst->settings()->set("JavaPath", "");

@@ -51,7 +51,6 @@
 #include <memory>
 #include <utility>
 
-#include "Application.h"
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
@@ -91,6 +90,11 @@ PackProfile::PackProfile(MinecraftInstance* instance)
             }
         });
     });
+}
+
+MinecraftInstance* PackProfile::instance() const
+{
+    return d->m_instance;
 }
 
 PackProfile::~PackProfile()

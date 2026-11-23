@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <cstdint>
+#include "minecraft/InstanceServices.h"
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
@@ -22,6 +23,8 @@ class InstanceTask : public Task {
     ~InstanceTask() override = default;
 
     void setParentSettings(SettingsObject* settings) { m_globalSettings = settings; }
+
+    void setServices(InstanceServices services) { m_services = services; }
 
     void setStagingPath(const QString& stagingPath) { m_stagingPath = stagingPath; }
 
@@ -59,6 +62,7 @@ class InstanceTask : public Task {
 
    protected: /* data */
     SettingsObject* m_globalSettings{};
+    InstanceServices m_services;
     QString m_instIcon;
     QString m_instGroup;
     QString m_targetDir;

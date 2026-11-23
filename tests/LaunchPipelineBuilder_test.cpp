@@ -99,7 +99,7 @@ void LaunchPipelineBuilderTest::init()
     }
 
     auto instanceSettings = std::make_unique<INISettingsObject>(m_root->filePath("instance.cfg"));
-    m_instance = std::make_unique<MinecraftInstance>(m_global.get(), std::move(instanceSettings), m_root->filePath("instance"));
+    m_instance = std::make_unique<MinecraftInstance>(m_global.get(), std::move(instanceSettings), m_root->filePath("instance"), {});
     m_instance->loadSpecificSettings();
     QCoreApplication::processEvents();
 }

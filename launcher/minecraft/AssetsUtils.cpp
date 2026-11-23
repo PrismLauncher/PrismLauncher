@@ -49,9 +49,9 @@
 #include "net/ApiRequest.h"
 #include "net/ChecksumValidator.h"
 
-#include "Application.h"
 #include "net/Request.h"
-#include "update/AssetUpdateTask.h"
+
+#include <QNetworkAccessManager>
 
 namespace {
 QSet<QString> collectPathsFromDir(QString dirPath)
@@ -277,11 +277,11 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
 }  // namespace AssetsUtils
 
-Net::Request::Ptr AssetObject::getDownloadAction()
+Net::Request::Ptr AssetObject::getDownloadAction(const QString& resourceBase)
 {
     QFileInfo objectFile(getLocalPath());
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {
-        auto objectDL = Net::ApiRequest::makeFile(getUrl(), objectFile.filePath());
+        auto objectDL = Net::ApiRequest::makeFile(getUrl(resourceBase), objectFile.filePath());
         if (hash.size()) {
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, hash));
         }
@@ -296,10 +296,9 @@ QString AssetObject::getLocalPath()
     return "assets/objects/" + getRelPath();
 }
 
-QUrl AssetObject::getUrl()
+QUrl AssetObject::getUrl(const QString& resourceBase)
 {
-    auto resourceURL = AssetUpdateTask::resourceUrl();
-    return resourceURL + getRelPath();
+    return resourceBase + getRelPath();
 }
 
 QString AssetObject::getRelPath()
@@ -307,11 +306,11 @@ QString AssetObject::getRelPath()
     return hash.left(2) + "/" + hash;
 }
 
-NetJob::Ptr AssetsIndex::getDownloadJob()
+NetJob::Ptr AssetsIndex::getDownloadJob(QNetworkAccessManager* network, const QString& resourceBase)
 {
-    auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id), APPLICATION->network());
+    auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id), network);
     for (auto& object : objects.values()) {
-        auto dl = object.getDownloadAction();
+        auto dl = object.getDownloadAction(resourceBase);
         if (dl) {
             job->addNetAction(dl);
         }

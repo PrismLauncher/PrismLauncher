@@ -78,6 +78,8 @@ class PackProfile : public QAbstractListModel {
     explicit PackProfile(MinecraftInstance* instance);
     virtual ~PackProfile();
 
+    MinecraftInstance* instance() const;
+
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;

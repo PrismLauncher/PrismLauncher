@@ -7,7 +7,9 @@
 #include "minecraft/PackProfile.h"
 #include "net/ChecksumValidator.h"
 
-#include "Application.h"
+#include "net/HttpMetaCache.h"
+#include "services/LauncherSettings.h"
+#include "services/NetworkContext.h"
 
 #include "net/ApiRequest.h"
 
@@ -24,9 +26,13 @@ void AssetUpdateTask::executeTask()
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
     QString localPath = assets->id + ".json";
-    auto job = makeShared<NetJob>(tr("Asset index for %1").arg(m_inst->name()), APPLICATION->network());
-
-    auto metacache = APPLICATION->metacache();
+    auto* network = m_inst->services().network;
+    auto* metacache = network != nullptr ? network->httpMetaCache() : nullptr;
+    if (network == nullptr || metacache == nullptr) {
+        emitFailed(tr("No network is available to update assets."));
+        return;
+    }
+    auto job = makeShared<NetJob>(tr("Asset index for %1").arg(m_inst->name()), network->qnam());
     auto entry = metacache->resolveEntry("asset_indexes", localPath);
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
@@ -64,14 +70,14 @@ void AssetUpdateTask::assetIndexFinished()
     QString asset_fname = "assets/indexes/" + assets->id + ".json";
     // FIXME: this looks like a job for a generic validator based on json schema?
     if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, index)) {
-        auto metacache = APPLICATION->metacache();
+        auto* metacache = m_inst->services().network->httpMetaCache();
         auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
         metacache->evictEntry(entry);
         emitFailed(tr("Failed to read the assets index!"));
         return;
     }
 
-    auto job = index.getDownloadJob();
+        auto job = index.getDownloadJob(m_inst->services().network->qnam(), resourceUrl());
     if (job) {
         QString resourceURL = resourceUrl();
         QString source = tr("Mojang");
@@ -112,10 +118,12 @@ bool AssetUpdateTask::abort()
     return true;
 }
 
-QString AssetUpdateTask::resourceUrl()
+QString AssetUpdateTask::resourceUrl() const
 {
-    if (const QString urlOverride = APPLICATION->settings()->get("ResourceURLOverride").toString(); !urlOverride.isEmpty()) {
-        return urlOverride;
+    if (auto* settings = m_inst->services().settings) {
+        if (const QString urlOverride = settings->get("ResourceURLOverride").toString(); !urlOverride.isEmpty()) {
+            return urlOverride;
+        }
     }
 
     return BuildConfig.DEFAULT_RESOURCE_BASE;

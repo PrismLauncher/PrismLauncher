@@ -132,7 +132,8 @@ void PackInstallTask::install()
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     m_instance =
-        std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath);
+        std::make_unique<MinecraftInstance>(m_globalSettings, std::make_unique<INISettingsObject>(instanceConfigPath), m_stagingPath,
+                                            m_services);
     {
         SettingsObject::Lock const lock(m_instance->settings());
 

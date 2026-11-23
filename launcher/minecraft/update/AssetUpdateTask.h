@@ -14,7 +14,7 @@ class AssetUpdateTask : public Task {
     bool canAbort() const override;
 
    public:
-    static QString resourceUrl();
+    QString resourceUrl() const;
 
    private slots:
     void assetIndexFinished();
