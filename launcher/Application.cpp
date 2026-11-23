@@ -386,8 +386,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         if (m_instanceIdToLaunch.isEmpty()) {
             parser.showHelp(1);
         }
-    }
-    else if (command == "import") {
+    } else if (command == "import") {
         parser.clearPositionalArguments();
         parser.addPositionalArgument("import", "Import instance or resource from specified local path or URL(s)", "import [urls]");
 
@@ -397,15 +396,80 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         for (const auto& url : parser.positionalArguments().sliced(1)) {
             m_urlsToImport.append(normalizeImportUrl(url));
         }
-    }
-    else {
-        parser.addOptions(
-        { { { "l", "launch" }, "(Legacy. Use launch command instead.) Launch the specified instance (by instance ID)", "instance" },
+    } else if (command == "export") {
+        parser.clearPositionalArguments();
+        parser.addPositionalArgument("export", "Export the specified instance", "export <instance ID>");
+        parser.addPositionalArgument("paths", "Paths within the instance to exclude from the export", "[paths]");
+        parser.addOptions({
+            { { "f", "format" }, "Format to export as. Options: prismzip (default), curseforgezip, mrpack", "format", "prismzip" },
+            { { "i", "include" }, "Treat paths as a list of paths to include instead of exclude" },
+            { { "n", "name" }, "Set name of the exported pack (only for curseforgezip and mrpack formats)", "name" },
+            { { "e", "export-version" }, "Set version of the exported pack (only for curseforgezip and mrpack formats)", "version"},
+            { { "o", "optional" }, "Mark excluded paths as optional (only for curseforgezip and mrpack formats)" },
+            { { "a", "author" }, "Set author of the exported pack (only for curseforgezip format)", "author" },
+            { { "m", "memory" }, "Set recommended memory of the exported pack, in MiB (only for curseforgezip format)", "memory" },
+            { { "s", "summary" }, "Set summary of the exported pack (only for mrpack format)", "summary" },
+            { "show-files", "Show all files in the specified path in the instance and exit", "path" },
+        });
+
+        parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
+        parser.process(arguments());
+
+        // TODO: Move to fields
+        QString m_instanceIdToExport;
+        QString m_exportFormat;
+        bool m_exportIncludePaths;
+        QString m_exportName;
+        QString m_exportVersion;
+        bool m_exportMarkAsOptional;
+        QString m_exportAuthor;
+        bool m_exportSetRecommendedMemory;
+        int m_exportRecommendedMemory;
+        QString m_exportSummary;
+        QString m_exportShowFiles;
+        QStringList m_exportExcludePaths;
+
+        m_instanceIdToExport = args.value(1);
+        if (m_instanceIdToExport.isEmpty()) {
+            parser.showHelp(1);
+        }
+        m_exportFormat = parser.value("format").toLower();
+        const QStringList availableFormats = {"prismzip", "curseforgezip", "mrpack"};
+        if (!availableFormats.contains(m_exportFormat)) {
+            std::cerr << "--format must be one of prismzip, curseforgezip, or mrpack.\n";
+            m_status = Failed;
+            return;
+        }
+        m_exportIncludePaths = parser.isSet("include");
+        m_exportName = parser.value("name");
+        m_exportVersion = parser.value("export-version");
+        m_exportMarkAsOptional = parser.isSet("optional");
+        m_exportAuthor = parser.value("author");
+        m_exportSetRecommendedMemory = parser.isSet("memory");
+        if (m_exportSetRecommendedMemory) {
+            bool conversionSucceeded = false;
+            m_exportRecommendedMemory = parser.value("memory").toInt(&conversionSucceeded);
+            if (!conversionSucceeded) {
+                std::cerr << "--memory must be an integer.\n";
+                m_status = Failed;
+                return;
+            }
+        }
+        m_exportSummary = parser.value("summary");
+        m_exportShowFiles = parser.value("show-files");
+
+        for (const auto& path : parser.positionalArguments().sliced(2)) {
+            m_exportExcludePaths.append(path);
+        }
+    } else {
+        parser.addOptions({
+          { { "l", "launch" }, "(Legacy. Use launch command instead.) Launch the specified instance (by instance ID)", "instance" },
           { { "s", "server" }, "(Legacy. Use launch command instead.) Join the specified server on launch (only valid in combination with --launch)", "address" },
           { { "w", "world" }, "(Legacy. Use launch command instead.) Join the specified world on launch (only valid in combination with --launch)", "world" },
           { { "a", "profile" }, "(Legacy. Use launch command instead.) Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
           { { "o", "offline" }, "(Legacy. Use launch command instead.) Launch offline, with given player name (only valid in combination with --launch)", "offline" },
-          { { "I", "import" }, "(Legacy. Use import command instead.) Import instance or resource from specified local path or URL", "url" }, });
+          { { "I", "import" }, "(Legacy. Use import command instead.) Import instance or resource from specified local path or URL", "url" },
+        });
         parser.addPositionalArgument("URL", "(Legacy. Use import command instead.) Import the resource(s) at the given URL(s) (same as -I / --import)", " ");
 
         parser.process(arguments());
