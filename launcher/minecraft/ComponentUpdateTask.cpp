@@ -1,4 +1,5 @@
 #include "ComponentUpdateTask.h"
+#include <QDebug>
 #include <algorithm>
 
 #include "Component.h"
@@ -15,7 +16,6 @@
 #include "minecraft/ProfileUtils.h"
 #include "net/Mode.h"
 
-#include "Application.h"
 #include "tasks/Task.h"
 
 #include "minecraft/Logging.h"
@@ -125,13 +125,18 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
         component->m_loaded = true;
         result = LoadResult::LoadedLocal;
     } else {
-        auto metaVersion = APPLICATION->metadataIndex()->get(component->m_uid, component->m_version);
+        auto* index = component->m_parent->instance()->services().metadata;
+        if (index == nullptr) {
+            qWarning() << "No metadata index available for" << component->m_uid;
+            return LoadResult::Failed;
+        }
+        auto metaVersion = index->get(component->m_uid, component->m_version);
         component->m_metaVersion = metaVersion;
         if (metaVersion->isLoaded()) {
             component->m_loaded = true;
             result = LoadResult::LoadedLocal;
         } else {
-            loadTask = APPLICATION->metadataIndex()->loadVersion(component->m_uid, component->m_version, netmode);
+            loadTask = index->loadVersion(component->m_uid, component->m_version, netmode);
             loadTask->start();
             if (netmode == Net::Mode::Online)
                 result = LoadResult::RequiresRemote;
@@ -610,7 +615,8 @@ void ComponentUpdateTask::performUpdateActions()
                                   << instance->name() << "|"
                                   << "UpdateActionLatestRecommendedCompatible" << component->getID() << ":" << component->getVersion()
                                   << "updating to latest recommend or compatible with" << lrc.parentUid << lrc.version;
-                              auto versionList = APPLICATION->metadataIndex()->get(component->getID());
+                              auto* index = instance->services().metadata;
+                              auto versionList = index != nullptr ? index->get(component->getID()) : nullptr;
                               if (versionList) {
                                   versionList->waitToLoad();
                                   auto recommended = versionList->getRecommendedForParent(lrc.parentUid, lrc.version);
@@ -643,7 +649,11 @@ void ComponentUpdateTask::performUpdateActions()
                                   << instance->name() << "|"
                                   << "UpdateImportantChanged" << component->getID() << ":" << component->getVersion() << "was changed from"
                                   << ic.oldVersion << "updating linked components";
-                              auto oldVersion = APPLICATION->metadataIndex()->getLoadedVersion(component->getID(), ic.oldVersion);
+                              auto* index = instance->services().metadata;
+                              auto oldVersion = index != nullptr ? index->getLoadedVersion(component->getID(), ic.oldVersion) : nullptr;
+                              if (!oldVersion) {
+                                  return;
+                              }
                               for (auto oldReq : oldVersion->requiredSet()) {
                                   auto currentlyRequired = component->m_cachedRequires.find(oldReq);
                                   if (currentlyRequired == component->m_cachedRequires.cend()) {

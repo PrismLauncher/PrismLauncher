@@ -93,3 +93,12 @@ Wrappers do not introduce a second service locator. Do not replace `APPLICATION`
 - `Net::Request` again records `Succeeded` on a successful download. The `std::expected` sink refactor (`bb27d2e13`) had dropped that, so `wasSuccessful()` was false for good responses and the MSA device-code step rejected them. The device-code test covers this.
 - Result: `launcher/minecraft/auth/` has no `APPLICATION` uses or `Application.h` includes (previously 14 lines across 9 files).
 - `tests/AuthSteps_test.cpp` runs the offline flow, the client-ID-changed refresh path, `XboxUserStep`, and `MSADeviceCodeStep` against a fake `NetworkContext` whose network manager returns canned replies.
+
+## Instance / profile migration (R1.5)
+
+- `InstanceServices` bundles what an instance needs to load and launch: `LauncherSettings*`, `NetworkContext*`, `IconStore*`, `Meta::Index*`, and `const LauncherRuntimeInfo*` (detected OpenAL/GLFW/SDL paths and MangoHud). Pointers are non-owning. A null pointer means that service is absent, which is how headless tests construct an instance.
+- `Application::instanceServices()` builds the bundle. The meta cache, settings wrapper, network wrapper, and icon store are created before `InstanceList::loadList()`, because loading an instance copies the pointers. `LauncherRuntimeInfo` is updated in place by `detectLibraries()` and `updateCapabilities()`, so instances see the detected libraries at launch time.
+- `InstanceList` and `InstanceTask` carry the bundle. Every `MinecraftInstance` constructor takes it: instance load, vanilla creation, and the Flame, Modrinth, FTB, legacy FTB, import FTB, ATLauncher, and Technic install tasks.
+- `MinecraftInstance` uses it for native-library arguments, the libraries directory, game-time formatting, mod-metadata indexing, the launch icon, and MangoHud. `PackProfile` no longer includes `Application.h`; components and `ComponentUpdateTask` read the metadata index from the instance. Library, asset, and legacy FML update tasks build their `NetJob`s on the injected network and read URL overrides from the injected settings.
+- `populateLaunchMenu` still calls `APPLICATION->launch()` and `profilers()`. That menu is UI, and launch coordination is R2.1. Java download (`AutoInstallJava`), account claim, and window show/hide on launch stay on `Application` for the same reason.
+- `tests/InstanceServices_test.cpp` checks the injected OpenAL path, the asset URL override, and that a service-less instance still builds arguments.

@@ -279,6 +279,7 @@ set(MINECRAFT_SOURCES
     minecraft/launch/AutoInstallJava.h
 
     minecraft/GradleSpecifier.h
+    minecraft/InstanceServices.h
     minecraft/MinecraftInstance.cpp
     minecraft/MinecraftInstance.h
     minecraft/LaunchProfile.cpp
@@ -429,6 +430,8 @@ set(SERVICE_SOURCES
     services/AccountService.h
     services/AccountListService.h
     services/AccountListService.cpp
+    services/IconStore.h
+    services/IconListIconStore.h
 )
 
 set(JAVA_SOURCES

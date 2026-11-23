@@ -3,7 +3,8 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-#include "Application.h"
+#include "net/HttpMetaCache.h"
+#include "services/NetworkContext.h"
 
 LibrariesTask::LibrariesTask(MinecraftInstance* inst)
 {
@@ -20,10 +21,15 @@ void LibrariesTask::executeTask()
     auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
-    NetJob::Ptr job{ new NetJob(tr("Libraries for instance %1").arg(inst->name()), APPLICATION->network()) };
-    downloadJob.reset(job);
+    auto* network = inst->services().network;
+    auto* metacache = network != nullptr ? network->httpMetaCache() : nullptr;
+    if (network == nullptr || metacache == nullptr) {
+        emitFailed(tr("No network is available to download libraries."));
+        return;
+    }
 
-    auto metacache = APPLICATION->metacache();
+    NetJob::Ptr job{ new NetJob(tr("Libraries for instance %1").arg(inst->name()), network->qnam()) };
+    downloadJob.reset(job);
 
     auto processArtifactPool = [this, inst, metacache](const QList<LibraryPtr>& pool, QStringList& errors, const QString& localPath) {
         for (auto lib : pool) {

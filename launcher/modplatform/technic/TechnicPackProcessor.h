@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QString>
+#include "minecraft/InstanceServices.h"
 #include "settings/SettingsObject.h"
 
 namespace Technic {
@@ -29,6 +30,7 @@ class TechnicPackProcessor : public QObject {
 
    public:
     void run(SettingsObject* globalSettings,
+             InstanceServices services,
              const QString& instName,
              const QString& instIcon,
              const QString& stagingPath,

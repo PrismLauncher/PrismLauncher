@@ -1,12 +1,16 @@
 #include "LegacyFMLLibrariesTask.h"
 
+#include <QFile>
+
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/VersionFilterData.h"
 
-#include "Application.h"
 #include "BuildConfig.h"
+#include "net/HttpMetaCache.h"
+#include "services/LauncherSettings.h"
+#include "services/NetworkContext.h"
 
 #include "net/ApiRequest.h"
 
@@ -58,8 +62,13 @@ void LegacyFMLLibrariesTask::executeTask()
 
     // download missing libs to our place
     setStatus(tr("Downloading FML libraries..."));
-    NetJob::Ptr dljob{ new NetJob("FML libraries", APPLICATION->network()) };
-    auto metacache = APPLICATION->metacache();
+    auto* network = inst->services().network;
+    auto* metacache = network != nullptr ? network->httpMetaCache() : nullptr;
+    if (network == nullptr || metacache == nullptr) {
+        emitFailed(tr("No network is available to download FML libraries."));
+        return;
+    }
+    NetJob::Ptr dljob{ new NetJob("FML libraries", network->qnam()) };
     Net::Request::Options options = Net::Request::Option::MakeEternal;
     const QString base = baseUrl();
     for (auto& lib : fmlLibsToProcess) {
@@ -88,7 +97,7 @@ void LegacyFMLLibrariesTask::fmllibsFinished()
     if (!fmlLibsToProcess.isEmpty()) {
         setStatus(tr("Copying FML libraries into the instance..."));
         MinecraftInstance* inst = (MinecraftInstance*)m_inst;
-        auto metacache = APPLICATION->metacache();
+        auto* metacache = inst->services().network->httpMetaCache();
         int index = 0;
         for (auto& lib : fmlLibsToProcess) {
             progress(index, fmlLibsToProcess.size());
@@ -125,10 +134,12 @@ bool LegacyFMLLibrariesTask::abort()
     return true;
 }
 
-QString LegacyFMLLibrariesTask::baseUrl()
+QString LegacyFMLLibrariesTask::baseUrl() const
 {
-    if (const QString urlOverride = APPLICATION->settings()->get("LegacyFMLLibsURLOverride").toString(); !urlOverride.isEmpty()) {
-        return urlOverride;
+    if (auto* settings = m_inst->services().settings) {
+        if (const QString urlOverride = settings->get("LegacyFMLLibsURLOverride").toString(); !urlOverride.isEmpty()) {
+            return urlOverride;
+        }
     }
 
     return BuildConfig.LEGACY_FMLLIBS_BASE_URL;

@@ -23,7 +23,7 @@ class LegacyFMLLibrariesTask : public Task {
     bool abort() override;
 
    private:
-    static QString baseUrl();
+    QString baseUrl() const;
 
    private:
     MinecraftInstance* m_inst;

@@ -20,18 +20,20 @@
 #include "net/NetJob.h"
 #include "net/Request.h"
 
+class QNetworkAccessManager;
+
 struct AssetObject {
     QString getRelPath();
-    QUrl getUrl();
+    QUrl getUrl(const QString& resourceBase);
     QString getLocalPath();
-    Net::Request::Ptr getDownloadAction();
+    Net::Request::Ptr getDownloadAction(const QString& resourceBase);
 
     QString hash;
     qint64 size;
 };
 
 struct AssetsIndex {
-    NetJob::Ptr getDownloadJob();
+    NetJob::Ptr getDownloadJob(QNetworkAccessManager* network, const QString& resourceBase);
 
     QString id;
     QMap<QString, AssetObject> objects;

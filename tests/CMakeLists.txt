@@ -45,6 +45,9 @@ ecm_add_test(ModPlatformInjection_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_
 ecm_add_test(AuthSteps_test.cpp AuthSteps_test.h LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Network
     TEST_NAME AuthSteps)
 
+ecm_add_test(InstanceServices_test.cpp InstanceServices_test.h LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME InstanceServices)
+
 ecm_add_test(INIFile_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME INIFile)
 

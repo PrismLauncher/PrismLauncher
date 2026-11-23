@@ -39,8 +39,8 @@
 
 #include <QSaveFile>
 
-#include "Application.h"
 #include "FileSystem.h"
+#include "minecraft/MinecraftInstance.h"
 #include "OneSixVersionFormat.h"
 #include "VersionFile.h"
 #include "meta/Version.h"
@@ -48,6 +48,13 @@
 #include "minecraft/PackProfile.h"
 
 #include <assert.h>
+
+namespace {
+Meta::Index* componentMetadata(const Component* component)
+{
+    return component->m_parent->instance()->services().metadata;
+}
+}  // namespace
 
 const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
     { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
@@ -108,8 +115,8 @@ std::shared_ptr<class VersionFile> Component::getVersionFile() const
 std::shared_ptr<class Meta::VersionList> Component::getVersionList() const
 {
     // FIXME: what if the metadata index isn't loaded yet?
-    if (APPLICATION->metadataIndex()->hasUid(m_uid)) {
-        return APPLICATION->metadataIndex()->get(m_uid);
+    if (auto* index = componentMetadata(this); index != nullptr && index->hasUid(m_uid)) {
+        return index->get(m_uid);
     }
     return nullptr;
 }
@@ -209,7 +216,7 @@ bool Component::isRemovable()
 bool Component::isRevertible()
 {
     if (isCustom()) {
-        if (APPLICATION->metadataIndex()->hasUid(m_uid)) {
+        if (auto* index = componentMetadata(this); index != nullptr && index->hasUid(m_uid)) {
             return true;
         }
     }
@@ -310,8 +317,9 @@ void Component::setVersion(const QString& version)
             // we don't have a file, therefore we are loaded with metadata
             m_cachedVersion = version;
             // see if the meta version is loaded
-            auto metaVersion = APPLICATION->metadataIndex()->get(m_uid, version);
-            if (metaVersion->isLoaded()) {
+            auto* index = componentMetadata(this);
+            auto metaVersion = index != nullptr ? index->get(m_uid, version) : nullptr;
+            if (metaVersion && metaVersion->isLoaded()) {
                 // if yes, we can continue with that.
                 m_metaVersion = metaVersion;
             } else {
@@ -378,8 +386,9 @@ bool Component::revert()
         m_file.reset();
 
         // check local cache for metadata...
-        auto version = APPLICATION->metadataIndex()->get(m_uid, m_version);
-        if (version->isLoaded()) {
+        auto* index = componentMetadata(this);
+        auto version = index != nullptr ? index->get(m_uid, m_version) : nullptr;
+        if (version && version->isLoaded()) {
             m_metaVersion = version;
         } else {
             m_metaVersion.reset();
@@ -455,7 +464,9 @@ void Component::waitLoadMeta()
     if (!m_loaded) {
         if (!m_metaVersion || !m_metaVersion->isLoaded()) {
             // wait for the loaded version from meta
-            m_metaVersion = APPLICATION->metadataIndex()->getLoadedVersion(m_uid, m_version);
+            if (auto* index = componentMetadata(this); index != nullptr) {
+                m_metaVersion = index->getLoadedVersion(m_uid, m_version);
+            }
         }
         m_loaded = true;
         updateCachedData();

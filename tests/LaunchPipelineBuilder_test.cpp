@@ -6,6 +6,7 @@
 #include <LaunchMode.h>
 #include <launch/LaunchPipelineBuilder.h>
 #include <launch/LaunchTask.h>
+#include <minecraft/InstanceServices.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/auth/AuthSession.h>
 #include <minecraft/launch/MinecraftTarget.h>
@@ -99,7 +100,8 @@ void LaunchPipelineBuilderTest::init()
     }
 
     auto instanceSettings = std::make_unique<INISettingsObject>(m_root->filePath("instance.cfg"));
-    m_instance = std::make_unique<MinecraftInstance>(m_global.get(), std::move(instanceSettings), m_root->filePath("instance"));
+    m_instance =
+        std::make_unique<MinecraftInstance>(m_global.get(), std::move(instanceSettings), m_root->filePath("instance"), InstanceServices{});
     m_instance->loadSpecificSettings();
     QCoreApplication::processEvents();
 }

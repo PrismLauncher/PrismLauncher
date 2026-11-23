@@ -40,6 +40,7 @@
 #include <QDir>
 #include <QProcess>
 #include "BaseInstance.h"
+#include "minecraft/InstanceServices.h"
 #include "minecraft/launch/MinecraftTarget.h"
 #include "minecraft/mod/Mod.h"
 
@@ -56,7 +57,12 @@ class PackProfile;
 class MinecraftInstance : public BaseInstance {
     Q_OBJECT
    public:
-    MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir);
+    MinecraftInstance(SettingsObject* globalSettings,
+                      std::unique_ptr<SettingsObject> settings,
+                      const QString& rootDir,
+                      InstanceServices services);
+
+    const InstanceServices& services() const { return m_services; }
     virtual ~MinecraftInstance();
     virtual void saveNow() override;
 
@@ -160,6 +166,7 @@ class MinecraftInstance : public BaseInstance {
     QMap<QString, QString> makeProfileVarMapping(std::shared_ptr<LaunchProfile> profile) const;
 
    protected:  // data
+    InstanceServices m_services;
     std::unique_ptr<PackProfile> m_components;
     std::unique_ptr<ModFolderModel> m_loader_mod_list;
     std::unique_ptr<ModFolderModel> m_core_mod_list;

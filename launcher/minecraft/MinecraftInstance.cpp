@@ -38,10 +38,26 @@
 #include "MinecraftInstance.h"
 #include "Application.h"
 #include "BuildConfig.h"
+#include "net/HttpMetaCache.h"
+#include "services/IconStore.h"
+#include "services/LauncherSettings.h"
+#include "services/NetworkContext.h"
 #include "Json.h"
 #include "QObjectPtr.h"
 #include "settings/Setting.h"
 #include "settings/SettingsObject.h"
+
+namespace {
+bool modMetadataEnabled(const InstanceServices& services)
+{
+    return services.settings == nullptr || !services.settings->get("ModMetadataDisabled").toBool();
+}
+
+bool showGameTimeWithoutDays(const InstanceServices& services)
+{
+    return services.settings != nullptr && services.settings->get("ShowGameTimeWithoutDays").toBool();
+}
+}  // namespace
 
 #include "FileSystem.h"
 #include "MMCTime.h"
@@ -163,8 +179,11 @@ class OrSetting : public Setting {
     std::shared_ptr<Setting> m_b;
 };
 
-MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings, std::unique_ptr<SettingsObject> settings, const QString& rootDir)
-    : BaseInstance(globalSettings, std::move(settings), rootDir)
+MinecraftInstance::MinecraftInstance(SettingsObject* globalSettings,
+                                     std::unique_ptr<SettingsObject> settings,
+                                     const QString& rootDir,
+                                     InstanceServices services)
+    : BaseInstance(globalSettings, std::move(settings), rootDir), m_services(services)
 {
     m_components.reset(new PackProfile(this));
 }
@@ -544,19 +563,19 @@ QStringList MinecraftInstance::extraArguments()
         QString sdlPath;
 
         if (settings()->get("UseNativeOpenAL").toBool()) {
-            openALPath = APPLICATION->m_detectedOpenALPath;
+            openALPath = m_services.runtime != nullptr ? m_services.runtime->detectedOpenALPath : QString();
             auto customPath = settings()->get("CustomOpenALPath").toString();
             if (!customPath.isEmpty())
                 openALPath = customPath;
         }
         if (settings()->get("UseNativeGLFW").toBool()) {
-            glfwPath = APPLICATION->m_detectedGLFWPath;
+            glfwPath = m_services.runtime != nullptr ? m_services.runtime->detectedGLFWPath : QString();
             auto customPath = settings()->get("CustomGLFWPath").toString();
             if (!customPath.isEmpty())
                 glfwPath = customPath;
         }
         if (settings()->get("UseNativeSDL").toBool()) {
-            sdlPath = APPLICATION->m_detectedSDLPath;
+            sdlPath = m_services.runtime != nullptr ? m_services.runtime->detectedSDLPath : QString();
             auto customPath = settings()->get("CustomSDLPath").toString();
             if (!customPath.isEmpty())
                 sdlPath = customPath;
@@ -708,7 +727,7 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
     QProcessEnvironment env = createEnvironment();
 
 #ifdef Q_OS_LINUX
-    if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud) {
+    if (settings()->get("EnableMangoHud").toBool() && m_services.runtime != nullptr && m_services.runtime->supportsMangoHud) {
         QStringList preloadList;
         if (auto value = env.value("LD_PRELOAD"); !value.isEmpty())
             preloadList = value.split(QLatin1String(":"));
@@ -1070,7 +1089,8 @@ QMap<QString, QString> MinecraftInstance::makeProfileVarMapping(std::shared_ptr<
     result["assets_root"] = absAssetsDir;
     result["assets_index_name"] = assets->id;
 
-    result["library_directory"] = APPLICATION->metacache()->getBasePath("libraries");
+    auto* cache = m_services.network != nullptr ? m_services.network->httpMetaCache() : nullptr;
+    result["library_directory"] = cache != nullptr ? cache->getBasePath("libraries") : QDir("libraries").absolutePath();
 
     return result;
 }
@@ -1102,13 +1122,13 @@ QString MinecraftInstance::getStatusbarDescription()
             description.append(
                 tr(", last played on %1 for %2")
                     .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
-                    .arg(Time::prettifyDuration(lastTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
+                    .arg(Time::prettifyDuration(lastTimePlayed(), showGameTimeWithoutDays(m_services))));
         }
 
         if (totalTimePlayed() > 0) {
             description.append(
                 tr(", total played for %1")
-                    .arg(Time::prettifyDuration(totalTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
+                    .arg(Time::prettifyDuration(totalTimePlayed(), showGameTimeWithoutDays(m_services))));
         }
     }
     if (hasCrashed()) {
@@ -1137,7 +1157,9 @@ LaunchTask* MinecraftInstance::createLaunchTask(AuthSessionPtr session, Minecraf
     auto process = LaunchTask::create(this);
     auto pptr = process.get();
 
-    APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
+    if (m_services.icons != nullptr) {
+        m_services.icons->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
+    }
 
     // print a header
     {
@@ -1271,7 +1293,7 @@ JavaVersion MinecraftInstance::getJavaVersion()
 ModFolderModel* MinecraftInstance::loaderModList()
 {
     if (!m_loader_mod_list) {
-        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool is_indexed = modMetadataEnabled(m_services);
         m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed, true));
     }
     return m_loader_mod_list.get();
@@ -1280,7 +1302,7 @@ ModFolderModel* MinecraftInstance::loaderModList()
 ModFolderModel* MinecraftInstance::coreModList()
 {
     if (!m_core_mod_list) {
-        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool is_indexed = modMetadataEnabled(m_services);
         m_core_mod_list.reset(new ModFolderModel(coreModsDir(), this, is_indexed, true));
     }
     return m_core_mod_list.get();
@@ -1289,7 +1311,7 @@ ModFolderModel* MinecraftInstance::coreModList()
 ModFolderModel* MinecraftInstance::nilModList()
 {
     if (!m_nil_mod_list) {
-        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool is_indexed = modMetadataEnabled(m_services);
         m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), this, is_indexed, false));
     }
     return m_nil_mod_list.get();
@@ -1298,7 +1320,7 @@ ModFolderModel* MinecraftInstance::nilModList()
 ResourcePackFolderModel* MinecraftInstance::resourcePackList()
 {
     if (!m_resource_pack_list) {
-        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool is_indexed = modMetadataEnabled(m_services);
         m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir(), this, is_indexed, true));
     }
     return m_resource_pack_list.get();
@@ -1307,7 +1329,7 @@ ResourcePackFolderModel* MinecraftInstance::resourcePackList()
 TexturePackFolderModel* MinecraftInstance::texturePackList()
 {
     if (!m_texture_pack_list) {
-        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool is_indexed = modMetadataEnabled(m_services);
         m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir(), this, is_indexed, true));
     }
     return m_texture_pack_list.get();
@@ -1316,7 +1338,7 @@ TexturePackFolderModel* MinecraftInstance::texturePackList()
 ShaderPackFolderModel* MinecraftInstance::shaderPackList()
 {
     if (!m_shader_pack_list) {
-        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool is_indexed = modMetadataEnabled(m_services);
         m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir(), this, is_indexed, true));
     }
     return m_shader_pack_list.get();
@@ -1325,7 +1347,7 @@ ShaderPackFolderModel* MinecraftInstance::shaderPackList()
 DataPackFolderModel* MinecraftInstance::dataPackList()
 {
     if (!m_data_pack_list && settings()->get("GlobalDataPacksEnabled").toBool()) {
-        bool isIndexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        bool isIndexed = modMetadataEnabled(m_services);
         m_data_pack_list.reset(new DataPackFolderModel(dataPacksDir(), this, isIndexed, true));
     }
     return m_data_pack_list.get();

@@ -66,8 +66,8 @@
 
 const static int g_GROUP_FILE_FORMAT_VERSION = 1;
 
-InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings)
+InstanceList::InstanceList(SettingsObject* settings, const QStringList& instDirs, InstanceServices services, QObject* parent)
+    : QAbstractListModel(parent), m_globalSettings(settings), m_services(services)
 {
     resumeWatch();
 
@@ -714,7 +714,7 @@ std::unique_ptr<MinecraftInstance> InstanceList::loadInstance(const InstanceId& 
         return nullptr;
     }
 
-    auto inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), instanceRoot);
+    auto inst = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), instanceRoot, m_services);
     qDebug() << "Loaded instance" << inst->name() << "from" << inst->instanceRoot();
 
     auto shortcut = inst->shortcuts();
@@ -965,7 +965,7 @@ class InstanceStaging : public Task {
     const unsigned maxBackoff = 16;
 
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings)
+    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObject* settings, InstanceServices services)
         : m_parent(parent), m_backoff(minBackoff, maxBackoff)
     {
         m_stagingPath = parent->getStagedInstancePath(child->targetDir());
@@ -974,6 +974,7 @@ class InstanceStaging : public Task {
 
         m_child->setStagingPath(m_stagingPath);
         m_child->setParentSettings(settings);
+        m_child->setServices(services);
 
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
@@ -1060,7 +1061,7 @@ class InstanceStaging : public Task {
 
 Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
-    return new InstanceStaging(this, task, m_globalSettings);
+    return new InstanceStaging(this, task, m_globalSettings, m_services);
 }
 
 QString InstanceList::getStagedInstancePath(const QString& targetDir)

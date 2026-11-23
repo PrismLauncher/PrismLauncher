@@ -447,7 +447,7 @@ void FlameCreationTask::createInstance()
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_unique<INISettingsObject>(configPath);
-    m_newInstance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath);
+    m_newInstance = std::make_unique<MinecraftInstance>(m_globalSettings, std::move(instanceSettings), m_stagingPath, m_services);
     auto mcVersion = m_pack.minecraft.version;
 
     // Hack to correct some 'special sauce'...

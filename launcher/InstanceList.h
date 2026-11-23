@@ -74,7 +74,7 @@ class InstanceList : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, QObject* parent = nullptr);
+    explicit InstanceList(SettingsObject* settings, const QStringList& instDirs, InstanceServices services, QObject* parent = nullptr);
     ~InstanceList() override = default;
 
    public:
@@ -191,6 +191,7 @@ class InstanceList : public QAbstractListModel {
     QMap<QString, int> m_groupNameCache;
 
     SettingsObject* m_globalSettings;
+    InstanceServices m_services;
     QStringList m_instDirs;
     QHash<InstanceId, QString> m_instanceRootDirMap;
     QString rootDirOf(const InstanceId& id) const;

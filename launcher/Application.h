@@ -49,6 +49,7 @@
 
 #include "QObjectPtr.h"
 
+#include "minecraft/InstanceServices.h"
 #include "minecraft/auth/MinecraftAccount.h"
 
 class LaunchController;
@@ -87,6 +88,7 @@ class InstanceCatalog;
 class AccountService;
 class FlameAPI;
 class ModrinthAPI;
+class IconStore;
 
 namespace Meta {
 class Index;
@@ -175,6 +177,10 @@ class Application : public QApplication {
 
     /** Dependencies for MinecraftAccount::login()/refresh(), bound to the services above. */
     AuthContext authContext() const;
+
+    /** Dependencies for MinecraftInstance load and launch. */
+    InstanceServices instanceServices();
+    const LauncherRuntimeInfo& runtime() const { return m_runtime; }
 
     Meta::Index* metadataIndex();
 
@@ -295,6 +301,7 @@ class Application : public QApplication {
     // concrete members above so they are destroyed first on shutdown.
     std::unique_ptr<LauncherSettings> m_launcherSettings;
     std::unique_ptr<NetworkContext> m_networkContext;
+    std::unique_ptr<IconStore> m_iconStore;
     std::unique_ptr<OAuthCallbackRelay> m_oauthCallbacks;
     std::unique_ptr<InstanceCatalog> m_instanceCatalog;
     std::unique_ptr<AccountService> m_accountService;
@@ -310,6 +317,7 @@ class Application : public QApplication {
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
     bool m_portable = false;
+    LauncherRuntimeInfo m_runtime;
 
 #ifdef Q_OS_MACOS
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
@@ -340,9 +348,6 @@ class Application : public QApplication {
     SetupWizard* m_setupWizard = nullptr;
 
    public:
-    QString m_detectedGLFWPath;
-    QString m_detectedOpenALPath;
-    QString m_detectedSDLPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_worldToJoin;
