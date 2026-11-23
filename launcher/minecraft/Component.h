@@ -43,12 +43,6 @@ using UpdateAction = std::variant<UpdateActionNone,
                                   UpdateActionLatestRecommendedCompatible,
                                   UpdateActionRemove,
                                   UpdateActionImportantChanged>;
-
-struct ModloaderMapEntry {
-    ModPlatform::ModLoaderType type;
-    QStringList knownConflictingComponents;
-};
-
 class Component : public QObject, public ProblemProvider {
     Q_OBJECT
    public:
@@ -58,8 +52,6 @@ class Component : public QObject, public ProblemProvider {
     Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file);
 
     virtual ~Component() {}
-
-    static const QMap<QString, ModloaderMapEntry> KNOWN_MODLOADERS;
 
     void applyTo(LaunchProfile* profile);
 
@@ -73,8 +65,6 @@ class Component : public QObject, public ProblemProvider {
     bool isRemovable();
     bool isCustom();
     bool isVersionChangeable() const;
-    bool isKnownModloader();
-    QStringList knownConflictingComponents();
 
     // DEPRECATED: explicit numeric order values, used for loading old non-component config. TODO: refactor and move to migration code
     void setOrder(int order);

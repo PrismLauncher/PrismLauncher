@@ -78,12 +78,12 @@
 
 #include "icons/IconList.h"
 
+#include "mod/DataPackFolderModel.h"
 #include "mod/Mod.h"
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/ShaderPackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
-#include "mod/DataPackFolderModel.h"
 
 #include "WorldList.h"
 
@@ -1108,8 +1108,25 @@ QString MinecraftInstance::getStatusbarDescription()
         mcVersion = m_components->getComponentVersion("net.minecraft");
     }
 
+    QString loaderNames;
+    const auto loaders = m_components->getModLoaders();
+    for (const auto modLoader : ModLoaderType::all()) {
+        if (!loaders.contains(modLoader)) {
+            continue;
+        }
+
+        if (!loaderNames.isEmpty()) {
+            loaderNames.append(" + ");
+        }
+        loaderNames.append(modLoader.displayName());
+    }
+
     QString description;
-    description.append(tr("Minecraft %1").arg(mcVersion));
+    if (!loaderNames.isEmpty()) {
+        description.append(tr("Minecraft %1 %2").arg(loaderNames, mcVersion));
+    } else {
+        description.append(tr("Minecraft %1").arg(mcVersion));
+    }
     if (m_settings->get("ShowGameTime").toBool()) {
         if (lastTimePlayed() > 0 && lastLaunch() > 0) {
             QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
