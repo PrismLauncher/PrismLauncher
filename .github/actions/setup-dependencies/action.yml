@@ -58,6 +58,7 @@ runs:
       uses: hendrikmuhs/ccache-action@v1.2.23
       with:
         variant: sccache
+        max-size: 500M
         create-symlink: ${{ runner.os != 'Windows' }}
         key: ${{ runner.os }}-${{ runner.arch }}-${{ inputs.artifact-name }}-sccache
 
