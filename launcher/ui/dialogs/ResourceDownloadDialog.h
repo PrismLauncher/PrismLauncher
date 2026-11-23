@@ -92,6 +92,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     ResourceFolderModel* getBaseModel() const { return m_baseModel; }
 
     void setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta);
+    void setResourcePack(const ModPlatform::IndexedPack& pack, ModPlatform::ResourceProvider provider);
 
     QList<BasePage*> getPages() override { return m_pages; };
 

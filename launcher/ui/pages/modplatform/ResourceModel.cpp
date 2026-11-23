@@ -259,34 +259,26 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
-        auto addonId = pack->addonId;
-        // Use default if no callbacks are set
-        if (!callbacks.onSucceed) {
-            callbacks.onSucceed = [this, entry, addonId](auto& doc) {
-                if (!s_runningModels.constFind(this).value()) {
-                    return;
-                }
-                versionRequestSucceeded(doc, addonId, entry);
-            };
-        }
-        if (!callbacks.onFail) {
-            callbacks.onFail = [](const QString& reason, int) {
-                QMessageBox::critical(nullptr, tr("Error"),
-                                      tr("A network error occurred. Could not load project versions: %1").arg(reason));
-            };
-        }
+        auto [job, response] = m_api->getVersionsTask(args);
 
-        if (auto job = m_api->getProjectVersions(args, callbacks); job) {
-            runInfoJob(job);
-        }
+        connect(job.get(), &NetJob::succeeded, this, [project = pack, response, this, entry] {
+            if (!s_runningModels.constFind(this).value()) {
+                return;
+            }
+            versionRequestSucceeded(*response, project->addonId.toString(), entry);
+        });
+        connect(job.get(), &NetJob::failed, this, [](const QString& reason) {
+            QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project versions: %1").arg(reason));
+        });
+
+        runInfoJob(job);
     }
 
     if (!pack->extraDataLoaded) {
         auto [job, response] = m_api->getProjectTask(pack->addonId.toString(), true);
 
-        QObject::connect(job.get(), &NetJob::succeeded, job.get(), [project = pack, response, this, entry] {
+        connect(job.get(), &NetJob::succeeded, this, [project = pack, response, this, entry] {
             // Preserve any version data already loaded into the pack, since the project request only carries the pack info
             auto versions = std::move(project->versions);
             auto versionsLoaded = project->versionsLoaded;
@@ -298,13 +290,13 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
             }
             infoRequestSucceeded(project, entry);
         });
-        QObject::connect(job.get(), &NetJob::failed, job.get(), [this](const QString& reason) {
+        connect(job.get(), &NetJob::failed, this, [this](const QString& reason) {
             if (!s_runningModels.constFind(this).value()) {
                 return;
             }
             QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
         });
-        QObject::connect(job.get(), &NetJob::aborted, job.get(), [this] {
+        connect(job.get(), &NetJob::aborted, this, [this] {
             if (!s_runningModels.constFind(this).value()) {
                 return;
             }
