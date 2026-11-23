@@ -528,14 +528,15 @@ void MinecraftSettingsWidget::openGlobalSettings()
 
     qDebug() << id;
 
-    if (id == "javaPage")
+    if (id == "javaPage") {
         if (m_instance->services().windows != nullptr) {
             m_instance->services().windows->showGlobalSettings(this, "java-settings");
         }
-    else  // TODO select tab
+    } else {  // TODO select tab
         if (m_instance->services().windows != nullptr) {
             m_instance->services().windows->showGlobalSettings(this, "minecraft-settings");
         }
+    }
 }
 
 void MinecraftSettingsWidget::updateAccountsMenu(SettingsObject& settings)
