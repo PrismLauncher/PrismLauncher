@@ -113,11 +113,11 @@ QPixmap MinecraftAccount::getFace(int width, int height) const
     return skin.scaled(width, height, Qt::KeepAspectRatio);
 }
 
-shared_qobject_ptr<AuthFlow> MinecraftAccount::login(bool useDeviceCode)
+shared_qobject_ptr<AuthFlow> MinecraftAccount::login(const AuthContext& context, bool useDeviceCode)
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new AuthFlow(&data, useDeviceCode ? AuthFlow::Action::DeviceCode : AuthFlow::Action::Login));
+    m_currentTask.reset(new AuthFlow(&data, context, useDeviceCode ? AuthFlow::Action::DeviceCode : AuthFlow::Action::Login));
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
     connect(m_currentTask.get(), &Task::aborted, this, [this] { authFailed(tr("Aborted")); });
@@ -125,13 +125,13 @@ shared_qobject_ptr<AuthFlow> MinecraftAccount::login(bool useDeviceCode)
     return m_currentTask;
 }
 
-shared_qobject_ptr<AuthFlow> MinecraftAccount::refresh()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::refresh(const AuthContext& context)
 {
     if (m_currentTask) {
         return m_currentTask;
     }
 
-    m_currentTask.reset(new AuthFlow(&data, AuthFlow::Action::Refresh));
+    m_currentTask.reset(new AuthFlow(&data, context, AuthFlow::Action::Refresh));
 
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);

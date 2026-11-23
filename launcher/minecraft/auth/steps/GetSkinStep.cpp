@@ -3,9 +3,9 @@
 
 #include <QNetworkRequest>
 
-#include "Application.h"
+#include "services/NetworkContext.h"
 
-GetSkinStep::GetSkinStep(AccountData* data) : AuthStep(data) {}
+GetSkinStep::GetSkinStep(AccountData* data, NetworkContext* network) : AuthStep(data, network) {}
 
 QString GetSkinStep::describe()
 {
@@ -20,7 +20,7 @@ void GetSkinStep::perform()
     m_request = request;
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("GetSkinStep", APPLICATION->network()));
+    m_task.reset(new NetJob("GetSkinStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 

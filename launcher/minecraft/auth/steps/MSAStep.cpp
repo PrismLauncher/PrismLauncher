@@ -41,15 +41,18 @@
 #include <QOAuthHttpServerReplyHandler>
 #include <QOAuthOobReplyHandler>
 
-#include "Application.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
+#include "minecraft/auth/AuthContext.h"
+#include "services/NetworkContext.h"
 
+#include <QCoreApplication>
+#include <QDebug>
 #include <QProcess>
 #include <QSettings>
 #include <QStandardPaths>
 
-bool isSchemeHandlerRegistered()
+bool isSchemeHandlerRegistered([[maybe_unused]] const QString& desktopFileName)
 {
 #ifdef Q_OS_LINUX
     QProcess process;
@@ -57,7 +60,7 @@ bool isSchemeHandlerRegistered()
     process.waitForFinished();
     QString output = process.readAllStandardOutput().trimmed();
 
-    return output.contains(APPLICATION->desktopFileName());
+    return output.contains(desktopFileName);
 
 #elif defined(Q_OS_WIN)
     QString regPath = QString("HKEY_CURRENT_USER\\Software\\Classes\\%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
@@ -73,13 +76,9 @@ class CustomOAuthOobReplyHandler : public QOAuthOobReplyHandler {
     Q_OBJECT
 
    public:
-    explicit CustomOAuthOobReplyHandler(QObject* parent = nullptr) : QOAuthOobReplyHandler(parent)
+    CustomOAuthOobReplyHandler(OAuthCallbackRelay* relay, QObject* parent) : QOAuthOobReplyHandler(parent)
     {
-        connect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
-    }
-    ~CustomOAuthOobReplyHandler() override
-    {
-        disconnect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
+        connect(relay, &OAuthCallbackRelay::replyReceived, this, &QOAuthOobReplyHandler::callbackReceived);
     }
     QString callback() const override { return BuildConfig.LAUNCHER_APP_BINARY_NAME + "://oauth/microsoft"; }
 
@@ -111,12 +110,11 @@ class LoggingOAuthHttpServerReplyHandler final : public QOAuthHttpServerReplyHan
     }
 };
 
-MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
+MSAStep::MSAStep(AccountData* data, const AuthContext& context, bool silent)
+    : AuthStep(data, context.network), m_silent(silent), m_clientId(context.msaClientId())
 {
-    m_clientId = APPLICATION->getMSAClientID();
-    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || APPLICATION->isPortable() || !isSchemeHandlerRegistered())
-
-    {
+    if (context.oauthCallbacks == nullptr || QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || context.portable ||
+        !isSchemeHandlerRegistered(context.desktopFileName)) {
         auto replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
         replyHandler->setCallbackText(QString(R"XXX(
     <noscript>
@@ -130,13 +128,13 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
                                           .arg(BuildConfig.LOGIN_CALLBACK_URL));
         m_oauth2.setReplyHandler(replyHandler);
     } else {
-        m_oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(this));
+        m_oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(context.oauthCallbacks, this));
     }
     m_oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
     m_oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
     m_oauth2.setScope("XboxLive.SignIn XboxLive.offline_access");
     m_oauth2.setClientIdentifier(m_clientId);
-    m_oauth2.setNetworkAccessManager(APPLICATION->network());
+    m_oauth2.setNetworkAccessManager(m_network->qnam());
 
     connect(&m_oauth2, &QOAuth2AuthorizationCodeFlow::granted, this, [this] {
         m_data->msaClientID = m_oauth2.clientIdentifier();

@@ -58,9 +58,8 @@
 #include "net/ChecksumValidator.h"
 #include "net/MetaCacheSink.h"
 #include "settings/SettingsObject.h"
-#else
-#include "BuildConfig.h"
 #endif
+#include "BuildConfig.h"
 #include "net/ByteArraySink.h"
 #include "net/FileSink.h"
 #include "net/Logging.h"
@@ -122,15 +121,17 @@ void Request::executeTask()
 {
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
-    if (m_network == nullptr) {
 #ifdef LAUNCHER_APPLICATION
-        m_network = APPLICATION->network();
-#else
+    auto* app = APPLICATION_DYN;
+    if (m_network == nullptr && app != nullptr) {
+        m_network = app->network();
+    }
+#endif
+    if (m_network == nullptr) {
         qCCritical(m_logCat) << getUid().toString() << "No network manager set for request:" << m_url.toString();
         emit failed("No network manager set for request");
         emit finished();
         return;
-#endif
     }
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(m_logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
@@ -160,10 +161,11 @@ void Request::executeTask()
             return;
     }
 
+    QString userAgent = BuildConfig.USER_AGENT;
 #ifdef LAUNCHER_APPLICATION
-    auto userAgent = APPLICATION->getUserAgent();
-#else
-    auto userAgent = BuildConfig.USER_AGENT;
+    if (app != nullptr) {
+        userAgent = app->getUserAgent();
+    }
 #endif
     request.setHeader(QNetworkRequest::UserAgentHeader, userAgent.toUtf8());
     for (auto& headerProxy : m_headerProxies) {
@@ -171,7 +173,11 @@ void Request::executeTask()
     }
 
 #ifdef LAUNCHER_APPLICATION
-    request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
+    if (app != nullptr) {
+        request.setTransferTimeout(app->settings()->get("RequestTimeout").toInt() * 1000);
+    } else {
+        request.setTransferTimeout();
+    }
 #else
     request.setTransferTimeout();
 #endif

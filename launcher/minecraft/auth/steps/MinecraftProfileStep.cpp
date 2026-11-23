@@ -2,12 +2,12 @@
 
 #include <QNetworkRequest>
 
-#include "Application.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
+#include "services/NetworkContext.h"
 
-MinecraftProfileStep::MinecraftProfileStep(AccountData* data) : AuthStep(data) {}
+MinecraftProfileStep::MinecraftProfileStep(AccountData* data, NetworkContext* network) : AuthStep(data, network) {}
 
 QString MinecraftProfileStep::describe()
 {
@@ -26,7 +26,7 @@ void MinecraftProfileStep::perform()
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("MinecraftProfileStep", APPLICATION->network()));
+    m_task.reset(new NetJob("MinecraftProfileStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 

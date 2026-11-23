@@ -55,7 +55,7 @@
 
 enum AccountListVersion { MojangMSA = 3 };
 
-AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)
+AccountList::AccountList(AuthContext authContext, QObject* parent) : QAbstractListModel(parent), m_authContext(std::move(authContext))
 {
     m_refreshTimer = new QTimer(this);
     m_refreshTimer->setSingleShot(true);
@@ -661,7 +661,7 @@ void AccountList::tryNext()
                              << accountId << "(no longer needs refresh)";
                     break;
                 }
-                m_currentTask = account->refresh();
+                m_currentTask = account->refresh(m_authContext);
                 if (m_currentTask) {
                     connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
                     connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);

@@ -9,7 +9,7 @@ class GetSkinStep : public AuthStep {
     Q_OBJECT
 
    public:
-    explicit GetSkinStep(AccountData* data);
+    GetSkinStep(AccountData* data, NetworkContext* network);
     virtual ~GetSkinStep() noexcept = default;
 
     void perform() override;

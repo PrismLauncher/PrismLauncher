@@ -2,12 +2,12 @@
 
 #include <QNetworkRequest>
 
-#include "Application.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/RawHeaderProxy.h"
+#include "services/NetworkContext.h"
 
-XboxUserStep::XboxUserStep(AccountData* data) : AuthStep(data) {}
+XboxUserStep::XboxUserStep(AccountData* data, NetworkContext* network) : AuthStep(data, network) {}
 
 QString XboxUserStep::describe()
 {
@@ -42,7 +42,7 @@ void XboxUserStep::perform()
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("XboxUserStep", APPLICATION->network()));
+    m_task.reset(new NetJob("XboxUserStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 

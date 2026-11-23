@@ -6,15 +6,15 @@
 #include <QUuid>
 #include <memory>
 
-#include "Application.h"
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/Request.h"
 #include "net/NetJob.h"
 #include "net/RawHeaderProxy.h"
+#include "services/NetworkContext.h"
 #include "tasks/Task.h"
 
-EntitlementsStep::EntitlementsStep(AccountData* data) : AuthStep(data) {}
+EntitlementsStep::EntitlementsStep(AccountData* data, NetworkContext* network) : AuthStep(data, network) {}
 
 QString EntitlementsStep::describe()
 {
@@ -35,7 +35,7 @@ void EntitlementsStep::perform()
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));
     m_request->enableAutoRetry(true);
 
-    m_task.reset(new NetJob("EntitlementsStep", APPLICATION->network()));
+    m_task.reset(new NetJob("EntitlementsStep", m_network->qnam()));
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 

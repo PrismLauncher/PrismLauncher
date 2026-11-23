@@ -9,7 +9,7 @@ class LauncherLoginStep : public AuthStep {
     Q_OBJECT
 
    public:
-    explicit LauncherLoginStep(AccountData* data);
+    LauncherLoginStep(AccountData* data, NetworkContext* network);
     virtual ~LauncherLoginStep() noexcept = default;
 
     void perform() override;

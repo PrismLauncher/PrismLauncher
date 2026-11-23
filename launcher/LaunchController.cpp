@@ -160,7 +160,7 @@ LaunchDecision LaunchController::decideLaunchMode()
     const bool needsRefresh =
         m_wantedLaunchMode == LaunchMode::Normal && (state == AccountState::Offline || accountToCheck->shouldRefresh());
     if (state == AccountState::Unchecked || state == AccountState::Errored || needsRefresh) {
-        accountToCheck->refresh();
+        accountToCheck->refresh(APPLICATION->authContext());
         state = AccountState::Working;
     }
 

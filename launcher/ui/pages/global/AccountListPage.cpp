@@ -154,7 +154,7 @@ void AccountListPage::on_actionAddOffline_triggered()
     }
 
     if (const MinecraftAccountPtr account = MinecraftAccount::createOffline(dialog.getUsername())) {
-        account->login()->start();  // The task will complete here.
+        account->login(APPLICATION->authContext())->start();  // The task will complete here.
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
             m_accounts->setDefaultAccount(account);

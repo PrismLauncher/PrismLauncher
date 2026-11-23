@@ -220,6 +220,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/Parsers.cpp
     minecraft/auth/Parsers.h
 
+    minecraft/auth/AuthContext.cpp
+    minecraft/auth/AuthContext.h
     minecraft/auth/AuthFlow.cpp
     minecraft/auth/AuthFlow.h
 

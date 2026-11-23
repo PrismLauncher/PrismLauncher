@@ -6,6 +6,7 @@
 #include <QSet>
 
 #include "minecraft/auth/AccountData.h"
+#include "minecraft/auth/AuthContext.h"
 #include "minecraft/auth/AuthStep.h"
 #include "tasks/Task.h"
 
@@ -15,7 +16,7 @@ class AuthFlow : public Task {
    public:
     enum class Action { Refresh, Login, DeviceCode };
 
-    explicit AuthFlow(AccountData* data, Action action = Action::Refresh);
+    AuthFlow(AccountData* data, const AuthContext& context, Action action = Action::Refresh);
     virtual ~AuthFlow() = default;
 
     void executeTask() override;
