@@ -400,7 +400,41 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
     }
     else {
+        parser.addOptions(
+        { { { "l", "launch" }, "(Legacy. Use launch command instead.) Launch the specified instance (by instance ID)", "instance" },
+          { { "s", "server" }, "(Legacy. Use launch command instead.) Join the specified server on launch (only valid in combination with --launch)", "address" },
+          { { "w", "world" }, "(Legacy. Use launch command instead.) Join the specified world on launch (only valid in combination with --launch)", "world" },
+          { { "a", "profile" }, "(Legacy. Use launch command instead.) Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
+          { { "o", "offline" }, "(Legacy. Use launch command instead.) Launch offline, with given player name (only valid in combination with --launch)", "offline" },
+          { { "I", "import" }, "(Legacy. Use import command instead.) Import instance or resource from specified local path or URL", "url" }, });
+        parser.addPositionalArgument("URL", "(Legacy. Use import command instead.) Import the resource(s) at the given URL(s) (same as -I / --import)", "");
+
         parser.process(arguments());
+
+        m_instanceIdToLaunch = parser.value("launch");
+        m_serverToJoin = parser.value("server");
+        m_worldToJoin = parser.value("world");
+        m_profileToUse = parser.value("profile");
+        if (parser.isSet("offline")) {
+            m_launchOffline = true;
+            m_offlineName = parser.value("offline");
+        }
+
+        if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
+        m_instanceIdToLaunch.isEmpty()) {
+            std::cerr << "--server, --profile and --offline can only be used in combination with --launch!\n";
+            m_status = Failed;
+            return;
+        }
+
+        for (const auto& url : parser.values("import")) {
+            m_urlsToImport.append(normalizeImportUrl(url));
+        }
+
+        // treat unspecified positional arguments as import urls
+        for (const auto& url : parser.positionalArguments()) {
+            m_urlsToImport.append(normalizeImportUrl(url));
+        }
     }
 
     m_liveCheck = parser.isSet("alive");
