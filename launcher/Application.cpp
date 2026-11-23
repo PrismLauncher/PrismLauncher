@@ -355,7 +355,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     });
 
     parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
-    parser.addPositionalArgument("command", "The command to execute");
+    parser.addPositionalArgument("command", "The command to execute. Commands: launch, import", "<launch|import>");
 
     parser.parse(arguments());
 
@@ -364,8 +364,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     if (command == "launch") {
         parser.clearPositionalArguments();
-        parser.addPositionalArgument("launch", "Launch the specified instance");
-        parser.addPositionalArgument("instance", "Instance ID to launch");
+        parser.addPositionalArgument("launch", "Launch the specified instance", "launch <instance ID>");
         parser.addOptions(
             { { { "s", "server" }, "Join the specified server on launch", "address" },
             { { "w", "world" }, "Join the specified world on launch", "world" },
@@ -390,7 +389,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
     else if (command == "import") {
         parser.clearPositionalArguments();
-        parser.addPositionalArgument("import", "Import instance or resource from specified local path or URL(s)");
+        parser.addPositionalArgument("import", "Import instance or resource from specified local path or URL(s)", "import [urls]");
 
         parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
         parser.process(arguments());
@@ -407,7 +406,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "a", "profile" }, "(Legacy. Use launch command instead.) Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
           { { "o", "offline" }, "(Legacy. Use launch command instead.) Launch offline, with given player name (only valid in combination with --launch)", "offline" },
           { { "I", "import" }, "(Legacy. Use import command instead.) Import instance or resource from specified local path or URL", "url" }, });
-        parser.addPositionalArgument("URL", "(Legacy. Use import command instead.) Import the resource(s) at the given URL(s) (same as -I / --import)", "");
+        parser.addPositionalArgument("URL", "(Legacy. Use import command instead.) Import the resource(s) at the given URL(s) (same as -I / --import)", " ");
 
         parser.process(arguments());
 
