@@ -46,12 +46,10 @@
 #include <utility>
 
 #include "../Version.h"
-#include "Result.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "net/NetJob.h"
 #include "net/RPCSink.h"
-#include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -65,13 +63,6 @@ class ResourceAPI {
         QString name;
         // The human-readable name of the sorting, used for display in the UI.
         QString readableName;
-    };
-
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> onSucceed;
-        std::function<void(const QString& reason, int networkErrorCode)> onFail;
-        std::function<void()> onAbort;
     };
 
     struct SearchArgs {
@@ -97,48 +88,34 @@ class ResourceAPI {
         bool includeChangelog{};
     };
 
-    struct DependencySearchArgs {
-        ModPlatform::Dependency dependency;
-        Version mcVersion;
-        ModPlatform::ModLoaderTypes loader;
-        bool includeChangelog{};
-    };
-
    public:
     /** Gets a list of available sorting methods for this API. */
     virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
 
-    virtual std::pair<Task::Ptr, QByteArray*> getProjects(QStringList addonIds) const = 0;
-
-    Task::Ptr getProjectVersions(const VersionSearchArgs& args, const Callback<QVector<ModPlatform::IndexedVersion>>& callbacks) const;
-    virtual Task::Ptr getDependencyVersion(const DependencySearchArgs&, const Callback<ModPlatform::IndexedVersion>&) const;
-
-   public slots:
-
     virtual Net::RPC::Spec<ModPlatform::IndexedPack> getProject(const QString& id) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> getProjects(const QStringList& addonIds) const = 0;
     virtual std::optional<Net::RPC::Spec<bool>> getProjectExtra(ModPlatform::IndexedPack& /*pack*/) const { return {}; }
     virtual Net::RPC::Spec<QList<ModPlatform::IndexedPack>> searchProjects(const SearchArgs& args) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::Category>> getCategories(ModPlatform::ResourceType type) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const VersionSearchArgs& args) const = 0;
+    virtual Net::RPC::Spec<QList<ModPlatform::IndexedVersion>> getVersions(const QStringList& versionIds) const = 0;
+    virtual Net::RPC::Spec<ModPlatform::IndexedVersion> getVersion(const QString& id, const QString& versionId) const = 0;
 
     // helpers to omit the netJob stuff
     std::pair<NetJob::Ptr, ModPlatform::IndexedPack*> getProjectTask(const QString& addonId,
                                                                      bool loadExtra = false,
                                                                      bool askRetry = true) const;
     std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> searchProjectsTask(const SearchArgs& args) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::IndexedPack>*> getProjectsTask(const QStringList& addonIds) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::Category>*> getCategoriesTask(ModPlatform::ResourceType type) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> getVersionsTask(const VersionSearchArgs& args) const;
+    std::pair<NetJob::Ptr, QList<ModPlatform::IndexedVersion>*> getVersionsTask(const QStringList& versionIds) const;
+    std::pair<NetJob::Ptr, ModPlatform::IndexedVersion*> getVersionTask(const QString& id, const QString& versionId) const;
 
    protected:
     ~ResourceAPI() = default;
 
     virtual QString debugName() const { return "External resource API"; }
-
-   public:
-    virtual auto getVersionsURL(const VersionSearchArgs& args) const -> std::optional<QString> = 0;
-    virtual auto getDependencyURL(const DependencySearchArgs& args) const -> std::optional<QString> = 0;
-
-    virtual Result<ModPlatform::IndexedVersion> loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
-
-    virtual std::pair<Task::Ptr, QByteArray*> getModCategories() const = 0;
-
-    virtual QList<ModPlatform::Category> loadModCategories(const QByteArray& response) const = 0;
 };

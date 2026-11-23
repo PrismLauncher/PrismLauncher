@@ -22,9 +22,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
-#include "Json.h"
 #include "QObjectPtr.h"
-#include "Result.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -221,15 +219,8 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         tasks->addTask(getProjectInfoTask(pDep));
     }
 
-    ResourceAPI::DependencySearchArgs args = {
-        .dependency = dep, .mcVersion = m_version, .loader = m_loaderType, .includeChangelog = true
-    };
-    ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
-    callbacks.onFail = [](const QString& reason, int) {
-        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
-    };
-    callbacks.onSucceed = [dep, provider, pDep, level, this](auto& pack) {
-        pDep->version = pack;
+    auto handleVersion = [dep, provider, pDep, level, this](const ModPlatform::IndexedVersion& response) {
+        pDep->version = response;
         if (!pDep->version.addonId.isValid()) {
             if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
                 auto overide = ModPlatform::getOverrideDeps();
@@ -273,10 +264,35 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         }
     };
 
-    auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
-    if (auto* netJob = dynamic_cast<NetJob*>(version.get())) {
-        netJob->setAskRetry(false);
+    if (!dep.version.isEmpty()) {
+        auto [version, response] = getAPI(provider)->getVersionTask(dep.addonId.toString(), dep.version);
+        version->setAskRetry(false);
+        connect(version.get(), &NetJob::succeeded, this, [response, handleVersion]() { handleVersion(*response); });
+        connect(version.get(), &NetJob::failed, this, [this, version, pDep](const QString& reason) {
+            qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
+            removePack(pDep->pack->addonId);
+            m_failed.remove(version.get());
+        });
+        tasks->addTask(version);
+        return tasks;
     }
+    auto packDep = std::make_shared<ModPlatform::IndexedPack>();
+    packDep->addonId = dep.addonId;
+    ResourceAPI::VersionSearchArgs args = {
+        .pack = packDep,
+        .mcVersions = { { m_version } },
+        .loaders = m_loaderType,
+        .includeChangelog = true,
+    };
+
+    auto [version, response] = getAPI(provider)->getVersionsTask(args);
+    version->setAskRetry(false);
+    connect(version.get(), &NetJob::succeeded, this, [this, response, handleVersion]() {
+        auto it = std::ranges::find_if(*response,
+                                       [this](const ModPlatform::IndexedVersion& v) { return !v.loaders || (m_loaderType & v.loaders); });
+        handleVersion(it != response->end() ? *it : ModPlatform::IndexedVersion());
+    });
+
     QObject::connect(version.get(), &NetJob::failed, this, [this, pDep] {
         logWarning(tr("Failed to resolve dependency %1, it will not be installed. The mod may not work correctly without it.")
                        .arg(pDep->pack->addonId.toString()));
