@@ -88,6 +88,10 @@ ImportantClass importantClassInstance;
 
 If you see any names which do not follow these conventions, it is preferred that you leave them be - renames increase the number of changes therefore make reviewing harder and make your PR more prone to conflicts. However, if you're refactoring a whole class anyway, it's fine.
 
+## Write a good commit message
+
+The commit message should follow the [Conventional Commits specification](https://www.conventionalcommits.org).
+
 ## Signing your work
 
 In an effort to ensure that the code you contribute is actually compatible with the licenses in this codebase, we require you to sign-off all your contributions.
