@@ -406,7 +406,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             { { "i", "include" }, "Treat paths as a list of paths to include instead of exclude" },
             { { "x", "no-exclude-defaults"}, "Don't automatically exclude logs, crash-reports, .cache, .fabric, .quilt, .DS_Store, and thumbs.db"},
             { { "n", "name" }, "Set name of the exported pack (only for curseforgezip and mrpack formats)", "name" },
-            { { "e", "export-version" }, "Set version of the exported pack (only for curseforgezip and mrpack formats)", "version"},
+            { { "e", "export-version" }, "Set version of the exported pack (only for curseforgezip and mrpack formats - required for mrpack)", "version"},
             { { "p", "optional" }, "Mark excluded paths as optional (only for curseforgezip and mrpack formats)" },
             { { "a", "author" }, "Set author of the exported pack (only for curseforgezip format)", "author" },
             { { "m", "memory" }, "Set recommended memory of the exported pack, in MiB (only for curseforgezip format)", "memory" },
@@ -1571,7 +1571,12 @@ void Application::performMainStartupAction()
     if (!m_instanceIdToExport.isEmpty()) {
         qDebug() << "<> Exporting instance id:" << m_instanceIdToExport;
         if (m_exportFormat == "prismzip") {
-            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths, m_exportOutputPath, m_exportNoExcludeDefaults);
+            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths,
+                                         m_exportOutputPath, m_exportNoExcludeDefaults);
+        } else if (m_exportFormat == "mrpack") {
+            m_mainWindow->exportMrpack(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths,
+                                       m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName, m_exportVersion, m_exportMarkAsOptional,
+                                       m_exportSummary);
         }
     }
 }

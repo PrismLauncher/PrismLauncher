@@ -139,6 +139,7 @@
 
 #include "MMCTime.h"
 #include "archive/ExportToZipTask.h"
+#include "modplatform/modrinth/ModrinthPackExportTask.h"
 
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
@@ -1872,8 +1873,32 @@ void MainWindow::handleInstanceRename(const QString& before, const QString& afte
         APPLICATION->instances()->setInstanceGroup(newID, origGroup);
     }
 }
+bool MainWindow::filterInstanceFileAgainstBlockList(const QFileInfo& fileInfo, bool include, const QStringList& excludePaths, const QString& fileRoot, bool noExcludeDefaults)
+{
+    const QString pathInInstance = fileInfo.absoluteFilePath().remove(fileRoot);
+    if (!noExcludeDefaults) {
+        const QStringList ignoreNames = { ".DS_Store", "thumbs.db", "Thumbs.db" };
+        if (ignoreNames.contains(fileInfo.fileName())) {
+            return true;
+        }
+        const QStringList ignorePaths = { "logs", "crash-reports", ".cache", ".fabric", ".quilt" };
+        for (const auto& path : ignorePaths) {
+            if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
+                return true;
+            }
+        }
+    }
 
-void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults)
+    for (const auto& path : excludePaths) {
+        if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
+            return true ^ include;
+        }
+    }
+
+    return false ^ include;
+}
+
+void MainWindow::exportPrismZip(const BaseInstance* instance, const QStringList& excludePaths, const bool include, QString output, const bool noExcludeDefaults)
 {
     const auto name = FS::RemoveInvalidFilenameChars(instance->name());
 
@@ -1937,28 +1962,7 @@ void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& exclu
 
     const auto prefix = instance->instanceRoot();
     const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
-        qDebug() << "Passed in file: " << fileInfo.filePath();
-        const QString pathInInstance = fileInfo.absoluteFilePath().remove(prefix);
-        if (!noExcludeDefaults) {
-            const QStringList ignoreNames = { ".DS_Store", "thumbs.db", "Thumbs.db" };
-            if (ignoreNames.contains(fileInfo.fileName())) {
-                return true;
-            }
-            const QStringList ignorePaths = { "logs", "crash-reports", ".cache", ".fabric", ".quilt" };
-            for (const auto& path : ignorePaths) {
-                if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
-                    return true;
-                }
-            }
-        }
-
-        for (const auto& path : finalExcludePaths) {
-            if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
-                return true ^ include;
-            }
-        }
-
-        return false ^ include;
+        return filterInstanceFileAgainstBlockList(fileInfo, include, finalExcludePaths, prefix, noExcludeDefaults);
     };
     if (!MMCZip::collectFileListRecursively(instance->instanceRoot(), nullptr, &files, filterFunction)) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
@@ -1974,4 +1978,84 @@ void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& exclu
     ProgressDialog progress(this);
     progress.showSkipButton();
     progress.execWithTask(task.get());
+}
+void MainWindow::exportMrpack(MinecraftInstance* instance,
+                              const QStringList& excludePaths,
+                              const bool include,
+                              QString output,
+                              const bool noExcludeDefaults,
+                              QString name,
+                              QString version,
+                              const bool optional,
+                              QString summary)
+{
+    auto* settings = instance->settings();
+    if (!name.isEmpty()) {
+        settings->set("ExportName", name);
+    } else {
+        name = settings->get("ExportName").toString();
+    }
+    if (!version.isEmpty()) {
+        settings->set("ExportVersion", version);
+    } else {
+        version = settings->get("ExportVersion").toString();
+        if (version.isEmpty()) {
+            QMessageBox::warning(this, tr("Error"), tr("Mrpack exports require a version to be set."));
+            return;
+        }
+    }
+    settings->set("ExportOptionalFiles", optional);
+    if (!summary.isEmpty()) {
+        settings->set("ExportSummary", summary);
+    } else {
+        summary = settings->get("ExportSummary").toString();
+    }
+
+    const QString filename = FS::RemoveInvalidFilenameChars(name.isEmpty() ? instance->name() : name);
+
+    if (output.isEmpty()) {
+        output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
+                                          tr("Modrinth pack") + " (*.mrpack *.zip)", nullptr);
+    }
+    if (output.isEmpty()) {
+        return;
+    }
+    if (!(output.endsWith(".zip") || output.endsWith(".mrpack"))) {
+        output.append(".mrpack");
+    }
+
+    QStringList finalExcludePaths;
+    for (const auto& path : excludePaths) {
+        QString finalPath = QDir::cleanPath(path);
+        if (!finalPath.startsWith('/')) {
+            finalPath.prepend('/');
+        }
+        if (!finalPath.endsWith('/')) {
+            finalPath.append('/');
+        }
+        finalExcludePaths.append(finalPath);
+    }
+    QStringList strippedPaths;
+    for (const auto& path : finalExcludePaths) {
+        strippedPaths.append(path.sliced(1, path.length() - 2));
+    }
+    const auto ignoreData = strippedPaths.join('\n').toUtf8();
+    const auto res = FS::write(FS::PathCombine(instance->instanceRoot(), ".packignore"), ignoreData);
+    if (!res) {
+        qWarning() << res.error();
+    }
+
+    const auto prefix = instance->instanceRoot();
+    const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
+        return filterInstanceFileAgainstBlockList(fileInfo, include, finalExcludePaths, prefix, noExcludeDefaults);
+    };
+
+    Task* task = new ModrinthPackExportTask(name, version, summary, optional, instance, output, filterFunction);
+    connect(task, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task, &Task::finished, task, &Task::deleteLater);
+
+    ProgressDialog progress(this);
+    progress.showSkipButton();
+    progress.execWithTask(task);
 }
