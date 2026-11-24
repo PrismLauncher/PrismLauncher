@@ -10,6 +10,22 @@ Our team believes a fundamental part of this is **valuable, human engagement**. 
 
 With this in mind, our team have come to the decision that **any** contribution - be it an issue report, pull request, etc. - which is created by, documented by, or otherwise aided by AI/LLM usage **in any way** will typically be **closed and locked without further discussion**. Similarly, the team may also take action against contributions deemed to be "low-effort" - such as unverified bug reports, large and untested pull requests, or using AI-generated content in your interactions with others.
 
+## Before committing
+
+Announce large changes in advance: when you plan to make changes which affect a lot of files, announce them in advance on Discord.
+
+Respect other developers' code: don't change code style just because you don't like it. Solve real problems; don't just re-arrange the code.
+
+Don't mix formatting changes with code changes: split these into separate commits.
+
+Test your changes before committing: make sure the changes compile, have the effect you're expecting, and don't regress anything else. Run unit tests with the ctest command.
+
+Don't commit code you don't understand: avoid things like "I don't know why it crashes, but when I do this, it doesn't crash anymore." Understand your changes. If you can't find a solution to a problem that you understand, discuss it with other developers.
+
+Commit atomic changesets: every bugfix, feature, refactoring, or reformatting should go into its own commit. This improves the readability of the history, makes it easier to port changes between branches, and makes it easier to find faulty commits using git bisect.
+
+Double-check before committing: do a final git pull --rebase to keep your checkout up to date. Invoke git diff before committing. Take messages from git about conflicts, unknown files, etc. seriously.
+
 ## Code style
 
 All files are formatted with `clang-format` using the configuration in `.clang-format`. Ensure it is run on changed files before committing!
