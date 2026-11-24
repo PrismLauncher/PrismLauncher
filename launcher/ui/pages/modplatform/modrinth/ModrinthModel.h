@@ -116,7 +116,5 @@ class ModpackListModel : public QAbstractListModel {
 
     std::shared_ptr<QByteArray> m_allResponse = std::make_shared<QByteArray>();
     QByteArray m_specificResponse;
-
-    int m_modpacksPerPage = 20;
 };
 }  // namespace Modrinth
