@@ -404,6 +404,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             { { "f", "format" }, "Format to export as. Options: prismzip (default), curseforgezip, mrpack", "format", "prismzip" },
             { { "o", "output" }, "Location to output exported instance to. If unset, opens file picker dialog.", "path" },
             { { "i", "include" }, "Treat paths as a list of paths to include instead of exclude" },
+            { { "x", "no-exclude-defaults"}, "Don't automatically exclude logs, crash-reports, .cache, .fabric, .quilt, .DS_Store, and thumbs.db"},
             { { "n", "name" }, "Set name of the exported pack (only for curseforgezip and mrpack formats)", "name" },
             { { "e", "export-version" }, "Set version of the exported pack (only for curseforgezip and mrpack formats)", "version"},
             { { "p", "optional" }, "Mark excluded paths as optional (only for curseforgezip and mrpack formats)" },
@@ -429,6 +430,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         m_exportOutputPath = parser.value("output");
         m_exportIncludePaths = parser.isSet("include");
+        m_exportNoExcludeDefaults = parser.isSet("no-exclude-defaults");
         m_exportName = parser.value("name");
         m_exportVersion = parser.value("export-version");
         m_exportMarkAsOptional = parser.isSet("optional");
@@ -1569,7 +1571,7 @@ void Application::performMainStartupAction()
     if (!m_instanceIdToExport.isEmpty()) {
         qDebug() << "<> Exporting instance id:" << m_instanceIdToExport;
         if (m_exportFormat == "prismzip") {
-            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths, m_exportOutputPath);
+            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths, m_exportOutputPath, m_exportNoExcludeDefaults);
         }
     }
 }

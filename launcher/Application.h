@@ -302,6 +302,7 @@ class Application : public QApplication {
     QString m_exportFormat;
     QString m_exportOutputPath;
     bool m_exportIncludePaths;
+    bool m_exportNoExcludeDefaults;
     QString m_exportName;
     QString m_exportVersion;
     bool m_exportMarkAsOptional;

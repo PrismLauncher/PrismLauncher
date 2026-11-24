@@ -79,7 +79,7 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
-    void exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include, QString outputPath);
+    void exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults);
    signals:
     void isClosing();
 

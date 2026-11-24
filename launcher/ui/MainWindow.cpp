@@ -1873,7 +1873,7 @@ void MainWindow::handleInstanceRename(const QString& before, const QString& afte
     }
 }
 
-void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include, QString output)
+void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults)
 {
     const auto name = FS::RemoveInvalidFilenameChars(instance->name());
 
@@ -1914,13 +1914,51 @@ void MainWindow::exportPrismZip(const BaseInstance* instance, QStringList& exclu
     }
 
     auto files = QFileInfoList();
-    const auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
-    const auto filterFunction = [](const QFileInfo& fileInfo) -> bool {
-        // Ignore paths: "logs", "crash-reports", ".cache", ".fabric", ".quilt"
-        // Ignore names: ".DS_Store", "thumbs.db", "Thumbs.db"
-        // Load from .packignore (capture variable)
+    QStringList finalExcludePaths;
+    for (const auto& path : excludePaths) {
+        QString finalPath = QDir::cleanPath(path);
+        if (!finalPath.startsWith('/')) {
+            finalPath.prepend('/');
+        }
+        if (!finalPath.endsWith('/')) {
+            finalPath.append('/');
+        }
+        finalExcludePaths.append(finalPath);
+    }
+    QStringList strippedPaths;
+    for (const auto& path : finalExcludePaths) {
+        strippedPaths.append(path.sliced(1, path.length() - 2));
+    }
+    const auto ignoreData = strippedPaths.join('\n').toUtf8();
+    const auto res = FS::write(FS::PathCombine(instance->instanceRoot(), ".packignore"), ignoreData);
+    if (!res) {
+        qWarning() << res.error();
+    }
 
-        return false;
+    const auto prefix = instance->instanceRoot();
+    const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
+        qDebug() << "Passed in file: " << fileInfo.filePath();
+        const QString pathInInstance = fileInfo.absoluteFilePath().remove(prefix);
+        if (!noExcludeDefaults) {
+            const QStringList ignoreNames = { ".DS_Store", "thumbs.db", "Thumbs.db" };
+            if (ignoreNames.contains(fileInfo.fileName())) {
+                return true;
+            }
+            const QStringList ignorePaths = { "logs", "crash-reports", ".cache", ".fabric", ".quilt" };
+            for (const auto& path : ignorePaths) {
+                if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
+                    return true;
+                }
+            }
+        }
+
+        for (const auto& path : finalExcludePaths) {
+            if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
+                return true ^ include;
+            }
+        }
+
+        return false ^ include;
     };
     if (!MMCZip::collectFileListRecursively(instance->instanceRoot(), nullptr, &files, filterFunction)) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
