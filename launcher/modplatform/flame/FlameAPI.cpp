@@ -269,7 +269,7 @@ QUrl FlameAPI::searchProjectsURL(const SearchArgs& args)
     QStringList getArguments;
     getArguments.append(QString("classId=%1").arg(getClassId(args.type)));
     getArguments.append(QString("index=%1").arg(args.offset));
-    getArguments.append("pageSize=25");
+    getArguments.append(QString("pageSize=%1").arg(ResourceAPI::SearchPageSize));
     if (args.search.has_value()) {
         getArguments.append(QString("searchFilter=%1").arg(args.search.value()));
     }
