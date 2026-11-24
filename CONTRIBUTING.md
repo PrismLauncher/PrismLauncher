@@ -26,6 +26,16 @@ Commit atomic changesets: every bugfix, feature, refactoring, or reformatting sh
 
 Double-check before committing: do a final git pull --rebase to keep your checkout up to date. Invoke git diff before committing. Take messages from git about conflicts, unknown files, etc. seriously.
 
+## Know what you commit
+
+You're responsible for what you commit. When you make a merge request, it's your code, even if it originates from the internet, an LLM, a friend, or your pet lizard.
+
+This means that the responsibility is on you and only you to you understand exactly what you're committing and why, since you're the one adding it to the codebase.
+
+You should be able to answer all questions about the code you're submitting, and be willing to find out any answers you don't know.
+
+Don't be afraid to ask for help!
+
 ## Code style
 
 All files are formatted with `clang-format` using the configuration in `.clang-format`. Ensure it is run on changed files before committing!
