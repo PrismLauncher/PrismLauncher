@@ -327,10 +327,10 @@ void ModpackListModel::searchRequestFinished(const QList<ModPlatform::IndexedPac
 {
     m_jobPtr.reset();
 
-    if (newList.size() < m_modpacksPerPage) {
+    if (newList.size() < ResourceAPI::SearchPageSize) {
         m_searchState = Finished;
     } else {
-        m_nextSearchOffset += m_modpacksPerPage;
+        m_nextSearchOffset += ResourceAPI::SearchPageSize;
         m_searchState = CanPossiblyFetchMore;
     }
 

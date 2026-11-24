@@ -56,6 +56,8 @@
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
    public:
+    static constexpr int SearchPageSize = 25;
+
     struct SortingMethod {
         // The index of the sorting method. Used to allow for arbitrary ordering in the list of methods.
         // Used by Flame in the API request.
