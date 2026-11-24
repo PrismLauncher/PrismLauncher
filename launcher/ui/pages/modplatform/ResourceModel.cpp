@@ -452,10 +452,10 @@ void ResourceModel::searchRequestSucceeded(const QList<ModPlatform::IndexedPack>
         }
     }
 
-    if (newList.size() < 25) {
+    if (newList.size() < ResourceAPI::SearchPageSize) {
         m_searchState = SearchState::Finished;
     } else {
-        m_nextSearchOffset += 25;
+        m_nextSearchOffset += ResourceAPI::SearchPageSize;
         m_searchState = SearchState::CanFetchMore;
     }
 
