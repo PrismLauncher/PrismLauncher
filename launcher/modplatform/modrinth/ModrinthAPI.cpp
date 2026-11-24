@@ -343,7 +343,7 @@ QUrl ModrinthAPI::searchProjectsURL(const SearchArgs& args)
 {
     QStringList getArguments;
     getArguments.append(QString("offset=%1").arg(args.offset));
-    getArguments.append(QString("limit=25"));
+    getArguments.append(QString("limit=%1").arg(ResourceAPI::SearchPageSize));
     if (args.search.has_value()) {
         getArguments.append(QString("query=%1").arg(args.search.value()));
     }
