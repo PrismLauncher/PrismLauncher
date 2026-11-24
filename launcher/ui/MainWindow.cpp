@@ -139,6 +139,7 @@
 
 #include "MMCTime.h"
 #include "archive/ExportToZipTask.h"
+#include "modplatform/flame/FlamePackExportTask.h"
 #include "modplatform/modrinth/ModrinthPackExportTask.h"
 
 namespace {
@@ -2053,6 +2054,109 @@ void MainWindow::exportMrpack(MinecraftInstance* instance,
     Task* task = new ModrinthPackExportTask(name, version, summary, optional, instance, output, filterFunction);
     connect(task, &Task::failed, this,
                 [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task, &Task::finished, task, &Task::deleteLater);
+
+    ProgressDialog progress(this);
+    progress.showSkipButton();
+    progress.execWithTask(task);
+}
+void MainWindow::exportCurseforgezip(MinecraftInstance* instance,
+                                     const QStringList& excludePaths,
+                                     bool include,
+                                     QString output,
+                                     bool noExcludeDefaults,
+                                     QString name,
+                                     QString version,
+                                     bool optional,
+                                     QString author,
+                                     bool setRecommendedMemory,
+                                     int recommendedMemory)
+{
+    auto* settings = instance->settings();
+    if (!name.isEmpty()) {
+        settings->set("ExportName", name);
+    } else {
+        name = settings->get("ExportName").toString();
+    }
+    if (!version.isEmpty()) {
+        settings->set("ExportVersion", version);
+    } else {
+        version = settings->get("ExportVersion").toString();
+        if (version.isEmpty()) {
+            QMessageBox::warning(this, tr("Error"), tr("Mrpack exports require a version to be set."));
+            return;
+        }
+    }
+    settings->set("ExportOptionalFiles", optional);
+    if (!author.isEmpty()) {
+        settings->set("ExportAuthor", author);
+    } else {
+        author = settings->get("ExportAuthor").toString();
+    }
+
+    if (setRecommendedMemory) {
+        settings->set("ExportRecommendedRAM", recommendedMemory);
+    } else {
+        settings->reset("ExportRecommendedRAM");
+    }
+
+    if (name.isEmpty()) {
+        name = instance->name();
+    }
+    const QString filename = FS::RemoveInvalidFilenameChars(name);
+    if (output.isEmpty()) {
+        output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
+                                          tr("CurseForge pack") + " (*.zip)", nullptr);
+        if (output.isEmpty()) {
+            return;
+        }
+    }
+
+    if (!output.endsWith(".zip")) {
+        output.append(".zip");
+    }
+
+    QStringList finalExcludePaths;
+    for (const auto& path : excludePaths) {
+        QString finalPath = QDir::cleanPath(path);
+        if (!finalPath.startsWith('/')) {
+            finalPath.prepend('/');
+        }
+        if (!finalPath.endsWith('/')) {
+            finalPath.append('/');
+        }
+        finalExcludePaths.append(finalPath);
+    }
+    QStringList strippedPaths;
+    for (const auto& path : finalExcludePaths) {
+        strippedPaths.append(path.sliced(1, path.length() - 2));
+    }
+    const auto ignoreData = strippedPaths.join('\n').toUtf8();
+    const auto res = FS::write(FS::PathCombine(instance->instanceRoot(), ".packignore"), ignoreData);
+    if (!res) {
+        qWarning() << res.error();
+    }
+
+    const auto prefix = instance->instanceRoot();
+    const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
+        return filterInstanceFileAgainstBlockList(fileInfo, include, finalExcludePaths, prefix, noExcludeDefaults);
+    };
+
+    FlamePackExportOptions options{};
+
+    options.name = std::move(name);
+    options.version = std::move(version);
+    options.author = std::move(author);
+    options.optionalFiles = optional;
+    options.instance = instance;
+    options.output = std::move(output);
+    options.filter = filterFunction;
+    options.recommendedRAM = setRecommendedMemory ? recommendedMemory : 0;
+
+    Task* task = new FlamePackExportTask(std::move(options));
+
+    connect(task, &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
     connect(task, &Task::finished, task, &Task::deleteLater);
 
     ProgressDialog progress(this);

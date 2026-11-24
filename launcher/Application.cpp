@@ -1577,6 +1577,11 @@ void Application::performMainStartupAction()
             m_mainWindow->exportMrpack(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths,
                                        m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName, m_exportVersion, m_exportMarkAsOptional,
                                        m_exportSummary);
+        } else {
+            m_mainWindow->exportCurseforgezip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths,
+                                              m_exportIncludePaths, m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName,
+                                              m_exportVersion, m_exportMarkAsOptional, m_exportAuthor, m_exportSetRecommendedMemory,
+                                              m_exportRecommendedMemory);
         }
     }
 }

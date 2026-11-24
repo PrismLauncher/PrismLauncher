@@ -93,6 +93,7 @@ class MainWindow : public QMainWindow {
                       QString version,
                       bool optional,
                       QString summary);
+    void exportCurseforgezip(MinecraftInstance* instance, const QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults, QString name, QString version, bool optional, QString author, bool setRecommendedMemory, int recommendedMemory);
    signals:
     void isClosing();
 
