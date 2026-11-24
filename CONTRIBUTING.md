@@ -12,7 +12,7 @@ With this in mind, our team have come to the decision that **any** contribution 
 
 ## Before committing
 
-Announce large changes in advance: when you plan to make changes which affect a lot of files, announce them in advance on Discord.
+Announce large changes in advance: when you plan to make changes which affect a lot of files, announce them in advance on GitHub or Discord.
 
 Respect other developers' code: don't change code style just because you don't like it. Solve real problems; don't just re-arrange the code.
 
