@@ -181,8 +181,7 @@
         <property name="title">
          <string>Pinned Java Installations</string>
         </property>
-        <layout class="QGridLayout" name="pinnedJavaGridLayout">
-        </layout>
+        <layout class="QGridLayout" name="pinnedJavaGridLayout"/>
        </widget>
       </item>
      </layout>
@@ -306,55 +305,6 @@
           </item>
          </layout>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>&amp;PermGen Size:</string>
-          </property>
-          <property name="buddy">
-           <cstring>permGenSpinBox</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QSpinBox" name="permGenSpinBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>The amount of memory available to store loaded Java classes.</string>
-            </property>
-            <property name="suffix">
-             <string notr="true"> MiB</string>
-            </property>
-            <property name="minimum">
-             <number>4</number>
-            </property>
-            <property name="maximum">
-             <number>1048576</number>
-            </property>
-            <property name="singleStep">
-             <number>8</number>
-            </property>
-            <property name="value">
-             <number>64</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>(-XX:PermSize)</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
        </layout>
       </item>
       <item>
@@ -409,7 +359,6 @@
   <tabstop>javaDownloadBtn</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
-  <tabstop>permGenSpinBox</tabstop>
   <tabstop>lowMemWarningCheckBox</tabstop>
   <tabstop>jvmArgsTextBox</tabstop>
  </tabstops>

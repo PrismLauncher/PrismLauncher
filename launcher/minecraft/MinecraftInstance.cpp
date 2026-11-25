@@ -216,7 +216,6 @@ void MinecraftInstance::loadSpecificSettings()
         auto memorySetting = m_settings->registerSetting("OverrideMemory", false);
         m_settings->registerOverride(global_settings->getSetting("MinMemAlloc"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("MaxMemAlloc"), memorySetting);
-        m_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("LowMemWarning"), memorySetting);
 
         // Native library workarounds
@@ -639,15 +638,7 @@ QStringList MinecraftInstance::javaArguments()
         args << QString("-Xmx%1m").arg(min);
     }
 
-    // No PermGen in newer java.
     JavaVersion javaVersion = getJavaVersion();
-    if (javaVersion.requiresPermGen()) {
-        auto permgen = settings()->get("PermGen").toInt();
-        if (permgen != 64) {
-            args << QString("-XX:PermSize=%1m").arg(permgen);
-        }
-    }
-
     if (javaVersion.isModular() && shouldApplyOnlineFixes())
         // allow reflective access to java.net - required by the skin fix
         args << "--add-opens" << "java.base/java.net=ALL-UNNAMED";

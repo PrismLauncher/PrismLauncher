@@ -26,7 +26,7 @@ class JavaChecker : public Task {
         enum class Validity { Errored, ReturnedInvalidData, Valid } validity = Validity::Errored;
     };
 
-    explicit JavaChecker(QString path, QString args, int minMem = 0, int maxMem = 0, int permGen = 0, int id = 0);
+    explicit JavaChecker(QString path, QString args, int minMem = 0, int maxMem = 0, int id = 0);
     ~JavaChecker() override = default;
 
    signals:
@@ -45,7 +45,6 @@ class JavaChecker : public Task {
     QString m_args;
     int m_minMem = 0;
     int m_maxMem = 0;
-    int m_permGen = 64;
     int m_id = 0;
 
    private slots:
