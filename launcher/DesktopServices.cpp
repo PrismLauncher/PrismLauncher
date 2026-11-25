@@ -37,6 +37,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcess>
+#include <QtEnvironmentVariables>
 #include "FileSystem.h"
 
 namespace DesktopServices {
@@ -84,4 +85,33 @@ bool isSnap()
 #endif
 }
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+QString desktopEnvironment()
+{
+    return qEnvironmentVariable("XDG_CURRENT_DESKTOP");
+}
+#endif
+
+#ifdef Q_OS_WIN
+Result<winrt::com_ptr<IShellLink>> createShellLink(const QString& path,
+                                                   const QStringList& arguments,
+                                                   const QString& workDir,
+                                                   const QString& iconPath)
+{
+    auto shellLink = winrt::create_instance<IShellLink>(CLSID_ShellLink);
+    const auto escapedArguments = FS::quoteShortcutArgs(arguments);
+
+    try {
+        winrt::check_hresult(shellLink->SetPath(path.toStdWString().c_str()));
+        winrt::check_hresult(shellLink->SetArguments(escapedArguments.toStdWString().c_str()));
+        winrt::check_hresult(shellLink->SetWorkingDirectory(workDir.toStdWString().c_str()));
+        winrt::check_hresult(shellLink->SetIconLocation(iconPath.toStdWString().c_str(), 0));
+    } catch (const winrt::hresult_error& e) {
+        const auto message = e.message();
+        return std::unexpected("Error creating shell link: " + message);
+    }
+
+    return shellLink;
+}
+#endif
 }  // namespace DesktopServices

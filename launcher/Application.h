@@ -270,14 +270,6 @@ class Application : public QApplication {
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
 #endif
 
-    // FIXME: attach to instances instead.
-    struct InstanceXtras {
-        InstanceWindow* window = nullptr;
-        std::unique_ptr<LaunchController> controller;
-    };
-    std::map<QString, InstanceXtras> m_instanceExtras;
-    mutable QMutex m_instanceExtrasMutex;
-
     // main state variables
     size_t m_openWindows = 0;
     size_t m_runningInstances = 0;

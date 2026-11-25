@@ -129,7 +129,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 
     // Get rid of old entries, to prevent cache problems
     auto current_time = QDateTime::currentSecsSinceEpoch();
-    if (entry->isExpired(current_time - (file_last_changed / 1000))) {
+    if (entry->isExpired(current_time - entry->m_last_refresh)) {
         qCWarning(taskNetLogC) << "[HttpMetaCache]"
                                << "Removing cache entry because of old age!";
         selected_base.entry_list.remove(resource_path);
@@ -268,6 +268,7 @@ void HttpMetaCache::Load()
         if (!foo->isEternal()) {
             foo->m_current_age = element_obj["current_age"].toDouble();
             foo->m_max_age = element_obj["max_age"].toDouble();
+            foo->m_last_refresh = element_obj["last_refresh"].toDouble();
         }
 
         // presumed innocent until closer examination
@@ -315,6 +316,7 @@ void HttpMetaCache::SaveNow()
             } else {
                 entryObj.insert("current_age", QJsonValue(double(entry->m_current_age)));
                 entryObj.insert("max_age", QJsonValue(double(entry->m_max_age)));
+                entryObj.insert("last_refresh", QJsonValue(double(entry->m_last_refresh)));
             }
             entriesArr.append(entryObj);
         }

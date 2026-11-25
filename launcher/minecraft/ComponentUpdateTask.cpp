@@ -132,6 +132,7 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
             result = LoadResult::LoadedLocal;
         } else {
             loadTask = APPLICATION->metadataIndex()->loadVersion(component->m_uid, component->m_version, netmode);
+            loadTask->start();
             if (netmode == Net::Mode::Online)
                 result = LoadResult::RequiresRemote;
             else if (metaVersion->isLoaded())
@@ -246,9 +247,6 @@ void ComponentUpdateTask::loadComponents()
     }
 
     setDetails(tr("Downloading metadata for %1 components").arg(taskIndex));
-    for (const auto& status : d->remoteLoadStatusList) {
-        status.task->start();
-    }
 }
 
 namespace {

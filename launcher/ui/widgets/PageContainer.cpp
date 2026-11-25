@@ -91,11 +91,6 @@ PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, 
         page->listIndex = counter;
         page->setParentContainer(this);
         counter++;
-        page->updateExtraInfo = [this](const QString& id, const QString& info) {
-            if (m_currentPage && id == m_currentPage->id()) {
-                m_header->setText(m_currentPage->displayName() + info);
-            }
-        };
     }
     m_model->setPages(pages);
 
@@ -174,8 +169,6 @@ void PageContainer::createUI()
     m_header->setFont(headerLabelFont);
 
     auto* headerHLayout = new QHBoxLayout;
-    const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
-    headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 

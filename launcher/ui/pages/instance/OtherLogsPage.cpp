@@ -259,8 +259,8 @@ void OtherLogsPage::reload()
     if (!file.open(QFile::ReadOnly)) {
         setControlsEnabled(false);
         ui->btnReload->setEnabled(true);  // allow reload
-        m_currentFile = QString();
         QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
+        m_currentFile = QString();
     } else {
         auto setPlainText = [this](const QString& text) {
             QTextDocument* doc = ui->text->document();
@@ -394,9 +394,9 @@ void OtherLogsPage::on_btnDelete_clicked()
     }
     if (QMessageBox::question(this, tr("Confirm Deletion"),
                               tr("You are about to delete \"%1\".\n"
-                                 "This may be permanent and it will be gone from the logs folder.\n\n"
+                                 "This log will be sent to your %2 if possible - if not it will be permanently gone!\n\n"
                                  "Are you sure?")
-                                  .arg(m_currentFile),
+                                  .arg(m_currentFile).arg(GuiUtil::trashName()),
                               QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
         return;
     }

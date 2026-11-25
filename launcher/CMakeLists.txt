@@ -91,8 +91,6 @@ set(CORE_SOURCES
     MMCTime.h
     MMCTime.cpp
 
-    MTPixmapCache.h
-
     # Assertion helper
     AssertHelpers.h
 )
@@ -1240,7 +1238,35 @@ target_link_libraries(Launcher_logic
     qdcss
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
+    # Required for WinRT
+    $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
 )
+
+# MinGW has three main methods of getting WinRT headers:
+# - Finding and using a pre-installed Windows SDK
+# - MSYS2
+# - VCPKG
+# Actually finding the Windows SDK on a given system is annoying. It's also annoying to install, as it'd be separate from a standalone MinGW toolchain. Thus, we don't exactly support it outside of MSVC
+# MSYS2 will put the headers in the standard system directory when installed, so we don't need special handling and obviously support it
+# VCPKG uses a custom CMake config file. That's what we're handling here
+if(MINGW)
+    include(CMakePushCheckState)
+    include(CheckIncludeFile)
+
+    # Why doesn't CMake have an arg for this...............
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_QUIET TRUE)
+    check_include_file("winrt/base.h" HAVE_WINRT)
+    cmake_pop_check_state()
+
+    # The core assumption is that if the include already exists, we're probably on MSYS2
+    if(NOT HAVE_WINRT)
+        # Otherwise a generic env with VCPKG (or poorly configured MSYS2 :< )
+        find_package(cppwinrt CONFIG REQUIRED)
+        set(USE_VCPKG_WINRT TRUE)
+        target_link_libraries(Launcher_logic Microsoft::CppWinRT)
+    endif()
+endif()
 
 if(TARGET PkgConfig::libqrencode)
     target_link_libraries(Launcher_logic PkgConfig::libqrencode)
@@ -1364,6 +1390,9 @@ if(Launcher_BUILD_UPDATER)
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
         cmark::cmark
+        # Required for WinRT
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
+        $<$<BOOL:${USE_VCPKG_WINRT}>:Microsoft::CppWinRT>
     )
     if(TARGET PkgConfig::libarchive)
         target_link_libraries(prism_updater_logic PkgConfig::libarchive)
@@ -1416,6 +1445,9 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
         Qt${QT_VERSION_MAJOR}::Network
         # Qt${QT_VERSION_MAJOR}::Concurrent
         ${Launcher_QT_LIBS}
+        # Required for WinRT
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
+        $<$<BOOL:${USE_VCPKG_WINRT}>:Microsoft::CppWinRT>
     )
 
     add_executable("${Launcher_Name}_filelink" WIN32 filelink/filelink_main.cpp)
@@ -1465,18 +1497,32 @@ endif()
 get_directory_property(Launcher_TARGETS BUILDSYSTEM_TARGETS)
 foreach(target ${Launcher_TARGETS})
     # TODO: Fix unused parameter warnings (/wd4100, -Wno-unused-parameter, etc)
-    target_compile_options(${target} PRIVATE
-        $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W4 /permissive- /wd4100,-Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers>
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        target_compile_options(${target} PRIVATE
+            /W4 /permissive- /wd4100
+            $<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-Wno-missing-field-initializers -Wno-missing-designated-field-initializers>
+        )
+        # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+        target_link_options(${target} PRIVATE /STACK:8388608)
+    else()
+        target_compile_options(${target} PRIVATE
+            -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers
+        )
+    endif()
+
+    # Wrangle in windows.h and its nastiness
+    # https://learn.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers
+    target_compile_definitions(${target} PRIVATE
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WIN32_LEAN_AND_MEAN NOGDI NOMINMAX WINRT_LEAN_AND_MEAN>
     )
-    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
-    target_link_options(${target} PRIVATE $<$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>:/STACK:8388608>)
 endforeach()
 
 set_target_properties(${Launcher_TARGETS} PROPERTIES COMPILE_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
 
 # NOTE: Universal macOS builds (i.e., `CMAKE_OSX_ARCHITECTURES="x86_64;arm64") emit benign warnings for duplicate libraries
+# lld-link on Windows fails warns with `found both wWinMain and WinMain; using latter`
 # TODO: Maybe fix this...?
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR (MSVC AND (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_LINKER_TYPE STREQUAL "LLD"))))
     set_target_properties(${Launcher_TARGETS} PROPERTIES LINK_WARNING_AS_ERROR ${Launcher_WARNING_AS_ERROR})
 endif()
 

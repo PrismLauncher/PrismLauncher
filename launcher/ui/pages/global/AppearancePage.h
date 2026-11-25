@@ -56,6 +56,8 @@ class AppearancePage : public AppearanceWidget, public BasePage {
     QString id() const override { return "appearance-settings"; }
     QString helpPage() const override { return "Launcher-settings"; }
 
+    void openedImpl() override { loadThemeSettings(); }
+
     bool apply() override
     {
         applySettings();

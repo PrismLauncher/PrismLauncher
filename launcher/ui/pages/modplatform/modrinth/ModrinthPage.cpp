@@ -219,7 +219,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
     } else {
         for (const auto& version : m_current->versions) {
-            if (!version.version.contains(version.version)) {
+            if (!version.version.contains(version.versionNumber)) {
                 m_ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.version, version.versionNumber),
                                                    QVariant(version.fileId));
             } else {

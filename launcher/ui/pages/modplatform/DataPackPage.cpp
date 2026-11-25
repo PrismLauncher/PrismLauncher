@@ -17,11 +17,6 @@ namespace {
 
 ResourceDownload::ResourceDescriptor prepareDataPackDescriptor()
 {
-    QMap<QString, QString> urlHandlers;
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?modrinth\.com\/datapack\/([^\/]+)\/?)"), "modrinth");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"((?:www\.)?curseforge\.com\/minecraft\/data-packs\/([^\/]+)\/?)"),
-                       "curseforge");
-    urlHandlers.insert(QRegularExpression::anchoredPattern(R"(minecraft\.curseforge\.com\/projects\/([^\/]+)\/?)"), "curseforge");
     return {
         .helpPage = {},
         //: The singular version of 'data packs'
@@ -30,7 +25,6 @@ ResourceDownload::ResourceDescriptor prepareDataPackDescriptor()
         .resourcesString = QObject::tr("data packs"),
         .supportsFiltering = false,
         .isIndexed = true,
-        .urlHandlers = urlHandlers,
     };
 }
 

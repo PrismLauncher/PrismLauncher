@@ -452,10 +452,10 @@ void ResourceModel::searchRequestSucceeded(const QList<ModPlatform::IndexedPack>
         }
     }
 
-    if (newList.size() < 25) {
+    if (newList.size() < ResourceAPI::SearchPageSize) {
         m_searchState = SearchState::Finished;
     } else {
-        m_nextSearchOffset += 25;
+        m_nextSearchOffset += ResourceAPI::SearchPageSize;
         m_searchState = SearchState::CanFetchMore;
     }
 
@@ -473,7 +473,7 @@ void ResourceModel::searchRequestForOneSucceeded(const ModPlatform::IndexedPack:
 {
     m_searchState = SearchState::Finished;
 
-    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()), static_cast<int>(m_packs.size() + 1));
+    beginInsertRows(QModelIndex(), static_cast<int>(m_packs.size()), static_cast<int>(m_packs.size()));
     m_packs.append(pack);
     endInsertRows();
 }

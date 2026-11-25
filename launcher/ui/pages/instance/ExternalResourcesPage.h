@@ -28,7 +28,6 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     QString helpPage() const override = 0;
 
     bool shouldDisplay() const override = 0;
-    QString extraHeaderInfoString();
 
     void openedImpl() override;
     void closedImpl() override;
@@ -43,7 +42,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
    public slots:
     virtual void updateActions();
-    virtual void updateFrame(const QModelIndex& current, const QModelIndex& previous);
+    virtual void updateFrame(const QModelIndex& current);
 
    protected slots:
     void itemActivated(const QModelIndex& index);
@@ -66,6 +65,9 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
     void lockUpdates();
     void unlockUpdates();
+
+   private:
+    void updateCounts();
 
    protected:
     MinecraftInstance* m_instance = nullptr;

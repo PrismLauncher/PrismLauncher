@@ -46,6 +46,7 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "LaunchController.h"
 #include "launch/LaunchTask.h"
 #include "settings/Setting.h"
 
@@ -134,6 +135,8 @@ BaseInstance::BaseInstance(SettingsObject* globalSettings, std::unique_ptr<Setti
 
     m_settings->registerSetting("Profiler", "");
 }
+
+BaseInstance::~BaseInstance() = default;
 
 QString BaseInstance::getPreLaunchCommand()
 {
@@ -461,8 +464,13 @@ QList<ShortcutData> BaseInstance::shortcuts() const
         if (!dict.contains("name") || !dict.contains("filePath") || !dict.contains("target")) {
             continue;
         }
+        // TODO(@getchoo): This should really be represented as a string so internal enum re-orderings don't fuck up how we read this back
         int value = dict["target"].toInt(-1);
-        if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value >= 3) {
+        // It would help avoid this messy checking, which is here to avoid easy off-by-one errors in manual int comparision
+        // ...and make it more apparent what we're actually checking
+        const auto newestKnownTarget = static_cast<int>(ShortcutTarget::Other);
+        if (!dict.value("name").isString() || !dict.value("filePath").isString() || value < 0 || value > newestKnownTarget) {
+            qWarning() << "Skipping shortcut of target level" << value << "with unknown fields";
             continue;
         }
 
@@ -496,6 +504,11 @@ QStringList BaseInstance::extraArguments()
 LaunchTask* BaseInstance::getLaunchTask()
 {
     return m_launchProcess.get();
+}
+
+void BaseInstance::setLaunchController(std::unique_ptr<LaunchController> controller)
+{
+    m_launchController = std::move(controller);
 }
 
 void BaseInstance::updateRuntimeContext()

@@ -256,10 +256,10 @@ void Flame::ListModel::searchRequestFinished(const QList<ModPlatform::IndexedPac
         return;
     }
 
-    if (newList.size() < 25) {
+    if (newList.size() < ResourceAPI::SearchPageSize) {
         m_searchState = Finished;
     } else {
-        m_nextSearchOffset += 25;
+        m_nextSearchOffset += ResourceAPI::SearchPageSize;
         m_searchState = CanPossiblyFetchMore;
     }
 
@@ -281,7 +281,7 @@ void Flame::ListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack::Pt
 {
     m_jobPtr.reset();
 
-    beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + 1);
+    beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size());
     m_modpacks.append(pack);
     endInsertRows();
 }

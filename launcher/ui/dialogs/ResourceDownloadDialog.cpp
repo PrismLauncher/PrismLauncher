@@ -113,9 +113,9 @@ void ResourceDownloadDialog::reject()
     auto selected = getTasks();
     if (selected.count() > 0) {
         auto reply = CustomMessageBox::selectable(this, tr("Confirmation Needed"),
-                                                  tr("You have %1 selected resources.\n"
-                                                     "Are you sure you want to close this dialog?")
-                                                      .arg(selected.count()),
+                                                  tr("You have %n selected resources.\n"
+                                                     "Are you sure you want to close this dialog?",
+                                                     "", selected.count()),
                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                          ->exec();
         if (reply != QMessageBox::Yes) {
@@ -181,7 +181,9 @@ void ResourceDownloadDialog::confirm()
                 warnings = task->warnings();
             }
             if (warnings.count()) {
-                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n') + "\nThe mod may not work correctly without it.",
+                                             QMessageBox::Warning)
+                    ->exec();
             }
         });
 

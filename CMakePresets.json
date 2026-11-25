@@ -15,7 +15,6 @@
             "toolchainFile": "cmake/vcpkg/scripts/buildsystems/vcpkg.cmake",
             "cacheVariables": {
                 "Launcher_ENABLE_JAVA_DOWNLOADER": "ON",
-                "Launcher_WARNING_AS_ERROR": "ON",
                 "ENABLE_LTO": "ON"
             }
         },
@@ -27,7 +26,8 @@
             ],
             "cacheVariables": {
                 "Launcher_BUILD_ARTIFACT": "$penv{ARTIFACT_NAME}",
-                "Launcher_BUILD_PLATFORM": "$penv{BUILD_PLATFORM}"
+                "Launcher_BUILD_PLATFORM": "$penv{BUILD_PLATFORM}",
+                "Launcher_WARNING_AS_ERROR": "ON"
             }
         },
         {
@@ -38,7 +38,8 @@
             ],
             "cacheVariables": {
                 "DEBUG_ADDRESS_SANITIZER": "ON",
-                "USE_CLANG_TIDY": "ON"
+                "USE_CLANG_TIDY": "ON",
+                "Launcher_WARNING_AS_ERROR": "ON"
             },
             "environment": {
                 "DEBUG_ADDRESS_SANITIZER": "1"

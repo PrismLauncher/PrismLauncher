@@ -58,7 +58,7 @@ DataPackPage::DataPackPage(MinecraftInstance* instance, DataPackFolderModel* mod
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
-void DataPackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void DataPackPage::updateFrame(const QModelIndex& current)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
@@ -185,9 +185,9 @@ void DataPackPage::deleteDataPackMetadata()
     }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
-                                                     tr("You are about to remove the metadata for %1 data packs.\n"
-                                                        "Are you sure?")
-                                                         .arg(selectionCount),
+                                                     tr("You are about to remove the metadata for %n data packs.\n"
+                                                        "Are you sure?",
+                                                        "", selectionCount),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
@@ -329,7 +329,6 @@ void GlobalDataPackPage::updateContent()
     if (shouldDisplay()) {
         m_underlyingPage = new DataPackPage(m_instance, m_instance->dataPackList());
         m_underlyingPage->setParentContainer(m_container);
-        m_underlyingPage->updateExtraInfo = [this](QString id, QString value) { updateExtraInfo(std::move(id), std::move(value)); };
 
         if (m_container->selectedPage() == this) {
             m_underlyingPage->openedImpl();

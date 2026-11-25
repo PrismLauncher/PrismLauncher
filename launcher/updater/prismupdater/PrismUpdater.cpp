@@ -117,7 +117,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         m_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
         m_rootPath = binPath;
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
         QDir foo(FS::PathCombine(binPath, "../.."));
         m_rootPath = foo.absolutePath();
         // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
@@ -1028,13 +1028,13 @@ void PrismUpdaterApp::backupAppDir()
     if (fileList.isEmpty()) {
         // best guess
         if (BuildConfig.BUILD_ARTIFACT.toLower().contains("linux")) {
-            fileList.append({ "PrismLauncher", "bin", "share", "lib" });
+            fileList.append({ BuildConfig.LAUNCHER_NAME, "bin", "share", "lib" });
         } else {  // windows by process of elimination
             fileList.append({
                 "jars",
-                "prismlauncher.exe",
-                "prismlauncher_filelink.exe",
-                "prismlauncher_updater.exe",
+                QString("%1.exe").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME),
+                QString("%1_filelink.exe").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME),
+                QString("%1_updater.exe").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME),
                 "qtlogging.ini",
                 "imageformats",
                 "iconengines",

@@ -45,6 +45,8 @@ class ThemeWizardPage : public BaseWizardPage {
         widget.retranslateUi();
     }
 
+    void initializePage() override { widget.loadThemeSettings(); }
+
    private:
     AppearanceWidget widget{ true };
 };

@@ -77,7 +77,7 @@ int naturalCompare(const QString& s1, const QString& s2, Qt::CaseSensitivity cs)
  */
 QString truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_limit = false);
 
-QString humanReadableFileSize(double bytes, bool use_si = false, int decimal_points = 1);
+QString humanReadableFileSize(double bytes, int decimal_points = 1);
 
 QString getRandomAlphaNumeric();
 

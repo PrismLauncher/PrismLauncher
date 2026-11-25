@@ -2,8 +2,11 @@
 
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QCoreApplication>
+#include <QMetaObject>
 #include <QObject>
 #include <QRegularExpression>
+#include <QThreadPool>
 #include <tuple>
 #include <utility>
 
@@ -37,7 +40,7 @@ std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
         }
         return { QString("%1 %2").arg(QString::number(count), str), count };
     }
-    return { StringUtils::humanReadableFileSize(static_cast<double>(file.size()), true), file.size() };
+    return { StringUtils::humanReadableFileSize(static_cast<double>(file.size())), file.size() };
 }
 }  // namespace
 
@@ -387,4 +390,63 @@ QDebug operator<<(QDebug debug, ResourceStatus status)
             break;
     };
     return debug;
+}
+
+QPixmap ResourceIconCache::icon(QSize size) const
+{
+    QPixmap icon;
+    if (!QPixmapCache::find(m_cacheKey, &icon)) {
+        return {};
+    }
+
+    // NOTE: only enable antialiasing when scaling down to keep pixel art intact
+    const auto scaleMode = size.width() < icon.width() || size.height() < icon.height() ? Qt::SmoothTransformation : Qt::FastTransformation;
+    return icon.scaled(size, Qt::KeepAspectRatio, scaleMode);
+}
+
+void ResourceIconCache::loadIcon(std::function<QPixmap()> load)
+{
+    if (m_isLoading) {
+        return;
+    }
+    // No valid image we can get
+    if (!m_wasEverUsed && m_wasReadAttempt) {
+        return;
+    }
+
+    m_isLoading = true;
+
+    auto callback = [self = QPointer(this)](const QPixmap& pixmap) {
+        if (self == nullptr) {
+            // we were deleted :(
+            return;
+        }
+
+        if (self->m_cacheKey.isValid()) {
+            QPixmapCache::remove(self->m_cacheKey);
+        }
+        if (!pixmap.isNull()) {
+            self->m_cacheKey = QPixmapCache::insert(pixmap);
+            self->m_wasEverUsed = self->m_cacheKey.isValid();
+            if (!self->m_cacheKey.isValid()) {
+                qWarning() << "Could not insert icon cache entry! Ignoring it";
+            }
+        }
+        self->m_wasReadAttempt = true;
+        self->m_isLoading = false;
+        emit self->iconLoaded();
+    };
+
+    auto task = [load = std::move(load), callback = std::move(callback)] mutable {
+        QPixmap pixmap = load();
+        if (pixmap.width() > 64 || pixmap.height() > 64) {
+            pixmap = pixmap.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        QMetaObject::invokeMethod(
+            QCoreApplication::instance(), [callback = std::move(callback), pixmap = std::move(pixmap)] { callback(pixmap); },
+            Qt::QueuedConnection);
+    };
+
+    QThreadPool::globalInstance()->start(task);
 }

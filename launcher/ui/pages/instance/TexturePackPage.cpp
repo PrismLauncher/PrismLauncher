@@ -76,7 +76,7 @@ TexturePackPage::TexturePackPage(MinecraftInstance* instance, TexturePackFolderM
     m_ui->actionsToolbar->insertActionAfter(m_ui->actionLockUpdates, m_ui->actionUnlockUpdates);
 }
 
-void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void TexturePackPage::updateFrame(const QModelIndex& current)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
@@ -204,9 +204,9 @@ void TexturePackPage::deleteTexturePackMetadata()
     }
     if (selectionCount > 1) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
-                                                     tr("You are about to remove the metadata for %1 texture packs.\n"
-                                                        "Are you sure?")
-                                                         .arg(selectionCount),
+                                                     tr("You are about to remove the metadata for %n texture packs.\n"
+                                                        "Are you sure?",
+                                                        "", selectionCount),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 

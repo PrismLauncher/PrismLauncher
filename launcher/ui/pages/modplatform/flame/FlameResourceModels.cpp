@@ -8,6 +8,7 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/pages/modplatform/flame/FlameResourcePages.h"
 

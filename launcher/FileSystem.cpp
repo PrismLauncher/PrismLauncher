@@ -60,8 +60,6 @@
 #include "StringUtils.h"
 
 #if defined Q_OS_WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
 #include <objidl.h>
 #include <shlguid.h>
 #include <shobjidl.h>
@@ -1015,6 +1013,17 @@ QString NormalizePath(const QString& path)
     return newAbsolute;
 }
 
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+QString quoteShortcutArgs(const QStringList& args)
+{
+#ifdef Q_OS_WIN
+    return quoteArgs(args, "\"", "\\\"", true);
+#elifdef Q_OS_MACOS
+    return quoteArgs(args, "\"", "\\\"");
+#endif
+}
+#endif
+
 namespace {
 const QString g_badChars = "<>:\"|?*\r\n!";
 QString removeChars(QString source, QChar replace, const QString& extraChars = "")
@@ -1132,7 +1141,7 @@ QString createShortcut(QString destination, const QString& target, const QString
     }
     QTextStream stream(&f);
 
-    auto argstring = quoteArgs(args, "\"", "\\\"");
+    auto argstring = quoteShortcutArgs(args);
 
     stream << "#!/bin/bash" << "\n";
     stream << "\"" << target << "\" " << argstring << "\n";
@@ -1224,75 +1233,23 @@ QString createShortcut(QString destination, const QString& target, const QString
         return QString();
     }
 
-    auto argStr = quoteArgs(args, "\"", "\\\"", true);
-    if (argStr.length() >= MAX_PATH) {
-        qWarning() << "Arguments string is too long!";
+    const auto shellLink = DesktopServices::createShellLink(absoluteTarget, args, targetInfo.absolutePath(), icon);
+    if (!shellLink) {
+        qWarning() << shellLink.error();
         return QString();
     }
 
-    HRESULT hres;
-
-    // ...yes, you need to initialize the entire COM stack just to make a shortcut
-    hres = CoInitialize(nullptr);
-    if (FAILED(hres)) {
-        qWarning() << "Failed to initialize COM!";
+    // query an IPersistFile interface from our IShellLink instance
+    // this is the interface that will actually let us save the shortcut to disk!
+    const auto persistFile = shellLink.value().as<IPersistFile>();
+    const auto saved = persistFile->Save(destination.toStdWString().c_str(), TRUE);
+    if (FAILED(saved)) {
+        qWarning() << "IPersistFile->Save() failed";
+        qWarning() << "hres = " << saved;
         return QString();
     }
 
-    WCHAR wsz[MAX_PATH];
-
-    IShellLink* psl;
-
-    // create an IShellLink instance - this stores the shortcut's attributes
-    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
-    if (SUCCEEDED(hres)) {
-        wmemset(wsz, 0, MAX_PATH);
-        absoluteTarget.toWCharArray(wsz);
-        psl->SetPath(wsz);
-
-        wmemset(wsz, 0, MAX_PATH);
-        argStr.toWCharArray(wsz);
-        psl->SetArguments(wsz);
-
-        wmemset(wsz, 0, MAX_PATH);
-        targetInfo.absolutePath().toWCharArray(wsz);
-        psl->SetWorkingDirectory(wsz);  // "Starts in" attribute
-
-        if (!icon.isEmpty()) {
-            wmemset(wsz, 0, MAX_PATH);
-            icon.toWCharArray(wsz);
-            psl->SetIconLocation(wsz, 0);
-        }
-
-        // query an IPersistFile interface from our IShellLink instance
-        // this is the interface that will actually let us save the shortcut to disk!
-        IPersistFile* ppf;
-        hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
-        if (SUCCEEDED(hres)) {
-            wmemset(wsz, 0, MAX_PATH);
-            destination.toWCharArray(wsz);
-            hres = ppf->Save(wsz, TRUE);
-            if (FAILED(hres)) {
-                qWarning() << "IPresistFile->Save() failed";
-                qWarning() << "hres =" << hres;
-            }
-            ppf->Release();
-        } else {
-            qWarning() << "Failed to query IPersistFile interface from IShellLink instance";
-            qWarning() << "hres =" << hres;
-        }
-        psl->Release();
-    } else {
-        qWarning() << "Failed to create IShellLink instance";
-        qWarning() << "hres =" << hres;
-    }
-
-    // go away COM, nobody likes you
-    CoUninitialize();
-
-    if (SUCCEEDED(hres))
-        return destination;
-    return QString();
+    return destination;
 #else
     qWarning("Desktop Shortcuts not supported on your platform!");
     return QString();
@@ -1902,7 +1859,7 @@ bool removeFiles(const QStringList& listFile)
     // For each file
     for (int i = 0; i < listFile.count(); i++) {
         // Remove
-        ret = ret && QFile::remove(listFile.at(i));
+        ret = QFile::remove(listFile.at(i)) && ret;
     }
     return ret;
 }

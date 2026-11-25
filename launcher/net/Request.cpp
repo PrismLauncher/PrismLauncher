@@ -340,7 +340,6 @@ void Request::handleAutoRetry(int64_t delay)
     m_retryCount++;
     if (delay > 60 || m_retryCount > 4) {
         /* 1 minute is too long to wait for retry, fail for now */
-        m_state = State::Failed;
         auto retryAfter = QDateTime::currentDateTime().addSecs(delay);
         emitFailed(tr("Request Rate Limited for %n second(s): Retry After %1", "seconds", static_cast<int>(delay))
                        .arg(retryAfter.toLocalTime().toString(QLocale::system().dateTimeFormat(QLocale::ShortFormat))));

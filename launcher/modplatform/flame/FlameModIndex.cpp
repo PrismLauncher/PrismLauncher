@@ -51,6 +51,7 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJson
     TRY_INTO(const auto& versionArray, Json::requireArray(obj, "gameVersions"))
 
     ModPlatform::IndexedVersion file;
+    file.side = ModPlatform::SideType::NoSide;
     for (auto mcVer : versionArray) {
         auto str = mcVer.toString();
 
@@ -58,7 +59,6 @@ Result<ModPlatform::IndexedVersion> FlameMod::loadIndexedPackVersion(const QJson
             file.mcVersion.append(str);
         }
 
-        file.side = ModPlatform::SideType::NoSide;
         if (auto loader = str.toLower(); loader == "neoforge") {
             file.loaders |= ModPlatform::NeoForge;
         } else if (loader == "forge") {

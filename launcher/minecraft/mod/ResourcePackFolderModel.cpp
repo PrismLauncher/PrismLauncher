@@ -36,7 +36,6 @@
 
 #include "ResourcePackFolderModel.h"
 
-#include <QIcon>
 #include <QStyle>
 
 #include "minecraft/mod/Resource.h"
@@ -55,9 +54,8 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir,
         QStringList({ "", tr("Name"), tr("Version"), tr("Pack Format"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name") });
     m_columnSortKeys = { SortType::Enabled, SortType::Name,     SortType::Version, SortType::PackFormat,
                          SortType::Date,    SortType::Provider, SortType::Size,    SortType::Filename };
-    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,          QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::ResizeToContents, QHeaderView::Interactive,
-                            QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,     QHeaderView::Interactive, QHeaderView::Interactive,
+                            QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, false, true, true, true, true, true, true, true };
 }
 
@@ -129,26 +127,6 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
     }
 
     return {};
-}
-
-QList<MultiDecorationItemDelegate::Icon> ResourcePackFolderModel::icons(int row) const
-{
-    auto result = ResourceFolderModel::icons(row);
-
-    if (m_showImages) {
-        static const QSize s_iconSize = { 32, 32 };
-
-        QIcon icon;
-        if (const auto pixmap = at(row).image(s_iconSize, Qt::KeepAspectRatio); !pixmap.isNull()) {
-            icon = pixmap;
-        } else {
-            icon = QIcon::fromTheme("resourcepacks");
-        }
-
-        result.prepend({ .icon = icon, .size = s_iconSize });
-    }
-
-    return result;
 }
 
 QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const

@@ -95,29 +95,30 @@ ExternalResourcesPage::ExternalResourcesPage(MinecraftInstance* instance, Resour
 
     auto* selectionModel = m_ui->treeView->selectionModel();
 
-    connect(selectionModel, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    connect(selectionModel, &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current) {
         if (!current.isValid()) {
             m_ui->frame->clear();
             return;
         }
 
-        updateFrame(current, previous);
+        updateFrame(current);
     });
 
-    auto updateExtra = [this]() {
-        if (updateExtraInfo) {
-            updateExtraInfo(id(), extraHeaderInfoString());
-        }
-    };
-
-    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, updateExtra);
-    connect(model, &ResourceFolderModel::updateFinished, this, updateExtra);
-    connect(model, &ResourceFolderModel::parseFinished, this, updateExtra);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &ExternalResourcesPage::updateCounts);
+    connect(model, &ResourceFolderModel::updateFinished, this, &ExternalResourcesPage::updateCounts);
+    connect(model, &ResourceFolderModel::parseFinished, this, &ExternalResourcesPage::updateCounts);
+    updateCounts();
 
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
     connect(m_model, &ResourceFolderModel::dataChanged, this, [this] { updateActions(); });
+    connect(m_model, &ResourceFolderModel::iconChanged, this, [this, selectionModel](int row) {
+        const int currentRow = m_filterModel->mapToSource(selectionModel->currentIndex()).row();
+        if (row == currentRow) {
+            updateFrame(selectionModel->currentIndex());
+        }
+    });
     connect(m_model, &ResourceFolderModel::sizeHintChanged, m_ui->treeView->itemDelegate(),
             [this] { m_ui->treeView->itemDelegate()->sizeHintChanged(QModelIndex()); });
 
@@ -174,6 +175,7 @@ void ExternalResourcesPage::closedImpl()
 void ExternalResourcesPage::retranslate()
 {
     m_ui->retranslateUi(this);
+    updateCounts();
 }
 
 void ExternalResourcesPage::itemActivated(const QModelIndex& /*unused*/)
@@ -186,6 +188,7 @@ void ExternalResourcesPage::filterTextChanged(const QString& newContents)
 {
     m_viewFilter = newContents;
     m_filterModel->setFilterRegularExpression(m_viewFilter);
+    updateCounts();
 }
 
 bool ExternalResourcesPage::shouldDisplay() const
@@ -265,15 +268,17 @@ void ExternalResourcesPage::removeItem()
     bool multiple = count > 1;
 
     if (multiple) {
-        text = tr("You are about to remove %1 items.\n"
-                  "This may be permanent and they will be gone from the folder.\n\n"
-                  "Are you sure?")
-                   .arg(count);
+        text = tr("You are about to remove %n items.\n"
+                  "These items will be sent to your %1 if possible - if not they will be permanently gone!\n\n"
+                  "Are you sure?",
+                  "", count)
+                   .arg(GuiUtil::trashName());
     } else if (folder) {
         text = tr("You are about to remove the folder \"%1\".\n"
-                  "This may be permanent and it will be gone from the parent folder.\n\n"
+                  "This folder will be sent to your %2 if possible - if not it will be permanently gone!\n\n"
                   "Are you sure?")
-                   .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName());
+                   .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName())
+                   .arg(GuiUtil::trashName());
     }
 
     if (!text.isEmpty()) {
@@ -369,32 +374,12 @@ void ExternalResourcesPage::updateActions()
     m_ui->actionExportMetadata->setEnabled(!m_model->empty());
 }
 
-void ExternalResourcesPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ExternalResourcesPage::updateFrame(const QModelIndex& current)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     const Resource& resource = m_model->at(row);
     m_ui->frame->updateWithResource(resource);
-}
-
-QString ExternalResourcesPage::extraHeaderInfoString()
-{
-    auto all = m_model->allResources();
-    auto enabledCount = std::ranges::count_if(all, [](Resource* res) { return res->enabled(); });
-    auto installedCount = m_model->size();
-
-    if (m_ui && m_ui->treeView && m_ui->treeView->selectionModel()) {
-        auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
-        if (auto count = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; }); count != 0) {
-            return tr(" (%1 installed, %2 enabled, %3 selected)").arg(installedCount).arg(enabledCount).arg(count);
-        }
-    }
-
-    if (enabledCount != 0) {
-        return tr(" (%1 installed, %2 enabled)").arg(installedCount).arg(enabledCount);
-    }
-
-    return tr(" (%1 installed)").arg(installedCount);
 }
 
 void ExternalResourcesPage::lockUpdates()
@@ -409,4 +394,28 @@ void ExternalResourcesPage::unlockUpdates()
     auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection());
     m_model->setUpdateLock(selection.indexes(), EnableAction::DISABLE);
     updateActions();
+}
+
+void ExternalResourcesPage::updateCounts()
+{
+    auto selection = m_filterModel->mapSelectionToSource(m_ui->treeView->selectionModel()->selection()).indexes();
+    if (const auto selectedCount = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; });
+        selectedCount > 1) {
+        m_ui->counts->setText(tr("%n items selected", "", static_cast<int>(selectedCount)));
+        return;
+    }
+
+    if (!m_filterModel->filterRegularExpression().pattern().isEmpty()) {
+        m_ui->counts->setText(tr("%n search results", "", m_filterModel->rowCount()));
+        return;
+    }
+
+    const auto resources = m_model->allResources();
+    const auto enabledCount = std::ranges::count_if(resources, [](Resource* res) { return res->enabled(); });
+
+    if (resources.count() == enabledCount) {
+        m_ui->counts->setText(tr("%1 installed and enabled").arg(resources.count()));
+    } else {
+        m_ui->counts->setText(tr("%1 installed, %2 enabled").arg(resources.count()).arg(enabledCount));
+    }
 }

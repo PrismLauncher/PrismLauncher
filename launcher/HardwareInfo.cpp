@@ -62,16 +62,13 @@ bool readFromOutput(const char* command, F function)
 #endif
 
 #ifdef Q_OS_WINDOWS
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 #include <QSettings>
 
 #include <dxgi1_6.h>
 #include <windows.h>
 
-#include <wrl/client.h>
-using Microsoft::WRL::ComPtr;
+#include <winrt/base.h>
+using winrt::com_ptr;
 
 QString HardwareInfo::cpuInfo()
 {
@@ -109,7 +106,7 @@ uint64_t HardwareInfo::availableRamMiB()
 
 QStringList HardwareInfo::gpuInfo()
 {
-    ComPtr<IDXGIFactory6> factory;
+    com_ptr<IDXGIFactory6> factory;
     HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory));
     if (FAILED(hr)) {
         qWarning() << "Could not create DXGI factory:" << Qt::hex << hr;
@@ -117,7 +114,7 @@ QStringList HardwareInfo::gpuInfo()
     }
 
     UINT i = 0;
-    ComPtr<IDXGIAdapter> adapter;
+    com_ptr<IDXGIAdapter> adapter;
     QStringList out;
     while (factory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)) != DXGI_ERROR_NOT_FOUND) {
         DXGI_ADAPTER_DESC desc;

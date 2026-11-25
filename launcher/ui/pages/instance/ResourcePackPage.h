@@ -61,7 +61,7 @@ class ResourcePackPage : public ExternalResourcesPage {
     }
 
    public slots:
-    void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
+    void updateFrame(const QModelIndex& current) override;
 
    private slots:
     void downloadResourcePacks();

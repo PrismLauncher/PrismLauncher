@@ -200,6 +200,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void updateFinished();
     void parseFinished();
     void sizeHintChanged();
+    void iconChanged(int row);
 
    protected:
     [[nodiscard]] virtual Task* createPreUpdateTask() { return nullptr; }
@@ -260,7 +261,7 @@ class ResourceFolderModel : public QAbstractListModel {
         "", tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size"), tr("File Name")
     };
     QList<QHeaderView::ResizeMode> m_columnResizeModes = { QHeaderView::Fixed,       QHeaderView::Stretch,
-                                                           QHeaderView::Interactive, QHeaderView::ResizeToContents,
+                                                           QHeaderView::Interactive, QHeaderView::Interactive,
                                                            QHeaderView::Interactive, QHeaderView::Interactive,
                                                            QHeaderView::Interactive };
     QList<bool> m_columnsHideable = { false, false, true, true, true, true, true };

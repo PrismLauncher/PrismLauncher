@@ -300,7 +300,7 @@ QString SkinList::installSkin(const QString& file, const QString& name)
         return tr("Not a file.");
     if (!fileinfo.isReadable())
         return tr("File is not readable.");
-    if (fileinfo.suffix() != "png" && !SkinModel(fileinfo.absoluteFilePath()).isValid())
+    if (fileinfo.suffix() != "png" || !SkinModel(fileinfo.absoluteFilePath()).isValid())
         return tr("Skin images must be 64x64 or 64x32 pixel PNG files.");
 
     QString target = getUniqueFile(m_dir.absolutePath(), name.isEmpty() ? fileinfo.fileName() : name);
@@ -411,7 +411,7 @@ void SkinList::updateSkin(SkinModel* s)
         }
     }
     if (!done) {
-        beginInsertRows(QModelIndex(), m_skinList.count(), m_skinList.count() + 1);
+        beginInsertRows(QModelIndex(), m_skinList.count(), m_skinList.count());
         m_skinList.append(*s);
         endInsertRows();
     }
