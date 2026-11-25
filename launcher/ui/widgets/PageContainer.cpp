@@ -214,6 +214,9 @@ void PageContainer::showPage(int row)
 {
     if (m_currentPage) {
         m_currentPage->closed();
+        if (m_saveOnPageChange) {
+            m_currentPage->apply();
+        }
     }
     if (row != -1) {
         m_currentPage = m_model->pages().at(row);
@@ -257,10 +260,14 @@ void PageContainer::currentChanged(const QModelIndex& current)
 
 bool PageContainer::prepareToClose()
 {
-    if (!saveAll()) {
+    if (!m_saveOnPageChange && !saveAll()) {
         return false;
     }
     if (m_currentPage) {
+        if (m_saveOnPageChange) {
+            // NOTE: we only need to save the current page if we're saving on page change
+            m_currentPage->apply();
+        }
         m_currentPage->closed();
     }
     return true;

@@ -68,6 +68,7 @@ InstanceWindow::InstanceWindow(MinecraftInstance* instance, QWidget* parent) : Q
         auto provider = std::make_shared<InstancePageProvider>(m_instance);
         m_container = new PageContainer(provider.get(), "console", this);
         m_container->setParentContainer(this);
+        m_container->setSaveOnPageChange(true);
         setCentralWidget(m_container);
         setContentsMargins(0, 0, 0, 0);
     }
@@ -210,6 +211,14 @@ void InstanceWindow::restartInstance()
     updateButtons();
 }
 
+bool InstanceWindow::event(QEvent* event)
+{
+    if (event->type() == QEvent::WindowDeactivate && !m_ignoreDeactivate) {
+        m_container->selectedPage()->apply();
+    }
+    return QMainWindow::event(event);
+}
+
 void InstanceWindow::closeEvent(QCloseEvent* event)
 {
     bool proceed = true;
@@ -221,9 +230,12 @@ void InstanceWindow::closeEvent(QCloseEvent* event)
         return;
     }
 
+
     APPLICATION->settings()->set("ConsoleWindowState", QString::fromUtf8(saveState().toBase64()));
     APPLICATION->settings()->set("ConsoleWindowGeometry", QString::fromUtf8(saveGeometry().toBase64()));
     emit isClosing();
+    // HACK: avoid double apply, since closing also causes a deactivate
+    m_ignoreDeactivate = true;
     event->accept();
 }
 

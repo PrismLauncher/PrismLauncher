@@ -78,6 +78,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
    protected:
+    bool event(QEvent* event) override;
     void closeEvent(QCloseEvent*) override;
 
    private:
@@ -87,6 +88,7 @@ class InstanceWindow : public QMainWindow, public BasePageContainer {
     LaunchTask* m_proc;
     MinecraftInstance* m_instance;
     bool m_doNotSave = false;
+    bool m_ignoreDeactivate = false;
     bool m_restartQueued = false;
     PageContainer* m_container = nullptr;
     QPushButton* m_closeButton = nullptr;
