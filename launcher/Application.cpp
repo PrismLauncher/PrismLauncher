@@ -913,7 +913,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Init page provider
         {
-            m_globalSettingsProvider = std::make_unique<GenericPageProvider>(tr("Settings"));
+            m_globalSettingsProvider = std::make_unique<GenericPageProvider>("");
             m_globalSettingsProvider->addPage<LauncherPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<AppearancePage>();
@@ -1681,6 +1681,7 @@ void Application::ShowGlobalSettings(class QWidget* parent, QString openPage)
     if (!m_globalSettingsProvider) {
         return;
     }
+    m_globalSettingsProvider->setDialogTitle(tr("Settings"));
     emit globalSettingsAboutToOpen();
     {
         SettingsObject::Lock lock(APPLICATION->settings());
