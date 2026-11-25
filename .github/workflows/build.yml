@@ -43,14 +43,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04
-            artifact-name: Linux
-            qt-version: 6.11.2
-
-          - os: ubuntu-24.04-arm
-            artifact-name: Linux-aarch64
-            qt-version: 6.11.2
-
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
             msystem: CLANG64
@@ -135,18 +127,6 @@ jobs:
         shell: bash
         run: |
           echo "version=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Package (Linux)
-        if: ${{ runner.os == 'Linux' }}
-        uses: $/.github/actions/package/linux
-        with:
-          version: ${{ steps.short-version.outputs.version }}
-          build-type: ${{ steps.setup-dependencies.outputs.build-type }}
-          artifact-name: ${{ matrix.artifact-name }}
-          qt-version: ${{ steps.setup-dependencies.outputs.qt-version }}
-
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-private-key-id: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
       - name: Package (macOS)
         if: ${{ runner.os == 'macOS' }}
