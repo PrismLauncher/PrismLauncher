@@ -1142,6 +1142,32 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInfo() << "<> Instances loaded.";
     }
 
+    // not init, but needs instances to be loaded first
+    if (!m_exportShowFiles.isEmpty()) {
+        const MinecraftInstance* instance = instances()->getInstanceById(m_instanceIdToExport);
+        QString prefix;
+        if (m_exportFormat == "prismzip") {
+            prefix = instance->instanceRoot();
+        } else {
+            prefix = instance->gameRoot();
+        }
+        qDebug() << "Instance prefix: " << prefix << '\n';
+        const QString path = QDir::cleanPath(prefix + '/' + m_exportShowFiles);
+        qDebug() << "Path: " << path << '\n';
+        qDebug() << "Gathering file info" << '\n';
+        const QFileInfoList files = (new QDir(path))->entryInfoList(QDir::AllEntries | QDir::Hidden | QDir::NoDotAndDotDot);
+        qDebug() << "Total files: " << files.count() << '\n';
+        for (const auto& file : files) {
+            if (file.isDir()) {
+                std::cout << file.fileName().toStdString().append("/") << '\n';
+            } else {
+                std::cout << file.fileName().toStdString() << '\n';
+            }
+        }
+        m_status = Succeeded;
+        return;
+    }
+
     // and accounts
     {
         m_accounts.reset(new AccountList(this));
@@ -1569,16 +1595,17 @@ void Application::performMainStartupAction()
     }
 
     if (!m_instanceIdToExport.isEmpty()) {
-        qDebug() << "<> Exporting instance id:" << m_instanceIdToExport;
+        MinecraftInstance* instance = instances()->getInstanceById(m_instanceIdToExport);
+        qDebug() << "Exporting instance id:" << m_instanceIdToExport;
         if (m_exportFormat == "prismzip") {
-            m_mainWindow->exportPrismZip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths,
+            m_mainWindow->exportPrismZip(instance, m_exportExcludePaths, m_exportIncludePaths,
                                          m_exportOutputPath, m_exportNoExcludeDefaults);
         } else if (m_exportFormat == "mrpack") {
-            m_mainWindow->exportMrpack(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths, m_exportIncludePaths,
+            m_mainWindow->exportMrpack(instance, m_exportExcludePaths, m_exportIncludePaths,
                                        m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName, m_exportVersion, m_exportMarkAsOptional,
                                        m_exportSummary);
         } else {
-            m_mainWindow->exportCurseforgezip(instances()->getInstanceById(m_instanceIdToExport), m_exportExcludePaths,
+            m_mainWindow->exportCurseforgezip(instance, m_exportExcludePaths,
                                               m_exportIncludePaths, m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName,
                                               m_exportVersion, m_exportMarkAsOptional, m_exportAuthor, m_exportSetRecommendedMemory,
                                               m_exportRecommendedMemory);
