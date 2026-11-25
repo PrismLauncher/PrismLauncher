@@ -52,7 +52,6 @@ jobs:
           - os: windows-2022
             artifact-name: Windows-MinGW-w64
             msystem: CLANG64
-            vcvars-arch: amd64_x86
 
           - os: windows-2022
             artifact-name: Windows-MSVC
