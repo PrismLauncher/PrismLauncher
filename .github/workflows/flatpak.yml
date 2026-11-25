@@ -1,0 +1,177 @@
+name: Flatpak
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  merge_group:
+    types: [checks_requested]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build (${{ matrix.arch }})
+
+    # Avoid running on forks, unless specifically requested
+    if: ${{ github.event_name == 'workflow_dispatch' || github.repository == 'PrismLauncher/PrismLauncher' }}
+
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-26.04
+            arch: x86_64
+          - os: ubuntu-26.04-arm
+            arch: aarch64
+
+    runs-on: ${{ matrix.os }}
+
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.11
+      options: --privileged
+      volumes:
+        - /opt/hostedtoolcache:/hostedtoolcache
+
+    env:
+      FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY != '' && vars.FLATPAK_GPG_KEY_ID || '' }}
+
+    steps:
+      - name: Free up disk space
+        shell: bash
+        run: |
+          rm -rf /hostedtoolcache/*
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+
+      - name: Setup signing
+        shell: bash
+        env:
+          FLATPAK_GPG_PRIVATE_KEY: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY || '' }}
+        run: |
+          if [[ -z "$FLATPAK_GPG_PRIVATE_KEY" ]]; then
+            echo ":warning: Not signing Flatpaks, as the signing key was not present" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo -n "$FLATPAK_GPG_PRIVATE_KEY" | base64 -d | gpg --import
+            gpg --list-keys --keyid-format=long "$FLATPAK_GPG_KEY_ID"
+          fi
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
+        with:
+          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
+          bundle: org.prismlauncher.PrismLauncher.flatpak
+          run-tests: true
+          branch: nightly
+          arch: ${{ matrix.arch }}
+          gpg-sign: ${{ env.GPG_KEY_ID }}
+          artifact-name: org.prismlauncher.PrismLauncher-${{ matrix.arch }}.flatpak
+
+      - name: Build OCI bundle
+        shell: bash
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          flatpak build-bundle \
+            --arch="$ARCH" \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo \
+            --oci --oci-layer-compress=zstd \
+            repo/ oci \
+            org.prismlauncher.PrismLauncher nightly
+
+      - name: Upload OCI bundle
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: flatpak-oci-${{ matrix.arch }}
+          path: oci/
+          if-no-files-found: error
+
+  upload:
+    name: Upload OCI images
+
+    needs: build
+
+    runs-on: ubuntu-slim
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      REGISTRY: ghcr.io
+
+    steps:
+      - name: Download OCI bundles
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: flatpak-oci-*
+          path: bundles
+
+      - name: Determine image name
+        run: |
+          echo "IMAGE_NAME=${REGISTRY,,}/${GITHUB_REPOSITORY_OWNER,,}/flatpak" >> "$GITHUB_ENV"
+
+      - name: Gather metadata for OCI image
+        id: metadata
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.event.merge_group.base_ref == 'refs/heads/develop' }}
+            type=raw,value=nightly,enable=${{ github.event.merge_group.base_ref == 'refs/heads/develop' }}
+            # Don't SHA create tags for the current PR merge commit since they're basically useless, and do not represent an in-tree SHA
+            type=sha,enable=${{ github.event != 'pull_request' }}
+            type=sha,format=long,enable=${{ github.event != 'pull_request' }}
+            type=ref,event=branch
+            type=ref,event=pr
+
+      - name: Setup regctl
+        uses: regclient/actions/regctl-installer@dd58ad94f76adb73d8ac1bf75ed25f01545d5b32 # v0.2.0
+
+      - name: Login to registry
+        env:
+          REGISTRY_TOKEN: ${{ github.token }}
+        run: |
+          regctl registry login "$REGISTRY" --user "${GITHUB_REPOSITORY_OWNER,,}" --pass-stdin <<< "$REGISTRY_TOKEN"
+
+      - name: Push OCI bundles to registry
+        id: push
+        run: |
+          index_args=()
+
+          for layout in bundles/flatpak-oci-*; do
+            digest="$(jq -r '.manifests[0].digest' "$layout"/index.json)"
+
+            ref="$IMAGE_NAME@$digest"
+            index_args+=(--ref "$ref")
+
+            regctl image copy "ocidir://$(realpath "$layout")@$digest" "$ref"
+          done
+
+          while read -r annotation; do
+            index_args+=(--annotation "${annotation#manifest:}")
+          done <<< "$DOCKER_METADATA_OUTPUT_ANNOTATIONS"
+
+          while read -r tag; do
+            regctl index create "$tag" "${index_args[@]}"
+          done <<< "$DOCKER_METADATA_OUTPUT_TAGS"
+
+      - name: Create summary
+        run: |
+          {
+            echo "# Test with Flatpak!"
+            echo
+            echo "\`\`\`sh"
+            echo "flatpak install --image docker://$IMAGE_NAME:$DOCKER_METADATA_OUTPUT_VERSION"
+            echo "\`\`\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+

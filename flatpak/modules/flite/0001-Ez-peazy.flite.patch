@@ -1,0 +1,25 @@
+From e4b5e40fe29e0fb972ab4abcaa6f0ed137f0fb92 Mon Sep 17 00:00:00 2001
+From: Babakinha <59146844+Babakinha@users.noreply.github.com>
+Date: Sat, 3 Sep 2022 19:30:26 -0300
+Subject: [PATCH] Ez peazy
+
+---
+ src/audio/au_alsa.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/audio/au_alsa.c b/src/audio/au_alsa.c
+index 93fc706..b8b7c7f 100644
+--- a/src/audio/au_alsa.c
++++ b/src/audio/au_alsa.c
+@@ -54,7 +54,7 @@
+ #include <alsa/asoundlib.h>
+ 
+ /*static char *pcm_dev_name = "hw:0,0"; */
+-static const char *pcm_dev_name ="default";
++static const char *pcm_dev_name ="pipewire";
+ 
+ static inline void print_pcm_state(snd_pcm_t *handle, char *msg)
+ {
+-- 
+2.47.2
+

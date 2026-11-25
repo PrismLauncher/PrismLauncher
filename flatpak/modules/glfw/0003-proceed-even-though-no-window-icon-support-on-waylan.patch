@@ -1,0 +1,30 @@
+From 8f4a285cbf4f66b14f03b992979d7b8469b95069 Mon Sep 17 00:00:00 2001
+From: DioEgizio <83089242+DioEgizio@users.noreply.github.com>
+Date: Mon, 5 Jan 2026 20:05:47 +0100
+Subject: [PATCH 3/3] proceed even though no window icon support on wayland
+
+hack needed for old versions of minecraft with our custom glfw and most compositors. Thanks to BoyOrigin/glfw-wayland for the original implementation
+
+Co-Authored-By: FayBoy <ahmadyasinfikri@gmail.com>
+---
+ src/wl_window.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/wl_window.c b/src/wl_window.c
+index 0e67e5c5..cddcac44 100644
+--- a/src/wl_window.c
++++ b/src/wl_window.c
+@@ -2230,8 +2230,8 @@ void _glfwSetWindowIconWayland(_GLFWwindow* window,
+ {
+     if (!_glfw.wl.toplevelIconManager)
+     {   
+-        _glfwInputError(GLFW_FEATURE_UNAVAILABLE,
+-                        "Wayland: The platform does not support setting the window icon");
++        fprintf(stderr,
++                    "[GLFW] Wayland: The compositor does not support setting the window icon");
+         return;
+     }
+ 
+-- 
+2.52.0
+
