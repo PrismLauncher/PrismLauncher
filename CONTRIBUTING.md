@@ -28,7 +28,7 @@ Double-check before committing: do a final git pull --rebase to keep your checko
 
 ## Know what you commit
 
-You're responsible for what you commit. When you make a merge request, it's your code, even if it originates from the internet, an LLM, a friend, or your pet lizard.
+You're responsible for what you commit. When you make a merge request, it's your code, even if it originates from the internet, a friend, or your pet lizard.
 
 This means that the responsibility is on you and only you to you understand exactly what you're committing and why, since you're the one adding it to the codebase.
 
