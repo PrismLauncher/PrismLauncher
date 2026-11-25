@@ -288,15 +288,6 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
 #endif
 
-    if (binPath.startsWith("/tmp/.mount_")) {
-        m_isAppimage = true;
-        m_appimagePath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (m_appimagePath.isEmpty()) {
-            showFatalErrorMessage(tr("Unsupported Installation"),
-                                  tr("Updater is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
-        }
-    }
-
     m_isFlatpak = DesktopServices::isFlatpak();
 
     QString prismExecutable = FS::PathCombine(binPath, BuildConfig.LAUNCHER_APP_BINARY_NAME);
@@ -457,14 +448,6 @@ void PrismUpdaterApp::run()
     if (m_isFlatpak) {
         showFatalErrorMessage(tr("Updating flatpack not supported"), tr("Actions outside of checking if an update is available are not "
                                                                         "supported when running the flatpak version of Prism Launcher."));
-        return;
-    }
-    if (m_isAppimage) {
-        bool result = true;
-        if (needUpdateVal) {
-            result = callAppImageUpdate();
-        }
-        exit(result ? 0 : 1);
         return;
     }
 
@@ -683,14 +666,6 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
             qDebug() << "Rejecting zsync file" << asset.name;
             continue;
         }
-        if (!m_isAppimage && asset.name.toLower().endsWith("appimage")) {
-            qDebug() << "Rejecting" << asset.name << "because it is an AppImage";
-            continue;
-        }
-        if (m_isAppimage && !asset.name.toLower().endsWith("appimage")) {
-            qDebug() << "Rejecting" << asset.name << "because it is not an AppImage";
-            continue;
-        }
         auto assetName = asset.name.toLower();
         auto [platform, platformQtVer] = StringUtils::splitFirst(BuildConfig.BUILD_ARTIFACT.toLower(), "-qt");
         auto systemIsArm = QSysInfo::buildCpuArchitecture().contains("arm64");
@@ -801,20 +776,6 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
 
     QFileInfo outFile(outFilePath);
     return outFile;
-}
-
-bool PrismUpdaterApp::callAppImageUpdate()
-{
-    auto appimagePath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-    QProcess proc = QProcess();
-    qDebug() << "Calling: AppImageUpdate" << appimagePath;
-    proc.setProgram(FS::PathCombine(m_rootPath, "bin", "AppImageUpdate.AppImage"));
-    proc.setArguments({ appimagePath });
-    auto result = proc.startDetached();
-    if (!result) {
-        qDebug() << "Failed to start AppImageUpdate reason:" << proc.errorString();
-    }
-    return result;
 }
 
 void PrismUpdaterApp::clearUpdateLog()
