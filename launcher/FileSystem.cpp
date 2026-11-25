@@ -853,7 +853,7 @@ Result<> deleteRecursively(QString path)
     fs::remove_all(StringUtils::toStdString(std::move(path)), err);
 
     if (err) {
-        return std::unexpected{ QString::fromStdString(err.message()) };
+        return std::unexpected{ "Unable to recursively delete path " + path + ": " + QString::fromStdString(err.message()) };
     }
 
     return {};
