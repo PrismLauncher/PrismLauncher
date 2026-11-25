@@ -40,7 +40,7 @@
 NotesPage::NotesPage(BaseInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
 {
     ui->setupUi(this);
-    ui->noteEditor->setText(m_inst->notes());
+    ui->noteEditor->setPlainText(m_inst->notes());
 }
 
 NotesPage::~NotesPage()
