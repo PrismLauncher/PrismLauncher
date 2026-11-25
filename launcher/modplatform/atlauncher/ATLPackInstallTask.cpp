@@ -1004,7 +1004,7 @@ Result<> PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract
         // the copy from the Configs.zip
         QFileInfo fileInfo(to);
         if (fileInfo.exists()) {
-            TRY(FS::deletePathWithResult(to))
+            TRY(FS::deleteRecursively(to))
         }
 
         FS::copy fileCopyOperation(from, to);

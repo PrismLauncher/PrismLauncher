@@ -303,11 +303,11 @@ bool move(const QString& source, const QString& dest);
 /**
  * Delete a folder recursively
  *
- * @deprecated Use deletePathWithResult instead
+ * @deprecated Use deleteRecursively instead
  */
 bool deletePath(QString path);
 
-Result<> deletePathWithResult(QString path);
+Result<> deleteRecursively(QString path);
 
 /**
  * Delete a folder's contents recursively but not the folder itself.

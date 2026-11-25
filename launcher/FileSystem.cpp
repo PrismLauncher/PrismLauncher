@@ -846,7 +846,7 @@ bool deletePath(QString path)
     return err.value() == 0;
 }
 
-Result<> deletePathWithResult(QString path)
+Result<> deleteRecursively(QString path)
 {
     std::error_code err;
 
