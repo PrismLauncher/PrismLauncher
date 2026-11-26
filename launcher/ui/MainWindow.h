@@ -79,27 +79,31 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
-    int exportPrismZip(const BaseInstance* instance, const QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults);
-    int exportMrpack(MinecraftInstance* instance,
-                     const QStringList& excludePaths,
-                     bool include,
-                     QString output,
-                     bool noExcludeDefaults,
-                     QString name,
-                     QString version,
-                     bool optional,
-                     QString summary);
-    int exportCurseforgezip(MinecraftInstance* instance,
-                            const QStringList& excludePaths,
-                            bool include,
-                            QString output,
-                            bool noExcludeDefaults,
-                            QString name,
-                            QString version,
-                            bool optional,
-                            QString author,
-                            bool setRecommendedMemory,
-                            int recommendedMemory);
+    bool exportPrismZip(const BaseInstance* instance,
+                        const QStringList& excludePaths,
+                        bool include,
+                        QString output,
+                        bool noExcludeDefaults);
+    bool exportMrpack(MinecraftInstance* instance,
+                      const QStringList& excludePaths,
+                      bool include,
+                      QString output,
+                      bool noExcludeDefaults,
+                      QString name,
+                      QString version,
+                      bool optional,
+                      QString summary);
+    bool exportCurseforgezip(MinecraftInstance* instance,
+                             const QStringList& excludePaths,
+                             bool include,
+                             QString output,
+                             bool noExcludeDefaults,
+                             QString name,
+                             QString version,
+                             bool optional,
+                             QString author,
+                             bool setRecommendedMemory,
+                             int recommendedMemory);
    signals:
     void isClosing();
 

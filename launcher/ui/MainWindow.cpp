@@ -1899,11 +1899,11 @@ bool MainWindow::filterInstanceFileAgainstBlockList(const QFileInfo& fileInfo, b
     return false ^ include;
 }
 
-int MainWindow::exportPrismZip(const BaseInstance* instance,
-                               const QStringList& excludePaths,
-                               const bool include,
-                               QString output,
-                               const bool noExcludeDefaults)
+bool MainWindow::exportPrismZip(const BaseInstance* instance,
+                                const QStringList& excludePaths,
+                                const bool include,
+                                QString output,
+                                const bool noExcludeDefaults)
 {
     const auto name = FS::RemoveInvalidFilenameChars(instance->name());
 
@@ -1913,7 +1913,7 @@ int MainWindow::exportPrismZip(const BaseInstance* instance,
     }
     if (output.isEmpty()) {
         qDebug() << "No output path given, stopping export";
-        return 1;
+        return false;
     }
 
     // Save icon
@@ -1973,7 +1973,7 @@ int MainWindow::exportPrismZip(const BaseInstance* instance,
     if (!MMCZip::collectFileListRecursively(instance->instanceRoot(), nullptr, &files, filterFunction)) {
         qDebug() << "Unable to export instance";
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
-        return 1;
+        return false;
     }
 
     const auto task = makeShared<MMCZip::ExportToZipTask>(output, instance->instanceRoot(), files, "", true);
@@ -1984,17 +1984,17 @@ int MainWindow::exportPrismZip(const BaseInstance* instance,
 
     ProgressDialog progress(this);
     progress.showSkipButton();
-    return progress.execWithTask(task.get()) == QDialog::Accepted ? 0 : 1;
+    return progress.execWithTask(task.get()) == QDialog::Accepted;
 }
-int MainWindow::exportMrpack(MinecraftInstance* instance,
-                             const QStringList& excludePaths,
-                             const bool include,
-                             QString output,
-                             const bool noExcludeDefaults,
-                             QString name,
-                             QString version,
-                             const bool optional,
-                             QString summary)
+bool MainWindow::exportMrpack(MinecraftInstance* instance,
+                              const QStringList& excludePaths,
+                              const bool include,
+                              QString output,
+                              const bool noExcludeDefaults,
+                              QString name,
+                              QString version,
+                              const bool optional,
+                              QString summary)
 {
     auto* settings = instance->settings();
     if (!name.isEmpty()) {
@@ -2008,7 +2008,7 @@ int MainWindow::exportMrpack(MinecraftInstance* instance,
         version = settings->get("ExportVersion").toString();
         if (version.isEmpty()) {
             QMessageBox::warning(this, tr("Error"), tr("Mrpack exports require a version to be set."));
-            return 1;
+            return false;
         }
     }
     settings->set("ExportOptionalFiles", optional);
@@ -2025,7 +2025,7 @@ int MainWindow::exportMrpack(MinecraftInstance* instance,
                                           tr("Modrinth pack") + " (*.mrpack *.zip)", nullptr);
     }
     if (output.isEmpty()) {
-        return 1;
+        return false;
     }
     if (!(output.endsWith(".zip") || output.endsWith(".mrpack"))) {
         output.append(".mrpack");
@@ -2064,19 +2064,19 @@ int MainWindow::exportMrpack(MinecraftInstance* instance,
 
     ProgressDialog progress(this);
     progress.showSkipButton();
-    return progress.execWithTask(task) == QDialog::Accepted ? 0 : 1;
+    return progress.execWithTask(task) == QDialog::Accepted;
 }
-int MainWindow::exportCurseforgezip(MinecraftInstance* instance,
-                                    const QStringList& excludePaths,
-                                    bool include,
-                                    QString output,
-                                    bool noExcludeDefaults,
-                                    QString name,
-                                    QString version,
-                                    bool optional,
-                                    QString author,
-                                    bool setRecommendedMemory,
-                                    int recommendedMemory)
+bool MainWindow::exportCurseforgezip(MinecraftInstance* instance,
+                                     const QStringList& excludePaths,
+                                     bool include,
+                                     QString output,
+                                     bool noExcludeDefaults,
+                                     QString name,
+                                     QString version,
+                                     bool optional,
+                                     QString author,
+                                     bool setRecommendedMemory,
+                                     int recommendedMemory)
 {
     auto* settings = instance->settings();
     if (!name.isEmpty()) {
@@ -2090,7 +2090,7 @@ int MainWindow::exportCurseforgezip(MinecraftInstance* instance,
         version = settings->get("ExportVersion").toString();
         if (version.isEmpty()) {
             QMessageBox::warning(this, tr("Error"), tr("Mrpack exports require a version to be set."));
-            return 1;
+            return false;
         }
     }
     settings->set("ExportOptionalFiles", optional);
@@ -2114,7 +2114,7 @@ int MainWindow::exportCurseforgezip(MinecraftInstance* instance,
         output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
                                           tr("CurseForge pack") + " (*.zip)", nullptr);
         if (output.isEmpty()) {
-            return 1;
+            return false;
         }
     }
 
@@ -2167,5 +2167,5 @@ int MainWindow::exportCurseforgezip(MinecraftInstance* instance,
 
     ProgressDialog progress(this);
     progress.showSkipButton();
-    return progress.execWithTask(task) == QDialog::Accepted ? 0 : 1;
+    return progress.execWithTask(task) == QDialog::Accepted;
 }
