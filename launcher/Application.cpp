@@ -313,38 +313,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     QCommandLineParser parser;
     parser.setApplicationDescription(BuildConfig.LAUNCHER_DISPLAYNAME);
 
-    // parser.addOptions(
-    //     { { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
-    //       { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
-    //       { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
-    //       { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
-    //       { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
-    //       { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
-    //       { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
-    //       { "show-window", "Show the main launcher window (useful in combination with --launch)" },
-    //       { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-    //       { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
-    // // Has to be positional for some OS to handle that properly
-    // parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
-    //
-    // parser.addHelpOption();
-    // parser.addVersionOption();
-    //
-    // parser.process(arguments());
-    //
-    // m_instanceIdToLaunch = parser.value("launch");
-    // m_serverToJoin = parser.value("server");
-    // m_worldToJoin = parser.value("world");
-    // m_profileToUse = parser.value("profile");
-    // if (parser.isSet("offline")) {
-    //     m_launchOffline = true;
-    //     m_offlineName = parser.value("offline");
-    // }
-    // m_liveCheck = parser.isSet("alive");
-    //
-    // m_instanceIdToShowWindowOf = parser.value("show");
-    // m_showMainWindow = parser.isSet("show-window");
-
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addOptions({
