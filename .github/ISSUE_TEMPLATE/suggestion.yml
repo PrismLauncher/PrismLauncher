@@ -6,14 +6,14 @@ body:
   attributes:
     value: |
       ### Use this form to suggest a feature for Prism Launcher.
-- type: input
+- type: textarea
   attributes:
     label: Suggestion
     description: What do you want Prism Launcher to do?
     placeholder: I want the cat button to meow.
   validations:
     required: true
-- type: input
+- type: textarea
   attributes:
     label: Benefit
     description: Why do you need Prism Launcher to do this?
@@ -26,6 +26,3 @@ body:
     options:
     - label: I have searched the issue tracker and did not find an issue describing my suggestion, especially not one that has been rejected.
       required: true
-- type: textarea
-  attributes:
-    label: You may use the editor below to elaborate further.
