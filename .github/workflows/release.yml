@@ -10,7 +10,7 @@ permissions: {}
 jobs:
   build_release:
     name: Build Release
-    uses: ./.github/workflows/build.yml
+    uses: $/.github/workflows/build.yml
     permissions:
       contents: read
       # Required for Azure Trusted Signing

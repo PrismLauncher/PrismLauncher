@@ -100,7 +100,7 @@ jobs:
 
       - name: Setup dependencies
         id: setup-dependencies
-        uses: ./.github/actions/setup-dependencies
+        uses: $/.github/actions/setup-dependencies
         with:
           build-type: ${{ env.BUILD_TYPE }}
           artifact-name: ${{ matrix.artifact-name }}
@@ -138,7 +138,7 @@ jobs:
 
       - name: Package (Linux)
         if: ${{ runner.os == 'Linux' }}
-        uses: ./.github/actions/package/linux
+        uses: $/.github/actions/package/linux
         with:
           version: ${{ steps.short-version.outputs.version }}
           build-type: ${{ steps.setup-dependencies.outputs.build-type }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Package (macOS)
         if: ${{ runner.os == 'macOS' }}
-        uses: ./.github/actions/package/macos
+        uses: $/.github/actions/package/macos
         with:
           version: ${{ steps.short-version.outputs.version }}
           build-type: ${{ steps.setup-dependencies.outputs.build-type }}
@@ -166,7 +166,7 @@ jobs:
 
       - name: Package (Windows)
         if: ${{ runner.os == 'Windows' }}
-        uses: ./.github/actions/package/windows
+        uses: $/.github/actions/package/windows
         env:
           CI_HAS_ACCESS_TO_AZURE: ${{ vars.CI_HAS_ACCESS_TO_AZURE || '' }}
         with:
