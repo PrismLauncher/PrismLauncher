@@ -95,10 +95,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v32
+        uses: cachix/install-nix-action@v32.1.0
 
         # For PRs
       - name: Setup Nix Magic Cache

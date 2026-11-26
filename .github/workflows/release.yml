@@ -31,12 +31,12 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           submodules: "true"
           path: "PrismLauncher-source"
       - name: Download artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
       - name: Grab and store version
         run: |
           tag_name=$(echo ${{ github.ref }} | grep -oE "[^/]+$")
@@ -83,7 +83,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v3.0.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
