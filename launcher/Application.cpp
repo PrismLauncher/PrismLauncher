@@ -1745,12 +1745,12 @@ InstanceWindow* Application::showInstanceWindow(MinecraftInstance* instance, con
     auto* window = instance->window();
 
     if (window != nullptr) {
-// If the window is minimized on macOS or Windows, activate and bring it up
+// If the window is minimized, activate and bring it up
 #ifdef Q_OS_MACOS
         if (window->isMinimized()) {
             window->setWindowState(window->windowState() & ~Qt::WindowMinimized);
         }
-#elif defined(Q_OS_WIN)
+#else
         if (window->isMinimized()) {
             window->showNormal();
         }
