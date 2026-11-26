@@ -23,9 +23,6 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject* parent) : Setti
 {
     auto first_path = paths.constFirst();
     for (auto path : paths) {
-        if (!QFile::exists(path))
-            continue;
-
         if (path != first_path && QFile::exists(path)) {
             // Copy the fallback to the preferred path.
             QFile::copy(path, first_path);
@@ -35,12 +32,14 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject* parent) : Setti
     }
 
     m_filePath = first_path;
+    m_isNew = !QFile::exists(first_path);
     m_ini.loadFile(first_path);
 }
 
 INISettingsObject::INISettingsObject(QString path, QObject* parent) : SettingsObject(parent)
 {
     m_filePath = path;
+    m_isNew = !QFile::exists(path);
     m_ini.loadFile(path);
 }
 

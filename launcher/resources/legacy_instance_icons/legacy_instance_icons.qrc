@@ -1,0 +1,32 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/legacy_instance_icons">
+        <file>bee_legacy.svg</file>
+        <file>brick_legacy.png</file>
+        <file>chicken_legacy.png</file>
+        <file>creeper_legacy.png</file>
+        <file>diamond_legacy.png</file>
+        <file>dirt_legacy.png</file>
+        <file>enderman_legacy.png</file>
+        <file>enderpearl_legacy.png</file>
+        <file>flame_legacy.png</file>
+        <file>fox_legacy.svg</file>
+        <file>ftb_glow.png</file>
+        <file>ftb_logo_legacy.png</file>
+        <file>gear_legacy.png</file>
+        <file>gold_legacy.png</file>
+        <file>grass_legacy.png</file>
+        <file>herobrine_legacy.png</file>
+        <file>iron_legacy.png</file>
+        <file>legacy_instance_icons.qrc</file>
+        <file>magitech_legacy.png</file>
+        <file>meat_legacy.png</file>
+        <file>netherstar_legacy.png</file>
+        <file>planks_legacy.png</file>
+        <file>skeleton_legacy.png</file>
+        <file>squarecreeper_legacy.png</file>
+        <file>steve_legacy.png</file>
+        <file>stone_legacy.png</file>
+        <file>tnt_legacy.png</file>
+    </qresource>
+</RCC>

@@ -170,6 +170,11 @@ class SettingsObject : public QObject {
      */
     virtual bool reload();
 
+    /**
+     * @return true if the settings file didn't exist on the initial load
+     */
+    virtual bool isNew() const = 0;
+
     virtual void suspendSave() = 0;
     virtual void resumeSave() = 0;
    signals:

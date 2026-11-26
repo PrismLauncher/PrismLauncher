@@ -37,6 +37,7 @@
 #include "IconList.h"
 #include <FileSystem.h>
 #include <QDebug>
+#include <QDirListing>
 #include <QFileSystemWatcher>
 #include <QMap>
 #include <QMimeData>
@@ -75,6 +76,50 @@ IconList::IconList(const QStringList& builtinPaths, const QString& path, QObject
 
     // Forces the UI to update, so that lengthy icon names are shown properly from the start
     emit iconUpdated({});
+}
+
+bool IconList::copyLegacyIcons(const QString& dest)
+{
+    const QDirListing entries(":/legacy_instance_icons", QDirListing::IteratorFlag::FilesOnly);
+    bool success = true;
+    for (const auto& entry : entries) {
+        if (entry.suffix() == "qrc") {
+            continue;
+        }
+
+        // NOTE: using manual copy to avoid broken permissions
+        // directly using QFile::copy with a resource as the source results in a read-only file...
+        // passing no permissions to QFile::open just uses the default permissions determined by Qt (666 on Unix but the windows code seems less straightforward)
+        const auto destPath = QDir(dest).absoluteFilePath(entry.fileName());
+        QFile destFile(destPath);
+        if (destFile.exists()) {
+            continue;
+        }
+        if (!destFile.open(QFile::WriteOnly)) {
+            qWarning() << "Failed to open destination icon" << destPath << "-" << destFile.errorString();
+            success = false;
+            continue;
+        }
+
+        QFile srcFile(entry.absoluteFilePath());
+        if (!srcFile.open(QFile::ReadOnly)) {
+            qWarning() << "Failed to open source icon from resource" << entry.absoluteFilePath() << "-" << srcFile.errorString();
+            success = false;
+            continue;
+        }
+
+        const QByteArray srcData = srcFile.readAll();
+        Q_ASSERT(srcFile.error() == QFile::NoError);
+
+        if (destFile.write(srcData) != srcData.size() || !destFile.flush()) {
+            qWarning() << "Failed to write to destination icon" << destPath << "-" + destFile.errorString();
+            success = false;
+            continue;
+        }
+
+        qDebug() << "Copied icon from resource to" << destPath;
+    }
+    return success;
 }
 
 bool IconList::addPath(const QString& path)

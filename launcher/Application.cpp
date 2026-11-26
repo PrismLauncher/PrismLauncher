@@ -713,6 +713,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("TemplateDirBookmark", "");
 #endif
 
+        m_settings->registerSetting("LegacyIconsAdded", false);
+        if (m_settings->isNew()) {
+            m_settings->set("LegacyIconsAdded", true);
+        }
+
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
 
@@ -957,6 +962,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         auto setting = APPLICATION->settings()->getSetting("IconsDir");
         QStringList instFolders = { ":/icons/multimc/32x32/instances/", ":/icons/multimc/50x50/instances/",
                                     ":/icons/multimc/128x128/instances/", ":/icons/multimc/scalable/instances/" };
+        if (!settings()->get("LegacyIconsAdded").toBool()) {
+            if (IconList::copyLegacyIcons(setting->get().toString())) {
+                settings()->set("LegacyIconsAdded", true);
+            } else {
+                qWarning() << "Failed to copy legacy icons";
+            }
+        }
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
         connect(setting.get(), &Setting::SettingChanged, this,
                 [this](const Setting&, const QVariant& value) { m_icons->directoryChanged(value.toString()); });
