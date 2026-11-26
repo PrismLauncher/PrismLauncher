@@ -589,7 +589,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         connect(m_peerInstance, &LocalPeer::messageReceived, this, &Application::messageReceived);
         if (m_peerInstance->isClient()) {
             bool sentMessage = false;
-            int timeout = 2000;
+            constexpr int timeout = 2000;
 
             if (m_instanceIdToLaunch.isEmpty()) {
                 ApplicationMessage activate;
@@ -603,6 +603,25 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                         import.args.insert("url", url.toString());
                         sentMessage = m_peerInstance->sendMessage(import.serialize(), timeout);
                     }
+                // FIXME: --show-files doesn't work if another instance is already running, but printing the output
+                // to the other instance's output would not be very useful. What to do?
+                } else if (!m_instanceIdToExport.isEmpty() && m_exportShowFiles.isEmpty()) {
+                    ApplicationMessage exportMessage;
+                    exportMessage.command = "export";
+                    exportMessage.args["id"] = m_instanceIdToExport;
+                    exportMessage.args["format"] = m_exportFormat;
+                    exportMessage.args["outputPath"] = m_exportOutputPath;
+                    exportMessage.args["includePaths"] = QString::number(static_cast<int>(m_exportIncludePaths));
+                    exportMessage.args["noExcludeDefaults"] = QString::number(static_cast<int>(m_exportNoExcludeDefaults));
+                    exportMessage.args["name"] = m_exportName;
+                    exportMessage.args["version"] = m_exportVersion;
+                    exportMessage.args["markAsOptional"] = QString::number(static_cast<int>(m_exportMarkAsOptional));
+                    exportMessage.args["author"] = m_exportAuthor;
+                    exportMessage.args["setRecommendedMemory"] = QString::number(static_cast<int>(m_exportSetRecommendedMemory));
+                    exportMessage.args["recommendedMemory"] = QString::number(m_exportRecommendedMemory);
+                    exportMessage.args["summary"] = m_exportSummary;
+                    exportMessage.args["excludePaths"] = m_exportExcludePaths.join("|thisisaseparatorthatwillneverbeinarealpath|");
+                    sentMessage = m_peerInstance->sendMessage(exportMessage.serialize(), timeout);
                 }
             } else {
                 ApplicationMessage launch;
@@ -1712,6 +1731,49 @@ void Application::messageReceived(const QByteArray& message)
         }
 
         launch(instance, offline ? LaunchMode::Offline : LaunchMode::Normal, serverObject, accountObject, offlineName);
+    } else if (command == "export") {
+        const QString id = received.args["id"];
+        if (id.isEmpty()) {
+            qWarning() << "Export command called with no instance id.";
+            return;
+        }
+        MinecraftInstance* instance = instances()->getInstanceById(id);
+        if (!instance) {
+            qWarning() << "Export command requires a valid instance id, " << id << "resolves to nothing.";
+        }
+        const QString format = received.args["format"];
+        const QString outputPath = received.args["outputPath"];
+        const bool includePaths = received.args["includePaths"].toInt() != 0;
+        const bool noExcludeDefaults = received.args["noExcludeDefaults"].toInt() != 0;
+        QStringList excludePaths = received.args["excludePaths"].split("|thisisaseparatorthatwillneverbeinarealpath|");
+        if (excludePaths.length() == 1 && excludePaths[0].isEmpty()) {
+            excludePaths = {};
+        }
+        int exportResult;
+        if (format == "prismzip") {
+            exportResult = m_mainWindow->exportPrismZip(instance, excludePaths, includePaths, outputPath, noExcludeDefaults);
+        } else {
+            const QString name = received.args["name"];
+            const QString version = received.args["version"];
+            const bool markAsOptional = received.args["markAsOptional"].toInt() != 0;
+            if (format == "mrpack") {
+                const QString summary = received.args["summary"];
+                exportResult = m_mainWindow->exportMrpack(instance, excludePaths, includePaths, outputPath, noExcludeDefaults, name,
+                    version, markAsOptional, summary);
+            } else if (format == "curseforgezip") {
+                const QString author = received.args["author"];
+                const bool setRecommendedMemory = received.args["setRecommendedMemory"].toInt() != 0;
+                const int recommendedMemory = received.args["recommendedMemory"].toInt();
+                exportResult = m_mainWindow->exportCurseforgezip(instance, excludePaths, includePaths, outputPath, noExcludeDefaults,
+                    name, version, markAsOptional, author, setRecommendedMemory, recommendedMemory);
+            } else {
+                qWarning() << "Export command called with unrecognized format " << format;
+                return;
+            }
+        }
+        if (exportResult != 0) {
+            qWarning() << "Export command failed!";
+        }
     } else {
         qWarning() << "Received invalid message" << message;
     }
