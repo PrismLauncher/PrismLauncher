@@ -1084,6 +1084,12 @@ QMap<QString, QString> MinecraftInstance::makeProfileVarMapping(std::shared_ptr<
 
     result["library_directory"] = APPLICATION->metacache()->getBasePath("libraries");
 
+#ifdef Q_OS_WIN
+    result["classpath_separator"] = ";";
+#else
+    result["classpath_separator"] = ":";
+#endif
+
     return result;
 }
 
