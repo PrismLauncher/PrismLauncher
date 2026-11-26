@@ -36,17 +36,17 @@ runs:
   steps:
     - name: Setup Linux dependencies
       if: ${{ runner.os == 'Linux' }}
-      uses: ./.github/actions/setup-dependencies/linux
+      uses: $/.github/actions/setup-dependencies/linux
 
     - name: Setup macOS dependencies
       if: ${{ runner.os == 'macOS' }}
-      uses: ./.github/actions/setup-dependencies/macos
+      uses: $/.github/actions/setup-dependencies/macos
       with:
         build-type: ${{ inputs.build-type }}
 
     - name: Setup Windows dependencies
       if: ${{ runner.os == 'Windows' }}
-      uses: ./.github/actions/setup-dependencies/windows
+      uses: $/.github/actions/setup-dependencies/windows
       with:
         build-type: ${{ inputs.build-type }}
         msystem: ${{ inputs.msystem }}

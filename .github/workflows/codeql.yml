@@ -34,7 +34,7 @@ jobs:
           languages: cpp, java
 
       - name: Setup dependencies
-        uses: ./.github/actions/setup-dependencies
+        uses: $/.github/actions/setup-dependencies
         with:
           build-type: Debug
           qt-version: 6.8.3
