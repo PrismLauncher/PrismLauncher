@@ -262,64 +262,7 @@
         <file>scalable/instances/fox.svg</file>
         <file>scalable/instances/bee.svg</file>
 
-
-        <!-- instance icons -->
-        <file>32x32/instances/chicken_legacy.png</file>
-        <file>128x128/instances/chicken_legacy.png</file>
-
-        <file>32x32/instances/creeper_legacy.png</file>
-        <file>128x128/instances/creeper_legacy.png</file>
-
-        <file>32x32/instances/enderpearl_legacy.png</file>
-        <file>128x128/instances/enderpearl_legacy.png</file>
-
-        <file>32x32/instances/ftb_glow.png</file>
-        <file>128x128/instances/ftb_glow.png</file>
-
-        <file>32x32/instances/ftb_logo_legacy.png</file>
-        <file>128x128/instances/ftb_logo_legacy.png</file>
-
-        <file>128x128/instances/flame_legacy.png</file>
-
-        <file>32x32/instances/gear_legacy.png</file>
-        <file>128x128/instances/gear_legacy.png</file>
-
-        <file>32x32/instances/herobrine_legacy.png</file>
-        <file>128x128/instances/herobrine_legacy.png</file>
-
-        <file>32x32/instances/magitech_legacy.png</file>
-        <file>128x128/instances/magitech_legacy.png</file>
-
-        <file>32x32/instances/meat_legacy.png</file>
-        <file>128x128/instances/meat_legacy.png</file>
-
-        <file>32x32/instances/netherstar_legacy.png</file>
-        <file>128x128/instances/netherstar_legacy.png</file>
-
-        <file>32x32/instances/skeleton_legacy.png</file>
-        <file>128x128/instances/skeleton_legacy.png</file>
-
-        <file>32x32/instances/squarecreeper_legacy.png</file>
-        <file>128x128/instances/squarecreeper_legacy.png</file>
-
-        <file>32x32/instances/steve_legacy.png</file>
-        <file>128x128/instances/steve_legacy.png</file>
-
-        <file>32x32/instances/brick_legacy.png</file>
-        <file>32x32/instances/diamond_legacy.png</file>
-        <file>32x32/instances/dirt_legacy.png</file>
-        <file>32x32/instances/gold_legacy.png</file>
-        <file>32x32/instances/grass_legacy.png</file>
-        <file>32x32/instances/iron_legacy.png</file>
-        <file>32x32/instances/planks_legacy.png</file>
-        <file>32x32/instances/stone_legacy.png</file>
-        <file>32x32/instances/tnt_legacy.png</file>
-
-        <file>50x50/instances/enderman_legacy.png</file>
-
         <file>scalable/instances/prismlauncher.svg</file>
-        <file>scalable/instances/fox_legacy.svg</file>
-        <file>scalable/instances/bee_legacy.svg</file>
 
         <!-- delete, tag, rename, shortcut, about, new, checkupdate and server LGPL3, Oxygen icons.-->
         <file>scalable/delete.svg</file>
