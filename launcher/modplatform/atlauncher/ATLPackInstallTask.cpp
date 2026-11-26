@@ -941,14 +941,14 @@ void PackInstallTask::onModsDownloaded()
 void PackInstallTask::onModsExtracted()
 {
     qDebug() << "PackInstallTask::onModsExtracted:" << QThread::currentThreadId();
-    if (m_modExtractFuture.result()) {
+    if (const auto result = m_modExtractFuture.result(); result) {
         install();
     } else {
-        emitFailed(tr("Failed to extract mods..."));
+        emitFailed(tr("Failed to extract mods: %1").arg(result.error()));
     }
 }
 
-bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
+Result<> PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
                                   const QMap<QString, VersionMod>& toDecomp,
                                   const QMap<QString, QString>& toCopy)
 {
@@ -976,18 +976,11 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
             folderToExtract = mod.extractFolder;
             static const QRegularExpression s_regex("^/");
             folderToExtract.remove(s_regex);
-            auto fullPath = FS::getSafePathInRoot(extractToPath, folderToExtract);
-            if (!fullPath) {
-                qWarning() << fullPath.error() << mod.extractFolder;
-                return false;
-            }
+            TRY_INTO(auto fullPath, FS::getSafePathInRoot(extractToPath, folderToExtract))
         }
 
         qDebug() << "Extracting " + mod.file + " to " + extractToDir;
-        if (const auto result = MMCZip::extractDir(modPath, folderToExtract, extractToPath); !result) {
-            qWarning() << "Failed to extract:" << result.error();
-            return false;
-        }
+        TRY(MMCZip::extractDir(modPath, folderToExtract, extractToPath))
     }
 
     for (auto iter = toDecomp.begin(); iter != toDecomp.end(); iter++) {
@@ -998,17 +991,9 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         QDir extractDir(m_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
-        auto fullPath = FS::getSafePathInRoot(extractToPath, mod.decompFile);
-        if (!fullPath) {
-            qWarning() << fullPath.error() << mod.decompFile;
-            return false;
-        }
-
+        TRY_INTO(auto fullPath, FS::getSafePathInRoot(extractToPath, mod.decompFile))
         qDebug() << "Extracting " + mod.decompFile + " to " + extractToDir;
-        if (const auto result = MMCZip::extractFile(modPath, mod.decompFile, extractToPath); !result) {
-            qWarning() << "Failed to extract" << mod.decompFile << "-" << result.error();
-            return false;
-        }
+        TRY(MMCZip::extractFile(modPath, mod.decompFile, extractToPath))
     }
 
     for (auto iter = toCopy.begin(); iter != toCopy.end(); iter++) {
@@ -1019,19 +1004,15 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         // the copy from the Configs.zip
         QFileInfo fileInfo(to);
         if (fileInfo.exists()) {
-            if (!FS::deletePath(to)) {
-                qWarning() << "Failed to delete" << to;
-                return false;
-            }
+            TRY(FS::deleteRecursively(to))
         }
 
         FS::copy fileCopyOperation(from, to);
         if (!fileCopyOperation()) {
-            qWarning() << "Failed to copy" << from << "to" << to;
-            return false;
+            return std::unexpected{ tr("Failed to copy %1 to %2. Check the launcher logs for details.").arg(from, to) };
         }
     }
-    return true;
+    return {};
 }
 
 void PackInstallTask::install()

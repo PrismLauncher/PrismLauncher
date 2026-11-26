@@ -844,6 +844,19 @@ bool deletePath(QString path)
     return err.value() == 0;
 }
 
+Result<> deleteRecursively(QString path)
+{
+    std::error_code err;
+
+    fs::remove_all(StringUtils::toStdString(std::move(path)), err);
+
+    if (err) {
+        return std::unexpected{ "Unable to recursively delete path " + path + ": " + QString::fromStdString(err.message()) };
+    }
+
+    return {};
+}
+
 bool deleteContents(const QString& path)
 {
     const QFileInfo info(path);

@@ -113,7 +113,7 @@ class PackInstallTask : public InstanceTask {
     void installConfigs();
     void extractConfigs();
     void downloadMods();
-    bool extractMods(const QMap<QString, VersionMod>& toExtract,
+    Result<> extractMods(const QMap<QString, VersionMod>& toExtract,
                      const QMap<QString, VersionMod>& toDecomp,
                      const QMap<QString, QString>& toCopy);
     void install();
@@ -143,8 +143,8 @@ class PackInstallTask : public InstanceTask {
     QFuture<Result<QStringList>> m_extractFuture;
     QFutureWatcher<Result<QStringList>> m_extractFutureWatcher;
 
-    QFuture<bool> m_modExtractFuture;
-    QFutureWatcher<bool> m_modExtractFutureWatcher;
+    QFuture<Result<>> m_modExtractFuture;
+    QFutureWatcher<Result<>> m_modExtractFutureWatcher;
 
     std::unique_ptr<MinecraftInstance> m_instance;
 };
