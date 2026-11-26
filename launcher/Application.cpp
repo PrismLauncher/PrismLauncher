@@ -323,7 +323,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     });
 
     parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
-    parser.addPositionalArgument("command", "The command to execute. Commands: launch, import", "<launch|import>");
+    parser.addPositionalArgument("command", "The command to execute. Commands: launch, import, export", "<launch|import|export>");
 
     parser.parse(arguments());
 
