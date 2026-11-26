@@ -312,6 +312,7 @@ class Application : public QApplication {
     QString m_exportSummary;
     QString m_exportShowFiles;
     QStringList m_exportExcludePaths;
+    bool m_exitOnCompletion;
     std::unique_ptr<QFile> logFile;
     std::unique_ptr<LogModel> logModel;
 

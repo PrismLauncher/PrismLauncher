@@ -79,21 +79,27 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
-    void exportPrismZip(const BaseInstance* instance,
-                        const QStringList& excludePaths,
-                        bool include,
-                        QString output,
-                        bool noExcludeDefaults);
-    void exportMrpack(MinecraftInstance* instance,
-                      const QStringList& excludePaths,
-                      bool include,
-                      QString output,
-                      bool noExcludeDefaults,
-                      QString name,
-                      QString version,
-                      bool optional,
-                      QString summary);
-    void exportCurseforgezip(MinecraftInstance* instance, const QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults, QString name, QString version, bool optional, QString author, bool setRecommendedMemory, int recommendedMemory);
+    int exportPrismZip(const BaseInstance* instance, const QStringList& excludePaths, bool include, QString output, bool noExcludeDefaults);
+    int exportMrpack(MinecraftInstance* instance,
+                     const QStringList& excludePaths,
+                     bool include,
+                     QString output,
+                     bool noExcludeDefaults,
+                     QString name,
+                     QString version,
+                     bool optional,
+                     QString summary);
+    int exportCurseforgezip(MinecraftInstance* instance,
+                            const QStringList& excludePaths,
+                            bool include,
+                            QString output,
+                            bool noExcludeDefaults,
+                            QString name,
+                            QString version,
+                            bool optional,
+                            QString author,
+                            bool setRecommendedMemory,
+                            int recommendedMemory);
    signals:
     void isClosing();
 

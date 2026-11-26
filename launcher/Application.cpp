@@ -411,6 +411,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             { { "a", "author" }, "Set author of the exported pack (only for curseforgezip format)", "author" },
             { { "m", "memory" }, "Set recommended memory of the exported pack, in MiB (only for curseforgezip format)", "memory" },
             { { "s", "summary" }, "Set summary of the exported pack (only for mrpack format)", "summary" },
+            { { "t", "exit" }, "Exit after export is complete" },
             { "show-files", "Show all files in the specified path in the instance and exit", "path" },
         });
 
@@ -447,6 +448,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         m_exportSummary = parser.value("summary");
         m_exportShowFiles = parser.value("show-files");
+        m_exitOnCompletion = parser.isSet("exit");
 
         for (const auto& path : parser.positionalArguments().sliced(2)) {
             m_exportExcludePaths.append(path);
@@ -1598,17 +1600,29 @@ void Application::performMainStartupAction()
         MinecraftInstance* instance = instances()->getInstanceById(m_instanceIdToExport);
         qDebug() << "Exporting instance id:" << m_instanceIdToExport;
         if (m_exportFormat == "prismzip") {
-            m_mainWindow->exportPrismZip(instance, m_exportExcludePaths, m_exportIncludePaths,
+            const int res = m_mainWindow->exportPrismZip(instance, m_exportExcludePaths, m_exportIncludePaths,
                                          m_exportOutputPath, m_exportNoExcludeDefaults);
+            if (m_exitOnCompletion) {
+                qDebug() << "Export complete, exiting";
+                QTimer::singleShot(0, qApp, [res] -> void { exit(res); });
+            }
         } else if (m_exportFormat == "mrpack") {
-            m_mainWindow->exportMrpack(instance, m_exportExcludePaths, m_exportIncludePaths,
+            const int res = m_mainWindow->exportMrpack(instance, m_exportExcludePaths, m_exportIncludePaths,
                                        m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName, m_exportVersion, m_exportMarkAsOptional,
                                        m_exportSummary);
+            if (m_exitOnCompletion) {
+                qDebug() << "Export complete, exiting";
+                QTimer::singleShot(0, qApp, [res] -> void { exit(res); });
+            }
         } else {
-            m_mainWindow->exportCurseforgezip(instance, m_exportExcludePaths,
+            const int res = m_mainWindow->exportCurseforgezip(instance, m_exportExcludePaths,
                                               m_exportIncludePaths, m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName,
                                               m_exportVersion, m_exportMarkAsOptional, m_exportAuthor, m_exportSetRecommendedMemory,
                                               m_exportRecommendedMemory);
+            if (m_exitOnCompletion) {
+                qDebug() << "Export complete, exiting";
+                QTimer::singleShot(0, qApp, [res] -> void { exit(res); });
+            }
         }
     }
 }
