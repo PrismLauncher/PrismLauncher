@@ -364,6 +364,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         for (const auto& url : parser.positionalArguments().sliced(1)) {
             m_urlsToImport.append(normalizeImportUrl(url));
         }
+        if (m_urlsToImport.isEmpty()) {
+            parser.showHelp(1);
+        }
     } else if (command == "export") {
         parser.clearPositionalArguments();
         parser.addPositionalArgument("export", "Export the specified instance", "export <instance ID>");
