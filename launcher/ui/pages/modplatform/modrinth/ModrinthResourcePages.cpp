@@ -78,6 +78,6 @@ TexturePackResourcePage* Modrinth::createTexturePackResourcePage(ResourceDownloa
 ModPage* Modrinth::createModPage(ResourceDownloadDialog* dialog, BaseInstance& instance)
 {
     return new ModPage(dialog, instance, prepareModrinth(), &ModrinthAPI::get(),
-                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true));
+                       ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), true, &ModrinthAPI::get()));
 }
 }  // namespace ResourceDownload

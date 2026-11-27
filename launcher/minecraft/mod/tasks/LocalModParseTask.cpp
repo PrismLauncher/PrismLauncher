@@ -31,7 +31,7 @@ ModDetails ReadMCModInfo(const QByteArray& contents)
             return {};
         }
         ModDetails details;
-        details.loader = ModPlatform::ModLoaderType::Forge;
+        details.loader = ModLoaderType::Forge;
 
         auto firstObj = arr.at(0).toObject();
         details.mod_id = firstObj.value("modid").toString();
@@ -132,7 +132,7 @@ ModDetails ReadMCModInfo(const QByteArray& contents)
 ModDetails ReadMCModTOML(const QByteArray& contents)
 {
     ModDetails details;
-    details.loader = ModPlatform::ModLoaderType::Forge;
+    details.loader = ModLoaderType::Forge;
 
     toml::table tomlData;
 #if TOML_EXCEPTIONS
@@ -289,7 +289,7 @@ ModDetails ReadFabricModInfo(const QByteArray& contents)
     auto schemaVersion = object.contains("schemaVersion") ? object.value("schemaVersion").toInt(0) : 0;
 
     ModDetails details;
-    details.loader = ModPlatform::ModLoaderType::Fabric;
+    details.loader = ModLoaderType::Fabric;
 
     details.mod_id = object.value("id").toString();
     details.version = object.value("version").toString();
@@ -383,7 +383,7 @@ ModDetails ReadFabricModInfo(const QByteArray& contents)
 ModDetails ReadQuiltModInfo(const QByteArray& contents)
 {
     ModDetails details;
-    details.loader = ModPlatform::ModLoaderType::Quilt;
+    details.loader = ModLoaderType::Quilt;
 
     auto parse = [&details, contents]() -> Result<> {
         TRY_INTO(const auto& object, Json::requireObject(contents, "quilt.mod.json"))
@@ -497,7 +497,7 @@ ModDetails ReadQuiltModInfo(const QByteArray& contents)
 ModDetails ReadForgeInfo(const QByteArray& contents)
 {
     ModDetails details;
-    details.loader = ModPlatform::ModLoaderType::Forge;
+    details.loader = ModLoaderType::Forge;
     // Read the data
     details.name = "Minecraft Forge";
     details.mod_id = "Forge";
@@ -518,7 +518,7 @@ ModDetails ReadForgeInfo(const QByteArray& contents)
 ModDetails ReadLiteModInfo(const QByteArray& contents)
 {
     ModDetails details;
-    details.loader = ModPlatform::ModLoaderType::LiteLoader;
+    details.loader = ModLoaderType::LiteLoader;
     auto jsonDoc = Json::requireDocument(contents).value_or(QJsonDocument());
     auto object = jsonDoc.object();
     if (object.contains("name")) {
@@ -598,7 +598,7 @@ bool processZIP(Mod& mod)
             if (filePath == "META-INF/mods.toml" || filePath == "META-INF/neoforge.mods.toml") {
                 TRY_INTO(details, file->readAll().transform([](const auto& v) { return ReadMCModTOML(v); }))
                 if (filePath == "META-INF/neoforge.mods.toml") {
-                    details.loader = ModPlatform::ModLoaderType::NeoForge;
+                    details.loader = ModLoaderType::NeoForge;
                 }
 
                 isValid = true;

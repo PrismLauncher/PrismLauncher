@@ -47,6 +47,7 @@
 
 #include "../Version.h"
 #include "Result.h"
+#include "minecraft/ModLoaderType.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceType.h"
 #include "net/NetJob.h"
@@ -82,7 +83,7 @@ class ResourceAPI {
 
         std::optional<QString> search;
         std::optional<SortingMethod> sorting;
-        std::optional<ModPlatform::ModLoaderTypes> loaders;
+        QSet<ModLoaderType> loaders;
         std::optional<std::vector<Version>> versions;
         std::optional<ModPlatform::SideType> side;
         std::optional<QStringList> categoryIds;
@@ -94,7 +95,7 @@ class ResourceAPI {
         ModPlatform::IndexedPack::Ptr pack;
 
         std::optional<std::vector<Version>> mcVersions;
-        std::optional<ModPlatform::ModLoaderTypes> loaders;
+        QSet<ModLoaderType> loaders;
         ModPlatform::ResourceType resourceType;
         bool includeChangelog{};
     };
@@ -102,13 +103,15 @@ class ResourceAPI {
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
-        ModPlatform::ModLoaderTypes loader;
+        QSet<ModLoaderType> loader;
         bool includeChangelog{};
     };
 
    public:
     /** Gets a list of available sorting methods for this API. */
     virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
+
+    virtual bool supportsModLoader(ModLoaderType loader) const = 0;
 
    public slots:
 
