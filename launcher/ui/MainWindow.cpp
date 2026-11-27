@@ -225,6 +225,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         auto* instanceFolderMenu = new QMenu(this);
         instanceFolderMenu->addAction(ui->actionViewInstanceDataFolder);
         instanceFolderMenu->addAction(ui->actionViewInstanceDotMinecraftFolder);
+        instanceFolderMenu->addAction(ui->actionViewInstanceModsFolder);
         instanceFolderMenu->addAction(ui->actionViewInstanceModConfigsFolder);
         ui->actionViewSelectedInstFolder->setMenu(instanceFolderMenu);
 
@@ -1633,6 +1634,14 @@ void MainWindow::on_actionViewInstanceDotMinecraftFolder_triggered()
 {
     if (m_selectedInstance) {
         QString str = m_selectedInstance->gameRoot();
+        DesktopServices::openPath(QFileInfo(str), true);
+    }
+}
+
+void MainWindow::on_actionViewInstanceModsFolder_triggered()
+{
+    if (m_selectedInstance) {
+        QString str = m_selectedInstance->modsRoot();
         DesktopServices::openPath(QFileInfo(str), true);
     }
 }
