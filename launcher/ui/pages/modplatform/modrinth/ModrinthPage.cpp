@@ -146,11 +146,11 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             }
 
             // Preserve any version data already loaded into the pack, since the project request only carries the pack info
-            auto versions = std::move(m_current->versions);
-            auto versionsLoaded = m_current->versionsLoaded;
+            auto old = std::move(*m_current);
             *m_current = *response;
-            m_current->versions = std::move(versions);
-            m_current->versionsLoaded = versionsLoaded;
+            m_current->versions = std::move(old.versions);
+            m_current->versionsLoaded = old.versionsLoaded;
+            m_current->authors = std::move(old.authors);
 
             QVariant currentUpdated;
             currentUpdated.setValue(m_current);
