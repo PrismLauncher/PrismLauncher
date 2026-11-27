@@ -9,15 +9,14 @@
 #include "tasks/Task.h"
 
 InstanceCopyTask::InstanceCopyTask(BaseInstance* origInstance, const InstanceCopyPrefs& prefs)
+    : m_origInstance(origInstance)
+    , m_keepPlaytime(prefs.keepPlaytime)
+    , m_useLinks(prefs.useSymLinks)
+    , m_useHardLinks(prefs.linkRecursively && prefs.useHardLinks)
+    , m_copySaves(prefs.linkRecursively && prefs.dontLinkSaves && prefs.copySaves)
+    , m_linkRecursively(prefs.linkRecursively)
+    , m_useClone(prefs.useClone)
 {
-    m_origInstance = origInstance;
-    m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
-    m_useLinks = prefs.isUseSymLinksEnabled();
-    m_linkRecursively = prefs.isLinkRecursivelyEnabled();
-    m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();
-    m_copySaves = prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();
-    m_useClone = prefs.isUseCloneEnabled();
-
     QString filters = prefs.getSelectedFiltersAsRegex();
     if (m_useLinks || m_useHardLinks) {
         if (!filters.isEmpty())
