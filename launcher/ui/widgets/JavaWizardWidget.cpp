@@ -42,7 +42,6 @@ JavaWizardWidget::JavaWizardWidget(QWidget* parent)
 
     connect(m_minMemSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
     connect(m_maxMemSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
-    connect(m_permGenSpinBox, &QSpinBox::valueChanged, this, &JavaWizardWidget::onSpinBoxValueChanged);
     connect(m_memoryTimer, &QTimer::timeout, this, &JavaWizardWidget::memoryValueChanged);
     connect(m_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaWizardWidget::javaVersionSelected);
     connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaWizardWidget::on_javaBrowseBtn_clicked);
@@ -113,21 +112,6 @@ void JavaWizardWidget::setupUi()
     m_labelMaxMemIcon->setObjectName(QStringLiteral("labelMaxMemIcon"));
     m_gridLayout2->addWidget(m_labelMaxMemIcon, 1, 2, 1, 1);
 
-    m_labelPermGen = new QLabel(m_memoryGroupBox);
-    m_labelPermGen->setObjectName(QStringLiteral("labelPermGen"));
-    m_labelPermGen->setText(QStringLiteral("PermGen:"));
-    m_gridLayout2->addWidget(m_labelPermGen, 2, 0, 1, 1);
-    m_labelPermGen->setVisible(false);
-
-    m_permGenSpinBox = new QSpinBox(m_memoryGroupBox);
-    m_permGenSpinBox->setObjectName(QStringLiteral("permGenSpinBox"));
-    m_permGenSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_permGenSpinBox->setMinimum(4);
-    m_permGenSpinBox->setMaximum(1048576);
-    m_permGenSpinBox->setSingleStep(8);
-    m_gridLayout2->addWidget(m_permGenSpinBox, 2, 1, 1, 1);
-    m_permGenSpinBox->setVisible(false);
-
     m_verticalLayout->addWidget(m_memoryGroupBox);
 
     m_horizontalBtnLayout = new QHBoxLayout();
@@ -194,10 +178,8 @@ void JavaWizardWidget::initialize()
     // Memory
     m_observedMinMemory = s->get("MinMemAlloc").toInt();
     m_observedMaxMemory = s->get("MaxMemAlloc").toInt();
-    m_observedPermGenMemory = s->get("PermGen").toInt();
     m_minMemSpinBox->setValue(static_cast<int>(m_observedMinMemory));
     m_maxMemSpinBox->setValue(static_cast<int>(m_observedMaxMemory));
-    m_permGenSpinBox->setValue(static_cast<int>(m_observedPermGenMemory));
     updateThresholds();
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
         m_autodownloadCheckBox->setChecked(true);
@@ -291,32 +273,17 @@ int JavaWizardWidget::minHeapSize() const
     return std::min(m_minMemSpinBox->value(), m_maxMemSpinBox->value());
 }
 
-bool JavaWizardWidget::permGenEnabled() const
-{
-    return m_permGenSpinBox->isVisible();
-}
-
-int JavaWizardWidget::permGenSize() const
-{
-    return m_permGenSpinBox->value();
-}
-
 void JavaWizardWidget::memoryValueChanged()
 {
     bool actuallyChanged = false;
     unsigned int min = m_minMemSpinBox->value();
     unsigned int max = m_maxMemSpinBox->value();
-    unsigned int permgen = m_permGenSpinBox->value();
     if (min != m_observedMinMemory) {
         m_observedMinMemory = min;
         actuallyChanged = true;
     }
     if (max != m_observedMaxMemory) {
         m_observedMaxMemory = max;
-        actuallyChanged = true;
-    }
-    if (permgen != m_observedPermGenMemory) {
-        m_observedPermGenMemory = permgen;
         actuallyChanged = true;
     }
     if (actuallyChanged) {
@@ -331,9 +298,6 @@ void JavaWizardWidget::javaVersionSelected(const BaseVersion::Ptr& version)
     if (!java) {
         return;
     }
-    auto visible = java->id.requiresPermGen();
-    m_labelPermGen->setVisible(visible);
-    m_permGenSpinBox->setVisible(visible);
     m_javaPathTextBox->setText(java->path);
     checkJavaPath(java->path);
 }
@@ -450,8 +414,7 @@ void JavaWizardWidget::checkJavaPath(const QString& path)
         return;
     }
     setJavaStatus(JavaStatus::Pending);
-    m_checker.reset(
-        new JavaChecker(path, "", minHeapSize(), maxHeapSize(), m_permGenSpinBox->isVisible() ? m_permGenSpinBox->value() : 0, 0));
+    m_checker.reset(new JavaChecker(path, "", minHeapSize(), maxHeapSize(), 0));
     connect(m_checker.get(), &JavaChecker::checkFinished, this, &JavaWizardWidget::checkFinished);
     m_checker->start();
 }
@@ -488,7 +451,6 @@ void JavaWizardWidget::retranslate()
     m_labelMinMem->setText(tr("Minimum memory allocation:"));
     m_labelMaxMem->setText(tr("Maximum memory allocation:"));
     m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
-    m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
     m_javaBrowseBtn->setText(tr("Browse"));
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
         m_autodownloadCheckBox->setText(tr("Auto-download Mojang Java"));

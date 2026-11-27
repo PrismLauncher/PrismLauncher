@@ -43,8 +43,6 @@ class JavaWizardWidget : public QWidget {
     ValidationStatus validate();
     void retranslate();
 
-    bool permGenEnabled() const;
-    int permGenSize() const;
     int minHeapSize() const;
     int maxHeapSize() const;
     QString javaPath() const;
@@ -86,8 +84,6 @@ class JavaWizardWidget : public QWidget {
     QLabel* m_labelMaxMem = nullptr;
     QLabel* m_labelMaxMemIcon = nullptr;
     QSpinBox* m_minMemSpinBox = nullptr;
-    QLabel* m_labelPermGen = nullptr;
-    QSpinBox* m_permGenSpinBox = nullptr;
 
     QHBoxLayout* m_horizontalBtnLayout = nullptr;
     QPushButton* m_javaDownloadBtn = nullptr;
@@ -102,7 +98,6 @@ class JavaWizardWidget : public QWidget {
 
     unsigned int m_observedMinMemory = 0;
     unsigned int m_observedMaxMemory = 0;
-    unsigned int m_observedPermGenMemory = 0;
     QString m_queuedCheck;
     uint64_t m_availableMemory = 0ULL;
     shared_qobject_ptr<JavaChecker> m_checker;

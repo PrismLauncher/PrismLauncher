@@ -93,7 +93,7 @@ void CheckJava::executeTask()
     // if timestamps are not the same, or something is missing, check!
     if (m_javaSignature != storedSignature || storedVersion.size() == 0 || storedArchitecture.size() == 0 ||
         storedRealArchitecture.size() == 0 || storedVendor.size() == 0) {
-        m_JavaChecker.reset(new JavaChecker(realJavaPath, "", 0, 0, 0, 0));
+        m_JavaChecker.reset(new JavaChecker(realJavaPath, "", 0, 0, 0));
         emit logLine(QString("Checking Java version..."), MessageLevel::Launcher);
         connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
         m_JavaChecker->start();

@@ -110,23 +110,6 @@ class JavaVersionTest : public QObject {
         QCOMPARE(lver == rver, equal);
         QCOMPARE(lver > rver, bigger);
     }
-    void test_PermGen_data()
-    {
-        QTest::addColumn<QString>("version");
-        QTest::addColumn<bool>("needs_permgen");
-        QTest::newRow("1.6.0_33") << "1.6.0_33" << true;
-        QTest::newRow("1.7.0_60") << "1.7.0_60" << true;
-        QTest::newRow("1.8.0_22") << "1.8.0_22" << false;
-        QTest::newRow("9-ea") << "9-ea" << false;
-        QTest::newRow("9.2.4") << "9.2.4" << false;
-    }
-    void test_PermGen()
-    {
-        QFETCH(QString, version);
-        QFETCH(bool, needs_permgen);
-        JavaVersion v(version);
-        QCOMPARE(needs_permgen, v.requiresPermGen());
-    }
 };
 
 QTEST_GUILESS_MAIN(JavaVersionTest)

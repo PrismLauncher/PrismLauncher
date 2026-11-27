@@ -21,8 +21,8 @@ void javaCheckNotFound(QWidget* parent);
 class TestCheck : public QObject {
     Q_OBJECT
    public:
-    TestCheck(QWidget* parent, QString path, QString args, int minMem, int maxMem, int permGen)
-        : m_parent(parent), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen)
+    TestCheck(QWidget* parent, QString path, QString args, int minMem, int maxMem)
+        : m_parent(parent), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem)
     {}
     virtual ~TestCheck() = default;
 
@@ -42,6 +42,5 @@ class TestCheck : public QObject {
     QString m_args;
     int m_minMem = 0;
     int m_maxMem = 0;
-    int m_permGen = 64;
 };
 }  // namespace JavaCommon

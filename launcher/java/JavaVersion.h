@@ -24,7 +24,6 @@ class JavaVersion {
     bool operator==(const JavaVersion& rhs) const;
     bool operator>(const JavaVersion& rhs) const;
 
-    bool requiresPermGen() const;
     bool defaultsToUtf8() const;
     bool isModular() const;
 

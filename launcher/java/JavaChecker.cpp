@@ -44,8 +44,8 @@
 #include "FileSystem.h"
 #include "java/JavaUtils.h"
 
-JavaChecker::JavaChecker(QString path, QString args, int minMem, int maxMem, int permGen, int id)
-    : m_path(std::move(path)), m_args(std::move(args)), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen), m_id(id)
+JavaChecker::JavaChecker(QString path, QString args, int minMem, int maxMem, int id)
+    : m_path(std::move(path)), m_args(std::move(args)), m_minMem(minMem), m_maxMem(maxMem), m_id(id)
 {}
 
 void JavaChecker::executeTask()
@@ -71,9 +71,6 @@ void JavaChecker::executeTask()
     }
     if (m_maxMem != 0) {
         args << QString("-Xmx%1m").arg(m_maxMem);
-    }
-    if (m_permGen != 64 && m_permGen != 0) {
-        args << QString("-XX:PermSize=%1m").arg(m_permGen);
     }
 
     args.append({ "-jar", checkerJar });

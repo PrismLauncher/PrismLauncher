@@ -47,11 +47,6 @@ QString JavaVersion::toString() const
     return m_string;
 }
 
-bool JavaVersion::requiresPermGen() const
-{
-    return !m_parseable || m_major < 8;
-}
-
 bool JavaVersion::defaultsToUtf8() const
 {
     // starting from Java 18, UTF-8 is the default charset: https://openjdk.org/jeps/400
