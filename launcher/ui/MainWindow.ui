@@ -192,7 +192,6 @@
     <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewSkinsFolder"/>
     <addaction name="actionViewJavaFolder"/>
-
     <addaction name="separator"/>
     <addaction name="actionViewWidgetThemeFolder"/>
     <addaction name="actionViewIconThemeFolder"/>
@@ -784,6 +783,62 @@
    </property>
    <property name="toolTip">
     <string>Open the template folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewInstanceDotMinecraftFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>.minecraft</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the selected instance's .minecraft folder in a file browser.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionViewInstanceModConfigsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>Mod Configs</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance's config folder in a file browser.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionViewInstanceDataFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>Instance Data</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the selected instance's root folder in a file browser.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionViewInstanceModsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>Mods</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance's mods folder in a file browser.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
  </widget>

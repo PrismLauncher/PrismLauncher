@@ -122,6 +122,10 @@ class MainWindow : public QMainWindow {
     void on_actionViewSkinsFolder_triggered();
 
     void on_actionViewSelectedInstFolder_triggered();
+    void on_actionViewInstanceDataFolder_triggered();
+    void on_actionViewInstanceDotMinecraftFolder_triggered();
+    void on_actionViewInstanceModsFolder_triggered();
+    void on_actionViewInstanceModConfigsFolder_triggered();
 
     void refreshInstances();
 
