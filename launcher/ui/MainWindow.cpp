@@ -207,7 +207,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_instanceToolBarTopSeparator = ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
     }
 
-    // set the menu for the folders help, accounts, and export tool buttons
+    // set action menus
     {
         auto foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
         ui->actionFoldersButton->setMenu(ui->foldersMenu);
@@ -221,6 +221,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
         accountMenuButton->setPopupMode(QToolButton::InstantPopup);
+
+        auto* instanceFolderMenu = new QMenu(this);
+        instanceFolderMenu->addAction(ui->actionViewInstanceDataFolder);
+        instanceFolderMenu->addAction(ui->actionViewInstanceDotMinecraftFolder);
+        instanceFolderMenu->addAction(ui->actionViewInstanceModConfigsFolder);
+        ui->actionViewSelectedInstFolder->setMenu(instanceFolderMenu);
 
         auto exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
@@ -1615,6 +1621,27 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
     if (m_selectedInstance) {
         QString str = m_selectedInstance->instanceRoot();
         DesktopServices::openPath(QFileInfo(str));
+    }
+}
+
+void MainWindow::on_actionViewInstanceDataFolder_triggered()
+{
+    on_actionViewSelectedInstFolder_triggered();
+}
+
+void MainWindow::on_actionViewInstanceDotMinecraftFolder_triggered()
+{
+    if (m_selectedInstance) {
+        QString str = m_selectedInstance->gameRoot();
+        DesktopServices::openPath(QFileInfo(str), true);
+    }
+}
+
+void MainWindow::on_actionViewInstanceModConfigsFolder_triggered()
+{
+    if (m_selectedInstance) {
+        QString str = m_selectedInstance->instanceConfigFolder();
+        DesktopServices::openPath(QFileInfo(str), true);
     }
 }
 
