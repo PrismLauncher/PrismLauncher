@@ -43,7 +43,6 @@
 #include "ModrinthModel.h"
 
 #include "InstanceImportTask.h"
-#include "Markdown.h"
 #include "StringUtils.h"
 
 #include "ui/widgets/ProjectItem.h"
@@ -294,9 +293,9 @@ void ModrinthPage::updateUI()
 
     text += "<hr>";
 
-    text += markdownToHTML(m_current->extraData.body.toUtf8());
+    text += m_current->extraData.body;
 
-    m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
+    m_ui->packDescription->setMarkdown(text + m_current->description);
     m_ui->packDescription->flush();
 }
 

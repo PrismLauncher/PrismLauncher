@@ -19,7 +19,6 @@
 #include "InstanceImportTask.h"
 #include "InstanceList.h"
 #include "InstanceTask.h"
-#include "Markdown.h"
 #include "StringUtils.h"
 
 #include "ui/InstanceWindow.h"
@@ -64,7 +63,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instanceWin
             auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
             auto newUrl = QUrl(decoded);
             if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https")) {
-                QDesktopServices ::openUrl(newUrl);
+                QDesktopServices::openUrl(newUrl);
             }
             return;
         }
@@ -272,7 +271,7 @@ void ModrinthManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
+    ui->changelogTextBrowser->setMarkdown(version.changelog);
 
     ManagedPackPage::suggestVersion();
 }
@@ -357,7 +356,7 @@ void FlameManagedPackPage::parseManagedPack()
                "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
                "</h4>");
 
-        ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(message));
+        ui->changelogTextBrowser->setHtml(message);
         return;
     }
 
@@ -426,8 +425,7 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+    ui->changelogTextBrowser->setHtml(FlameAPI::getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt()));
 
     ManagedPackPage::suggestVersion();
 }

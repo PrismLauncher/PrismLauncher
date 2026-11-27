@@ -26,7 +26,6 @@
 
 #include <QPushButton>
 #include <QTextBrowser>
-#include "Markdown.h"
 #include "StringUtils.h"
 
 SelectReleaseDialog::SelectReleaseDialog(const Version& current_version, const QList<GitHubRelease>& releases, QWidget* parent)
@@ -98,10 +97,8 @@ GitHubRelease SelectReleaseDialog::getRelease(QTreeWidgetItem* item)
 void SelectReleaseDialog::selectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
 {
     GitHubRelease release = getRelease(current);
-    QString body = markdownToHTML(release.body.toUtf8());
     m_selectedRelease = release;
-
-    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(body));
+    ui->changelogTextBrowser->setMarkdown(release.body);
 }
 
 SelectReleaseAssetDialog::SelectReleaseAssetDialog(const QList<GitHubReleaseAsset>& assets, QWidget* parent)

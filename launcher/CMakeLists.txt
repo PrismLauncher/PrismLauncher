@@ -603,8 +603,6 @@ set(PRISMUPDATER_SOURCES
     DesktopServices.cpp
     Version.h
     Version.cpp
-    Markdown.h
-    Markdown.cpp
 
     # Zip
     MMCZip.h
@@ -786,8 +784,6 @@ SET(LAUNCHER_SOURCES
     DesktopServices.cpp
     VersionProxyModel.h
     VersionProxyModel.cpp
-    Markdown.h
-    Markdown.cpp
 
     # Super secret!
     KonamiCode.h
@@ -1305,7 +1301,6 @@ target_link_libraries(Launcher_logic
     ${Launcher_QT_LIBS}
 )
 target_link_libraries(Launcher_logic
-    cmark::cmark
     LocalPeer
     Launcher_rainbow
 )
@@ -1389,7 +1384,6 @@ if(Launcher_BUILD_UPDATER)
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
-        cmark::cmark
         # Required for WinRT
         $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:WindowsApp>
         $<$<BOOL:${USE_VCPKG_WINRT}>:Microsoft::CppWinRT>

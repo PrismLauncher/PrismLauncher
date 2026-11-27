@@ -37,8 +37,6 @@
 #include <QIcon>
 #include "Application.h"
 #include "BuildConfig.h"
-#include "Markdown.h"
-#include "StringUtils.h"
 #include "ui_AboutDialog.h"
 
 #include <net/NetJob.h>
@@ -58,13 +56,11 @@ QString getCreditsHtml()
                            QObject::tr("With special thanks to"));
 }
 
-QString getLicenseHtml()
+QString getLicenseMarkdown()
 {
     QFile dataFile(":/documents/COPYING.md");
     if (dataFile.open(QIODevice::ReadOnly)) {
-        QString output = markdownToHTML(dataFile.readAll());
-        dataFile.close();
-        return output;
+        return QString::fromUtf8(dataFile.readAll());
     } else {
         qWarning() << "Failed to open file" << dataFile.fileName() << "for reading:" << dataFile.errorString();
         return QString();
@@ -81,11 +77,9 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
 
     setWindowTitle(tr("About %1").arg(launcherName));
 
-    QString chtml = getCreditsHtml();
-    ui->creditsText->setHtml(StringUtils::htmlListPatch(chtml));
+    ui->creditsText->setHtml(getCreditsHtml());
 
-    QString lhtml = getLicenseHtml();
-    ui->licenseText->setHtml(StringUtils::htmlListPatch(lhtml));
+    ui->licenseText->setMarkdown(getLicenseMarkdown());
 
     ui->urlLabel->setOpenExternalLinks(true);
 

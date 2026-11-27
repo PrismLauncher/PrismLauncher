@@ -23,7 +23,6 @@
 #include "UpdateAvailableDialog.h"
 #include <QPushButton>
 #include "BuildConfig.h"
-#include "Markdown.h"
 #include "StringUtils.h"
 #include "ui_UpdateAvailableDialog.h"
 
@@ -42,8 +41,7 @@ UpdateAvailableDialog::UpdateAvailableDialog(const QString& currentVersion,
         tr("Version %1 is now available - you have %2 . Would you like to download it now?").arg(availableVersion).arg(currentVersion));
     ui->icon->setPixmap(QIcon::fromTheme("checkupdate").pixmap(64));
 
-    auto releaseNotesHtml = markdownToHTML(releaseNotes);
-    ui->releaseNotes->setHtml(StringUtils::htmlListPatch(releaseNotesHtml));
+    ui->releaseNotes->setMarkdown(releaseNotes);
     ui->releaseNotes->setOpenExternalLinks(true);
 
     connect(ui->skipButton, &QPushButton::clicked, this, [this]() {

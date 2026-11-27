@@ -227,7 +227,7 @@ void TechnicPage::metadataLoaded()
 
     text += "<br><br>";
 
-    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
+    ui->packDescription->setHtml(text + current.description);
 
     // Strip trailing forward-slashes from Solder URL's
     if (current.isSolder) {

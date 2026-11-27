@@ -317,7 +317,7 @@ void FlamePage::updateUi()
         text += m_current->extraData.body;
     }
 
-    m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
+    m_ui->packDescription->setHtml(text + m_current->description);
     m_ui->packDescription->flush();
 }
 QString FlamePage::getSerachTerm() const

@@ -1,6 +1,5 @@
 {
   "dependencies": [
-    "cmark",
     {
       "name": "cppwinrt",
       "platform": "mingw"

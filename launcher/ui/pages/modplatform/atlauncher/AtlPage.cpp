@@ -147,7 +147,7 @@ void AtlPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex
     Q_ASSERT(raw.canConvert<ATLauncher::IndexedPack>());
     selected = raw.value<ATLauncher::IndexedPack>();
 
-    ui->packDescription->setHtml(StringUtils::htmlListPatch(selected.description.replace("\n", "<br>")));
+    ui->packDescription->setHtml(selected.description.replace("\n", "<br>"));
 
     for (const auto& version : selected.versions) {
         ui->versionSelectionBox->addItem(version.version);

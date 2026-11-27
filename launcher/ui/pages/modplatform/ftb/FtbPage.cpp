@@ -43,8 +43,6 @@
 #include "modplatform/ftb/FTBPackInstallTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
-#include "Markdown.h"
-
 FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), m_ui(new Ui::FtbPage), m_dialog(dialog)
 {
     m_ui->setupUi(this);
@@ -165,8 +163,7 @@ void FtbPage::onSelectionChanged(QModelIndex first, QModelIndex /*second*/)
     auto vdata = m_filterModel->data(first, Qt::UserRole);
     m_selected = vdata.value<FTB::Modpack>();
 
-    QString output = markdownToHTML(m_selected.description.toUtf8());
-    m_ui->packDescription->setHtml(output);
+    m_ui->packDescription->setMarkdown(m_selected.description);
 
     // reverse foreach, so that the newest versions are first
     for (auto i = m_selected.versions.size(); i--;) {

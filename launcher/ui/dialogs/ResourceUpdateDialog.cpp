@@ -12,8 +12,6 @@
 #include "tasks/SequentialTask.h"
 #include "ui_ReviewMessageBox.h"
 
-#include "Markdown.h"
-
 #include "tasks/ConcurrentTask.h"
 
 #include "minecraft/MinecraftInstance.h"
@@ -236,8 +234,7 @@ void ResourceUpdateDialog::checkCandidates()
                     warnings = depTask->warnings();
                 }
                 if (warnings.count()) {
-                    CustomMessageBox::selectable(this, tr("Warnings"),
-                                                 warnings.join('\n') + "\nThe mod may not work correctly without it.",
+                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n') + "\nThe mod may not work correctly without it.",
                                                  QMessageBox::Warning)
                         ->exec();
                 }
@@ -517,10 +514,11 @@ void ResourceUpdateDialog::appendResource(const CheckUpdateTask::Update& info, Q
     QString text = info.changelog;
     changelog->setData(0, Qt::UserRole, text);
     if (info.provider == ModPlatform::ResourceProvider::MODRINTH) {
-        text = markdownToHTML(info.changelog.toUtf8());
+        changelogArea->setMarkdown(text);
+    } else {
+        changelogArea->setHtml(text);
     }
 
-    changelogArea->setHtml(StringUtils::htmlListPatch(text));
     changelogArea->setOpenExternalLinks(true);
     changelogArea->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     changelogArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);

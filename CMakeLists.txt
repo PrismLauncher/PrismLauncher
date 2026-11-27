@@ -332,8 +332,6 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
 endif()
 
-find_package(cmark REQUIRED)
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(gamemode IMPORTED_TARGET gamemode)

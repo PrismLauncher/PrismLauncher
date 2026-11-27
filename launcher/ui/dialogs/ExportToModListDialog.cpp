@@ -21,7 +21,6 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include "FileSystem.h"
-#include "Markdown.h"
 #include "StringUtils.h"
 #include "modplatform/helpers/ExportToModList.h"
 #include "ui_ExportToModListDialog.h"
@@ -147,10 +146,10 @@ void ExportToModListDialog::triggerImp()
         case ExportToModList::CUSTOM:
             return;
         case ExportToModList::HTML:
-            m_ui->resultText->setHtml(StringUtils::htmlListPatch(txt));
+            m_ui->resultText->setHtml(txt);
             break;
         case ExportToModList::MARKDOWN:
-            m_ui->resultText->setHtml(StringUtils::htmlListPatch(markdownToHTML(txt)));
+            m_ui->resultText->setMarkdown(txt);
             break;
         case ExportToModList::PLAINTXT:
         case ExportToModList::JSON:

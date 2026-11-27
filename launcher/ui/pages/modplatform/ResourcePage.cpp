@@ -48,7 +48,6 @@
 #include <algorithm>
 #include <utility>
 
-#include "Markdown.h"
 
 #include "Application.h"
 #include "Json.h"
@@ -294,8 +293,8 @@ void ResourcePage::updateUi(const QModelIndex& index)
 
     text += "<hr>";
 
-    m_ui->packDescription->setHtml(StringUtils::htmlListPatch(
-        text + (currentPack->extraData.body.isEmpty() ? currentPack->description : markdownToHTML(currentPack->extraData.body))));
+    m_ui->packDescription->setMarkdown(
+        text + (currentPack->extraData.body.isEmpty() ? currentPack->description : currentPack->extraData.body));
     m_ui->packDescription->flush();
 
     refreshVersionComboBox();
