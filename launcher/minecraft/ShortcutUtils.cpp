@@ -53,6 +53,10 @@
 #include <libportal/portal-qt6.h>
 #endif
 
+#ifdef Q_OS_WIN
+#include "InstanceList.h"
+#endif
+
 namespace ShortcutUtils {
 
 bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
@@ -78,7 +82,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {
-        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for application: %1").arg(iconFile.errorString()));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to create icon for application: %1").arg(iconFile.errorString()));
         return false;
     }
 
@@ -108,7 +113,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {
-        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
         return false;
     }
     bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
@@ -134,7 +140,8 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
 
     QFile iconFile(iconPath);
     if (!iconFile.open(QFile::WriteOnly)) {
-        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to create icon for shortcut: %1").arg(iconFile.errorString()));
         return false;
     }
     bool success = icon->icon().pixmap(64, 64).save(&iconFile, "ICO");
@@ -312,4 +319,40 @@ Result<> createInstanceShortcutInPortal(const Shortcut& shortcut)
     return {};
 }
 #endif
+
+#ifdef Q_OS_WIN
+bool createInstanceShortcutInJumplist(const Shortcut& shortcut)
+{
+    if (!shortcut.instance)
+        return false;
+
+    const auto appPath = QApplication::applicationFilePath();
+    auto icon = APPLICATION->icons()->icon(shortcut.iconKey.isEmpty() ? shortcut.instance->iconKey() : shortcut.iconKey);
+    if (icon == nullptr) {
+        icon = APPLICATION->icons()->icon("grass");
+    }
+
+    const auto iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.ico");
+    const auto scaled = icon->icon().pixmap(64, 64);
+    if (!scaled.save(iconPath, "ICO")) {
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"), QObject::tr("Failed to create icon for shortcut."));
+        return false;
+    }
+
+    auto args = QStringList{ "--launch", shortcut.instance->uuid() };
+    args.append(shortcut.extraArgs);
+
+    shortcut.instance->registerShortcut({ shortcut.name, QString(), shortcut.target, args, iconPath });
+    if (!APPLICATION->instances()->updateJumplist()) {
+        QMessageBox::critical(shortcut.parent, QObject::tr("Create Shortcut"),
+                              QObject::tr("Failed to add the shortcut for '%1' to your jumplist.").arg(shortcut.targetString));
+        return false;
+    }
+
+    QMessageBox::information(shortcut.parent, QObject::tr("Create Shortcut"),
+                             QObject::tr("Created a jumplist entry to this %1!").arg(shortcut.targetString));
+    return true;
+}
+#endif
+
 }  // namespace ShortcutUtils

@@ -71,4 +71,11 @@ bool createInstanceShortcutInOther(const Shortcut& shortcut);
 /// https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.DynamicLauncher.html
 Result<> createInstanceShortcutInPortal(const Shortcut& shortcut)
 #endif
+
+#ifdef Q_OS_WIN
+// Create an instance shortcut in the context menu jumplist
+// https://learn.microsoft.com/en-us/uwp/api/windows.ui.startscreen.jumplist
+bool createInstanceShortcutInJumplist(const Shortcut& shortcut);
+#endif
+
 }  // namespace ShortcutUtils

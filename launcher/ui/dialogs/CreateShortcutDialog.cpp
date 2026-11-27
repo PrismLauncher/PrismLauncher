@@ -89,6 +89,10 @@ CreateShortcutDialog::CreateShortcutDialog(MinecraftInstance* instance, QWidget*
             ui->saveTargetSelectionBox->addItem(tr("Applications"), QVariant::fromValue(ShortcutTarget::Applications));
 
         ui->saveTargetSelectionBox->addItem(tr("Other..."), QVariant::fromValue(ShortcutTarget::Other));
+
+#ifdef Q_OS_WIN
+        ui->saveTargetSelectionBox->addItem(tr("Jump List"), QVariant::fromValue(ShortcutTarget::Jumplist));
+#endif
     }
 
     // Populate worlds
@@ -222,6 +226,10 @@ void CreateShortcutDialog::createShortcut()
 #ifdef Q_OS_LINUX
     else if (target == ShortcutTarget::Portal)
         Shortcututils::createInstanceShortcutInPortal(args);
+#endif
+#ifdef Q_OS_WIN
+    else if (target == ShortcutTarget::Jumplist)
+        ShortcutUtils::createInstanceShortcutInJumplist(args);
 #endif
     else
         ShortcutUtils::createInstanceShortcutInOther(args);
