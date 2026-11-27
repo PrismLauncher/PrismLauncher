@@ -42,6 +42,9 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <algorithm>
+#include <vector>
+
 #include "Application.h"
 #include "BaseVersionList.h"
 #include "BuildConfig.h"
@@ -51,8 +54,11 @@
 #include "Json.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
+#include "meta/Index.h"
+#include "meta/VersionList.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/Setting.h"
+#include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/java/InstallJavaDialog.h"
@@ -78,7 +84,6 @@ JavaSettingsWidget::JavaSettingsWidget(MinecraftInstance* instance, QWidget* par
         }
         connect(m_ui->autodetectJavaCheckBox, &QCheckBox::checkStateChanged, this,
                 [this](bool state) { m_ui->pinnedJavaGroupBox->setEnabled(state); });
-        setupPinnedJavaRows();
     } else {
         m_ui->javaDownloadBtn->setVisible(BuildConfig.JAVA_DOWNLOADER_ENABLED);
         m_ui->skipWizardCheckBox->hide();
@@ -124,18 +129,35 @@ JavaSettingsWidget::~JavaSettingsWidget()
     delete m_ui;
 }
 
-void JavaSettingsWidget::setupPinnedJavaRows()
+void JavaSettingsWidget::setupPinnedJavaRows(const QVariantMap& javas)
 {
     auto* layout = m_ui->pinnedJavaGridLayout;
     layout->setColumnStretch(1, 1);
 
+    while (auto* item = layout->takeAt(0)) {
+        delete item->widget();
+        delete item;
+    }
+
     int row = 0;
-    for (int major : JavaUtils::pinnableMajors) {
+
+    std::vector<int> pinnableMajors = { 8, 17, 21, 25 };
+    for (const auto& key : javas.keys()) {
+        auto major = key.toInt();
+        if (major != 0 && !std::ranges::contains(pinnableMajors, major)) {
+            pinnableMajors.push_back(major);
+        }
+    }
+    std::ranges::sort(pinnableMajors);
+
+    m_pinnedJavaEdits.clear();
+    for (int major : pinnableMajors) {
         auto* label = new QLabel(tr("Java %1:").arg(major), m_ui->pinnedJavaGroupBox);
         auto* edit = new QLineEdit(m_ui->pinnedJavaGroupBox);
         edit->setToolTip(tr("Path to the Java %1 executable to use for instances that require it. "
                             "Leave empty to use the automatically detected one.")
                              .arg(major));
+        edit->setText(javas.value(QString::number(major)).toString());
         label->setBuddy(edit);
 
         auto* browseBtn = new QPushButton(tr("Browse"), m_ui->pinnedJavaGroupBox);
@@ -200,10 +222,35 @@ void JavaSettingsWidget::loadSettings()
         m_ui->autodownloadJavaCheckBox->setEnabled(m_ui->autodetectJavaCheckBox->isChecked());
         m_ui->autodownloadJavaCheckBox->setChecked(settings->get("AutomaticJavaDownload").toBool());
 
-        const auto pinned = Json::toMap(settings->get("PinnedJavaPaths").toString());
-        for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
-            edit->setText(pinned.value(QString::number(major)).toString());
+        auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
+        auto updateRowsFromMetadata = [this, versionList] {
+            auto pinned = Json::toMap(APPLICATION->settings()->get("PinnedJavaPaths").toString());
+            for (auto [major, edit] : m_pinnedJavaEdits.asKeyValueRange()) {
+                pinned.insert(QString::number(major), edit->text());
+            }
+            for (const auto& version : versionList->versions()) {
+                const auto id = version->version();
+                if (id.startsWith("java")) {
+                    auto key = id.mid(4);
+                    auto major = key.toInt();
+                    if (major != 0 && !pinned.contains(key)) {
+                        pinned.insert(key, "");
+                    }
+                }
+            }
+            setupPinnedJavaRows(pinned);
+        };
+        if (versionList->isLoaded()) {
+            updateRowsFromMetadata();
+        } else if (auto task = versionList->getLoadTask()) {
+            connect(task.get(), &Task::finished, this, updateRowsFromMetadata);
+            if (!task->isRunning()) {
+                task->start();
+            }
+            const auto pinned = Json::toMap(settings->get("PinnedJavaPaths").toString());
+            setupPinnedJavaRows(pinned);
         }
+
         m_ui->pinnedJavaGroupBox->setEnabled(settings->get("AutomaticJavaSwitch").toBool());
     }
 
