@@ -288,11 +288,11 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
         QObject::connect(job.get(), &NetJob::succeeded, job.get(), [project = pack, response, this, entry] {
             // Preserve any version data already loaded into the pack, since the project request only carries the pack info
-            auto versions = std::move(project->versions);
-            auto versionsLoaded = project->versionsLoaded;
+            auto old = std::move(*project);
             *project = *response;
-            project->versions = std::move(versions);
-            project->versionsLoaded = versionsLoaded;
+            project->versions = std::move(old.versions);
+            project->versionsLoaded = old.versionsLoaded;
+            project->authors = std::move(old.authors);
             if (!s_runningModels.constFind(this).value()) {
                 return;
             }
