@@ -41,6 +41,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <functional>
 #include <memory>
 
 #include "GradleSpecifier.h"
@@ -145,9 +146,13 @@ class Library {
 
     // Get a list of downloads for this library
     QList<Net::Request::Ptr> getDownloads(const RuntimeContext& runtimeContext,
-                                             class HttpMetaCache* cache,
-                                             QStringList& failedLocalFiles,
-                                             const QString& overridePath) const;
+                                          class HttpMetaCache* cache,
+                                          QStringList& failedLocalFiles,
+                                          const QString& overridePath) const;
+
+    using VisitDownloadFunc = std::function<void(const QString& storage, const QString& url, const QString& sha1)>;
+
+    void visitDownloads(const VisitDownloadFunc& visit, const RuntimeContext& runtimeContext) const;
 
     QString getCompatibleNative(const RuntimeContext& runtimeContext) const;
 

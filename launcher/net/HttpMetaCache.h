@@ -104,6 +104,8 @@ class HttpMetaCache : public QObject {
     HttpMetaCache(QString path = QString());
     ~HttpMetaCache() override;
 
+    QStringList getPaths(const QString& base) const;
+
     // get the entry solely from the cache
     // you probably don't want this, unless you have some specific caching needs.
     auto getEntry(QString base, QString resource_path) -> MetaEntryPtr;
@@ -116,6 +118,9 @@ class HttpMetaCache : public QObject {
 
     // evict selected entry from cache
     auto evictEntry(MetaEntryPtr entry) -> bool;
+
+    bool forgetEntry(const QString& base, const QString& resourcePath);
+
     bool evictAll();
 
     void addBase(QString base, QString base_root);
@@ -124,7 +129,7 @@ class HttpMetaCache : public QObject {
     void SaveEventually();
     void Load();
 
-    auto getBasePath(QString base) -> QString;
+    auto getBasePath(QString base) const -> QString;
 
    public slots:
     void SaveNow();
