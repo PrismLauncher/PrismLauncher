@@ -53,7 +53,6 @@ class FlameCreationTask final : public InstanceTask {
    public:
     FlameCreationTask(const QString& stagingPath,
                       bool trustedSource,
-                      SettingsObject* globalSettings,
                       QWidget* parent,
                       QString id,
                       QString versionId,
@@ -61,7 +60,6 @@ class FlameCreationTask final : public InstanceTask {
         : m_parent(parent), m_trustedSource(trustedSource), m_managedId(std::move(id)), m_managedVersionId(std::move(versionId))
     {
         setStagingPath(stagingPath);
-        setParentSettings(globalSettings);
 
         m_originalInstanceId = originalInstanceId;
     }

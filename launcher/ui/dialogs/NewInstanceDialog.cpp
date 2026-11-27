@@ -39,6 +39,7 @@
 #include "StringUtils.h"
 #endif
 #include "Application.h"
+#include "config/GlobalConfig.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
 #include "ui_NewInstanceDialog.h"
@@ -86,7 +87,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     refreshInstDirBox();
 
-    auto lastUsedDir = APPLICATION->settings()->get("LastUsedInstDirForNewInstance").toString();
+    auto lastUsedDir = APPLICATION->config()->lastUsedInstDirForNewInstance;
     int lastUsedIdx = ui->instDirBox->findData(lastUsedDir);
     ui->instDirBox->setCurrentIndex(lastUsedIdx >= 0 ? lastUsedIdx : 0);
 
@@ -118,7 +119,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     m_copyTemplateDirCheckbox = new QCheckBox(this);
     m_copyTemplateDirCheckbox->setText(tr("Use instance template"));
 
-    QString templateDir = APPLICATION->settings()->get("TemplateDir").toString();
+    const auto& templateDir = APPLICATION->config()->templateDir;
     if (templateDir.isEmpty() || !QDir(templateDir).exists()) {
         m_copyTemplateDirCheckbox->setChecked(false);
         m_copyTemplateDirCheckbox->setEnabled(false);
@@ -195,8 +196,8 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     updateDialogState();
 
-    if (APPLICATION->settings()->get("NewInstanceGeometry").isValid()) {
-        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toString().toUtf8()));
+    if (const auto geom = APPLICATION->config()->uiGeometry.value("NewInstance"); !geom.isEmpty()) {
+        restoreGeometry(geom);
     } else {
         auto* screen = parent->screen();
         auto geometry = screen->availableSize();
@@ -208,7 +209,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
 void NewInstanceDialog::reject()
 {
-    APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->config().update().uiGeometry["NewInstance"] = saveGeometry();
 
     // This is just so that the pages get the close() call and can react to it, if needed.
     m_container->prepareToClose();
@@ -229,7 +230,7 @@ void NewInstanceDialog::accept()
         return;
     }
 
-    APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->config().update().uiGeometry["NewInstance"] = saveGeometry();
     importIconNow();
 
     // This is just so that the pages get the close() call and can react to it, if needed.
@@ -283,9 +284,9 @@ void NewInstanceDialog::refreshInstDirBox()
         ui->instDirBox->addItem(label.isEmpty() ? canonical : label, canonical);
     };
 
-    auto instDir = APPLICATION->settings()->get("InstanceDir").toString();
+    auto instDir = APPLICATION->config()->instanceDir;
     addAccessibleDir(instDir, tr("Default (%1)").arg(instDir));
-    for (const auto& dir : APPLICATION->settings()->get("AdditionalInstanceDirs").toStringList()) {
+    for (const auto& dir : APPLICATION->config()->additionalInstanceDirs) {
         addAccessibleDir(dir, {});
     }
 
@@ -446,7 +447,7 @@ void NewInstanceDialog::importIconNow()
         m_instIconKey = m_importIconName.mid(0, m_importIconName.lastIndexOf('.'));
         m_importIcon = false;
     }
-    APPLICATION->settings()->set("NewInstanceGeometry", QString::fromUtf8(saveGeometry().toBase64()));
+    APPLICATION->config().update().uiGeometry["NewInstance"] = saveGeometry();
 }
 
 bool NewInstanceDialog::eventFilter(QObject* watched, QEvent* event)

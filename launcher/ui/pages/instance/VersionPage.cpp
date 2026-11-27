@@ -53,6 +53,8 @@
 
 #include "QObjectPtr.h"
 #include "VersionPage.h"
+#include "config/GlobalConfig.h"
+#include "config/InstanceConfig.h"
 #include "meta/JsonFormat.h"
 #include "tasks/SequentialTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
@@ -110,7 +112,7 @@ class IconProxy : public QIdentityProxyModel {
 
 QIcon VersionPage::icon() const
 {
-    return APPLICATION->icons()->getIcon(m_inst->iconKey());
+    return APPLICATION->icons()->getIcon(m_inst->config()->iconKey);
 }
 bool VersionPage::shouldDisplay() const
 {
@@ -283,7 +285,7 @@ void VersionPage::on_actionRemove_triggered()
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
     auto list = GuiUtil::browseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods") + " (*.zip *.jar)",
-                                        APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                        APPLICATION->config()->centralModsDir, this->parentWidget());
     if (!list.empty()) {
         m_profile->installJarMods(list);
     }
@@ -293,7 +295,7 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
     auto jarPath = GuiUtil::browseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement") + " (*.jar)",
-                                          APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                          APPLICATION->config()->centralModsDir, this->parentWidget());
     if (!jarPath.isEmpty()) {
         m_profile->installCustomJar(jarPath);
     }
@@ -303,7 +305,7 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 void VersionPage::on_actionImport_Components_triggered()
 {
     QStringList list = GuiUtil::browseForFiles("component", tr("Select components"), tr("Components") + " (*.json)",
-                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                               APPLICATION->config()->centralModsDir, this->parentWidget());
 
     if (!list.isEmpty()) {
         if (!m_profile->installComponents(list)) {
@@ -318,7 +320,7 @@ void VersionPage::on_actionImport_Components_triggered()
 void VersionPage::on_actionAdd_Agents_triggered()
 {
     QStringList list = GuiUtil::browseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
-                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+                                               APPLICATION->config()->centralModsDir, this->parentWidget());
 
     if (!list.isEmpty()) {
         m_profile->installAgents(list);
@@ -386,13 +388,9 @@ void VersionPage::on_actionChange_version_triggered()
     bool important = false;
     if (uid == "net.minecraft") {
         important = true;
-        if (APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() && m_inst->settings()->get("AutomaticJava").toBool() &&
-            m_inst->settings()->get("OverrideJavaLocation").toBool()) {
-            m_inst->settings()->set("OverrideJavaLocation", false);
-            m_inst->settings()->set("JavaPath", "");
-        }
-        if (m_inst->settings()->get("UseLatestMinecraftVersion").toBool()) {
-            m_inst->settings()->set("UseLatestMinecraftVersion", false);
+        m_inst->resetAutoJavaInstallation();
+        if (m_inst->config()->useLatestMinecraftVersionType.has_value()) {
+            m_inst->config().update().useLatestMinecraftVersionType = std::nullopt;
         }
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);

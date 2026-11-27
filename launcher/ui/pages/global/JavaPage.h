@@ -42,8 +42,6 @@
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/JavaSettingsWidget.h"
 
-class SettingsObject;
-
 namespace Ui {
 class JavaPage;
 }

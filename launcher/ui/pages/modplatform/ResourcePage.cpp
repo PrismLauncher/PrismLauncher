@@ -38,6 +38,7 @@
  */
 
 #include "ResourcePage.h"
+#include "config/GlobalConfig.h"
 #include "modplatform/ModIndex.h"
 #include "ui_ResourcePage.h"
 
@@ -389,8 +390,7 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
 
         if (currentPack) {
             bool versionChosen = false;
-            const auto releaseTypesSetting = APPLICATION->settings()->get("ModUpdateReleaseTypes");
-            const auto releaseTypes = ModPlatform::IndexedVersionType::fromStringList(Json::toStringList(releaseTypesSetting.toString()));
+            const auto releaseTypes = ModPlatform::IndexedVersionType::fromStringList(APPLICATION->config()->modUpdateReleaseTypes);
 
             auto installedVersion = m_model->getInstalledPackVersion(currentPack);
 
@@ -505,7 +505,7 @@ void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                      QString downloadReason,
                                      QString dependentOn)
 {
-    bool isIndexed = m_desc.isIndexed && !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+    bool isIndexed = m_desc.isIndexed && !APPLICATION->config()->modMetadataDisabled;
     m_model->addPack(std::move(pack), ver, baseModel, isIndexed, std::move(downloadReason), std::move(dependentOn));
 }
 
