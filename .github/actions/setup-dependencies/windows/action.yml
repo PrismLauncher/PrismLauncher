@@ -12,7 +12,6 @@ inputs:
   vcvars-arch:
     description: Visual Studio architecture to use
     required: true
-    default: amd64
 
 runs:
   using: composite

@@ -14,13 +14,15 @@ inputs:
     required: false
   vcvars-arch:
     description: Visual Studio architecture to use
-    required: false
+    required: true
+    default: amd64
   qt-architecture:
     description: Qt architecture
     required: false
   qt-version:
     description: Version of Qt to use
     required: true
+    default: "6.11.2"
 
 outputs:
   build-type:
