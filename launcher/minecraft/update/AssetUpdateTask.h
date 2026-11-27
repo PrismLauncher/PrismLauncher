@@ -19,7 +19,9 @@ class AssetUpdateTask : public Task {
    private slots:
     void assetIndexFinished();
     void assetIndexFailed(QString reason);
+    void assetsFinished();
     void assetsFailed(QString reason);
+    void loggingConfigFailed(const QString& reason);
 
    public slots:
     bool abort() override;

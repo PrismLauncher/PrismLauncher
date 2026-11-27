@@ -36,8 +36,10 @@
 #pragma once
 #include <ProblemProvider.h>
 #include <QString>
+#include <utility>
 #include "Agent.h"
 #include "Library.h"
+#include "LoggingSpec.h"
 
 class LaunchProfile : public ProblemProvider {
    public:
@@ -61,6 +63,7 @@ class LaunchProfile : public ProblemProvider {
     void applyCompatibleJavaMajors(QList<int>& javaMajor);
     void applyCompatibleJavaName(QString javaName);
     void applyMainJar(LibraryPtr jar);
+    void applyLogging(LoggingSpec logging) { m_logging = std::move(logging); }
     void applyProblemSeverity(ProblemSeverity severity);
     /// clear the profile
     void clear();
@@ -89,6 +92,7 @@ class LaunchProfile : public ProblemProvider {
                          const QString& overridePath,
                          const QString& tempPath,
                          bool addJarMods = true) const;
+    const std::optional<LoggingSpec>& getLogging() const { return m_logging; }
     bool hasTrait(const QString& trait) const;
     ProblemSeverity getProblemSeverity() const override;
     const QList<PatchProblem> getProblems() const override;
@@ -154,6 +158,8 @@ class LaunchProfile : public ProblemProvider {
     QList<int> m_compatibleJavaMajors;
 
     QString m_compatibleJavaName;
+
+    std::optional<LoggingSpec> m_logging;
 
     ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 };

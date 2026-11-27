@@ -46,6 +46,7 @@
 #include <memory>
 #include "Agent.h"
 #include "Library.h"
+#include "LoggingSpec.h"
 #include "ProblemProvider.h"
 #include "java/JavaMetadata.h"
 #include "minecraft/Rule.h"
@@ -156,6 +157,8 @@ class VersionFile : public ProblemContainer {
     bool m_volatile = false;
 
     QList<Java::MetadataPtr> runtimes;
+
+    std::optional<LoggingSpec> logging;
 
    public:
     // Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.
