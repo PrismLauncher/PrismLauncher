@@ -92,6 +92,9 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
+
+#include <QFileSystemModel>
+
 #include "InstanceWindow.h"
 
 #include "ui/dialogs/AboutDialog.h"
@@ -135,6 +138,9 @@
 #include "Json.h"
 
 #include "MMCTime.h"
+#include "archive/ExportToZipTask.h"
+#include "modplatform/flame/FlamePackExportTask.h"
+#include "modplatform/modrinth/ModrinthPackExportTask.h"
 
 namespace {
 QString profileInUseFilter(const QString& profile, bool used)
@@ -1867,4 +1873,299 @@ void MainWindow::handleInstanceRename(const QString& before, const QString& afte
     if (syncGroup) {
         APPLICATION->instances()->setInstanceGroup(newID, origGroup);
     }
+}
+bool MainWindow::filterInstanceFileAgainstBlockList(const QFileInfo& fileInfo, bool include, const QStringList& excludePaths, const QString& fileRoot, bool noExcludeDefaults)
+{
+    const QString pathInInstance = fileInfo.absoluteFilePath().remove(fileRoot);
+    if (!noExcludeDefaults) {
+        const QStringList ignoreNames = { ".DS_Store", "thumbs.db", "Thumbs.db" };
+        if (ignoreNames.contains(fileInfo.fileName())) {
+            return true;
+        }
+        const QStringList ignorePaths = { "logs", "crash-reports", ".cache", ".fabric", ".quilt" };
+        for (const auto& path : ignorePaths) {
+            if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
+                return true;
+            }
+        }
+    }
+
+    for (const auto& path : excludePaths) {
+        if (pathInInstance == path.sliced(0, path.length() - 1) || pathInInstance.contains(path)) {
+            return true ^ include;
+        }
+    }
+
+    return false ^ include;
+}
+
+bool MainWindow::exportPrismZip(const BaseInstance* instance,
+                                const QStringList& excludePaths,
+                                const bool include,
+                                QString output,
+                                const bool noExcludeDefaults)
+{
+    const auto name = FS::RemoveInvalidFilenameChars(instance->name());
+
+    if (output.isEmpty()) {
+        output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(instance->name()),
+                                                        FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr);
+    }
+    if (output.isEmpty()) {
+        qDebug() << "No output path given, stopping export";
+        return false;
+    }
+
+    // Save icon
+    const auto iconKey = instance->iconKey();
+    const auto *iconList = APPLICATION->icons();
+    const auto *mmcIcon = iconList->icon(iconKey);
+    if (mmcIcon && !mmcIcon->isBuiltIn()) {
+        const auto iconPath = mmcIcon->getFilePath();
+        if (!iconPath.isNull()) {
+            QFileInfo const inInfo(iconPath);
+            FS::copy(iconPath, FS::PathCombine(instance->instanceRoot(), inInfo.fileName()))();
+        } else {
+            const auto& image = mmcIcon->m_images[mmcIcon->type()];
+            const auto& icon = image.icon;
+            auto sizes = icon.availableSizes();
+            if (!sizes.empty()) {
+                const auto areaOf = [](const QSize size) { return size.width() * size.height(); };
+                QSize largest = sizes[0];
+                // find variant with the largest area
+                for (const auto size : sizes) {
+                    if (areaOf(largest) < areaOf(size)) {
+                        largest = size;
+                    }
+                }
+                const auto pixmap = icon.pixmap(largest);
+                pixmap.save(FS::PathCombine(instance->instanceRoot(), iconKey + ".png"));
+            }
+        }
+    }
+
+    auto files = QFileInfoList();
+    QStringList finalExcludePaths;
+    for (const auto& path : excludePaths) {
+        QString finalPath = QDir::cleanPath(path);
+        if (!finalPath.startsWith('/')) {
+            finalPath.prepend('/');
+        }
+        if (!finalPath.endsWith('/')) {
+            finalPath.append('/');
+        }
+        finalExcludePaths.append(finalPath);
+    }
+    QStringList strippedPaths;
+    for (const auto& path : finalExcludePaths) {
+        strippedPaths.append(path.sliced(1, path.length() - 2));
+    }
+    const auto ignoreData = strippedPaths.join('\n').toUtf8();
+    const auto res = FS::write(FS::PathCombine(instance->instanceRoot(), ".packignore"), ignoreData);
+    if (!res) {
+        qWarning() << res.error();
+    }
+
+    const auto prefix = instance->instanceRoot();
+    const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
+        return filterInstanceFileAgainstBlockList(fileInfo, include, finalExcludePaths, prefix, noExcludeDefaults);
+    };
+    if (!MMCZip::collectFileListRecursively(instance->instanceRoot(), nullptr, &files, filterFunction)) {
+        qDebug() << "Unable to export instance";
+        QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
+        return false;
+    }
+
+    const auto task = makeShared<MMCZip::ExportToZipTask>(output, instance->instanceRoot(), files, "", true);
+
+    connect(task.get(), &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
+
+    ProgressDialog progress(this);
+    progress.showSkipButton();
+    return progress.execWithTask(task.get()) == QDialog::Accepted;
+}
+bool MainWindow::exportMrpack(MinecraftInstance* instance,
+                              const QStringList& excludePaths,
+                              const bool include,
+                              QString output,
+                              const bool noExcludeDefaults,
+                              QString name,
+                              QString version,
+                              const bool optional,
+                              QString summary)
+{
+    auto* settings = instance->settings();
+    if (!name.isEmpty()) {
+        settings->set("ExportName", name);
+    } else {
+        name = settings->get("ExportName").toString();
+    }
+    if (!version.isEmpty()) {
+        settings->set("ExportVersion", version);
+    } else {
+        version = settings->get("ExportVersion").toString();
+        if (version.isEmpty()) {
+            QMessageBox::warning(this, tr("Error"), tr("Mrpack exports require a version to be set."));
+            return false;
+        }
+    }
+    settings->set("ExportOptionalFiles", optional);
+    if (!summary.isEmpty()) {
+        settings->set("ExportSummary", summary);
+    } else {
+        summary = settings->get("ExportSummary").toString();
+    }
+
+    const QString filename = FS::RemoveInvalidFilenameChars(name.isEmpty() ? instance->name() : name);
+
+    if (output.isEmpty()) {
+        output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
+                                          tr("Modrinth pack") + " (*.mrpack *.zip)", nullptr);
+    }
+    if (output.isEmpty()) {
+        return false;
+    }
+    if (!(output.endsWith(".zip") || output.endsWith(".mrpack"))) {
+        output.append(".mrpack");
+    }
+
+    QStringList finalExcludePaths;
+    for (const auto& path : excludePaths) {
+        QString finalPath = QDir::cleanPath(path);
+        if (!finalPath.startsWith('/')) {
+            finalPath.prepend('/');
+        }
+        if (!finalPath.endsWith('/')) {
+            finalPath.append('/');
+        }
+        finalExcludePaths.append(finalPath);
+    }
+    QStringList strippedPaths;
+    for (const auto& path : finalExcludePaths) {
+        strippedPaths.append(path.sliced(1, path.length() - 2));
+    }
+    const auto ignoreData = strippedPaths.join('\n').toUtf8();
+    const auto res = FS::write(FS::PathCombine(instance->instanceRoot(), ".packignore"), ignoreData);
+    if (!res) {
+        qWarning() << res.error();
+    }
+
+    const auto prefix = instance->instanceRoot();
+    const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
+        return filterInstanceFileAgainstBlockList(fileInfo, include, finalExcludePaths, prefix, noExcludeDefaults);
+    };
+
+    Task* task = new ModrinthPackExportTask(name, version, summary, optional, instance, output, filterFunction);
+    connect(task, &Task::failed, this,
+                [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task, &Task::finished, task, &Task::deleteLater);
+
+    ProgressDialog progress(this);
+    progress.showSkipButton();
+    return progress.execWithTask(task) == QDialog::Accepted;
+}
+bool MainWindow::exportCurseforgezip(MinecraftInstance* instance,
+                                     const QStringList& excludePaths,
+                                     bool include,
+                                     QString output,
+                                     bool noExcludeDefaults,
+                                     QString name,
+                                     QString version,
+                                     bool optional,
+                                     QString author,
+                                     bool setRecommendedMemory,
+                                     int recommendedMemory)
+{
+    auto* settings = instance->settings();
+    if (!name.isEmpty()) {
+        settings->set("ExportName", name);
+    } else {
+        name = settings->get("ExportName").toString();
+    }
+    if (!version.isEmpty()) {
+        settings->set("ExportVersion", version);
+    } else {
+        version = settings->get("ExportVersion").toString();
+        if (version.isEmpty()) {
+            QMessageBox::warning(this, tr("Error"), tr("Mrpack exports require a version to be set."));
+            return false;
+        }
+    }
+    settings->set("ExportOptionalFiles", optional);
+    if (!author.isEmpty()) {
+        settings->set("ExportAuthor", author);
+    } else {
+        author = settings->get("ExportAuthor").toString();
+    }
+
+    if (setRecommendedMemory) {
+        settings->set("ExportRecommendedRAM", recommendedMemory);
+    } else {
+        settings->reset("ExportRecommendedRAM");
+    }
+
+    if (name.isEmpty()) {
+        name = instance->name();
+    }
+    const QString filename = FS::RemoveInvalidFilenameChars(name);
+    if (output.isEmpty()) {
+        output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
+                                          tr("CurseForge pack") + " (*.zip)", nullptr);
+        if (output.isEmpty()) {
+            return false;
+        }
+    }
+
+    if (!output.endsWith(".zip")) {
+        output.append(".zip");
+    }
+
+    QStringList finalExcludePaths;
+    for (const auto& path : excludePaths) {
+        QString finalPath = QDir::cleanPath(path);
+        if (!finalPath.startsWith('/')) {
+            finalPath.prepend('/');
+        }
+        if (!finalPath.endsWith('/')) {
+            finalPath.append('/');
+        }
+        finalExcludePaths.append(finalPath);
+    }
+    QStringList strippedPaths;
+    for (const auto& path : finalExcludePaths) {
+        strippedPaths.append(path.sliced(1, path.length() - 2));
+    }
+    const auto ignoreData = strippedPaths.join('\n').toUtf8();
+    const auto res = FS::write(FS::PathCombine(instance->instanceRoot(), ".packignore"), ignoreData);
+    if (!res) {
+        qWarning() << res.error();
+    }
+
+    const auto prefix = instance->instanceRoot();
+    const auto filterFunction = [include, finalExcludePaths, prefix, noExcludeDefaults](const QFileInfo& fileInfo) -> bool {
+        return filterInstanceFileAgainstBlockList(fileInfo, include, finalExcludePaths, prefix, noExcludeDefaults);
+    };
+
+    FlamePackExportOptions options{};
+
+    options.name = std::move(name);
+    options.version = std::move(version);
+    options.author = std::move(author);
+    options.optionalFiles = optional;
+    options.instance = instance;
+    options.output = std::move(output);
+    options.filter = filterFunction;
+    options.recommendedRAM = setRecommendedMemory ? recommendedMemory : 0;
+
+    Task* task = new FlamePackExportTask(std::move(options));
+
+    connect(task, &Task::failed, this,
+            [this](const QString& reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task, &Task::finished, task, &Task::deleteLater);
+
+    ProgressDialog progress(this);
+    progress.showSkipButton();
+    return progress.execWithTask(task) == QDialog::Accepted;
 }

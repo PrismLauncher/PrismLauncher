@@ -79,6 +79,31 @@ class MainWindow : public QMainWindow {
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
+    bool exportPrismZip(const BaseInstance* instance,
+                        const QStringList& excludePaths,
+                        bool include,
+                        QString output,
+                        bool noExcludeDefaults);
+    bool exportMrpack(MinecraftInstance* instance,
+                      const QStringList& excludePaths,
+                      bool include,
+                      QString output,
+                      bool noExcludeDefaults,
+                      QString name,
+                      QString version,
+                      bool optional,
+                      QString summary);
+    bool exportCurseforgezip(MinecraftInstance* instance,
+                             const QStringList& excludePaths,
+                             bool include,
+                             QString output,
+                             bool noExcludeDefaults,
+                             QString name,
+                             QString version,
+                             bool optional,
+                             QString author,
+                             bool setRecommendedMemory,
+                             int recommendedMemory);
    signals:
     void isClosing();
 
@@ -238,7 +263,8 @@ class MainWindow : public QMainWindow {
 
     void handleInstanceRename(const QString& before, const QString& after);
 
-   private:
+    static bool filterInstanceFileAgainstBlockList(const QFileInfo& fileInfo, bool include, const QStringList& excludePaths, const QString& fileRoot, bool noExcludeDefaults);
+
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
     InstanceView* view = nullptr;

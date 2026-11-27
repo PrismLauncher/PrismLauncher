@@ -313,54 +313,159 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     QCommandLineParser parser;
     parser.setApplicationDescription(BuildConfig.LAUNCHER_DISPLAYNAME);
 
-    parser.addOptions(
-        { { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
-          { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
-          { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
-          { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
-          { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
-          { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
-          { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
-          { "show-window", "Show the main launcher window (useful in combination with --launch)" },
-          { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-          { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
-    // Has to be positional for some OS to handle that properly
-    parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
-
     parser.addHelpOption();
     parser.addVersionOption();
+    parser.addOptions({
+        { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
+        { "alive", "Write a small '" + g_liveCheckFile + "' file after the launcher starts" },
+        { "show-window", "Show the main launcher window" },
+        { "show", "Opens the window for the specified instance (by instance ID)", "show" },
+    });
 
-    parser.process(arguments());
+    parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
+    parser.addPositionalArgument("command", "The command to execute. Commands: launch, import, export", "<launch|import|export>");
 
-    m_instanceIdToLaunch = parser.value("launch");
-    m_serverToJoin = parser.value("server");
-    m_worldToJoin = parser.value("world");
-    m_profileToUse = parser.value("profile");
-    if (parser.isSet("offline")) {
-        m_launchOffline = true;
-        m_offlineName = parser.value("offline");
+    parser.parse(arguments());
+
+    const QStringList args = parser.positionalArguments();
+    const QString command = args.isEmpty() ? QString() : args.first();
+
+    if (command == "launch") {
+        parser.clearPositionalArguments();
+        parser.addPositionalArgument("launch", "Launch the specified instance", "launch <instance ID>");
+        parser.addOptions(
+            { { { "s", "server" }, "Join the specified server on launch", "address" },
+            { { "w", "world" }, "Join the specified world on launch", "world" },
+            { { "a", "profile" }, "Join with the account specified by the profile name", "profile" },
+            { { "o", "offline" }, "Launch offline, with given player name", "offline" }, } );
+
+        parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
+        parser.process(arguments());
+
+        m_instanceIdToLaunch = args.value(1);
+        m_serverToJoin = parser.value("server");
+        m_worldToJoin = parser.value("world");
+        m_profileToUse = parser.value("profile");
+        if (parser.isSet("offline")) {
+            m_launchOffline = true;
+            m_offlineName = parser.value("offline");
+        }
+
+        if (m_instanceIdToLaunch.isEmpty()) {
+            parser.showHelp(1);
+        }
+    } else if (command == "import") {
+        parser.clearPositionalArguments();
+        parser.addPositionalArgument("import", "Import instance or resource from specified local path or URL(s)", "import [urls]");
+
+        parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
+        parser.process(arguments());
+
+        for (const auto& url : parser.positionalArguments().sliced(1)) {
+            m_urlsToImport.append(normalizeImportUrl(url));
+        }
+        if (m_urlsToImport.isEmpty()) {
+            parser.showHelp(1);
+        }
+    } else if (command == "export") {
+        parser.clearPositionalArguments();
+        parser.addPositionalArgument("export", "Export the specified instance", "export <instance ID>");
+        parser.addPositionalArgument("paths", "Paths within the instance to exclude from the export", "[paths]");
+        parser.addOptions({
+            { { "f", "format" }, "Format to export as. Options: prismzip (default), curseforgezip, mrpack", "format", "prismzip" },
+            { { "o", "output" }, "Location to output exported instance to. If unset, opens file picker dialog.", "path" },
+            { { "i", "include" }, "Treat paths as a list of paths to include instead of exclude" },
+            { { "x", "no-exclude-defaults"}, "Don't automatically exclude logs, crash-reports, .cache, .fabric, .quilt, .DS_Store, and thumbs.db"},
+            { { "n", "name" }, "Set name of the exported pack (only for curseforgezip and mrpack formats)", "name" },
+            { { "e", "export-version" }, "Set version of the exported pack (only for curseforgezip and mrpack formats - required for mrpack)", "version"},
+            { { "p", "optional" }, "Mark excluded paths as optional (only for curseforgezip and mrpack formats)" },
+            { { "a", "author" }, "Set author of the exported pack (only for curseforgezip format)", "author" },
+            { { "m", "memory" }, "Set recommended memory of the exported pack, in MiB (only for curseforgezip format)", "memory" },
+            { { "s", "summary" }, "Set summary of the exported pack (only for mrpack format)", "summary" },
+            { { "t", "exit" }, "Exit after export is complete" },
+            { "show-files", "Show all files in the specified path in the instance and exit", "path" },
+        });
+
+        parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsOptions);
+        parser.process(arguments());
+
+        m_instanceIdToExport = args.value(1);
+        if (m_instanceIdToExport.isEmpty()) {
+            parser.showHelp(1);
+        }
+        m_exportFormat = parser.value("format").toLower();
+        const QStringList availableFormats = {"prismzip", "curseforgezip", "mrpack"};
+        if (!availableFormats.contains(m_exportFormat)) {
+            std::cerr << "--format must be one of prismzip, curseforgezip, or mrpack.\n";
+            m_status = Failed;
+            return;
+        }
+        m_exportOutputPath = parser.value("output");
+        m_exportIncludePaths = parser.isSet("include");
+        m_exportNoExcludeDefaults = parser.isSet("no-exclude-defaults");
+        m_exportName = parser.value("name");
+        m_exportVersion = parser.value("export-version");
+        m_exportMarkAsOptional = parser.isSet("optional");
+        m_exportAuthor = parser.value("author");
+        m_exportSetRecommendedMemory = parser.isSet("memory");
+        if (m_exportSetRecommendedMemory) {
+            bool conversionSucceeded = false;
+            m_exportRecommendedMemory = parser.value("memory").toInt(&conversionSucceeded);
+            if (!conversionSucceeded) {
+                std::cerr << "--memory must be an integer.\n";
+                m_status = Failed;
+                return;
+            }
+        }
+        m_exportSummary = parser.value("summary");
+        m_exportShowFiles = parser.value("show-files");
+        m_exitOnCompletion = parser.isSet("exit");
+
+        for (const auto& path : parser.positionalArguments().sliced(2)) {
+            m_exportExcludePaths.append(path);
+        }
+    } else {
+        parser.addOptions({
+          { { "l", "launch" }, "(Legacy. Use launch command instead.) Launch the specified instance (by instance ID)", "instance" },
+          { { "s", "server" }, "(Legacy. Use launch command instead.) Join the specified server on launch (only valid in combination with --launch)", "address" },
+          { { "w", "world" }, "(Legacy. Use launch command instead.) Join the specified world on launch (only valid in combination with --launch)", "world" },
+          { { "a", "profile" }, "(Legacy. Use launch command instead.) Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
+          { { "o", "offline" }, "(Legacy. Use launch command instead.) Launch offline, with given player name (only valid in combination with --launch)", "offline" },
+          { { "I", "import" }, "(Legacy. Use import command instead.) Import instance or resource from specified local path or URL", "url" },
+        });
+        parser.addPositionalArgument("URL", "(Legacy. Use import command instead.) Import the resource(s) at the given URL(s) (same as -I / --import)", " ");
+
+        parser.process(arguments());
+
+        m_instanceIdToLaunch = parser.value("launch");
+        m_serverToJoin = parser.value("server");
+        m_worldToJoin = parser.value("world");
+        m_profileToUse = parser.value("profile");
+        if (parser.isSet("offline")) {
+            m_launchOffline = true;
+            m_offlineName = parser.value("offline");
+        }
+
+        if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
+        m_instanceIdToLaunch.isEmpty()) {
+            std::cerr << "--server, --profile and --offline can only be used in combination with --launch!\n";
+            m_status = Failed;
+            return;
+        }
+
+        for (const auto& url : parser.values("import")) {
+            m_urlsToImport.append(normalizeImportUrl(url));
+        }
+
+        // treat unspecified positional arguments as import urls
+        for (const auto& url : parser.positionalArguments()) {
+            m_urlsToImport.append(normalizeImportUrl(url));
+        }
     }
-    m_liveCheck = parser.isSet("alive");
 
+    m_liveCheck = parser.isSet("alive");
     m_instanceIdToShowWindowOf = parser.value("show");
     m_showMainWindow = parser.isSet("show-window");
-
-    for (const auto& url : parser.values("import")) {
-        m_urlsToImport.append(normalizeImportUrl(url));
-    }
-
-    // treat unspecified positional arguments as import urls
-    for (const auto& url : parser.positionalArguments()) {
-        m_urlsToImport.append(normalizeImportUrl(url));
-    }
-
-    // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_launchOffline) &&
-        m_instanceIdToLaunch.isEmpty()) {
-        std::cerr << "--server, --profile and --offline can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
-        return;
-    }
 
     QString origcwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
@@ -455,7 +560,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         connect(m_peerInstance, &LocalPeer::messageReceived, this, &Application::messageReceived);
         if (m_peerInstance->isClient()) {
             bool sentMessage = false;
-            int timeout = 2000;
+            constexpr int timeout = 2000;
 
             if (m_instanceIdToLaunch.isEmpty()) {
                 ApplicationMessage activate;
@@ -469,6 +574,25 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                         import.args.insert("url", url.toString());
                         sentMessage = m_peerInstance->sendMessage(import.serialize(), timeout);
                     }
+                // FIXME: --show-files doesn't work if another instance is already running, but printing the output
+                // to the other instance's output would not be very useful. What to do?
+                } else if (!m_instanceIdToExport.isEmpty() && m_exportShowFiles.isEmpty()) {
+                    ApplicationMessage exportMessage;
+                    exportMessage.command = "export";
+                    exportMessage.args["id"] = m_instanceIdToExport;
+                    exportMessage.args["format"] = m_exportFormat;
+                    exportMessage.args["outputPath"] = m_exportOutputPath;
+                    exportMessage.args["includePaths"] = QString::number(static_cast<int>(m_exportIncludePaths));
+                    exportMessage.args["noExcludeDefaults"] = QString::number(static_cast<int>(m_exportNoExcludeDefaults));
+                    exportMessage.args["name"] = m_exportName;
+                    exportMessage.args["version"] = m_exportVersion;
+                    exportMessage.args["markAsOptional"] = QString::number(static_cast<int>(m_exportMarkAsOptional));
+                    exportMessage.args["author"] = m_exportAuthor;
+                    exportMessage.args["setRecommendedMemory"] = QString::number(static_cast<int>(m_exportSetRecommendedMemory));
+                    exportMessage.args["recommendedMemory"] = QString::number(m_exportRecommendedMemory);
+                    exportMessage.args["summary"] = m_exportSummary;
+                    exportMessage.args["excludePaths"] = m_exportExcludePaths.join("|thisisaseparatorthatwillneverbeinarealpath|");
+                    sentMessage = m_peerInstance->sendMessage(exportMessage.serialize(), timeout);
                 }
             } else {
                 ApplicationMessage launch;
@@ -1009,6 +1133,32 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInfo() << "<> Instances loaded.";
     }
 
+    // not init, but needs instances to be loaded first
+    if (!m_exportShowFiles.isEmpty()) {
+        const MinecraftInstance* instance = instances()->getInstanceById(m_instanceIdToExport);
+        QString prefix;
+        if (m_exportFormat == "prismzip") {
+            prefix = instance->instanceRoot();
+        } else {
+            prefix = instance->gameRoot();
+        }
+        qDebug() << "Instance prefix: " << prefix << '\n';
+        const QString path = QDir::cleanPath(prefix + '/' + m_exportShowFiles);
+        qDebug() << "Path: " << path << '\n';
+        qDebug() << "Gathering file info" << '\n';
+        const QFileInfoList files = (new QDir(path))->entryInfoList(QDir::AllEntries | QDir::Hidden | QDir::NoDotAndDotDot);
+        qDebug() << "Total files: " << files.count() << '\n';
+        for (const auto& file : files) {
+            if (file.isDir()) {
+                std::cout << file.fileName().toStdString().append("/") << '\n';
+            } else {
+                std::cout << file.fileName().toStdString() << '\n';
+            }
+        }
+        m_status = Succeeded;
+        return;
+    }
+
     // and accounts
     {
         m_accounts.reset(new AccountList(this));
@@ -1424,7 +1574,7 @@ void Application::performMainStartupAction()
         qDebug() << "<> Updater started.";
     }
 
-    {  // delete instances tmp dirctory
+    {  // delete instances tmp directory
         auto instDir = m_settings->get("InstanceDir").toString();
         const QString tempRoot = FS::PathCombine(instDir, ".tmp");
         FS::deletePath(tempRoot);
@@ -1433,6 +1583,29 @@ void Application::performMainStartupAction()
     if (!m_urlsToImport.isEmpty()) {
         qDebug() << "<> Importing from url:" << m_urlsToImport;
         m_mainWindow->processURLs(m_urlsToImport);
+    }
+
+    if (!m_instanceIdToExport.isEmpty()) {
+        MinecraftInstance* instance = instances()->getInstanceById(m_instanceIdToExport);
+        qDebug() << "Exporting instance id:" << m_instanceIdToExport;
+        bool res = false;
+        if (m_exportFormat == "prismzip") {
+            res = m_mainWindow->exportPrismZip(instance, m_exportExcludePaths, m_exportIncludePaths,
+                                         m_exportOutputPath, m_exportNoExcludeDefaults);
+        } else if (m_exportFormat == "mrpack") {
+            res = m_mainWindow->exportMrpack(instance, m_exportExcludePaths, m_exportIncludePaths,
+                                       m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName, m_exportVersion, m_exportMarkAsOptional,
+                                       m_exportSummary);
+        } else {
+            res = m_mainWindow->exportCurseforgezip(instance, m_exportExcludePaths,
+                                              m_exportIncludePaths, m_exportOutputPath, m_exportNoExcludeDefaults, m_exportName,
+                                              m_exportVersion, m_exportMarkAsOptional, m_exportAuthor, m_exportSetRecommendedMemory,
+                                              m_exportRecommendedMemory);
+        }
+        if (m_exitOnCompletion) {
+            qDebug() << "Export complete, exiting";
+            QTimer::singleShot(0, qApp, [res] -> void { exit(res ? 0 : 1); });
+        }
     }
 }
 
@@ -1521,6 +1694,49 @@ void Application::messageReceived(const QByteArray& message)
         }
 
         launch(instance, offline ? LaunchMode::Offline : LaunchMode::Normal, serverObject, accountObject, offlineName);
+    } else if (command == "export") {
+        const QString id = received.args["id"];
+        if (id.isEmpty()) {
+            qWarning() << "Export command called with no instance id.";
+            return;
+        }
+        MinecraftInstance* instance = instances()->getInstanceById(id);
+        if (!instance) {
+            qWarning() << "Export command requires a valid instance id, " << id << "resolves to nothing.";
+        }
+        const QString format = received.args["format"];
+        const QString outputPath = received.args["outputPath"];
+        const bool includePaths = received.args["includePaths"].toInt() != 0;
+        const bool noExcludeDefaults = received.args["noExcludeDefaults"].toInt() != 0;
+        QStringList excludePaths = received.args["excludePaths"].split("|thisisaseparatorthatwillneverbeinarealpath|");
+        if (excludePaths.length() == 1 && excludePaths[0].isEmpty()) {
+            excludePaths = {};
+        }
+        bool exportResult = false;
+        if (format == "prismzip") {
+            exportResult = m_mainWindow->exportPrismZip(instance, excludePaths, includePaths, outputPath, noExcludeDefaults);
+        } else {
+            const QString name = received.args["name"];
+            const QString version = received.args["version"];
+            const bool markAsOptional = received.args["markAsOptional"].toInt() != 0;
+            if (format == "mrpack") {
+                const QString summary = received.args["summary"];
+                exportResult = m_mainWindow->exportMrpack(instance, excludePaths, includePaths, outputPath, noExcludeDefaults, name,
+                    version, markAsOptional, summary);
+            } else if (format == "curseforgezip") {
+                const QString author = received.args["author"];
+                const bool setRecommendedMemory = received.args["setRecommendedMemory"].toInt() != 0;
+                const int recommendedMemory = received.args["recommendedMemory"].toInt();
+                exportResult = m_mainWindow->exportCurseforgezip(instance, excludePaths, includePaths, outputPath, noExcludeDefaults,
+                    name, version, markAsOptional, author, setRecommendedMemory, recommendedMemory);
+            } else {
+                qWarning() << "Export command called with unrecognized format " << format;
+                return;
+            }
+        }
+        if (!exportResult) {
+            qWarning() << "Export command failed!";
+        }
     } else {
         qWarning() << "Received invalid message" << message;
     }
