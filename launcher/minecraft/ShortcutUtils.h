@@ -66,4 +66,9 @@ bool createInstanceShortcutInApplications(const Shortcut& shortcut);
 /// Create an instance shortcut in other directories
 bool createInstanceShortcutInOther(const Shortcut& shortcut);
 
+#ifdef Q_OS_LINUX
+/// Create an instance shortcut using the Dynamic Launcher portal
+/// https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.DynamicLauncher.html
+Result<> createInstanceShortcutInPortal(const Shortcut& shortcut)
+#endif
 }  // namespace ShortcutUtils
