@@ -10,6 +10,32 @@ Our team believes a fundamental part of this is **valuable, human engagement**. 
 
 With this in mind, our team have come to the decision that **any** contribution - be it an issue report, pull request, etc. - which is created by, documented by, or otherwise aided by AI/LLM usage **in any way** will typically be **closed and locked without further discussion**. Similarly, the team may also take action against contributions deemed to be "low-effort" - such as unverified bug reports, large and untested pull requests, or using AI-generated content in your interactions with others.
 
+## Before committing
+
+Announce large changes in advance: when you plan to make changes which affect a lot of files, announce them in advance on GitHub or Discord.
+
+Respect other developers' code: don't change code style just because you don't like it. Solve real problems; don't just re-arrange the code.
+
+Don't mix formatting changes with code changes: split these into separate commits.
+
+Test your changes before committing: make sure the changes compile, have the effect you're expecting, and don't regress anything else. Run unit tests with the ctest command.
+
+Don't commit code you don't understand: avoid things like "I don't know why it crashes, but when I do this, it doesn't crash anymore." Understand your changes. If you can't find a solution to a problem that you understand, discuss it with other developers.
+
+Commit atomic changesets: every bugfix, feature, refactoring, or reformatting should go into its own commit. This improves the readability of the history, makes it easier to port changes between branches, and makes it easier to find faulty commits using git bisect.
+
+Double-check before committing: do a final git pull --rebase to keep your checkout up to date. Invoke git diff before committing. Take messages from git about conflicts, unknown files, etc. seriously.
+
+## Know what you commit
+
+You're responsible for what you commit. When you make a merge request, it's your code, even if it originates from the internet, a friend, or your pet lizard.
+
+This means that the responsibility is on you and only you to you understand exactly what you're committing and why, since you're the one adding it to the codebase.
+
+You should be able to answer all questions about the code you're submitting, and be willing to find out any answers you don't know.
+
+Don't be afraid to ask for help!
+
 ## Code style
 
 All files are formatted with `clang-format` using the configuration in `.clang-format`. Ensure it is run on changed files before committing!
@@ -71,6 +97,10 @@ ImportantClass importantClassInstance;
 ```
 
 If you see any names which do not follow these conventions, it is preferred that you leave them be - renames increase the number of changes therefore make reviewing harder and make your PR more prone to conflicts. However, if you're refactoring a whole class anyway, it's fine.
+
+## Write a good commit message
+
+The commit message should follow the [Conventional Commits specification](https://www.conventionalcommits.org).
 
 ## Signing your work
 
