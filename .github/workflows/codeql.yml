@@ -22,12 +22,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           submodules: "true"
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v4.39.5
         with:
           config-file: ./.github/codeql/codeql-config.yml
           queries: security-and-quality
@@ -40,7 +40,7 @@ jobs:
           qt-version: 6.8.3
 
       - name: Install JDK 17
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v6.3.0
         with:
           distribution: zulu
           java-version: '17'
@@ -55,4 +55,4 @@ jobs:
           ctest --preset ci --build-config Debug --extra-verbose --output-on-failure
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v4.39.5
