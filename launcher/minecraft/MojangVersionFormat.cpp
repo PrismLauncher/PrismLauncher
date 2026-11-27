@@ -147,11 +147,46 @@ QJsonObject assetIndexToJson(MojangAssetIndexInfo::Ptr info)
 }
 }  // namespace
 
-Result<> MojangVersionFormat::readVersionProperties(const QJsonObject& in, VersionFile* out)
+Result<MojangVersionFormat::ReadVersionPropertiesResult> MojangVersionFormat::readVersionProperties(const QJsonObject& in, VersionFile* out)
 {
+    out->gameArguments.clear();
+    out->jvmArguments.clear();
+
+    if (in.contains("arguments")) {
+        TRY_INTO(const QJsonObject& arguments, Json::requireObject(in, "arguments"));
+
+        if (arguments.contains("game")) {
+            TRY_INTO(const QJsonArray& game, Json::requireArray(arguments, "game"));
+
+            out->gameArguments.reserve(game.count());
+            for (const auto& arg : game) {
+                out->gameArguments.append(RuleGuardedStrings::fromJson(arg));
+            }
+        }
+
+        if (arguments.contains("jvm")) {
+            TRY_INTO(const QJsonArray& jvm, Json::requireArray(arguments, "jvm"));
+
+            out->jvmArguments.reserve(jvm.count());
+            for (const auto& arg : jvm) {
+                out->jvmArguments.append(RuleGuardedStrings::fromJson(arg));
+            }
+        }
+    }
+
+    const bool useLegacyGameArgs = out->gameArguments.isEmpty() && in.contains("minecraftArguments");
+    if (useLegacyGameArgs) {
+        TRY_INTO(const auto& legacyArguments, Json::requireString(in, "minecraftArguments"));
+
+        QStringList stringArgs = legacyArguments.split(' ', Qt::SkipEmptyParts);
+        out->gameArguments.reserve(stringArgs.count());
+        for (const auto& str : stringArgs) {
+            out->gameArguments.append(RuleGuardedStrings{ .value = { str }, .rules = {} });
+        }
+    }
+
     TRY_INTO(out->minecraftVersion, optionalString(in, "id"))
     TRY_INTO(out->mainClass, optionalString(in, "mainClass"))
-    TRY_INTO(out->minecraftArguments, optionalString(in, "minecraftArguments"))
     TRY_INTO(out->type, optionalString(in, "type"))
 
     TRY_INTO(out->assets, optionalString(in, "assets"))
@@ -193,7 +228,7 @@ Result<> MojangVersionFormat::readVersionProperties(const QJsonObject& in, Versi
             TRY_INTO(out->mojangDownloads[classifier], requireObject(iter.value()).and_then(downloadInfoFromJson))
         }
     }
-    return {};
+    return ReadVersionPropertiesResult{ .legacyGameArgs = useLegacyGameArgs };
 }
 
 Result<VersionFilePtr> MojangVersionFormat::versionFileFromJson(const QJsonDocument& doc, const QString& filename)
@@ -231,7 +266,27 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
 {
     writeString(out, "id", in->minecraftVersion);
     writeString(out, "mainClass", in->mainClass);
-    writeString(out, "minecraftArguments", in->minecraftArguments);
+
+    QJsonArray gameArguments;
+    for (const auto& arg : in->gameArguments) {
+        gameArguments.append(arg.toJson());
+    }
+
+    QJsonArray jvmArguments;
+    for (const auto& arg : in->jvmArguments) {
+        jvmArguments.append(arg.toJson());
+    }
+
+    QJsonObject argumentsObj;
+    if (!gameArguments.isEmpty()) {
+        argumentsObj["game"] = std::move(gameArguments);
+    }
+    if (!jvmArguments.isEmpty()) {
+        argumentsObj["jvm"] = std::move(jvmArguments);
+    }
+
+    out["arguments"] = std::move(argumentsObj);
+
     writeString(out, "type", in->type);
     if (!in->releaseTime.isNull()) {
         writeString(out, "releaseTime", timeToS3Time(in->releaseTime));

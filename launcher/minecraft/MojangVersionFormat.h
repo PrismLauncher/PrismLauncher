@@ -10,13 +10,14 @@
 class MojangVersionFormat {
     friend class OneSixVersionFormat;
 
-   protected:
+   public:
+    struct ReadVersionPropertiesResult {
+        bool legacyGameArgs = false;
+    };
     // does not include libraries
-    static Result<> readVersionProperties(const QJsonObject& in, VersionFile* out);
+    static Result<ReadVersionPropertiesResult> readVersionProperties(const QJsonObject& in, VersionFile* out);
     // does not include libraries
     static void writeVersionProperties(const VersionFile* in, QJsonObject& out);
-
-   public:
     // version files / profile patches
     static Result<VersionFilePtr> versionFileFromJson(const QJsonDocument& doc, const QString& filename);
     static QJsonDocument versionFileToJson(const VersionFilePtr& patch);

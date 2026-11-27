@@ -39,54 +39,157 @@
 
 #include "Rule.h"
 
-Rule Rule::fromJson(const QJsonObject& object)
+Rule Rule::fromJson(const QJsonObject& obj)
 {
-    Rule result;
+    auto action = Action::Defer;
+    if (obj["action"] == "allow") {
+        action = Action::Allow;
+    } else if (obj["action"] == "disallow") {
+        action = Action::Disallow;
+    }
 
-    if (object["action"] == "allow")
-        result.m_action = Allow;
-    else if (object["action"] == "disallow")
-        result.m_action = Disallow;
-
-    if (auto os = object["os"]; os.isObject()) {
-        if (auto name = os["name"].toString(); !name.isNull()) {
-            result.m_os = OS{
-                name,
-                os["version"].toString(),
+    std::optional<OS> os;
+    if (const auto osJSON = obj["os"]; osJSON.isObject()) {
+        if (auto name = osJSON["name"].toString(); !name.isNull()) {
+            os = OS{
+                .name = std::move(name),
+                .version = osJSON["version"].toString(),
             };
         }
     }
 
-    return result;
+    QList<std::pair<QString, bool>> features;
+
+    const auto featuresObj = obj["features"].toObject();
+    features.reserve(featuresObj.size());
+    for (const auto& [key, value] : featuresObj.asKeyValueRange()) {
+        if (value.isBool()) {
+            features.append(std::pair{ key.toString(), value.toBool() });
+        }
+    }
+
+    return Rule{
+        .action = action,
+        .os = std::move(os),
+        .features = std::move(features),
+    };
 }
 
-QJsonObject Rule::toJson()
+QJsonObject Rule::toJson() const
 {
     QJsonObject result;
 
-    if (m_action == Allow)
+    if (action == Action::Allow) {
         result["action"] = "allow";
-    else if (m_action == Disallow)
+    } else if (action == Action::Disallow) {
         result["action"] = "disallow";
+    }
 
-    if (m_os.has_value()) {
-        QJsonObject os;
+    if (os.has_value()) {
+        QJsonObject osObj;
 
-        os["name"] = m_os->name;
+        osObj["name"] = os->name;
 
-        if (!m_os->version.isEmpty())
-            os["version"] = m_os->version;
+        if (!os->version.isEmpty()) {
+            osObj["version"] = os->version;
+        }
 
-        result["os"] = os;
+        result["os"] = std::move(osObj);
+    }
+
+    QJsonObject featuresObj;
+    for (const auto& [feature, shouldHaveFeature] : features) {
+        featuresObj[feature] = shouldHaveFeature;
+    }
+    if (!featuresObj.isEmpty()) {
+        result["features"] = std::move(featuresObj);
     }
 
     return result;
 }
 
-Rule::Action Rule::apply(const RuntimeContext& runtimeContext)
+Rule::Action Rule::applyRuleset(const QList<Rule>& rules, const RuleContext& ctx)
 {
-    if (m_os.has_value() && !runtimeContext.classifierMatches(m_os->name))
-        return Defer;
+    if (rules.isEmpty()) {
+        return Action::Allow;
+    }
 
-    return m_action;
+    auto result = Action::Disallow;
+    for (const auto& rule : rules) {
+        if (auto choice = rule.apply(ctx); choice != Action::Defer) {
+            result = choice;
+        }
+    }
+    return result;
+}
+
+Rule::Action Rule::apply(const RuleContext& ctx) const
+{
+    if (os.has_value() && (ctx.runtime == nullptr || !ctx.runtime->classifierMatches(os->name))) {
+        return Action::Defer;
+    }
+
+    for (const auto& [feature, shouldHaveFeature] : features) {
+        const bool hasFeature = ctx.features != nullptr && ctx.features->contains(feature);
+        qDebug() << "feature =" << feature << "shouldHaveFeature = " << shouldHaveFeature << "hasFeature" << hasFeature;
+        if (hasFeature != shouldHaveFeature) {
+            return Action::Defer;
+        }
+    }
+
+    return action;
+}
+
+RuleGuardedStrings RuleGuardedStrings::fromJson(const QJsonValue& json)
+{
+    if (json.isObject()) {
+        const auto valueJSON = json["value"];
+        QStringList value;
+        if (valueJSON.isString()) {
+            value.append(valueJSON.toString());
+        } else if (valueJSON.isArray()) {
+            for (const auto& item : valueJSON.toArray()) {
+                if (item.isString()) {
+                    value.append(item.toString());
+                }
+            }
+        }
+
+        QList<Rule> rules;
+        for (const auto& rule : json["rules"].toArray()) {
+            rules.append(Rule::fromJson(rule.toObject()));
+        }
+
+        return {
+            .value = std::move(value),
+            .rules = std::move(rules),
+        };
+    }
+
+    return {
+        .value = { json.toString() },
+        .rules = {},
+    };
+}
+
+QJsonValue RuleGuardedStrings::toJson() const
+{
+    if (rules.isEmpty() && value.size() == 1) {
+        return value[0];
+    }
+
+    QJsonArray valueJSON;
+    for (const auto& item : value) {
+        valueJSON.append(item);
+    }
+
+    QJsonArray rulesJSON;
+    for (const auto& rule : rules) {
+        rulesJSON.append(rule.toJson());
+    }
+
+    return QJsonObject{
+        { "value", valueJSON },
+        { "rules", rulesJSON },
+    };
 }

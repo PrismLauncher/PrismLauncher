@@ -92,11 +92,15 @@ class VersionFile : public ProblemContainer {
     /// Prism Launcher: class to launch legacy Minecraft with (embed in a custom window)
     QString appletClass;
 
-    /// Mojang: Minecraft launch arguments (may contain placeholders for variable substitution)
-    QString minecraftArguments;
+    /// Prism Launcher: clear existing launch arguments when applying the component.
+    /// Used when the legacy minecraftArguments field is specified.
+    bool clearGameArguments = false;
 
-    /// Prism Launcher: Additional JVM launch arguments
-    QStringList addnJvmArguments;
+    /// Mojang: Minecraft launch arguments (may contain placeholders for variable substitution and rules)
+    QList<RuleGuardedStrings> gameArguments;
+
+    /// Mojang: JVM arguments (may contain placeholders for variable substitution and rules)
+    QList<RuleGuardedStrings> jvmArguments;
 
     /// Mojang: list of compatible java majors
     QList<int> compatibleJavaMajors;
@@ -155,6 +159,7 @@ class VersionFile : public ProblemContainer {
     /// is volatile -- may be removed as soon as it is no longer needed by something else
     bool m_volatile = false;
 
+    // FIXME: this should be part of a separate schema - runtimes are ignored in OneSixVersionFormat
     QList<Java::MetadataPtr> runtimes;
 
    public:

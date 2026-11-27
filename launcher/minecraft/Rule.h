@@ -38,21 +38,28 @@
 
 #include <QJsonObject>
 #include <QList>
+#include <QSet>
 #include <QString>
+
 #include "RuntimeContext.h"
 
 class Library;
 
-class Rule {
-   public:
-    enum Action { Allow, Disallow, Defer };
+struct RuleContext {
+    const RuntimeContext* runtime = nullptr;
+    const QSet<QString>* features = nullptr;
+};
 
-    static Rule fromJson(const QJsonObject& json);
-    QJsonObject toJson();
+struct Rule {
+    enum class Action : std::uint8_t { Allow, Disallow, Defer };
 
-    Action apply(const RuntimeContext& runtimeContext);
+    static Rule fromJson(const QJsonObject& obj);
+    QJsonObject toJson() const;
 
-   private:
+    static Action applyRuleset(const QList<Rule>& rules, const RuleContext& ctx);
+
+    Action apply(const RuleContext& ctx) const;
+
     struct OS {
         QString name;
         // FIXME: unsupported
@@ -60,6 +67,15 @@ class Rule {
         QString version;
     };
 
-    Action m_action = Defer;
-    std::optional<OS> m_os;
+    Action action = Action::Defer;
+    std::optional<OS> os;
+    QList<std::pair<QString, bool>> features;
+};
+
+struct RuleGuardedStrings {
+    QStringList value;
+    QList<Rule> rules;
+
+    static RuleGuardedStrings fromJson(const QJsonValue& json);
+    QJsonValue toJson() const;
 };

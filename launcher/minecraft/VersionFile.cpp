@@ -66,8 +66,11 @@ void VersionFile::applyTo(LaunchProfile* profile, const RuntimeContext& runtimeC
     profile->applyMainJar(mainJar);
     profile->applyMainClass(mainClass);
     profile->applyAppletClass(appletClass);
-    profile->applyMinecraftArguments(minecraftArguments);
-    profile->applyAddnJvmArguments(addnJvmArguments);
+    if (clearGameArguments) {
+        profile->clearGameArguments();
+    }
+    profile->applyGameArguments(gameArguments);
+    profile->applyJvmArguments(jvmArguments);
     profile->applyTweakers(addTweakers);
     profile->applyJarMods(jarMods);
     profile->applyMods(mods);

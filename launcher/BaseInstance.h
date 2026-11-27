@@ -263,7 +263,7 @@ class BaseInstance : public QObject {
     /**
      * 'print' a verbose description of the instance into a QStringList
      */
-    virtual QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) = 0;
+    virtual QStringList verboseDescription(MinecraftTarget::Ptr targetToJoin) = 0;
 
     Status currentStatus() const;
 

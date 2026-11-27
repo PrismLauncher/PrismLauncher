@@ -47,8 +47,9 @@ class LaunchProfile : public ProblemProvider {
     void applyMinecraftVersion(const QString& id);
     void applyMainClass(const QString& mainClass);
     void applyAppletClass(const QString& appletClass);
-    void applyMinecraftArguments(const QString& minecraftArguments);
-    void applyAddnJvmArguments(const QStringList& minecraftArguments);
+    void clearGameArguments() { m_gameArguments.clear(); }
+    void applyGameArguments(const QList<RuleGuardedStrings>& gameArguments);
+    void applyJvmArguments(const QList<RuleGuardedStrings>& jvmArguments);
     void applyMinecraftVersionType(const QString& type);
     void applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets);
     void applyTraits(const QSet<QString>& traits);
@@ -71,8 +72,8 @@ class LaunchProfile : public ProblemProvider {
     QString getAppletClass() const;
     QString getMinecraftVersionType() const;
     MojangAssetIndexInfo::Ptr getMinecraftAssets() const;
-    QString getMinecraftArguments() const;
-    const QStringList& getAddnJvmArguments() const;
+    const QList<RuleGuardedStrings>& getGameArguments() const;
+    const QList<RuleGuardedStrings>& getJvmArguments() const;
     const QSet<QString>& getTraits() const;
     const QStringList& getTweakers() const;
     const QList<LibraryPtr>& getJarMods() const;
@@ -109,13 +110,13 @@ class LaunchProfile : public ProblemProvider {
      * ex: "--username ${auth_player_name} --session ${auth_session}
      *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
      */
-    QString m_minecraftArguments;
+    QList<RuleGuardedStrings> m_gameArguments;
 
     /**
      * Additional arguments to pass to the JVM in addition to those the user has configured,
      * memory settings, etc.
      */
-    QStringList m_addnJvmArguments;
+    QList<RuleGuardedStrings> m_jvmArguments;
 
     /// A list of all tweaker classes
     QStringList m_tweakers;
