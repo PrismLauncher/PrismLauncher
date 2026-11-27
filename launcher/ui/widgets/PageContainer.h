@@ -64,6 +64,8 @@ class PageContainer : public QWidget, public BasePageContainer {
 
     void useSidebarStyle(bool sidebar);
 
+    void setSaveOnPageChange(bool save) { m_saveOnPageChange = save; }
+
     /*
      * Save any unsaved state and prepare to be closed.
      * @return true if everything can be saved, false if there is something that requires attention
@@ -116,4 +118,5 @@ class PageContainer : public QWidget, public BasePageContainer {
     QListView* m_pageList;
     QLabel* m_header;
     QGridLayout* m_layout;
+    bool m_saveOnPageChange = false;
 };

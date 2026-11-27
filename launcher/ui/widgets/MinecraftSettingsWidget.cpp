@@ -111,19 +111,6 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         connect(m_ui->dataPacksPathEdit, &QLineEdit::editingFinished, this, &MinecraftSettingsWidget::saveDataPacksPath);
         connect(m_ui->dataPacksPathBrowse, &QPushButton::clicked, this, &MinecraftSettingsWidget::selectDataPacksFolder);
 
-        connect(m_ui->loaderGroup, &QGroupBox::toggled, this, [this](bool value) {
-            m_instance->settings()->set("OverrideModDownloadLoaders", value);
-            if (value) {
-                saveSelectedLoaders();
-            } else {
-                m_instance->settings()->reset("ModDownloadLoaders");
-            }
-        });
-
-        for (auto* c : { m_ui->neoForge, m_ui->forge, m_ui->fabric, m_ui->quilt, m_ui->liteLoader, m_ui->babric, m_ui->btaBabric,
-                         m_ui->legacyFabric, m_ui->ornithe, m_ui->rift }) {
-            connect(c, &QCheckBox::checkStateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
-        }
         auto latestVersion = m_instance->settings()->getSetting("UseLatestMinecraftVersion");
         connect(latestVersion.get(), &Setting::SettingChanged, this, [this](const Setting&, const QVariant&) {
             m_ui->latestMCVersionGroupBox->setChecked(m_instance->settings()->get("UseLatestMinecraftVersion").toBool());
@@ -377,6 +364,16 @@ void MinecraftSettingsWidget::saveSettings()
         settings->reset("MinecraftWinHeight");
         settings->reset("CloseAfterLaunch");
         settings->reset("QuitAfterGameStop");
+    }
+
+    if (m_instance != nullptr) {
+        const bool overrideLoaders = m_ui->loaderGroup->isChecked();
+        settings->set("OverrideModDownloadLoaders", overrideLoaders);
+        if (overrideLoaders) {
+            saveSelectedLoaders();
+        } else {
+            settings->reset("ModDownloadLoaders");
+        }
     }
 
     // Custom Commands
