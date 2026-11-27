@@ -963,7 +963,8 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
             auto& newResource = newResources[kept];
             const auto& currentResource = m_resources.at(row);
 
-            if (newResource->dateTimeChanged() == currentResource->dateTimeChanged()) {
+            const auto metadataChanged = newResource->metadata() != currentResource->metadata();
+            if (newResource->dateTimeChanged() == currentResource->dateTimeChanged() && !metadataChanged) {
                 // no significant change
                 bool hadIssues = currentResource->hasIssues();
                 currentResource->updateIssues(m_instance);
@@ -1067,7 +1068,7 @@ QList<Resource*> ResourceFolderModel::allResources()
 {
     QList<Resource*> result;
     result.reserve(m_resources.size());
-    for (const Resource ::Ptr& resource : m_resources) {
+    for (const Resource::Ptr& resource : m_resources) {
         result.append((resource.get()));
     }
     return result;
