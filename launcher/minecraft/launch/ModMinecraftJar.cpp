@@ -39,6 +39,7 @@
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/Mod.h"
 
 void ModMinecraftJar::executeTask()
 {

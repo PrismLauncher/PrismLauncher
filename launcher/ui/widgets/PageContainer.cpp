@@ -39,6 +39,7 @@
 #include "BuildConfig.h"
 #include "PageContainer_p.h"
 
+#include <QApplication>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
@@ -55,7 +56,6 @@
 
 #include "ui/widgets/IconLabel.h"
 
-#include "Application.h"
 #include "DesktopServices.h"
 
 class PageEntryFilterModel : public QSortFilterProxyModel {
