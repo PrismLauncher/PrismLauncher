@@ -4,12 +4,12 @@
 
 Prism Launcher is packaged in [nixpkgs](https://github.com/NixOS/nixpkgs/) since 22.11.
 
-Check the [NixOS Wiki](https://wiki.nixos.org/wiki/Prism_Launcher) for up-to-date instructions.
+Check the [NixOS Wiki](https://wiki.nixos.org/wiki/Prism_Launcher) for up-to-date instructions, including how to configure the package with `override`.
 
 ## Installing a development release (flake)
 
-We use [cachix](https://cachix.org/) to cache our development and release builds.
-If you want to avoid rebuilds you may add the Cachix bucket to your substitutors, or use `--accept-flake-config`
+We use [Cachix](https://cachix.org/) to cache our development and release builds.
+If you want to avoid rebuilds you may add the Cachix bucket to your substituters, or use `--accept-flake-config`
 to temporarily enable it when using `nix` commands.
 
 Example (NixOS):
@@ -57,7 +57,7 @@ Example:
           (
             { pkgs, ... }:
             {
-              environment.systemPackages = [ prismlauncher.packages.${pkgs.system}.prismlauncher ];
+              environment.systemPackages = [ prismlauncher.packages.${pkgs.stdenv.hostPlatform.system}.prismlauncher ];
             }
           )
         ];
@@ -72,7 +72,7 @@ Alternatively, if you don't want to use our `packages` output, you can add our o
 This will ensure Prism is built with your system's packages.
 
 > [!WARNING]
-> Depending on what revision of nixpkgs your system uses, this may result in binaries that differ from the above `packages` output
+> Depending on what revision of nixpkgs your system uses, this may result in binaries that differ from the above `packages` output.
 > If this is the case, you will not be able to use the binary cache
 
 Example:
@@ -130,7 +130,7 @@ nix profile install github:PrismLauncher/PrismLauncher
 ## Installing a development release (without flakes)
 
 We use [Cachix](https://cachix.org/) to cache our development and release builds.
-If you want to avoid rebuilds you may add the Cachix bucket to your substitutors.
+If you want to avoid rebuilds you may add the Cachix bucket to your substituters.
 
 Example (NixOS):
 
@@ -158,7 +158,7 @@ Example:
   environment.systemPackages = [
     (import (
       builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz"
-    )).packages.${pkgs.system}.prismlauncher
+    )).packages.${pkgs.stdenv.hostPlatform.system}.prismlauncher
   ];
 }
 ```
@@ -166,7 +166,7 @@ Example:
 ### Using the overlay (`fetchTarball`)
 
 Alternatively, if you don't want to use our `packages` output, you can add our overlay to your instance of nixpkgs.
-This results in Prism using your system's libraries
+This results in Prism using your system's libraries.
 
 Example:
 
@@ -206,14 +206,6 @@ Both Nixpkgs and this repository offer the following packages:
 
 ### Customizing wrapped packages
 
-The wrapped package (`prismlauncher`) offers some build parameters to further customize the launcher's environment.
-
-The following parameters can be overridden:
-
-- `additionalLibs` (default: `[ ]`) Additional libraries that will be added to `LD_LIBRARY_PATH`
-- `additionalPrograms` (default: `[ ]`) Additional libraries that will be added to `PATH`
-- `controllerSupport` (default: `isLinux`) Turn on/off support for controllers on Linux (macOS will always have this)
-- `gamemodeSupport` (default: `isLinux`) Turn on/off support for [Feral GameMode](https://github.com/FeralInteractive/gamemode) on Linux
-- `jdks` (default: `[ jdk21 jdk17 jdk8 ]`) Java runtimes added to `PRISMLAUNCHER_JAVA_PATHS` variable
-- `msaClientID` (default: `null`, requires full rebuild!) Client ID used for Microsoft Authentication
-- `textToSpeechSupport` (default: `isLinux`) Turn on/off support for text-to-speech on Linux (macOS will always have this)
+The wrapped package (`prismlauncher`) can be customized with `override`.
+The available parameters (`additionalLibs`, `additionalPrograms`, `controllerSupport`, `gamemodeSupport`, `jdks`, `msaClientID` and `textToSpeechSupport`) and examples are documented on the [NixOS Wiki](https://wiki.nixos.org/wiki/Prism_Launcher#Useful_options).
+The wiki describes the nixpkgs package, so its defaults can differ from this repository's. The defaults used here are defined in [`nix/wrapper.nix`](wrapper.nix) and apply to nixpkgs as well when this repository's overlay is used.
