@@ -22,9 +22,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
-#include "Json.h"
 #include "QObjectPtr.h"
-#include "Result.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -196,6 +194,9 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(const std::shared_ptr<PackD
 
 void GetModDependenciesTask::subTaskFailed(Task::Ptr task, const QString& msg)
 {
+    // for anybody how wants to fix this warning
+    // yes I want the ConcurrentTask version
+    // not the SequentialTask one
     ConcurrentTask::subTaskFailed(task, msg);
     m_failed.remove(task.get());
 }
@@ -222,7 +223,10 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     }
 
     ResourceAPI::DependencySearchArgs args = {
-        .dependency = dep, .mcVersion = m_version, .loader = m_loaderType, .includeChangelog = true
+        .dependency = dep,
+        .mcVersion = m_version,
+        .loader = m_loaderType,
+        .includeChangelog = true,
     };
     ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
     callbacks.onFail = [](const QString& reason, int) {
@@ -268,15 +272,16 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             removePack(pDep->version.addonId);
             return;
         }
+        if (pDep->version.downloadUrl.isEmpty()) {
+            logWarning(tr("Dependency %1 is blocked, skiping it.").arg(pDep->pack->addonId.toString()));
+            removePack(pDep->pack->addonId);
+        }
         for (const auto& dependency : getDependenciesForVersion(pDep->version, provider)) {
             addTask(prepareDependencyTask(dependency, provider, level - 1));
         }
     };
 
     auto version = getAPI(provider)->getDependencyVersion(args, callbacks);
-    if (auto* netJob = dynamic_cast<NetJob*>(version.get())) {
-        netJob->setAskRetry(false);
-    }
     QObject::connect(version.get(), &NetJob::failed, this, [this, pDep] {
         logWarning(tr("Failed to resolve dependency %1, it will not be installed. The mod may not work correctly without it.")
                        .arg(pDep->pack->addonId.toString()));
