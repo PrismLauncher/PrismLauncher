@@ -49,6 +49,8 @@ class INISettingsObject : public SettingsObject {
     void suspendSave() override;
     void resumeSave() override;
 
+    bool isNew() const override { return m_isNew; }
+
    protected slots:
     virtual void changeSetting(const Setting& setting, QVariant value) override;
     virtual void resetSetting(const Setting& setting) override;
@@ -60,4 +62,5 @@ class INISettingsObject : public SettingsObject {
    protected:
     INIFile m_ini;
     QString m_filePath;
+    bool m_isNew = false;
 };

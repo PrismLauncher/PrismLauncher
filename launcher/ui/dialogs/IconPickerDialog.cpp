@@ -83,7 +83,6 @@ class IconProxyModel : public QSortFilterProxyModel {
 
         bool isModpack = false;
         bool isBuiltin = icon->isBuiltIn();
-        bool isLegacy = isBuiltin && icon->name().endsWith("_legacy", Qt::CaseInsensitive);
 
         if (!isBuiltin) {
             const QString& name = icon->name();
@@ -95,12 +94,10 @@ class IconProxyModel : public QSortFilterProxyModel {
         }
 
         switch (m_category) {
-            case IconPickerDialog::Legacy:
-                return isBuiltin && isLegacy;
+            case IconPickerDialog::BuiltIn:
+                return isBuiltin;
             case IconPickerDialog::Modpacks:
                 return isModpack;
-            case IconPickerDialog::Modern:
-                return isBuiltin && !isLegacy;
             case IconPickerDialog::Custom:
                 return !isBuiltin && !isModpack;
             default:
@@ -132,10 +129,10 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     setWindowModality(Qt::WindowModal);
 
     static const QString context_text[] = {
-        tr("All"), tr("Modern"), tr("Legacy"), tr("Modpacks"), tr("Custom"),
+        tr("All"), tr("Built-in"), tr("Modpacks"), tr("Custom"),
     };
     static const IconPickerCategory context_id[] = {
-        Any, Modern, Legacy, Modpacks, Custom,
+        Any, BuiltIn, Modpacks, Custom,
     };
     const int cnt = sizeof(context_text) / sizeof(context_text[0]);
     for (int i = 0; i < cnt; ++i) {

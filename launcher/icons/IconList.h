@@ -54,6 +54,8 @@ class IconList : public QAbstractListModel {
     explicit IconList(const QStringList& builtinPaths, const QString& path, QObject* parent = 0);
     virtual ~IconList() {};
 
+    static bool copyLegacyIcons(const QString& dest);
+
     QIcon getIcon(const QString& key) const;
     int getIconIndex(const QString& key) const;
     QString getDirectory() const;

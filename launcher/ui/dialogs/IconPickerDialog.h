@@ -34,8 +34,7 @@ class IconPickerDialog : public QDialog {
 
     enum IconPickerCategory {
         Any,
-        Modern,
-        Legacy,
+        BuiltIn,
         Modpacks,
         Custom,
     };

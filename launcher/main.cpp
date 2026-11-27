@@ -71,6 +71,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(flat_white);
 
             Q_INIT_RESOURCE(shaders);
+            Q_INIT_RESOURCE(legacy_instance_icons);
             return app.exec();
         }
         case Application::Failed:
