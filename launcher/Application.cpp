@@ -910,6 +910,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Custom Technic Client ID
         m_settings->registerSetting("TechnicClientID", "");
 
+        // Custom Github token
+        m_settings->registerSetting("GithubToken", "");
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_unique<GenericPageProvider>("");
