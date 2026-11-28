@@ -38,7 +38,6 @@
 
 #include <QRegularExpression>
 #include <QUuid>
-#include <QtSystemDetection>
 #include <cmath>
 
 #include "DesktopServices.h"
@@ -162,37 +161,22 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
     return url_compact;
 }
 
-static const QStringList s_units_si{ "KB", "MB", "GB", "TB" };
-static const QStringList s_units_kibi{ "KiB", "MiB", "GiB", "TiB" };
-
-namespace {
-bool platformUsesSIUnits()
+QString StringUtils::humanReadableFileSize(qint64 bytes, int decimalPoint)
 {
-#ifdef Q_OS_APPLE
-    return true;
+    const QLocale locale;
+#ifdef Q_OS_WIN
+    const auto format = QLocale::DataSizeTraditionalFormat;
+#elifdef Q_OS_MACOS
+    // https://support.apple.com/en-us/102119
+    const auto format = QLocale::DataSizeSIFormat;
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    return DesktopServices::desktopEnvironment() == "GNOME";
+    // GNOME doesn't allow configuring units, and sticks with the glib default of SI https://docs.gtk.org/glib/func.format_size.html
+    // Desktops like Plasma (and most Unix tools) use IEC by default https://api.kde.org/kformat.html#BinaryUnitDialect-enum
+    const auto format = DesktopServices::desktopEnvironment() == "gnome" ? QLocale::DataSizeSIFormat : QLocale::DataSizeIecFormat;
 #else
-    return false;
+    const auto format = QLocale::DataSizeIecFormat;
 #endif
-}
-}  // namespace
-
-QString StringUtils::humanReadableFileSize(double bytes, int decimal_points)
-{
-    const bool useSI = platformUsesSIUnits();
-    const QStringList units = useSI ? s_units_si : s_units_kibi;
-    const int scale = useSI ? 1000 : 1024;
-
-    int u = -1;
-    double r = pow(10, decimal_points);
-
-    do {
-        bytes /= scale;
-        u++;
-    } while (round(abs(bytes) * r) / r >= scale && u < units.length() - 1);
-
-    return QString::number(bytes, 'f', 2) + " " + units[u];
+    return locale.formattedDataSize(bytes, decimalPoint, format);
 }
 
 QString StringUtils::getRandomAlphaNumeric()
