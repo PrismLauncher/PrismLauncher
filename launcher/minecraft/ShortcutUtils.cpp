@@ -85,18 +85,6 @@ bool createInstanceShortcut(const Shortcut& shortcut, const QString& filePath)
         return false;
     }
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    if (appPath.startsWith("/tmp/.mount_")) {
-        // AppImage!
-        appPath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (appPath.isEmpty()) {
-            QMessageBox::critical(
-                shortcut.parent, QObject::tr("Create Shortcut"),
-                QObject::tr("Launcher is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
-        } else if (appPath.endsWith("/")) {
-            appPath.chop(1);
-        }
-    }
-
     iconPath = FS::PathCombine(shortcut.instance->instanceRoot(), "icon.png");
 
     QFile iconFile(iconPath);

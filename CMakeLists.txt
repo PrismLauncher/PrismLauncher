@@ -502,11 +502,6 @@ elseif(UNIX)
     if(Launcher_ManPage)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
-
-    # Install basic runner script if component "portable" is selected
-    configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
-    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION "." RENAME ${Launcher_Name} COMPONENT portable EXCLUDE_FROM_ALL)
-
 elseif(WIN32)
     set(BINARY_DEST_DIR ".")
     set(LIBRARY_DEST_DIR ".")

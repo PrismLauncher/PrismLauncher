@@ -114,7 +114,7 @@ class LoggingOAuthHttpServerReplyHandler final : public QOAuthHttpServerReplyHan
 MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
 {
     m_clientId = APPLICATION->getMSAClientID();
-    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") || APPLICATION->isPortable() || !isSchemeHandlerRegistered())
+    if (APPLICATION->isPortable() || !isSchemeHandlerRegistered())
 
     {
         auto replyHandler = new LoggingOAuthHttpServerReplyHandler(this);
