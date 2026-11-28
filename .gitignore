@@ -59,6 +59,8 @@ repl-result-*
 # Flatpak
 .flatpak-builder
 flatbuild
+repo/
+oci/
 
 # Snap
 *.snap

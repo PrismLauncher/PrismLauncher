@@ -1,0 +1,14 @@
+name: xrandr
+buildsystem: autotools
+sources:
+  - type: archive
+    url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.4.tar.xz
+    sha256: 2cafccb2aaf2491a4068676117a0d4f90ab307724b96fffc54cd1da953779400
+    x-checker-data:
+      type: anitya
+      project-id: 14957
+      stable-only: true
+      url-template: https://xorg.freedesktop.org/archive/individual/app/xrandr-$version.tar.xz
+cleanup:
+  - /bin/xkeystone
+  - /share

@@ -1,0 +1,82 @@
+id: org.prismlauncher.PrismLauncher
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+
+command: prismlauncher
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=all
+  - --share=network
+  - --socket=pulseaudio
+    # for Discord RPC mods
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
+    # Mod drag&drop
+  - --filesystem=xdg-download:ro
+    # FTBApp import
+  - --filesystem=~/.ftba:ro
+    # Userspace visibility for manual hugepages configuration
+    # Required for -XX:+UseLargePages
+  - --filesystem=/sys/kernel/mm/hugepages:ro
+    # Userspace visibility for transparent hugepages configuration
+    # Required for -XX:+UseTransparentHugePages
+  - --filesystem=/sys/kernel/mm/transparent_hugepage:ro
+
+add-extensions:
+  org.prismlauncher.PrismLauncher.Extension:
+    directory: extensions
+    add-ld-path: lib
+    subdirectories: true
+    no-autodownload: true
+    autodelete: true
+
+cleanup-commands:
+  - mkdir -p ${FLATPAK_DEST}/extensions
+
+modules:
+  - modules/cmark.yml
+  - modules/tomlplusplus.yml
+
+  # Text to Speech in the game
+  - modules/flite/flite.yml
+
+  # Required for older Minecraft versions
+  - modules/xrandr.yml
+
+  # Our patches improve native Wayland support
+  - modules/glfw/glfw.yml
+
+  - name: prismlauncher
+    buildsystem: cmake-ninja
+    builddir: true
+    run-tests: true
+    config-opts:
+      - -DLauncher_BUILD_PLATFORM=flatpak
+      # This allows us to manage and update Java independently of this Flatpak
+      - -DLauncher_ENABLE_JAVA_DOWNLOADER=ON
+      - -DCMAKE_BUILD_TYPE=Debug
+    build-options:
+      env:
+        JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
+        JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
+    sources:
+      - type: dir
+        path: ..
+
+  - name: enhance
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 prime-run ${FLATPAK_DEST}/bin/prime-run
+      - mv ${FLATPAK_DEST}/bin/{,.}prismlauncher
+      - install -Dm755 wrapper ${FLATPAK_DEST}/bin/prismlauncher
+    sources:
+      # Script used to wrap instances and ensure they use dGPUs in hyprid configurations
+      - type: file
+        path: scripts/prime-run
+      # Sets up misc integrations with gamemode, mangohud, Discord RPC, etc.
+      - type: file
+        path: scripts/wrapper
