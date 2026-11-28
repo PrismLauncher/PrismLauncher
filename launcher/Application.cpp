@@ -41,6 +41,8 @@
  */
 
 #include "Application.h"
+#include "ui/GreetingOverlay.h"
+#include "ui/PressAnimator.h"
 #include "BuildConfig.h"
 
 #include "DataMigrationTask.h"
@@ -1231,6 +1233,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     if (!createSetupWizard()) {
         m_themeManager->applyCurrentlySelectedTheme(true);
     }
+    installEventFilter(new PressAnimator(this));
     performMainStartupAction();
 }
 
@@ -1705,6 +1708,7 @@ MainWindow* Application::showMainWindow(bool minimized)
             m_mainWindow->showMinimized();
         } else {
             m_mainWindow->show();
+            QTimer::singleShot(150, m_mainWindow, [w = m_mainWindow] { showGreeting(w); });
         }
 
         m_mainWindow->checkInstancePathForProblems();
